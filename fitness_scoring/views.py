@@ -26,6 +26,9 @@ def login_user(request):
         elif user_type == 'Teacher':
             request.session['school_name'] = Teacher.objects.get(user=username).school_id.name
             return redirect('fitness_scoring.views.teacher')
+        elif user_type == 'Unpaid':
+            state = "Your school subscription has not been paid."
+            return render(request, 'auth.html', RequestContext(request, {'state':state, 'username': username}))
         else:
             state = "Your username and/or password were incorrect."
             return render(request, 'auth.html', RequestContext(request, {'state':state, 'username': username}))
@@ -45,12 +48,18 @@ def authenticate(username, password):
             user_type = 'SuperUser Failed'
     elif len(administrator) > 0:
         if check_password(password=password, encrypted_password=administrator[0].user.password):
-            user_type = 'Administrator'
+            if(administrator[0].school_id.subscriptionPaid):
+                user_type = 'Administrator'
+            else:
+                user_type = 'Unpaid'
         else:
             user_type = 'Administrator Failed'
     elif len(teacher) > 0:
         if check_password(password=password, encrypted_password=teacher[0].user.password):
-            user_type = 'Teacher'
+            if(teacher[0].school_id.subscriptionPaid):
+                user_type = 'Teacher'
+            else:
+                user_type = 'Unpaid'
         else:
             user_type = 'Teacher Failed'
     else:
