@@ -1,6 +1,6 @@
 from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
-from fitness_scoring.models import Teacher, Administrator, SuperUser, User
+from fitness_scoring.models import Teacher, Administrator, SuperUser, User, School
 
 
 # Create your views here.
@@ -86,7 +86,7 @@ def administrator(request):
 
 def superuser(request):
     if request.session.get('user_type', None) == 'SuperUser':
-        return render(request, 'superuser.html', RequestContext(request, {'user_type':'Super User','name':request.session.get('username', None)}))
+        return render(request, 'superuser.html', RequestContext(request, {'user_type':'Super User','name':request.session.get('username', None),'school_list':School.objects.all()}))
     else:
         return redirect('fitness_scoring.views.login_user')
 

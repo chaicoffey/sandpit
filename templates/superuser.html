@@ -5,5 +5,11 @@ Super User
 {% endblock %}
 
 {% block content_loggedin %}	
-SuperUser page.   
+SuperUser page.   <br>
+
+<select id="schools" size="3" multiple>
+{% for school in school_list %}
+    <option>{{ school }}</option>
+{% endfor %}
+</select>
 {% endblock %}
