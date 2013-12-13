@@ -24,7 +24,9 @@ def login_user(request):
             request.session['school_name'] = Administrator.objects.get(user=username).school_id.name
             return redirect('fitness_scoring.views.administrator')
         elif user_type == 'Teacher':
-            request.session['school_name'] = Teacher.objects.get(user=username).school_id.name
+            teacher = Teacher.objects.get(user=username);
+            request.session['school_name'] = teacher.school_id.name
+            request.session['teacher_full_name'] = teacher.firstname + " " + teacher.surname
             return redirect('fitness_scoring.views.teacher')
         elif user_type == 'Unpaid':
             state = "Your school subscription has not been paid."
@@ -72,7 +74,7 @@ def check_password(password, encrypted_password):
 
 def teacher(request):
     if request.session.get('user_type', None) == 'Teacher':
-        return render(request, 'teacher.html', RequestContext(request, {'user_type':'Teacher','name':request.session.get('username', None),'school_name':request.session.get('school_name', None)}))
+        return render(request, 'teacher.html', RequestContext(request, {'user_type':'Teacher','name':request.session.get('teacher_full_name', None),'school_name':request.session.get('school_name', None)}))
     else:
         return redirect('fitness_scoring.views.login_user')
 
