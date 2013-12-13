@@ -5,26 +5,34 @@ from django.db import models
 
 class School(models.Model):
     name = models.CharField(max_length=300)
-
+    subscriptionPaid = models.BooleanField(default=False)
+    def __unicode__(self):
+        return self.name
+	
 class User(models.Model):
     username = models.CharField(max_length=100, primary_key=True)
     password = models.CharField(max_length=128)
-
     def __unicode__(self):
         return self.username
 
 class SuperUser(models.Model):
     user = models.ForeignKey(User)
+    def __unicode__(self):
+        return self.user.username
 
 class Teacher(models.Model):
     firstname = models.CharField(max_length=100)
     surname = models.CharField(max_length=100)
     school_id = models.ForeignKey(School)
     user = models.ForeignKey(User)
+    def __unicode__(self):
+        return self.firstname + " " + self.surname
 
 class Administrator(models.Model):
     school_id = models.ForeignKey(School)
     user = models.ForeignKey(User)
+    def __unicode__(self):
+        return self.user.username
 
 class Student(models.Model):
     student_id = models.CharField(max_length=30, primary_key=True)
@@ -33,14 +41,20 @@ class Student(models.Model):
     surname = models.CharField(max_length=100)
     gender = models.CharField(max_length=1)
     dob = models.DateField()
+    def __unicode__(self):
+        return self.firstname + " " + self.surname
 
 class Class(models.Model):
     year = models.DateField()
     class_name = models.CharField(max_length=200)
     school_id = models.ForeignKey(School)
+    def __unicode__(self):
+        return self.class_name
 
 class TestCategory(models.Model):
     test_category_name = models.CharField(max_length=200, primary_key=True)
+    def __unicode__(self):
+        return self.test_category_name
 
 class Test(models.Model):
     RESULT_TYPE_CHOICES = (
@@ -58,6 +72,8 @@ class Test(models.Model):
     result_type = models.CharField(max_length=20, choices=RESULT_TYPE_CHOICES, default='DOUBLE')
     is_upward_percentile_brackets = models.BooleanField(default=True)
     percentile_score_conversion_type = models.CharField(max_length=20, choices=PERCENTILE_SCORE_CONVERSION_TYPE_CHOICES, default='DIRECT')
+    def __unicode__(self):
+        return self.test_name
 
 class TeacherClassAllocation(models.Model):
     teacher_id = models.ForeignKey(Teacher)
