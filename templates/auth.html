@@ -5,16 +5,16 @@ Login
 {% endblock %}
 
 {% block content_fitness_testing_base %}
-	<div id='login_box' class="six columns"> 
+	<div id='login_box' class="six columns offset-by-one">
 		<form action="/login/" method="post">
 			{% csrf_token %}
 			{% if next %}
 			<input type="hidden" name="next" value="{{ next }}" />
 			{% endif %}
 			username:
-			<input type="text" name="username" value="{{ username}}" /><br />
+			<input type="text" name="username" value="{{ username}}" />
 			password:
-			<input type="password" name="password" value="" /><br />
+			<input type="password" name="password" value="" />
 
 			<input type="submit" value="Log In" />
 		</form>
