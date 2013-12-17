@@ -6,16 +6,18 @@ Login
 
 {% block content_fitness_testing_base %}
 	{{ state }}
-	<form action="/login/" method="post">
-                {% csrf_token %}
-		{% if next %}
-		<input type="hidden" name="next" value="{{ next }}" />
-		{% endif %}
-		username:
-		<input type="text" name="username" value="{{ username}}" /><br />
-		password:
-		<input type="password" name="password" value="" /><br />
+	<div id='login_box' class="six columns"> 
+		<form action="/login/" method="post">
+			{% csrf_token %}
+			{% if next %}
+			<input type="hidden" name="next" value="{{ next }}" />
+			{% endif %}
+			username:
+			<input type="text" name="username" value="{{ username}}" /><br />
+			password:
+			<input type="password" name="password" value="" /><br />
 
-		<input type="submit" value="Log In" />
-	</form>
+			<input type="submit" value="Log In" />
+		</form>
+	</div>
 {% endblock %}
