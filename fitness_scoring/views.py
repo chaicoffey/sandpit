@@ -29,10 +29,10 @@ def login_user(request):
             request.session['teacher_full_name'] = teacher.firstname + " " + teacher.surname
             return redirect('fitness_scoring.views.teacher')
         elif user_type == 'Unpaid':
-            state = "Your school subscription has not been paid."
+            state = "Subscription fee has not been paid for your school."
             return render(request, 'auth.html', RequestContext(request, {'state':state, 'username': username}))
         else:
-            state = "Your username and/or password were incorrect."
+            state = "Incorrect username and/or password."
             return render(request, 'auth.html', RequestContext(request, {'state':state, 'username': username}))
     else:
         state = ""
