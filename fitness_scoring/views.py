@@ -35,7 +35,7 @@ def login_user(request):
             state = "Your username and/or password were incorrect."
             return render(request, 'auth.html', RequestContext(request, {'state':state, 'username': username}))
     else:
-        state = "Please log in below..."
+        state = ""
         return render(request, 'auth.html', RequestContext(request, {'state':state, 'username': username}))
 
 
