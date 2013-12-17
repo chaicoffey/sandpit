@@ -2,10 +2,12 @@
 
 {% block content_fitness_testing_base  %}
 
-{% block school_name_loggedin %} {% endblock %}<br>
+<div class="sixteen columns">
 
-{{ user_type }} : {{ name }}<br>
+{{ name }} ({{ user_type }}) : {% block school_name_loggedin %} {% endblock %}<br><br>
 
 {% block content_loggedin %} {% endblock %}
+
+</div>
 
 {% endblock %}
