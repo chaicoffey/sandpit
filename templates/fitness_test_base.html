@@ -1,15 +1,40 @@
 <!DOCTYPE html>
 {% load staticfiles %}
-<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<html>
 <head>
-<title> Fitness Testing App - {% block title_fitness_testing_base %} {% endblock %}</title>
-<meta http-equiv="Content-type" content="text/html; charset=utf-8" />
-<link rel="stylesheet" type="text/css" href="{% static "fitness_scoring/theme.css" %}">
+    <!-- Basic Page Needs
+    ================================================== -->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta charset="utf-8">
+    <meta name="description" content="">
+    <meta name="author" content="Mathew Chai & Michael Coffey">
+    <title>Fitness Testing App - {% block title_fitness_testing_base %} {% endblock %}</title>
+
+    <!-- Mobile Specific Metas
+    ================================================== -->
+	<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
+    <!-- CSS
+    ================================================== -->
+	<link rel="stylesheet" type="text/css" href="{% static "stylesheets/base.css" %}">
+	<link rel="stylesheet" type="text/css" href="{% static "stylesheets/skeleton.css" %}">
+	<link rel="stylesheet" type="text/css" href="{% static "stylesheets/layout.css" %}">
+
+	<!-- Favicons
+	================================================== -->
+	<link rel="shortcut icon" href="{% static "images/favicon.ico" %}">
+	<link rel="apple-touch-icon" href="{% static "images/apple-touch-icon.png" %}">
+	<link rel="apple-touch-icon" sizes="72x72" href="{% static "images/apple-touch-icon-72x72.png" %}">
+	<link rel="apple-touch-icon" sizes="114x114" href="{% static "images/apple-touch-icon-114x114.png" %}">
 </head>
 <body>
-        <div id="banner">
-	Fitness Testing App
-	</div>
-	{% block content_fitness_testing_base %} {% endblock %}
+    <div class="container">
+        <div class="sixteen columns" id="banner">
+	        Fitness Testing App
+	    </div>
+        <div class="sixteen columns">
+	        {% block content_fitness_testing_base %} {% endblock %}
+        </div>
+    </div><!-- container -->
 </body>
 </html>
