@@ -8,7 +8,12 @@ class School(models.Model):
     subscriptionPaid = models.BooleanField(default=False)
     def __unicode__(self):
         return self.name
-	
+    def getSubscriptionPaidText(self):
+        if self.subscriptionPaid:
+            return 'Paid'
+        else:
+            return 'Unpaid'
+
 class User(models.Model):
     username = models.CharField(max_length=100, primary_key=True)
     password = models.CharField(max_length=128)
