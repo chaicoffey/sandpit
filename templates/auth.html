@@ -1,23 +1,29 @@
 {% extends "fitness_test_base.html" %}
 
+{% load staticfiles %}
+
 {% block title_fitness_testing_base %}
-Login
+    Login
+{% endblock %}
+
+{% block custom_css %}
+    <!-- Custom styles for this template -->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/signin.css' %}">
 {% endblock %}
 
 {% block content_fitness_testing_base %}
-	<div id='login_box' class="six columns offset-by-one">
-		<form action="/login/" method="post">
-			{% csrf_token %}
-			{% if next %}
+	<form class="form-signin" role="form" action="/login/" method="post">
+        {% csrf_token %}
+        <h2 class="form-signin-heading">Please sign in</h2>
+    	{% if next %}
 			<input type="hidden" name="next" value="{{ next }}" />
-			{% endif %}
-			username:
-			<input type="text" name="username" value="{{ username}}" />
-			password:
-			<input type="password" name="password" value="" />
-
-			<input type="submit" value="Log In" />
-		</form>
-		<div class="error_message">{{ state }}</div>
-	</div>
+		{% endif %}
+		<input type="text" class="form-control" placeholder="Username" name="username" value="{{ username}}" required autofocus />
+		<input type="password" class="form-control" placeholder="Password" name="password" value="" required />
+        <label class="checkbox">
+            <input type="checkbox" value="remember-me" /> Remember me
+        </label>
+		<button class="btn btn-lg btn-primary btn-block" type="submit">Log In</button>
+	</form>
+	<div class="error_message">{{ state }}</div>
 {% endblock %}
