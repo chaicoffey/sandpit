@@ -89,4 +89,3 @@ def superuser(request):
         return render(request, 'superuser.html', RequestContext(request, {'user_type':'Super User','name':request.session.get('username', None),'school_list':School.objects.all()}))
     else:
         return redirect('fitness_scoring.views.login_user')
-
