@@ -21,6 +21,6 @@
 		<input type="text" class="form-control" placeholder="Username" name="username" value="{{ username}}" required autofocus />
 		<input type="password" class="form-control" placeholder="Password" name="password" value="" required />
 		<button class="btn btn-lg btn-primary btn-block" type="submit">Log In</button>
+    	<div class="error_message">{{ state }}</div>
 	</form>
-	<div class="error_message">{{ state }}</div>
 {% endblock %}
