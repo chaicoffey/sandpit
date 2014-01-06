@@ -9,6 +9,7 @@ def logout_user(request):
     request.session.flush()
     return redirect('fitness_scoring.views.login_user')
 
+
 def login_user(request):
     username = password = ''
     if request.POST:
@@ -24,19 +25,22 @@ def login_user(request):
             request.session['school_name'] = Administrator.objects.get(user=username).school_id.name
             return redirect('fitness_scoring.views.administrator')
         elif user_type == 'Teacher':
-            teacher = Teacher.objects.get(user=username);
+            teacher = Teacher.objects.get(user=username)
             request.session['school_name'] = teacher.school_id.name
             request.session['teacher_full_name'] = teacher.firstname + " " + teacher.surname
             return redirect('fitness_scoring.views.teacher')
         elif user_type == 'Unpaid':
             state = "Subscription fee has not been paid for your school."
-            return render(request, 'auth.html', RequestContext(request, {'state':state, 'username': username}))
+            return render(request, 'auth.html', RequestContext(request, {'state': state,
+                                                                         'username': username}))
         else:
             state = "Incorrect username and/or password."
-            return render(request, 'auth.html', RequestContext(request, {'state':state, 'username': username}))
+            return render(request, 'auth.html', RequestContext(request, {'state': state,
+                                                                         'username': username}))
     else:
         state = ""
-        return render(request, 'auth.html', RequestContext(request, {'state':state, 'username': username}))
+        return render(request, 'auth.html', RequestContext(request, {'state': state,
+                                                                     'username': username}))
 
 
 def authenticate(username, password):
@@ -50,7 +54,7 @@ def authenticate(username, password):
             user_type = 'SuperUser Failed'
     elif len(administrator) > 0:
         if check_password(password=password, encrypted_password=administrator[0].user.password):
-            if(administrator[0].school_id.subscriptionPaid):
+            if administrator[0].school_id.subscriptionPaid:
                 user_type = 'Administrator'
             else:
                 user_type = 'Unpaid'
@@ -58,7 +62,7 @@ def authenticate(username, password):
             user_type = 'Administrator Failed'
     elif len(teacher) > 0:
         if check_password(password=password, encrypted_password=teacher[0].user.password):
-            if(teacher[0].school_id.subscriptionPaid):
+            if teacher[0].school_id.subscriptionPaid:
                 user_type = 'Teacher'
             else:
                 user_type = 'Unpaid'
@@ -69,23 +73,41 @@ def authenticate(username, password):
 
     return user_type
 
+
 def check_password(password, encrypted_password):
     return password == encrypted_password
 
+
 def teacher(request):
     if request.session.get('user_type', None) == 'Teacher':
-        return render(request, 'teacher.html', RequestContext(request, {'user_type':'Teacher','name':request.session.get('teacher_full_name', None),'school_name':request.session.get('school_name', None)}))
+        return render(request, 'teacher.html',
+                      RequestContext(request,
+                                     {'user_type': 'Teacher',
+                                      'name': request.session.get('teacher_full_name', None),
+                                      'school_name': request.session.get('school_name', None)}))
     else:
         return redirect('fitness_scoring.views.login_user')
+
 
 def administrator(request):
     if request.session.get('user_type', None) == 'Administrator':
-        return render(request, 'administrator.html', RequestContext(request, {'user_type':'Administrator','name':request.session.get('username', None),'school_name':request.session.get('school_name', None)}))
+        return render(request, 'administrator.html',
+                      RequestContext(request,
+                                     {'user_type': 'Administrator',
+                                      'name': request.session.get('username', None),
+                                      'school_name': request.session.get('school_name', None)}))
     else:
         return redirect('fitness_scoring.views.login_user')
 
+
 def superuser(request):
     if request.session.get('user_type', None) == 'SuperUser':
-        return render(request, 'superuser.html', RequestContext(request, {'user_type':'Super User','name':request.session.get('username', None),'school_list':School.objects.all()}))
+        return render(request, 'superuser.html',
+                      RequestContext(request,
+                                     {'user_type': 'Super User',
+                                      'name': request.session.get('username', None),
+                                      'school_list': School.objects.all()}))
     else:
         return redirect('fitness_scoring.views.login_user')
+
+
