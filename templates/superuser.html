@@ -4,14 +4,16 @@
 Super User
 {% endblock %}
 
-{% block content_loggedin %}	
+{% block content_loggedin %}
 
 <select id="schools" size="3" multiple>
-{% for school in school_list %}
+{% autoescape off %}
+{% for school_padded_text, school_paid_text in school_list %}
     <option>
-		{{ school }} : ({{school.getSubscriptionPaidText}})
+		{{school_padded_text}} : {{school_paid_text}}
 	</option>
 {% endfor %}
+{% endautoescape %}
 </select>
 
 {% endblock %}

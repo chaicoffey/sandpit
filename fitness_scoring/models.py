@@ -11,12 +11,17 @@ class School(models.Model):
     def __unicode__(self):
         return self.name
 
+    def get_school_name_padded(self, padding):
+        return self.name+"&nbsp"*(padding - len(self.name))
+
     def getSubscriptionPaidText(self):
         if self.subscriptionPaid:
             return 'Paid'
         else:
             return 'Unpaid'
 
+def get_school_name_max_length():
+    return len(max([school.name for school in School.objects.all()], key=len))
 
 class User(models.Model):
     username = models.CharField(max_length=100, primary_key=True)
