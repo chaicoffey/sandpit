@@ -1,0 +1,61 @@
+
+<div class="panel panel-default">
+    <div class="panel-heading">
+        Student List
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                +
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li><a href="" data-toggle="modal" data-target="#addStudentModal">Add Student</a></li>
+                <li><a href="" data-toggle="modal" data-target="#addStudentsModal">Add Students from .CSV</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="table-responsive">
+    <table class="table table-hover">
+    <thead><tr><th>Student ID</th><th>Given Name</th><th>Family Name</th></tr></thead>
+        {% for student in student_list %}
+            <tr><td>{{ student.student_id }}</td><td>{{ student.firstname }}</td><td>{{ student.surname }}</td></tr>
+        {% endfor %}
+    </table>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addStudentModal" tabindex="-1" role="dialog" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="addStudentModalLabel">Add Student</h4>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary">Add Student</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addStudentsModal" tabindex="-1" role="dialog" aria-labelledby="addStudentsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title" id="addStudentsModalLabel">Add Students</h4>
+      </div>
+      <div class="modal-body">
+        ...
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-primary">Add Students</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="panel panel-default"></div>
