@@ -1,7 +1,7 @@
 from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
 from fitness_scoring.models import Teacher, Administrator, SuperUser, Student, User, School, get_school_name_max_length
-
+from fitness_scoring.forms import AddStudentForm
 
 # Create your views here.
 
@@ -91,12 +91,26 @@ def teacher(request):
 
 def administrator(request):
     if request.session.get('user_type', None) == 'Administrator':
+        if request.method == 'POST':
+            # If the form has been submitted
+            add_student_form = AddStudentForm(request.POST)  # A form bound to the POST data
+            if add_student_form.is_valid():
+                student_id = add_student_form.cleaned_data['student_id']
+                school_id = School.objects.get(id=1)
+                firstname = add_student_form.cleaned_data['firstname']
+                surname = add_student_form.cleaned_data['surname']
+                gender = add_student_form.cleaned_data['gender']
+                dob = add_student_form.cleaned_data['dob']
+                Student.objects.create(student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)
+        else:
+            add_student_form = AddStudentForm()
         return render(request, 'administrator.html',
                       RequestContext(request,
                                      {'user_type': 'Administrator',
                                       'name': request.session.get('username', None),
                                       'school_name': request.session.get('school_name', None),
-                                      'student_list': Student.objects.all()}))
+                                      'student_list': Student.objects.all(),
+                                      'add_student_form': add_student_form}))
     else:
         return redirect('fitness_scoring.views.login_user')
 
