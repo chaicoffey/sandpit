@@ -91,17 +91,21 @@ def teacher(request):
 
 def administrator(request):
     if request.session.get('user_type', None) == 'Administrator':
+        school_id = School.objects.get(name=request.session.get('school_name', None))
+        add_student_modal_visibility = 'hide'
         if request.method == 'POST':
             # If the form has been submitted
             add_student_form = AddStudentForm(request.POST)  # A form bound to the POST data
             if add_student_form.is_valid():
                 student_id = add_student_form.cleaned_data['student_id']
-                school_id = School.objects.get(id=1)
                 firstname = add_student_form.cleaned_data['firstname']
                 surname = add_student_form.cleaned_data['surname']
                 gender = add_student_form.cleaned_data['gender']
                 dob = add_student_form.cleaned_data['dob']
                 Student.objects.create(student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)
+                return redirect('/administrator/')  # Redirect after POST
+            else:
+                add_student_modal_visibility = 'show'
         else:
             add_student_form = AddStudentForm()
         return render(request, 'administrator.html',
@@ -109,8 +113,9 @@ def administrator(request):
                                      {'user_type': 'Administrator',
                                       'name': request.session.get('username', None),
                                       'school_name': request.session.get('school_name', None),
-                                      'student_list': Student.objects.all(),
-                                      'add_student_form': add_student_form}))
+                                      'student_list': Student.objects.filter(school_id=school_id),
+                                      'add_student_form': add_student_form,
+                                      'add_student_modal_hide_or_show': add_student_modal_visibility}))
     else:
         return redirect('fitness_scoring.views.login_user')
 
