@@ -7,3 +7,7 @@ class AddStudentForm(forms.Form):
     surname = forms.CharField(max_length=100)
     gender = forms.ChoiceField(choices=[('M', 'Male'), ('F', 'Female')])
     dob = forms.DateField(input_formats=['%d/%m/%Y'], help_text='(dd/mm/yyyy)')
+
+
+class AddStudentsForm(forms.Form):
+    file_upload = forms.CharField(max_length=5)

@@ -1,7 +1,7 @@
 from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
 from fitness_scoring.models import Teacher, Administrator, SuperUser, Student, User, School, get_school_name_max_length
-from fitness_scoring.forms import AddStudentForm
+from fitness_scoring.forms import AddStudentForm, AddStudentsForm
 
 # Create your views here.
 
@@ -91,23 +91,32 @@ def teacher(request):
 
 def administrator(request):
     if request.session.get('user_type', None) == 'Administrator':
+        add_student_form = AddStudentForm()
+        add_students_form = AddStudentsForm()
         school_id = School.objects.get(name=request.session.get('school_name', None))
         add_student_modal_visibility = 'hide'
+        add_students_modal_visibility = 'hide'
         if request.method == 'POST':
-            # If the form has been submitted
-            add_student_form = AddStudentForm(request.POST)  # A form bound to the POST data
-            if add_student_form.is_valid():
-                student_id = add_student_form.cleaned_data['student_id']
-                firstname = add_student_form.cleaned_data['firstname']
-                surname = add_student_form.cleaned_data['surname']
-                gender = add_student_form.cleaned_data['gender']
-                dob = add_student_form.cleaned_data['dob']
-                Student.objects.create(student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)
-                return redirect('/administrator/')  # Redirect after POST
-            else:
-                add_student_modal_visibility = 'show'
-        else:
-            add_student_form = AddStudentForm()
+            if request.POST.get('SubmitIdentifier') == 'AddStudent':
+                # If the form has been submitted
+                add_student_form = AddStudentForm(request.POST)  # A form bound to the POST data
+                if add_student_form.is_valid():
+                    student_id = add_student_form.cleaned_data['student_id']
+                    firstname = add_student_form.cleaned_data['firstname']
+                    surname = add_student_form.cleaned_data['surname']
+                    gender = add_student_form.cleaned_data['gender']
+                    dob = add_student_form.cleaned_data['dob']
+                    Student.objects.create(student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)
+                    return redirect('/administrator/')  # Redirect after POST
+                else:
+                    add_student_modal_visibility = 'show'
+            elif request.POST.get('SubmitIdentifier') == 'AddStudents':
+                # If the form has been submitted
+                add_students_form = AddStudentsForm(request.POST)  # A form bound to the POST data
+                if add_students_form.is_valid():
+                    return redirect('/administrator/')  # Redirect after POST
+                else:
+                    add_students_modal_visibility = 'show'
         return render(request, 'administrator.html',
                       RequestContext(request,
                                      {'user_type': 'Administrator',
@@ -115,7 +124,9 @@ def administrator(request):
                                       'school_name': request.session.get('school_name', None),
                                       'student_list': Student.objects.filter(school_id=school_id),
                                       'add_student_form': add_student_form,
-                                      'add_student_modal_hide_or_show': add_student_modal_visibility}))
+                                      'add_students_form': add_students_form,
+                                      'add_student_modal_hide_or_show': add_student_modal_visibility,
+                                      'add_students_modal_hide_or_show': add_students_modal_visibility}))
     else:
         return redirect('fitness_scoring.views.login_user')
 
