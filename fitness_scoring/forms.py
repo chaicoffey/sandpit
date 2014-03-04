@@ -6,4 +6,4 @@ class AddStudentForm(forms.Form):
     firstname = forms.CharField(max_length=100)
     surname = forms.CharField(max_length=100)
     gender = forms.ChoiceField(choices=[('M', 'Male'), ('F', 'Female')])
-    dob = forms.DateField()
+    dob = forms.DateField(input_formats=['%d/%m/%Y'], help_text='(dd/mm/yyyy)')
