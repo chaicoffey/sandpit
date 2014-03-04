@@ -10,4 +10,4 @@ class AddStudentForm(forms.Form):
 
 
 class AddStudentsForm(forms.Form):
-    file_upload = forms.CharField(max_length=5)
+    add_students_file = forms.FileField()

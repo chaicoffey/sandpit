@@ -112,8 +112,9 @@ def administrator(request):
                     add_student_modal_visibility = 'show'
             elif request.POST.get('SubmitIdentifier') == 'AddStudents':
                 # If the form has been submitted
-                add_students_form = AddStudentsForm(request.POST)  # A form bound to the POST data
+                add_students_form = AddStudentsForm(request.POST, request.FILES)  # A form bound to the POST data
                 if add_students_form.is_valid():
+                    # add_students_fromFile(request.FILES['add_students_file'])
                     return redirect('/administrator/')  # Redirect after POST
                 else:
                     add_students_modal_visibility = 'show'
