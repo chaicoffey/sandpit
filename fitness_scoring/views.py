@@ -2,6 +2,7 @@ from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
 from fitness_scoring.models import Teacher, Administrator, SuperUser, Student, User, School, get_school_name_max_length
 from fitness_scoring.forms import AddStudentForm, AddStudentsForm
+from fileio import save_file, add_students_from_file
 
 # Create your views here.
 
@@ -114,7 +115,10 @@ def administrator(request):
                 # If the form has been submitted
                 add_students_form = AddStudentsForm(request.POST, request.FILES)  # A form bound to the POST data
                 if add_students_form.is_valid():
-                    # add_students_fromFile(request.FILES['add_students_file'])
+                    add_students_file = request.FILES['add_students_file']
+                    file_path_on_server = save_file(add_students_file)
+                    add_students_from_file(file_path_on_server, school_id)
+                    # delete when finished with
                     return redirect('/administrator/')  # Redirect after POST
                 else:
                     add_students_modal_visibility = 'show'
