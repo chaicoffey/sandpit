@@ -1,9 +1,9 @@
 from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
 from fitness_scoring.models import Teacher, Administrator, SuperUser, Student, User, School, get_school_name_max_length
-from fitness_scoring.models import create_or_update_student
+from fitness_scoring.models import create_student
 from fitness_scoring.forms import AddStudentForm, AddStudentsForm
-from fileio import save_file, add_students_from_file
+from fileio import save_file, delete_file, add_students_from_file
 
 # Create your views here.
 
@@ -108,9 +108,7 @@ def administrator(request):
                     surname = add_student_form.cleaned_data['surname']
                     gender = add_student_form.cleaned_data['gender']
                     dob = add_student_form.cleaned_data['dob']
-                    mode = create_or_update_student(create_update=True, limited=True, student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)
-                    if mode != 'Unique':
-                        pass
+                    create_student(check_name=False, student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)
                     return redirect('/administrator/')  # Redirect after POST
                 else:
                     add_student_modal_visibility = 'show'
@@ -121,7 +119,7 @@ def administrator(request):
                     add_students_file = request.FILES['add_students_file']
                     file_path_on_server = save_file(add_students_file)
                     add_students_from_file(file_path_on_server, school_id)
-                    # delete when finished with
+                    delete_file(file_path_on_server)
                     return redirect('/administrator/')  # Redirect after POST
                 else:
                     add_students_modal_visibility = 'show'

@@ -1,8 +1,8 @@
 import csv
 import tempfile
-from fitness_scoring.models import Student
+from fitness_scoring.models import create_student, update_student
 
-destination_directory = '/tmp/fitness_scoring/'
+destination_directory = 'C:\\fitness_scoring_file_uploads\\'
 
 
 def save_file(f):
@@ -14,6 +14,8 @@ def save_file(f):
     destination_file.close()
     return destination_file.name
 
+def delete_file(file_name):
+    pass
 
 def add_students_from_file(file_path_on_server, school_id):
     file_handle = open(file_path_on_server, 'rb')
@@ -25,15 +27,8 @@ def add_students_from_file(file_path_on_server, school_id):
     students_list_reader = csv.DictReader(file_handle, dialect=dialect)
     # check headings are correct else throw exception
     for line in students_list_reader:
-        # do some checks on here on same student etc
-        Student.objects.create(student_id=line['student_id'], school_id=school_id, firstname=line['firstname'], surname=line['surname'], gender=line['gender'], dob=line['dob'])
+        (student_id, firstname, surname, gender, dob) = (line['student_id'], line['firstname'], line['surname'], line['gender'], line['dob'])
+        if(not create_student(check_name=False, student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)):
+            update_student(check_name=False,student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)
 
-    file_handle.close()
-    #for each record
-    #   check if studentID exists, check name same and dob, if same overwrite other details if not don't add
-    #   if same name and school but different ID then give warning promt and ask if want to do
-    #   if any problem with data dont add
-    #   keep list of all rows added and all rows not added and all rows overwritten
-    #   add record to database
-    #Return summary at end, n added, n updated, n not added, rows with same name but different ID
-
+    #file_handle.close()

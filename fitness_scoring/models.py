@@ -68,35 +68,26 @@ class Student(models.Model):
         return self.firstname + " " + self.surname
 
 
-def create_or_update_student(create_update, limited, student_id, school_id, firstname, surname, gender, dob):
-#   create_update, if true will only create, if false can create or update
-#   limited, if true  will only create if unique name and id
-#                     will only update if same name and id
-#            if false will create if unique id
-#                     will update if same id
-#   if all details the same then leave alone
+def create_student(check_name, student_id, school_id, firstname, surname, gender, dob):
 
-    unique_student_id = (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 0)
-    unique_name = (len(Student.objects.filter(school_id=school_id, firstname=firstname, surname=surname)) == 0)
+    student_unique = (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 0)
+    if check_name:
+        student_unique = student_unique and (len(Student.objects.filter(school_id=school_id, firstname=firstname, surname=surname)) == 0)
 
-    if unique_student_id and unique_name:
-        mode = 'Unique'
-    elif (not unique_student_id) and unique_name:
-        mode = 'Duplicate ID, Unique Name'
-    elif unique_student_id and not unique_name:
-        mode = 'Unique ID, Duplicate Name'
-    elif (not unique_student_id) and (not unique_name):
-        student = Student.objects.get(school_id=school_id, student_id=student_id)
-        same_details = student.gender == gender and student.dob == dob
-        if same_details:
-            mode = 'Duplicate'
-        else:
-            mode = 'Duplicate, Unique Details'
-
-    # check update_mode is valid
-    if mode == 'Unique' or (mode == 'Unique ID, Duplicate Name' and (not limited)):
+    if student_unique:
         Student.objects.create(student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)
-    elif (not create_update) and (mode == 'Duplicate, Unique Details' or (mode == 'Duplicate ID, Unique Name' and (not limited))):
+
+    return student_unique
+
+
+def update_student(check_name, student_id, school_id, firstname, surname, gender, dob):
+
+    if check_name:
+        student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id, firstname=firstname, surname=surname)) > 0)
+    else:
+        student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 1)
+
+    if student_exists:
         student = Student.objects.get(school_id=school_id, student_id=student_id)
         student.firstname = firstname
         student.surname = surname
@@ -104,7 +95,7 @@ def create_or_update_student(create_update, limited, student_id, school_id, firs
         student.dob = dob
         student.save()
 
-    return mode
+    return student_exists
 
 
 class Class(models.Model):
