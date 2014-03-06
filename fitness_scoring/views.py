@@ -108,8 +108,10 @@ def administrator(request):
                     surname = add_student_form.cleaned_data['surname']
                     gender = add_student_form.cleaned_data['gender']
                     dob = add_student_form.cleaned_data['dob']
-                    create_student(check_name=False, student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)
-                    return redirect('/administrator/')  # Redirect after POST
+                    if(create_student(check_name=False, student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)):
+                        return redirect('/administrator/')  # Redirect after POST
+                    else:
+                        add_student_modal_visibility = 'show'
                 else:
                     add_student_modal_visibility = 'show'
             elif request.POST.get('SubmitIdentifier') == 'AddStudents':
@@ -118,7 +120,7 @@ def administrator(request):
                 if add_students_form.is_valid():
                     add_students_file = request.FILES['add_students_file']
                     file_path_on_server = save_file(add_students_file)
-                    add_students_from_file(file_path_on_server, school_id)
+                    (nCreated,nUpdated,nNotCreatedOrUpdated) = add_students_from_file(file_path_on_server, school_id)
                     delete_file(file_path_on_server)
                     return redirect('/administrator/')  # Redirect after POST
                 else:

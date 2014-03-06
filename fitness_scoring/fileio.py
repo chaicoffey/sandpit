@@ -26,9 +26,18 @@ def add_students_from_file(file_path_on_server, school_id):
     file_handle.seek(0)
     students_list_reader = csv.DictReader(file_handle, dialect=dialect)
     # check headings are correct else throw exception
+
+    nCreated = 0
+    nUpdated = 0
+    nNotCreatedOrUpdated = 0
     for line in students_list_reader:
         (student_id, firstname, surname, gender, dob) = (line['student_id'], line['firstname'], line['surname'], line['gender'], line['dob'])
-        if(not create_student(check_name=False, student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)):
-            update_student(check_name=False,student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)
+        if(create_student(check_name=False, student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)):
+            nCreated = nCreated + 1
+        else:
+            if(update_student(check_name=False,student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)):
+               nUpdated = nUpdated + 1
+            else:
+                nNotCreatedOrUpdated = nNotCreatedOrUpdated + 1
 
-    #file_handle.close()
+    return nCreated,nUpdated,nNotCreatedOrUpdated

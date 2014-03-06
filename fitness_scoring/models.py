@@ -87,15 +87,18 @@ def update_student(check_name, student_id, school_id, firstname, surname, gender
     else:
         student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 1)
 
+    student_updated = student_exists
     if student_exists:
         student = Student.objects.get(school_id=school_id, student_id=student_id)
-        student.firstname = firstname
-        student.surname = surname
-        student.gender = gender
-        student.dob = dob
-        student.save()
+        student_updated = not (student.firstname == firstname and student.surname == surname and student.gender == gender and student.dob == dob)
+        if student_updated:
+            student.firstname = firstname
+            student.surname = surname
+            student.gender = gender
+            student.dob = dob
+            student.save()
 
-    return student_exists
+    return student_updated
 
 
 class Class(models.Model):
