@@ -8,3 +8,8 @@ body { padding-top:80px; }
 select {
     font-family:'Courier New','Courier','monospace';
 }
+
+#table-wrapper {
+    height: 200px;
+    overflow: auto;
+}

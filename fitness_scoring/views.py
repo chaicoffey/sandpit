@@ -1,6 +1,7 @@
 from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
 from fitness_scoring.models import Teacher, Administrator, SuperUser, Student, User, School, get_school_name_max_length
+from fitness_scoring.models import create_or_update_student
 from fitness_scoring.forms import AddStudentForm, AddStudentsForm
 from fileio import save_file, add_students_from_file
 
@@ -107,7 +108,9 @@ def administrator(request):
                     surname = add_student_form.cleaned_data['surname']
                     gender = add_student_form.cleaned_data['gender']
                     dob = add_student_form.cleaned_data['dob']
-                    Student.objects.create(student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)
+                    mode = create_or_update_student(create_update=True, limited=True, student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)
+                    if mode != 'Unique':
+                        pass
                     return redirect('/administrator/')  # Redirect after POST
                 else:
                     add_student_modal_visibility = 'show'

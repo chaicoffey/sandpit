@@ -57,7 +57,7 @@ class Administrator(models.Model):
 
 
 class Student(models.Model):
-    student_id = models.CharField(max_length=30, primary_key=True)
+    student_id = models.CharField(max_length=30)
     school_id = models.ForeignKey(School)
     firstname = models.CharField(max_length=100)
     surname = models.CharField(max_length=100)
@@ -66,6 +66,45 @@ class Student(models.Model):
 
     def __unicode__(self):
         return self.firstname + " " + self.surname
+
+
+def create_or_update_student(create_update, limited, student_id, school_id, firstname, surname, gender, dob):
+#   create_update, if true will only create, if false can create or update
+#   limited, if true  will only create if unique name and id
+#                     will only update if same name and id
+#            if false will create if unique id
+#                     will update if same id
+#   if all details the same then leave alone
+
+    unique_student_id = (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 0)
+    unique_name = (len(Student.objects.filter(school_id=school_id, firstname=firstname, surname=surname)) == 0)
+
+    if unique_student_id and unique_name:
+        mode = 'Unique'
+    elif (not unique_student_id) and unique_name:
+        mode = 'Duplicate ID, Unique Name'
+    elif unique_student_id and not unique_name:
+        mode = 'Unique ID, Duplicate Name'
+    elif (not unique_student_id) and (not unique_name):
+        student = Student.objects.get(school_id=school_id, student_id=student_id)
+        same_details = student.gender == gender and student.dob == dob
+        if same_details:
+            mode = 'Duplicate'
+        else:
+            mode = 'Duplicate, Unique Details'
+
+    # check update_mode is valid
+    if mode == 'Unique' or (mode == 'Unique ID, Duplicate Name' and (not limited)):
+        Student.objects.create(student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)
+    elif (not create_update) and (mode == 'Duplicate, Unique Details' or (mode == 'Duplicate ID, Unique Name' and (not limited))):
+        student = Student.objects.get(school_id=school_id, student_id=student_id)
+        student.firstname = firstname
+        student.surname = surname
+        student.gender = gender
+        student.dob = dob
+        student.save()
+
+    return mode
 
 
 class Class(models.Model):
