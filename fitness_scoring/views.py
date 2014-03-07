@@ -29,7 +29,7 @@ def login_user(request):
         elif user_type == 'Teacher':
             teacher = Teacher.objects.get(user=username)
             request.session['school_name'] = teacher.school_id.name
-            request.session['teacher_full_name'] = teacher.firstname + " " + teacher.surname
+            request.session['teacher_full_name'] = teacher.first_name + " " + teacher.surname
             return redirect('fitness_scoring.views.teacher')
         elif user_type == 'Unpaid':
             state = "Subscription fee has not been paid for your school."
@@ -104,11 +104,11 @@ def administrator(request):
                 add_student_form = AddStudentForm(request.POST)  # A form bound to the POST data
                 if add_student_form.is_valid():
                     student_id = add_student_form.cleaned_data['student_id']
-                    firstname = add_student_form.cleaned_data['firstname']
+                    first_name = add_student_form.cleaned_data['first_name']
                     surname = add_student_form.cleaned_data['surname']
                     gender = add_student_form.cleaned_data['gender']
                     dob = add_student_form.cleaned_data['dob']
-                    if(create_student(check_name=False, student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)):
+                    if(create_student(check_name=False, student_id=student_id, school_id=school_id, first_name=first_name, surname=surname, gender=gender, dob=dob)):
                         return redirect('/administrator/')  # Redirect after POST
                     else:
                         add_student_modal_visibility = 'show'
@@ -120,7 +120,7 @@ def administrator(request):
                 if add_students_form.is_valid():
                     add_students_file = request.FILES['add_students_file']
                     file_path_on_server = save_file(add_students_file)
-                    (nCreated,nUpdated,nNotCreatedOrUpdated) = add_students_from_file(file_path_on_server, school_id)
+                    (n_created, n_updated, n_not_created_or_updated) = add_students_from_file(file_path_on_server, school_id)
                     delete_file(file_path_on_server)
                     return redirect('/administrator/')  # Redirect after POST
                 else:
@@ -146,7 +146,7 @@ def superuser(request):
                       RequestContext(request,
                                      {'user_type': 'Super User',
                                       'name': request.session.get('username', None),
-                                      'school_list': [(school.get_school_name_padded(school_name_max_length), school.getSubscriptionPaidText()) for school in School.objects.all()]
+                                      'school_list': [(school.get_school_name_padded(school_name_max_length), school.get_subscription_paid_text()) for school in School.objects.all()]
                                       }))
     else:
         return redirect('fitness_scoring.views.login_user')

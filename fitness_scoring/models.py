@@ -14,7 +14,7 @@ class School(models.Model):
     def get_school_name_padded(self, padding):
         return self.name+"&nbsp"*(padding - len(self.name))
 
-    def getSubscriptionPaidText(self):
+    def get_subscription_paid_text(self):
         if self.subscriptionPaid:
             return 'Paid'
         else:
@@ -39,13 +39,13 @@ class SuperUser(models.Model):
 
 
 class Teacher(models.Model):
-    firstname = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100)
     surname = models.CharField(max_length=100)
     school_id = models.ForeignKey(School)
     user = models.ForeignKey(User)
 
     def __unicode__(self):
-        return self.firstname + " " + self.surname
+        return self.first_name + " " + self.surname
 
 
 class Administrator(models.Model):
@@ -59,40 +59,40 @@ class Administrator(models.Model):
 class Student(models.Model):
     student_id = models.CharField(max_length=30)
     school_id = models.ForeignKey(School)
-    firstname = models.CharField(max_length=100)
+    first_name = models.CharField(max_length=100)
     surname = models.CharField(max_length=100)
     gender = models.CharField(max_length=1)
     dob = models.DateField()
 
     def __unicode__(self):
-        return self.firstname + " " + self.surname
+        return self.first_name + " " + self.surname
 
 
-def create_student(check_name, student_id, school_id, firstname, surname, gender, dob):
+def create_student(check_name, student_id, school_id, first_name, surname, gender, dob):
 
     student_unique = (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 0)
     if check_name:
-        student_unique = student_unique and (len(Student.objects.filter(school_id=school_id, firstname=firstname, surname=surname)) == 0)
+        student_unique = student_unique and (len(Student.objects.filter(school_id=school_id, first_name=first_name, surname=surname)) == 0)
 
     if student_unique:
-        Student.objects.create(student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)
+        Student.objects.create(student_id=student_id, school_id=school_id, first_name=first_name, surname=surname, gender=gender, dob=dob)
 
     return student_unique
 
 
-def update_student(check_name, student_id, school_id, firstname, surname, gender, dob):
+def update_student(check_name, student_id, school_id, first_name, surname, gender, dob):
 
     if check_name:
-        student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id, firstname=firstname, surname=surname)) > 0)
+        student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id, first_name=first_name, surname=surname)) > 0)
     else:
         student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 1)
 
     student_updated = student_exists
     if student_exists:
         student = Student.objects.get(school_id=school_id, student_id=student_id)
-        student_updated = not (student.firstname == firstname and student.surname == surname and student.gender == gender and student.dob == dob)
+        student_updated = not (student.first_name == first_name and student.surname == surname and student.gender == gender and student.dob == dob)
         if student_updated:
-            student.firstname = firstname
+            student.first_name = first_name
             student.surname = surname
             student.gender = gender
             student.dob = dob

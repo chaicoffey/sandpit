@@ -32,11 +32,11 @@ def add_students_from_file(file_path_on_server, school_id):
     n_updated = 0
     n_not_created_or_updated = 0
     for line in students_list_reader:
-        (student_id, firstname, surname, gender, dob) = (line['student_id'], line['firstname'], line['surname'], line['gender'], line['dob'])
-        if create_student(check_name=False, student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob):
+        (student_id, first_name, surname, gender, dob) = (line['student_id'], line['first_name'], line['surname'], line['gender'], line['dob'])
+        if create_student(check_name=False, student_id=student_id, school_id=school_id, first_name=first_name, surname=surname, gender=gender, dob=dob):
             n_created += 1
         else:
-            if update_student(check_name=False,student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob):
+            if update_student(check_name=False,student_id=student_id, school_id=school_id, first_name=first_name, surname=surname, gender=gender, dob=dob):
                 n_updated += 1
             else:
                 n_not_created_or_updated += 1
