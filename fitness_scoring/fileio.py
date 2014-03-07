@@ -17,6 +17,7 @@ def save_file(f):
 def delete_file(file_name):
     pass
 
+
 def add_students_from_file(file_path_on_server, school_id):
     file_handle = open(file_path_on_server, 'rb')
 
@@ -27,17 +28,17 @@ def add_students_from_file(file_path_on_server, school_id):
     students_list_reader = csv.DictReader(file_handle, dialect=dialect)
     # check headings are correct else throw exception
 
-    nCreated = 0
-    nUpdated = 0
-    nNotCreatedOrUpdated = 0
+    n_created = 0
+    n_updated = 0
+    n_not_created_or_updated = 0
     for line in students_list_reader:
         (student_id, firstname, surname, gender, dob) = (line['student_id'], line['firstname'], line['surname'], line['gender'], line['dob'])
-        if(create_student(check_name=False, student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)):
-            nCreated = nCreated + 1
+        if create_student(check_name=False, student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob):
+            n_created += 1
         else:
-            if(update_student(check_name=False,student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob)):
-               nUpdated = nUpdated + 1
+            if update_student(check_name=False,student_id=student_id, school_id=school_id, firstname=firstname, surname=surname, gender=gender, dob=dob):
+                n_updated += 1
             else:
-                nNotCreatedOrUpdated = nNotCreatedOrUpdated + 1
+                n_not_created_or_updated += 1
 
-    return nCreated,nUpdated,nNotCreatedOrUpdated
+    return n_created, n_updated, n_not_created_or_updated
