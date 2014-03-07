@@ -1,6 +1,7 @@
 import csv
 import tempfile
 from fitness_scoring.models import create_student, update_student
+import os
 
 destination_directory = 'C:\\fitness_scoring_file_uploads\\'
 
@@ -15,7 +16,7 @@ def save_file(f):
     return destination_file.name
 
 def delete_file(file_name):
-    pass
+    os.remove(file_name)
 
 
 def add_students_from_file(file_path_on_server, school_id):

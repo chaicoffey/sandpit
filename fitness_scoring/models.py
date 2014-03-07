@@ -1,4 +1,5 @@
 from django.db import models
+import datetime
 
 # Create your models here.
 #delete me...what is this crappy comment?
@@ -83,14 +84,14 @@ def create_student(check_name, student_id, school_id, first_name, surname, gende
 def update_student(check_name, student_id, school_id, first_name, surname, gender, dob):
 
     if check_name:
-        student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id, first_name=first_name, surname=surname)) > 0)
+        student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id, first_name=first_name, surname=surname)) == 1)
     else:
         student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 1)
 
     student_updated = student_exists
     if student_exists:
         student = Student.objects.get(school_id=school_id, student_id=student_id)
-        student_updated = not (student.first_name == first_name and student.surname == surname and student.gender == gender and student.dob == dob)
+        student_updated = not ((student.first_name == first_name) and (student.surname == surname) and (student.gender == gender) and (student.dob == datetime.datetime.strptime(dob, "%Y-%m-%d").date()))
         if student_updated:
             student.first_name = first_name
             student.surname = surname
