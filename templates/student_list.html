@@ -12,16 +12,16 @@
             </ul>
         </div>
     </div>
-    <div id="table-wrapper">
+    <!--div id="table-wrapper"    This wrapper probably not required following use of dataTables-->
         <div class="table-responsive">
-        <table class="table table-hover">
+        <table class="table table-hover" id="student_list">
         <thead><tr><th>Student ID</th><th>Given Name</th><th>Family Name</th></tr></thead>
             {% for student in student_list %}
                 <tr><td>{{ student.student_id }}</td><td>{{ student.first_name }}</td><td>{{ student.surname }}</td></tr>
             {% endfor %}
         </table>
         </div>
-    </div>
+    <!--/div-->
 </div>
 
 <!-- Modal -->
