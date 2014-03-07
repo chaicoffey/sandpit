@@ -1,5 +1,7 @@
 from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
+from django.contrib import messages
+from django.forms.forms import NON_FIELD_ERRORS
 from fitness_scoring.models import Teacher, Administrator, SuperUser, Student, User, School, get_school_name_max_length
 from fitness_scoring.models import create_student
 from fitness_scoring.forms import AddStudentForm, AddStudentsForm
@@ -10,7 +12,6 @@ from fileio import save_file, delete_file, add_students_from_file
 def logout_user(request):
     request.session.flush()
     return redirect('fitness_scoring.views.login_user')
-
 
 def login_user(request):
     username = password = ''
@@ -112,6 +113,8 @@ def administrator(request):
                         return redirect('/administrator/')  # Redirect after POST
                     else:
                         add_student_modal_visibility = 'show'
+                        add_student_form.full_clean()
+                        add_student_form._errors[NON_FIELD_ERRORS] = add_student_form.error_class(['Student id already exists'])
                 else:
                     add_student_modal_visibility = 'show'
             elif request.POST.get('SubmitIdentifier') == 'AddStudents':
@@ -122,7 +125,11 @@ def administrator(request):
                     file_path_on_server = save_file(add_students_file)
                     (n_created, n_updated, n_not_created_or_updated) = add_students_from_file(file_path_on_server, school_id)
                     delete_file(file_path_on_server)
-                    return redirect('/administrator/')  # Redirect after POST
+                    messages.success(request, "Students Created From Data: "+str(n_created))
+                    messages.success(request, "Students Updated From Data: "+str(n_updated))
+                    messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated))
+                    add_students_modal_visibility = 'show'
+                    #return redirect('/administrator/')  # Redirect after POST
                 else:
                     add_students_modal_visibility = 'show'
         return render(request, 'administrator.html',
