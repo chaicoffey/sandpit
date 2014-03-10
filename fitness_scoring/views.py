@@ -9,9 +9,11 @@ from fileio import save_file, delete_file, add_students_from_file
 
 # Create your views here.
 
+
 def logout_user(request):
     request.session.flush()
     return redirect('fitness_scoring.views.login_user')
+
 
 def login_user(request):
     username = password = ''
@@ -132,6 +134,9 @@ def administrator(request):
                     #return redirect('/administrator/')  # Redirect after POST
                 else:
                     add_students_modal_visibility = 'show'
+            elif request.POST.get('SubmitIdentifier') == 'DeleteStudent':
+                student_id = request.POST.get('student_id')
+                Student.objects.get(student_id=student_id, school_id=school_id).delete()
         return render(request, 'administrator.html',
                       RequestContext(request,
                                      {'user_type': 'Administrator',
