@@ -113,9 +113,9 @@ def administrator(request):
                     dob = add_student_form.cleaned_data['dob']
                     if(create_student(check_name=False, student_id=student_id, school_id=school_id, first_name=first_name, surname=surname, gender=gender, dob=dob)):
                         add_student_form = AddStudentForm()
-                        messages.success(request, "Student Added: " + student_id + " " + first_name + " " + surname)
+                        messages.success(request, "Student Added: " + first_name + " " + surname + " (" + student_id + ")")
                     else:
-                        messages.success(request, "Error Adding Student (Student ID Already Exists: " + student_id + ")")
+                        messages.success(request, "Error Adding Student: " + first_name + " " + surname + " (" + student_id + ") (Student ID Already Exists)")
                 else:
                     add_student_modal_visibility = 'show'
             elif request.POST.get('SubmitIdentifier') == 'AddStudents':

@@ -34,7 +34,7 @@
                         </a>
                         <!--/button-->
                     </td>
-                    <td><form method="POST" action="/administrator/">
+                    <td><form method="POST" action="/administrator/" onsubmit="return confirm('Are you sure you want to delete student {{ student.first_name }} {{ student.surname }} ({{ student.student_id }})?');">
                         {% csrf_token %}
                         <input type="hidden" name="student_id" value="{{ student.student_id }}"></input>
                         <button type="submit" class="btn btn-default btn-xs" id="SubmitIdentifier" name="SubmitIdentifier" value="DeleteStudent">
