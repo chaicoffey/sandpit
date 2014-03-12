@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.forms.forms import NON_FIELD_ERRORS
 from fitness_scoring.models import Teacher, Administrator, SuperUser, Student, User, School, get_school_name_max_length
 from fitness_scoring.models import create_student
-from fitness_scoring.forms import AddStudentForm, AddStudentsForm
+from fitness_scoring.forms import AddStudentForm, AddStudentsForm, EditStudentForm
 from fileio import save_file, delete_file, add_students_from_file
 
 # Create your views here.
@@ -164,3 +164,23 @@ def superuser(request):
         return redirect('fitness_scoring.views.login_user')
 
 
+def edit_student(request, student_id=None):
+    if request.session.get('user_type', None) == 'Administrator':
+        school_id = School.objects.get(name=request.session.get('school_name', None))
+        try:
+            student = Student.objects.get(school_id=school_id, student_id=student_id)
+        except Student.DoesNotExist:
+            # render administrator page with "invalid student_id"
+            return redirect('fitness_scoring.views.login_user')   # this needs to be changed
+        if request.method == 'POST':
+            sform = EditStudentForm(request.POST, instance=student)
+            sform.save()
+            return redirect('/administrator/')  # Redirect after POST
+        else:
+            sform = EditStudentForm(instance=student)
+            return render(request, 'edit_student.html', {'user_type': 'Administrator',
+                                                         'name': request.session.get('username', None),
+                                                         'school_name': request.session.get('school_name', None),
+                                                         'student_form': sform})
+    else:
+        return redirect('fitness_scoring.views.login_user')

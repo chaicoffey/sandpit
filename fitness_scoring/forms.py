@@ -1,4 +1,5 @@
 from django import forms
+from fitness_scoring.models import Student
 
 
 class AddStudentForm(forms.Form):
@@ -11,3 +12,9 @@ class AddStudentForm(forms.Form):
 
 class AddStudentsForm(forms.Form):
     add_students_file = forms.FileField()
+
+
+class EditStudentForm(forms.ModelForm):
+    class Meta:
+        model = Student
+        exclude = ('school_id',)
