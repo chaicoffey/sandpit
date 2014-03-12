@@ -1,5 +1,13 @@
 {% load staticfiles %}
 <div class="panel panel-default">
+    {% if messages %}
+      <div class="alert alert-danger fade in">
+        <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+         {% for message in messages %}
+            {{ message }} <br>
+        {% endfor %}
+      </div>
+    {% endif %}
     <div class="panel-heading">
         Student List
         <div class="btn-group">
@@ -8,7 +16,7 @@
             </button>
             <ul class="dropdown-menu" role="menu">
                 <li><a href="" data-toggle="modal" data-target="#addStudentModal">Add Student</a></li>
-                <li><a href="" data-toggle="modal" data-target="#addStudentsModal">Add Students from .CSV</a></li>
+                <li><a href="" data-toggle="modal" data-target="#addStudentsModal">Add/Edit Students from .CSV</a></li>
             </ul>
         </div>
     </div>
@@ -68,14 +76,6 @@
             <h4 class="modal-title" id="addStudentsModalLabel">Add Students</h4>
           </div>
           <div class="modal-body">
-              {% if messages %}
-                  <div class="alert alert-danger fade in">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                     {% for message in messages %}
-                        {{ message }} <br>
-                    {% endfor %}
-                  </div>
-              {% endif %}
               {% csrf_token %}
               {{add_students_form.as_p}}
           </div>

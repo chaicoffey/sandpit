@@ -2,8 +2,8 @@ from django.shortcuts import render, render_to_response, redirect
 from django.template import RequestContext
 from django.contrib import messages
 from django.forms.forms import NON_FIELD_ERRORS
-from fitness_scoring.models import Teacher, Administrator, SuperUser, Student, User, School, get_school_name_max_length
-from fitness_scoring.models import create_student
+from fitness_scoring.models import Teacher, Administrator, SuperUser, Student, User, School, StudentClassEnrolment
+from fitness_scoring.models import create_student, get_school_name_max_length
 from fitness_scoring.forms import AddStudentForm, AddStudentsForm
 from fileio import save_file, delete_file, add_students_from_file
 
@@ -112,11 +112,10 @@ def administrator(request):
                     gender = add_student_form.cleaned_data['gender']
                     dob = add_student_form.cleaned_data['dob']
                     if(create_student(check_name=False, student_id=student_id, school_id=school_id, first_name=first_name, surname=surname, gender=gender, dob=dob)):
-                        return redirect('/administrator/')  # Redirect after POST
+                        add_student_form = AddStudentForm()
+                        messages.success(request, "Student Added: " + student_id + " " + first_name + " " + surname)
                     else:
-                        add_student_modal_visibility = 'show'
-                        add_student_form.full_clean()
-                        add_student_form._errors[NON_FIELD_ERRORS] = add_student_form.error_class(['Student id already exists'])
+                        messages.success(request, "Error Adding Student (Student ID Already Exists: " + student_id + ")")
                 else:
                     add_student_modal_visibility = 'show'
             elif request.POST.get('SubmitIdentifier') == 'AddStudents':
@@ -127,16 +126,20 @@ def administrator(request):
                     file_path_on_server = save_file(add_students_file)
                     (n_created, n_updated, n_not_created_or_updated) = add_students_from_file(file_path_on_server, school_id)
                     delete_file(file_path_on_server)
-                    messages.success(request, "Students Created From Data: "+str(n_created))
-                    messages.success(request, "Students Updated From Data: "+str(n_updated))
+                    messages.success(request, "Summary of changes made from .CSV: ")
+                    messages.success(request, "Students Created: "+str(n_created))
+                    messages.success(request, "Students Updated: "+str(n_updated))
                     messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated))
-                    add_students_modal_visibility = 'show'
-                    #return redirect('/administrator/')  # Redirect after POST
                 else:
                     add_students_modal_visibility = 'show'
             elif request.POST.get('SubmitIdentifier') == 'DeleteStudent':
                 student_id = request.POST.get('student_id')
-                Student.objects.get(student_id=student_id, school_id=school_id).delete()
+                student_to_delete = Student.objects.get(student_id=student_id, school_id=school_id)
+                if len(StudentClassEnrolment.objects.filter(student_id=student_to_delete)) == 0:
+                    student_to_delete.delete()
+                    messages.success(request, "Student Deleted: " + student_id)
+                else:
+                    messages.success(request, "Could Not Delete Student: " + student_id + " (Student Enrolled In Classes)")
         return render(request, 'administrator.html',
                       RequestContext(request,
                                      {'user_type': 'Administrator',
