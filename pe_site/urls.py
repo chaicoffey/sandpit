@@ -14,6 +14,5 @@ urlpatterns = patterns('',
     url(r'^logout/', 'fitness_scoring.views.logout_user'),
     url(r'^teacher/', 'fitness_scoring.views.teacher'),
     url(r'^administrator/$', 'fitness_scoring.views.administrator'),
-    url(r'^administrator/student/(?P<student_id>[^/]+)', 'fitness_scoring.views.edit_student'),
     url(r'^superuser/', 'fitness_scoring.views.superuser'),
 )

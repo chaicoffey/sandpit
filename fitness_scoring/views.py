@@ -96,11 +96,14 @@ def teacher(request):
 
 def administrator(request):
     if request.session.get('user_type', None) == 'Administrator':
+        school_id = School.objects.get(name=request.session.get('school_name', None))
+        edit_student_id_old = ''
         add_student_form = AddStudentForm()
         add_students_form = AddStudentsForm()
-        school_id = School.objects.get(name=request.session.get('school_name', None))
+        edit_student_form = EditStudentForm()
         add_student_modal_visibility = 'hide'
         add_students_modal_visibility = 'hide'
+        edit_student_modal_visibility = 'hide'
         if request.method == 'POST':
             if request.POST.get('SubmitIdentifier') == 'AddStudent':
                 # If the form has been submitted
@@ -140,16 +143,37 @@ def administrator(request):
                     messages.success(request, "Student Deleted: " + student_id)
                 else:
                     messages.success(request, "Could Not Delete Student: " + student_id + " (Student Enrolled In Classes)")
+            elif request.POST.get('SubmitIdentifier') == 'EditStudent':
+                student_id = request.POST.get('student_id')
+                student = Student.objects.get(school_id=school_id, student_id=student_id)
+                edit_student_id_old = student_id
+                edit_student_form = EditStudentForm(instance=student)
+                edit_student_modal_visibility = 'show'
+            elif request.POST.get('SubmitIdentifier') == 'SaveStudent':
+                edit_student_form = EditStudentForm(request.POST)
+                if edit_student_form.is_valid():
+                    edit_student_id_old = request.POST.get('edit_student_id_old')
+                    student = Student.objects.get(school_id=school_id, student_id=edit_student_id_old)
+                    first_name_old = student.first_name
+                    surname_old = student.surname
+                    edit_student_form = EditStudentForm(request.POST, instance=student)
+                    edit_student_form.save()
+                    messages.success(request, "Student Edited: " + first_name_old + " " + surname_old + " (" + edit_student_id_old + ")")
+                else:
+                    edit_student_modal_visibility = 'show'
         return render(request, 'administrator.html',
                       RequestContext(request,
                                      {'user_type': 'Administrator',
                                       'name': request.session.get('username', None),
                                       'school_name': request.session.get('school_name', None),
                                       'student_list': Student.objects.filter(school_id=school_id),
+                                      'edit_student_id_old': edit_student_id_old,
                                       'add_student_form': add_student_form,
                                       'add_students_form': add_students_form,
+                                      'edit_student_form': edit_student_form,
                                       'add_student_modal_hide_or_show': add_student_modal_visibility,
-                                      'add_students_modal_hide_or_show': add_students_modal_visibility}))
+                                      'add_students_modal_hide_or_show': add_students_modal_visibility,
+                                      'edit_student_modal_hide_or_show': edit_student_modal_visibility}))
     else:
         return redirect('fitness_scoring.views.login_user')
 
@@ -163,28 +187,5 @@ def superuser(request):
                                       'name': request.session.get('username', None),
                                       'school_list': [(school.get_school_name_padded(school_name_max_length), school.get_subscription_paid_text()) for school in School.objects.all()]
                                       }))
-    else:
-        return redirect('fitness_scoring.views.login_user')
-
-
-def edit_student(request, student_id=None):
-    if request.session.get('user_type', None) == 'Administrator':
-        school_id = School.objects.get(name=request.session.get('school_name', None))
-        try:
-            student = Student.objects.get(school_id=school_id, student_id=student_id)
-        except Student.DoesNotExist:
-            messages.success(request, "Invalid Student_ID")
-            return redirect('/administrator/')
-        if request.method == 'POST':
-            sform = EditStudentForm(request.POST, instance=student)
-            sform.save()
-            messages.success(request, "Student successfully edited.")
-            return redirect('/administrator/')  # Redirect after POST
-        else:
-            sform = EditStudentForm(instance=student)
-            return render(request, 'edit_student.html', {'user_type': 'Administrator',
-                                                         'name': request.session.get('username', None),
-                                                         'school_name': request.session.get('school_name', None),
-                                                         'student_form': sform})
     else:
         return redirect('fitness_scoring.views.login_user')
