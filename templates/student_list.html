@@ -28,7 +28,7 @@
                 <tr><td>{{ student.student_id }}</td>
                     <td>{{ student.first_name }}</td>
                     <td>{{ student.surname }}</td>
-                    <td><form method="POST" action="/administrator/">
+                    <td><form method="POST" action="{{ submit_to_page }}">
                         {% csrf_token %}
                         <input type="hidden" name="student_pk" value="{{ student.pk }}"/>
                         <button type="submit" class="btn btn-default btn-xs" id="SubmitIdentifier" name="SubmitIdentifier" value="EditStudent">
@@ -36,7 +36,7 @@
                         </button>
                         </form>
                     </td>
-                    <td><form method="POST" action="/administrator/" onsubmit="return confirm('Are you sure you want to delete student {{ student.first_name }} {{ student.surname }} ({{ student.student_id }})?');">
+                    <td><form method="POST" action="{{ submit_to_page }}" onsubmit="return confirm('Are you sure you want to delete student {{ student.first_name }} {{ student.surname }} ({{ student.student_id }})?');">
                         {% csrf_token %}
                         <input type="hidden" name="student_pk" value="{{ student.pk }}"/>
                         <button type="submit" class="btn btn-default btn-xs" id="SubmitIdentifier" name="SubmitIdentifier" value="DeleteStudent">
@@ -54,7 +54,7 @@
 <div class="modal fade" id="addStudentModal" tabindex="-1" role="dialog" aria-labelledby="addStudentModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="POST" enctype="multipart/form-data" action="/administrator/" class="form-horizontal">
+      <form method="POST" enctype="multipart/form-data" action="{{ submit_to_page }}" class="form-horizontal">
           <div class="modal-header">
             <h4 class="modal-title" id="addStudentModalLabel">Add Student</h4>
           </div>
@@ -75,7 +75,7 @@
 <div class="modal fade" id="addStudentsModal" tabindex="-1" role="dialog" aria-labelledby="addStudentsModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="POST" enctype="multipart/form-data" action="/administrator/">
+      <form method="POST" enctype="multipart/form-data" action="{{ submit_to_page }}">
           <div class="modal-header">
             <h4 class="modal-title" id="addStudentsModalLabel">Add Students</h4>
           </div>
@@ -95,7 +95,7 @@
 <div class="modal fade" id="editStudentModal" tabindex="-1" role="dialog" aria-labelledby="editStudentModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="POST" enctype="multipart/form-data" action="/administrator/" class="form-horizontal">
+      <form method="POST" enctype="multipart/form-data" action="{{ submit_to_page }}" class="form-horizontal">
           <div class="modal-header">
             <h4 class="modal-title" id="editStudentModalLabel">Edit Student</h4>
           </div>

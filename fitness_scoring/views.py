@@ -139,7 +139,7 @@ def administrator(request):
                 student_to_delete = Student.objects.get(pk=student_pk)
                 if len(StudentClassEnrolment.objects.filter(student_id=student_to_delete)) == 0:
                     student_to_delete.delete()
-                    messages.success(request, "Student Added: " + student_to_delete.first_name + " " + student_to_delete.surname + " (" + student_to_delete.student_id + ")")
+                    messages.success(request, "Student Deleted: " + student_to_delete.first_name + " " + student_to_delete.surname + " (" + student_to_delete.student_id + ")")
                 else:
                     messages.success(request, "Error Deleting Student: " + student_to_delete.first_name + " " + student_to_delete.surname + " (" + student_to_delete.student_id + ") (Student Enrolled In Classes)")
             elif request.POST.get('SubmitIdentifier') == 'EditStudent':
@@ -168,6 +168,7 @@ def administrator(request):
                                      {'user_type': 'Administrator',
                                       'name': request.session.get('username', None),
                                       'school_name': request.session.get('school_name', None),
+                                      'submit_to_page' : '/administrator/',
                                       'student_list': Student.objects.filter(school_id=school_id),
                                       'add_student_form': add_student_form,
                                       'add_students_form': add_students_form,

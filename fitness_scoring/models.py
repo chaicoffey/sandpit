@@ -21,8 +21,10 @@ class School(models.Model):
         else:
             return 'Unpaid'
 
+
 def get_school_name_max_length():
     return len(max([school.name for school in School.objects.all()], key=len))
+
 
 class User(models.Model):
     username = models.CharField(max_length=100, primary_key=True)
