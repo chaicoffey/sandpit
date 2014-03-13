@@ -96,73 +96,11 @@ def teacher(request):
 
 def administrator(request):
     if request.session.get('user_type', None) == 'Administrator':
+
         school_id = School.objects.get(name=request.session.get('school_name', None))
-        add_student_form = AddStudentForm()
-        add_students_form = AddStudentsForm()
-        edit_student_form = EditStudentForm()
-        add_student_modal_visibility = 'hide'
-        add_students_modal_visibility = 'hide'
-        edit_student_modal_visibility = 'hide'
-        if request.method == 'POST':
-            if request.POST.get('SubmitIdentifier') == 'AddStudent':
-                # If the form has been submitted
-                add_student_form = AddStudentForm(request.POST)  # A form bound to the POST data
-                if add_student_form.is_valid():
-                    student_id = add_student_form.cleaned_data['student_id']
-                    first_name = add_student_form.cleaned_data['first_name']
-                    surname = add_student_form.cleaned_data['surname']
-                    gender = add_student_form.cleaned_data['gender']
-                    dob = add_student_form.cleaned_data['dob']
-                    if(create_student(check_name=False, student_id=student_id, school_id=school_id, first_name=first_name, surname=surname, gender=gender, dob=dob)):
-                        add_student_form = AddStudentForm()
-                        messages.success(request, "Student Added: " + first_name + " " + surname + " (" + student_id + ")")
-                    else:
-                        messages.success(request, "Error Adding Student: " + first_name + " " + surname + " (" + student_id + ") (Student ID Already Exists)")
-                else:
-                    add_student_modal_visibility = 'show'
-            elif request.POST.get('SubmitIdentifier') == 'AddStudents':
-                # If the form has been submitted
-                add_students_form = AddStudentsForm(request.POST, request.FILES)  # A form bound to the POST data
-                if add_students_form.is_valid():
-                    add_students_file = request.FILES['add_students_file']
-                    file_path_on_server = save_file(add_students_file)
-                    (n_created, n_updated, n_not_created_or_updated) = add_students_from_file(file_path_on_server, school_id)
-                    delete_file(file_path_on_server)
-                    messages.success(request, "Summary of changes made from .CSV: ")
-                    messages.success(request, "Students Created: "+str(n_created))
-                    messages.success(request, "Students Updated: "+str(n_updated))
-                    messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated))
-                else:
-                    add_students_modal_visibility = 'show'
-            elif request.POST.get('SubmitIdentifier') == 'DeleteStudent':
-                student_pk = request.POST.get('student_pk')
-                student_to_delete = Student.objects.get(pk=student_pk)
-                if len(StudentClassEnrolment.objects.filter(student_id=student_to_delete)) == 0:
-                    student_to_delete.delete()
-                    messages.success(request, "Student Deleted: " + student_to_delete.first_name + " " + student_to_delete.surname + " (" + student_to_delete.student_id + ")")
-                else:
-                    messages.success(request, "Error Deleting Student: " + student_to_delete.first_name + " " + student_to_delete.surname + " (" + student_to_delete.student_id + ") (Student Enrolled In Classes)")
-            elif request.POST.get('SubmitIdentifier') == 'EditStudent':
-                student_pk = request.POST.get('student_pk')
-                student = Student.objects.get(pk=student_pk)
-                request.session['edit_student_pk'] = student_pk
-                edit_student_form = EditStudentForm(instance=student)
-                edit_student_modal_visibility = 'show'
-            elif request.POST.get('SubmitIdentifier') == 'SaveStudent':
-                edit_student_form = EditStudentForm(request.POST)
-                if edit_student_form.is_valid():
-                    student_pk = request.session.get('edit_student_pk')
-                    student = Student.objects.get(pk=student_pk)
-                    edit_student_form = EditStudentForm(request.POST, instance=student)
-                    student_id_old = student.student_id
-                    student_id_new = request.POST.get('student_id')
-                    if (student_id_old == student_id_new) or (len(Student.objects.filter(school_id=school_id, student_id=student_id_new)) == 0):
-                        edit_student_form.save()
-                        messages.success(request, "Student Edited: " + student.first_name + " " + student.surname + " (" + student_id_old + ")")
-                    else:
-                        messages.success(request, "Error Editing Student: " + student.first_name + " " + student.surname + " (" + student_id_old + ") (Student ID Already Exists: " + student_id_new + ")")
-                else:
-                    edit_student_modal_visibility = 'show'
+
+        (add_student_form, add_students_form, edit_student_form, add_student_modal_visibility, add_students_modal_visibility, edit_student_modal_visibility) = student_list(request, school_id)
+
         return render(request, 'administrator.html',
                       RequestContext(request,
                                      {'user_type': 'Administrator',
@@ -176,6 +114,7 @@ def administrator(request):
                                       'add_student_modal_hide_or_show': add_student_modal_visibility,
                                       'add_students_modal_hide_or_show': add_students_modal_visibility,
                                       'edit_student_modal_hide_or_show': edit_student_modal_visibility}))
+
     else:
         return redirect('fitness_scoring.views.login_user')
 
@@ -191,3 +130,75 @@ def superuser(request):
                                       }))
     else:
         return redirect('fitness_scoring.views.login_user')
+
+
+def student_list(request, school_id):
+
+    add_student_form = AddStudentForm()
+    add_students_form = AddStudentsForm()
+    edit_student_form = EditStudentForm()
+    add_student_modal_visibility = 'hide'
+    add_students_modal_visibility = 'hide'
+    edit_student_modal_visibility = 'hide'
+    if request.method == 'POST':
+        if request.POST.get('SubmitIdentifier') == 'AddStudent':
+            # If the form has been submitted
+            add_student_form = AddStudentForm(request.POST)  # A form bound to the POST data
+            if add_student_form.is_valid():
+                student_id = add_student_form.cleaned_data['student_id']
+                first_name = add_student_form.cleaned_data['first_name']
+                surname = add_student_form.cleaned_data['surname']
+                gender = add_student_form.cleaned_data['gender']
+                dob = add_student_form.cleaned_data['dob']
+                if(create_student(check_name=False, student_id=student_id, school_id=school_id, first_name=first_name, surname=surname, gender=gender, dob=dob)):
+                    add_student_form = AddStudentForm()
+                    messages.success(request, "Student Added: " + first_name + " " + surname + " (" + student_id + ")")
+                else:
+                    messages.success(request, "Error Adding Student: " + first_name + " " + surname + " (" + student_id + ") (Student ID Already Exists)")
+            else:
+                add_student_modal_visibility = 'show'
+        elif request.POST.get('SubmitIdentifier') == 'AddStudents':
+            # If the form has been submitted
+            add_students_form = AddStudentsForm(request.POST, request.FILES)  # A form bound to the POST data
+            if add_students_form.is_valid():
+                add_students_file = request.FILES['add_students_file']
+                file_path_on_server = save_file(add_students_file)
+                (n_created, n_updated, n_not_created_or_updated) = add_students_from_file(file_path_on_server, school_id)
+                delete_file(file_path_on_server)
+                messages.success(request, "Summary of changes made from .CSV: ")
+                messages.success(request, "Students Created: "+str(n_created))
+                messages.success(request, "Students Updated: "+str(n_updated))
+                messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated))
+            else:
+                add_students_modal_visibility = 'show'
+        elif request.POST.get('SubmitIdentifier') == 'DeleteStudent':
+            student_pk = request.POST.get('student_pk')
+            student_to_delete = Student.objects.get(pk=student_pk)
+            if len(StudentClassEnrolment.objects.filter(student_id=student_to_delete)) == 0:
+                student_to_delete.delete()
+                messages.success(request, "Student Deleted: " + student_to_delete.first_name + " " + student_to_delete.surname + " (" + student_to_delete.student_id + ")")
+            else:
+                messages.success(request, "Error Deleting Student: " + student_to_delete.first_name + " " + student_to_delete.surname + " (" + student_to_delete.student_id + ") (Student Enrolled In Classes)")
+        elif request.POST.get('SubmitIdentifier') == 'EditStudent':
+            student_pk = request.POST.get('student_pk')
+            student = Student.objects.get(pk=student_pk)
+            request.session['edit_student_pk'] = student_pk
+            edit_student_form = EditStudentForm(instance=student)
+            edit_student_modal_visibility = 'show'
+        elif request.POST.get('SubmitIdentifier') == 'SaveStudent':
+            edit_student_form = EditStudentForm(request.POST)
+            if edit_student_form.is_valid():
+                student_pk = request.session.get('edit_student_pk')
+                student = Student.objects.get(pk=student_pk)
+                edit_student_form = EditStudentForm(request.POST, instance=student)
+                student_id_old = student.student_id
+                student_id_new = request.POST.get('student_id')
+                if (student_id_old == student_id_new) or (len(Student.objects.filter(school_id=school_id, student_id=student_id_new)) == 0):
+                    edit_student_form.save()
+                    messages.success(request, "Student Edited: " + student.first_name + " " + student.surname + " (" + student_id_old + ")")
+                else:
+                    messages.success(request, "Error Editing Student: " + student.first_name + " " + student.surname + " (" + student_id_old + ") (Student ID Already Exists: " + student_id_new + ")")
+            else:
+                edit_student_modal_visibility = 'show'
+
+    return add_student_form, add_students_form, edit_student_form, add_student_modal_visibility, add_students_modal_visibility, edit_student_modal_visibility
