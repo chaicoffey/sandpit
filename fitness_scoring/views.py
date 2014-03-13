@@ -133,6 +133,7 @@ def superuser(request):
 
 
 def student_list(request, school_id):
+    #This method goes with student_list.html (remember to include student_list_javascript.html in the appropriate place
 
     add_student_form = AddStudentForm()
     add_students_form = AddStudentsForm()
