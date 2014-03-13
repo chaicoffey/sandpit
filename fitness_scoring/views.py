@@ -97,7 +97,6 @@ def teacher(request):
 def administrator(request):
     if request.session.get('user_type', None) == 'Administrator':
         school_id = School.objects.get(name=request.session.get('school_name', None))
-        edit_student_id_old = ''
         add_student_form = AddStudentForm()
         add_students_form = AddStudentsForm()
         edit_student_form = EditStudentForm()
@@ -136,29 +135,32 @@ def administrator(request):
                 else:
                     add_students_modal_visibility = 'show'
             elif request.POST.get('SubmitIdentifier') == 'DeleteStudent':
-                student_id = request.POST.get('student_id')
-                student_to_delete = Student.objects.get(student_id=student_id, school_id=school_id)
+                student_pk = request.POST.get('student_pk')
+                student_to_delete = Student.objects.get(pk=student_pk)
                 if len(StudentClassEnrolment.objects.filter(student_id=student_to_delete)) == 0:
                     student_to_delete.delete()
-                    messages.success(request, "Student Deleted: " + student_id)
+                    messages.success(request, "Student Added: " + student_to_delete.first_name + " " + student_to_delete.surname + " (" + student_to_delete.student_id + ")")
                 else:
-                    messages.success(request, "Could Not Delete Student: " + student_id + " (Student Enrolled In Classes)")
+                    messages.success(request, "Error Deleting Student: " + student_to_delete.first_name + " " + student_to_delete.surname + " (" + student_to_delete.student_id + ") (Student Enrolled In Classes)")
             elif request.POST.get('SubmitIdentifier') == 'EditStudent':
-                student_id = request.POST.get('student_id')
-                student = Student.objects.get(school_id=school_id, student_id=student_id)
-                edit_student_id_old = student_id
+                student_pk = request.POST.get('student_pk')
+                student = Student.objects.get(pk=student_pk)
+                request.session['edit_student_pk'] = student_pk
                 edit_student_form = EditStudentForm(instance=student)
                 edit_student_modal_visibility = 'show'
             elif request.POST.get('SubmitIdentifier') == 'SaveStudent':
                 edit_student_form = EditStudentForm(request.POST)
                 if edit_student_form.is_valid():
-                    edit_student_id_old = request.POST.get('edit_student_id_old')
-                    student = Student.objects.get(school_id=school_id, student_id=edit_student_id_old)
-                    first_name_old = student.first_name
-                    surname_old = student.surname
+                    student_pk = request.session.get('edit_student_pk')
+                    student = Student.objects.get(pk=student_pk)
                     edit_student_form = EditStudentForm(request.POST, instance=student)
-                    edit_student_form.save()
-                    messages.success(request, "Student Edited: " + first_name_old + " " + surname_old + " (" + edit_student_id_old + ")")
+                    student_id_old = student.student_id
+                    student_id_new = request.POST.get('student_id')
+                    if (student_id_old == student_id_new) or (len(Student.objects.filter(school_id=school_id, student_id=student_id_new)) == 0):
+                        edit_student_form.save()
+                        messages.success(request, "Student Edited: " + student.first_name + " " + student.surname + " (" + student_id_old + ")")
+                    else:
+                        messages.success(request, "Error Editing Student: " + student.first_name + " " + student.surname + " (" + student_id_old + ") (Student ID Already Exists: " + student_id_new + ")")
                 else:
                     edit_student_modal_visibility = 'show'
         return render(request, 'administrator.html',
@@ -167,7 +169,6 @@ def administrator(request):
                                       'name': request.session.get('username', None),
                                       'school_name': request.session.get('school_name', None),
                                       'student_list': Student.objects.filter(school_id=school_id),
-                                      'edit_student_id_old': edit_student_id_old,
                                       'add_student_form': add_student_form,
                                       'add_students_form': add_students_form,
                                       'edit_student_form': edit_student_form,
