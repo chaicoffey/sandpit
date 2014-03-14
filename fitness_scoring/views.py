@@ -163,9 +163,9 @@ def student_list(request, school_id):
                 dob = add_student_form.cleaned_data['dob']
                 if create_student(check_name=False, student_id=student_id, school_id=school_id, first_name=first_name, surname=surname, gender=gender, dob=dob):
                     add_student_form = AddStudentForm()
-                    messages.success(request, "Student Added: " + first_name + " " + surname + " (" + student_id + ")")
+                    messages.success(request, "Student Added: " + first_name + " " + surname + " (" + student_id + ")", extra_tags="student_list")
                 else:
-                    messages.success(request, "Error Adding Student: " + first_name + " " + surname + " (" + student_id + ") (Student ID Already Exists)")
+                    messages.success(request, "Error Adding Student: " + first_name + " " + surname + " (" + student_id + ") (Student ID Already Exists)", extra_tags="student_list")
             else:
                 add_student_modal_visibility = 'show'
         elif request.POST.get('SubmitIdentifier') == 'AddStudents':
@@ -177,10 +177,10 @@ def student_list(request, school_id):
                 file_path_on_server = save_file(add_students_file)
                 (n_created, n_updated, n_not_created_or_updated) = add_students_from_file(file_path_on_server, school_id)
                 delete_file(file_path_on_server)
-                messages.success(request, "Summary of changes made from .CSV: ")
-                messages.success(request, "Students Created: "+str(n_created))
-                messages.success(request, "Students Updated: "+str(n_updated))
-                messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated))
+                messages.success(request, "Summary of changes made from .CSV: ", extra_tags="student_list")
+                messages.success(request, "Students Created: "+str(n_created), extra_tags="student_list")
+                messages.success(request, "Students Updated: "+str(n_updated), extra_tags="student_list")
+                messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated), extra_tags="student_list")
             else:
                 add_students_modal_visibility = 'show'
         elif request.POST.get('SubmitIdentifier') == 'DeleteStudent':
@@ -192,9 +192,9 @@ def student_list(request, school_id):
                 surname = student_to_delete.surname
                 student_id = student_to_delete.student_id
                 student_to_delete.delete()
-                messages.success(request, "Student Deleted: " + first_name + " " + surname + " (" + student_id + ")")
+                messages.success(request, "Student Deleted: " + first_name + " " + surname + " (" + student_id + ")", extra_tags="student_list")
             else:
-                messages.success(request, "Error Deleting Student: " + student_to_delete.first_name + " " + student_to_delete.surname + " (" + student_to_delete.student_id + ") (Student Enrolled In Classes)")
+                messages.success(request, "Error Deleting Student: " + student_to_delete.first_name + " " + student_to_delete.surname + " (" + student_to_delete.student_id + ") (Student Enrolled In Classes)", extra_tags="student_list")
         elif request.POST.get('SubmitIdentifier') == 'EditStudent':
             student_list_posted = True
             student_pk = request.POST.get('student_pk')
@@ -213,9 +213,9 @@ def student_list(request, school_id):
                 student_id_new = request.POST.get('student_id')
                 if (student_id_old == student_id_new) or (len(Student.objects.filter(school_id=school_id, student_id=student_id_new)) == 0):
                     edit_student_form.save()
-                    messages.success(request, "Student Edited: " + student.first_name + " " + student.surname + " (" + student_id_old + ")")
+                    messages.success(request, "Student Edited: " + student.first_name + " " + student.surname + " (" + student_id_old + ")", extra_tags="student_list")
                 else:
-                    messages.success(request, "Error Editing Student: " + student.first_name + " " + student.surname + " (" + student_id_old + ") (Student ID Already Exists: " + student_id_new + ")")
+                    messages.success(request, "Error Editing Student: " + student.first_name + " " + student.surname + " (" + student_id_old + ") (Student ID Already Exists: " + student_id_new + ")", extra_tags="student_list")
             else:
                 edit_student_modal_visibility = 'show'
 
@@ -244,9 +244,9 @@ def teacher_list(request, school_id):
                 password = add_teacher_form.cleaned_data['password']
                 if create_teacher(check_name=False, first_name=first_name, surname=surname, school_id=school_id, username=username, password=password):
                     add_teacher_form = AddTeacherForm()
-                    messages.success(request, "Teacher Added: " + first_name + " " + surname + " (" + username + ")")
+                    messages.success(request, "Teacher Added: " + first_name + " " + surname + " (" + username + ")", extra_tags="teacher_list")
                 else:
-                    messages.success(request, "Error Adding Teacher: " + first_name + " " + surname + " (" + username + ") (Username Already Exists)")
+                    messages.success(request, "Error Adding Teacher: " + first_name + " " + surname + " (" + username + ") (Username Already Exists)", extra_tags="teacher_list")
             else:
                 add_teacher_modal_visibility = 'show'
         elif request.POST.get('SubmitIdentifier') == 'AddTeachers':
@@ -258,10 +258,10 @@ def teacher_list(request, school_id):
                 file_path_on_server = save_file(add_teachers_file)
                 (n_created, n_updated, n_not_created_or_updated) = add_teachers_from_file(file_path_on_server, school_id)
                 delete_file(file_path_on_server)
-                messages.success(request, "Summary of changes made from .CSV: ")
-                messages.success(request, "Teachers Created: "+str(n_created))
-                messages.success(request, "Teachers Updated: "+str(n_updated))
-                messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated))
+                messages.success(request, "Summary of changes made from .CSV: ", extra_tags="teacher_list")
+                messages.success(request, "Teachers Created: "+str(n_created), extra_tags="teacher_list")
+                messages.success(request, "Teachers Updated: "+str(n_updated), extra_tags="teacher_list")
+                messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated), extra_tags="teacher_list")
             else:
                 add_teachers_modal_visibility = 'show'
         elif request.POST.get('SubmitIdentifier') == 'DeleteTeacher':
@@ -274,9 +274,9 @@ def teacher_list(request, school_id):
                 username = teacher_to_delete.user.username
                 teacher_to_delete.user.delete()
                 teacher_to_delete.delete()
-                messages.success(request, "Teacher Deleted: " + first_name + " " + surname + " (" + username + ")")
+                messages.success(request, "Teacher Deleted: " + first_name + " " + surname + " (" + username + ")", extra_tags="teacher_list")
             else:
-                messages.success(request, "Error Deleting Teacher: " + teacher_to_delete.first_name + " " + teacher_to_delete.surname + " (" + teacher_to_delete.user.username + ") (Teacher Has Classes)")
+                messages.success(request, "Error Deleting Teacher: " + teacher_to_delete.first_name + " " + teacher_to_delete.surname + " (" + teacher_to_delete.user.username + ") (Teacher Has Classes)", extra_tags="teacher_list")
         elif request.POST.get('SubmitIdentifier') == 'EditTeacher':
             teacher_list_posted = True
             teacher_pk = request.POST.get('teacher_pk')
@@ -298,9 +298,9 @@ def teacher_list(request, school_id):
                     teacher.user.delete()
                     teacher.user = User.objects.create(username=teacher_username_new, password=edit_teacher_form.cleaned_data['password'])
                     teacher.save()
-                    messages.success(request, "Teacher Edited: " + teacher.first_name + " " + teacher.surname + " (" + teacher_username_old + ")")
+                    messages.success(request, "Teacher Edited: " + teacher.first_name + " " + teacher.surname + " (" + teacher_username_old + ")", extra_tags="teacher_list")
                 else:
-                    messages.success(request, "Error Editing Teacher: " + teacher.first_name + " " + teacher.surname + " (" + teacher_username_old + ") (Username Already Exists: " + teacher_username_new + ")")
+                    messages.success(request, "Error Editing Teacher: " + teacher.first_name + " " + teacher.surname + " (" + teacher_username_old + ") (Username Already Exists: " + teacher_username_new + ")", extra_tags="teacher_list")
             else:
                 edit_teacher_modal_visibility = 'show'
 

@@ -5,7 +5,9 @@
           <div class="alert alert-danger fade in">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
              {% for message in messages %}
-                {{ message }} <br>
+                 {% if "teacher_list" in message.tags %}
+                     {{ message }} <br>
+                 {% endif %}
             {% endfor %}
           </div>
         {% endif %}
