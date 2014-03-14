@@ -98,8 +98,8 @@ def administrator(request):
 
         school_id = School.objects.get(name=request.session.get('school_name', None))
 
-        (add_student_form, add_students_form, edit_student_form, add_student_modal_visibility, add_students_modal_visibility, edit_student_modal_visibility) = student_list(request, school_id)
-        (add_teacher_form, add_teachers_form, edit_teacher_form, add_teacher_modal_visibility, add_teachers_modal_visibility, edit_teacher_modal_visibility) = teacher_list(request, school_id)
+        (teacher_list_posted, add_teacher_form, add_teachers_form, edit_teacher_form, add_teacher_modal_visibility, add_teachers_modal_visibility, edit_teacher_modal_visibility) = teacher_list(request, school_id)
+        (student_list_posted, add_student_form, add_students_form, edit_student_form, add_student_modal_visibility, add_students_modal_visibility, edit_student_modal_visibility) = student_list(request, school_id)
 
         return render(request, 'administrator.html',
                       RequestContext(request,
@@ -118,7 +118,7 @@ def administrator(request):
                                       'add_teacher_form': add_teacher_form,
                                       'add_teachers_form': add_teachers_form,
                                       'edit_teacher_form': edit_teacher_form,
-                                      'student_list_active': True,
+                                      'student_list_active': student_list_posted,
                                       'add_teacher_modal_hide_or_show': add_teacher_modal_visibility,
                                       'add_teachers_modal_hide_or_show': add_teachers_modal_visibility,
                                       'edit_teacher_modal_hide_or_show': edit_teacher_modal_visibility}))
@@ -149,9 +149,11 @@ def student_list(request, school_id):
     add_student_modal_visibility = 'hide'
     add_students_modal_visibility = 'hide'
     edit_student_modal_visibility = 'hide'
+    student_list_posted = False
     if request.method == 'POST':
         if request.POST.get('SubmitIdentifier') == 'AddStudent':
             # If the form has been submitted
+            student_list_posted = True
             add_student_form = AddStudentForm(request.POST)  # A form bound to the POST data
             if add_student_form.is_valid():
                 student_id = add_student_form.cleaned_data['student_id']
@@ -168,6 +170,7 @@ def student_list(request, school_id):
                 add_student_modal_visibility = 'show'
         elif request.POST.get('SubmitIdentifier') == 'AddStudents':
             # If the form has been submitted
+            student_list_posted = True
             add_students_form = AddStudentsForm(request.POST, request.FILES)  # A form bound to the POST data
             if add_students_form.is_valid():
                 add_students_file = request.FILES['add_students_file']
@@ -181,6 +184,7 @@ def student_list(request, school_id):
             else:
                 add_students_modal_visibility = 'show'
         elif request.POST.get('SubmitIdentifier') == 'DeleteStudent':
+            student_list_posted = True
             student_pk = request.POST.get('student_pk')
             student_to_delete = Student.objects.get(pk=student_pk)
             if len(StudentClassEnrolment.objects.filter(student_id=student_to_delete)) == 0:
@@ -192,12 +196,14 @@ def student_list(request, school_id):
             else:
                 messages.success(request, "Error Deleting Student: " + student_to_delete.first_name + " " + student_to_delete.surname + " (" + student_to_delete.student_id + ") (Student Enrolled In Classes)")
         elif request.POST.get('SubmitIdentifier') == 'EditStudent':
+            student_list_posted = True
             student_pk = request.POST.get('student_pk')
             student = Student.objects.get(pk=student_pk)
             request.session['edit_student_pk'] = student_pk
             edit_student_form = EditStudentForm(instance=student)
             edit_student_modal_visibility = 'show'
         elif request.POST.get('SubmitIdentifier') == 'SaveStudent':
+            student_list_posted = True
             edit_student_form = EditStudentForm(request.POST)
             if edit_student_form.is_valid():
                 student_pk = request.session.get('edit_student_pk')
@@ -213,7 +219,7 @@ def student_list(request, school_id):
             else:
                 edit_student_modal_visibility = 'show'
 
-    return add_student_form, add_students_form, edit_student_form, add_student_modal_visibility, add_students_modal_visibility, edit_student_modal_visibility
+    return student_list_posted, add_student_form, add_students_form, edit_student_form, add_student_modal_visibility, add_students_modal_visibility, edit_student_modal_visibility
 
 
 def teacher_list(request, school_id):
@@ -225,9 +231,11 @@ def teacher_list(request, school_id):
     add_teacher_modal_visibility = 'hide'
     add_teachers_modal_visibility = 'hide'
     edit_teacher_modal_visibility = 'hide'
+    teacher_list_posted = False
     if request.method == 'POST':
         if request.POST.get('SubmitIdentifier') == 'AddTeacher':
             # If the form has been submitted
+            teacher_list_posted = True
             add_teacher_form = AddTeacherForm(request.POST)  # A form bound to the POST data
             if add_teacher_form.is_valid():
                 first_name = add_teacher_form.cleaned_data['first_name']
@@ -243,6 +251,7 @@ def teacher_list(request, school_id):
                 add_teacher_modal_visibility = 'show'
         elif request.POST.get('SubmitIdentifier') == 'AddTeachers':
             # If the form has been submitted
+            teacher_list_posted = True
             add_teachers_form = AddTeachersForm(request.POST, request.FILES)  # A form bound to the POST data
             if add_teachers_form.is_valid():
                 add_teachers_file = request.FILES['add_teachers_file']
@@ -256,6 +265,7 @@ def teacher_list(request, school_id):
             else:
                 add_teachers_modal_visibility = 'show'
         elif request.POST.get('SubmitIdentifier') == 'DeleteTeacher':
+            teacher_list_posted = True
             teacher_pk = request.POST.get('teacher_pk')
             teacher_to_delete = Teacher.objects.get(pk=teacher_pk)
             if len(TeacherClassAllocation.objects.filter(teacher_id=teacher_to_delete)) == 0:
@@ -268,12 +278,14 @@ def teacher_list(request, school_id):
             else:
                 messages.success(request, "Error Deleting Teacher: " + teacher_to_delete.first_name + " " + teacher_to_delete.surname + " (" + teacher_to_delete.user.username + ") (Teacher Has Classes)")
         elif request.POST.get('SubmitIdentifier') == 'EditTeacher':
+            teacher_list_posted = True
             teacher_pk = request.POST.get('teacher_pk')
             teacher = Teacher.objects.get(pk=teacher_pk)
             request.session['edit_teacher_pk'] = teacher_pk
             edit_teacher_form = EditTeacherForm(initial={'first_name': teacher.first_name, 'surname': teacher.surname, 'username': teacher.user.username, 'password': teacher.user.password})
             edit_teacher_modal_visibility = 'show'
         elif request.POST.get('SubmitIdentifier') == 'SaveTeacher':
+            teacher_list_posted = True
             edit_teacher_form = EditTeacherForm(request.POST)
             if edit_teacher_form.is_valid():
                 teacher_pk = request.session.get('edit_teacher_pk')
@@ -292,4 +304,4 @@ def teacher_list(request, school_id):
             else:
                 edit_teacher_modal_visibility = 'show'
 
-    return add_teacher_form, add_teachers_form, edit_teacher_form, add_teacher_modal_visibility, add_teachers_modal_visibility, edit_teacher_modal_visibility
+    return teacher_list_posted, add_teacher_form, add_teachers_form, edit_teacher_form, add_teacher_modal_visibility, add_teachers_modal_visibility, edit_teacher_modal_visibility
