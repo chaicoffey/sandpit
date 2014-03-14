@@ -1,0 +1,11 @@
+$(document).ready(function(){
+    // jQuery methods go here...
+    $('#addTeacherModal').modal('{{ add_teacher_modal_hide_or_show }}');
+    $('#addTeachersModal').modal('{{ add_teachers_modal_hide_or_show }}');
+    $('#editTeacherModal').modal('{{ edit_teacher_modal_hide_or_show }}');
+    $('#teacher_list').dataTable( {
+        "aoColumnDefs": [
+            { 'bSortable': false, 'aTargets': [ -2, -1 ] }
+        ]
+    });
+});

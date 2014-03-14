@@ -14,11 +14,12 @@ Administrator
             {% include "student_list.html" %}
         </div>
         <div class="tab-pane {% if not student_list_active %}active{% endif %}" id="teacher_list_tab">
-            <h3>teacher list to be included here.</h3>
+            {% include "teacher_list.html" %}
         </div>
     </div>
 {% endblock %}
 
 {% block javascript_functionality %}
     {% include "javascript_additions/student_list_javascript.html" %}
+    {% include "javascript_additions/teacher_list_javascript.html" %}
 {% endblock %}
