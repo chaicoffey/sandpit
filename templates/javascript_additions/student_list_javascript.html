@@ -3,5 +3,9 @@ $(document).ready(function(){
     $('#addStudentModal').modal('{{ add_student_modal_hide_or_show }}');
     $('#addStudentsModal').modal('{{ add_students_modal_hide_or_show }}');
     $('#editStudentModal').modal('{{ edit_student_modal_hide_or_show }}');
-    $('#student_list').dataTable();
+    $('#student_list').dataTable( {
+        "aoColumnDefs": [
+            { 'bSortable': false, 'aTargets': [ -2, -1 ] }
+        ]
+    });
 });

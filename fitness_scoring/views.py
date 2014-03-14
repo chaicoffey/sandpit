@@ -168,7 +168,7 @@ def administrator(request):
                                      {'user_type': 'Administrator',
                                       'name': request.session.get('username', None),
                                       'school_name': request.session.get('school_name', None),
-                                      'submit_to_page' : '/administrator/',
+                                      'submit_to_page': '/administrator/',
                                       'student_list': Student.objects.filter(school_id=school_id),
                                       'add_student_form': add_student_form,
                                       'add_students_form': add_students_form,

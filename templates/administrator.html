@@ -4,9 +4,19 @@
 Administrator
 {% endblock %}
 
-{% block content_schooluser %}	
-
-{% include "student_list.html" %}
+{% block content_schooluser %}
+    <ul class="nav nav-tabs">
+        <li {% if student_list_active %}class="active"{% endif %}><a href="#student_list_tab" data-toggle="tab">Student List</a></li>
+        <li {% if not student_list_active %}class="active"{% endif %}><a href="#teacher_list_tab" data-toggle="tab">Teacher List</a></li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane {% if student_list_active %}active{% endif %}" id="student_list_tab">
+            {% include "student_list.html" %}
+        </div>
+        <div class="tab-pane {% if not student_list_active %}active{% endif %}" id="teacher_list_tab">
+            <h3>teacher list to be included here.</h3>
+        </div>
+    </div>
 {% endblock %}
 
 {% block javascript_functionality %}

@@ -75,7 +75,9 @@ def create_student(check_name, student_id, school_id, first_name, surname, gende
 
     student_unique = (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 0)
     if check_name:
-        student_unique = student_unique and (len(Student.objects.filter(school_id=school_id, first_name=first_name, surname=surname)) == 0)
+        student_unique = student_unique and (len(Student.objects.filter(school_id=school_id,
+                                                                        first_name=first_name,
+                                                                        surname=surname)) == 0)
 
     if student_unique:
         Student.objects.create(student_id=student_id, school_id=school_id, first_name=first_name, surname=surname, gender=gender, dob=dob)
