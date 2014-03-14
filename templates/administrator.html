@@ -7,8 +7,11 @@ Administrator
 {% block content_schooluser %}	
 
 {% include "student_list.html" %}
+{% include "teacher_list.html" %}
+
 {% endblock %}
 
 {% block javascript_functionality %}
     {% include "javascript_additions/student_list_javascript.html" %}
+    {% include "javascript_additions/teacher_list_javascript.html" %}
 {% endblock %}

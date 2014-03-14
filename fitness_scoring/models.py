@@ -51,6 +51,47 @@ class Teacher(models.Model):
         return self.first_name + " " + self.surname
 
 
+def create_teacher(check_name, first_name, surname, school_id, username, password):
+
+    username_unique = (len(User.objects.filter(username=username)) == 0)
+    if check_name:
+        username_unique = username_unique and (len(Teacher.objects.filter(school_id=school_id, first_name=first_name, surname=surname)) == 0)
+
+    if username_unique:
+        user = User.objects.create(username=username, password=password)
+        Teacher.objects.create(first_name=first_name, surname=surname, school_id=school_id, user=user)
+
+    return username_unique
+
+
+def update_teacher(check_name, first_name, surname, school_id, username, password):
+
+    user_exists = (len(User.objects.filter(username=username)) == 1)
+
+    teacher_exists = False
+    if user_exists:
+        user = User.objects.get(username=username)
+        if check_name:
+            teacher_exists = (len(Teacher.objects.filter(school_id=school_id, first_name=first_name, surname=surname, user=user)) == 1)
+        else:
+            teacher_exists = (len(Teacher.objects.filter(school_id=school_id, user=user)) == 1)
+
+    teacher_updated = False
+    if teacher_exists:
+        teacher = Teacher.objects.get(user=user)
+        teacher_updated = not ((teacher.first_name == first_name) and (teacher.surname == surname) and (teacher.school_id == school_id) and (user.password == password))
+
+    if teacher_updated:
+        teacher.first_name = first_name
+        teacher.surname = surname
+        teacher.school_id = school_id
+        teacher.save()
+        user.password = password
+        user.save()
+
+    return teacher_updated
+
+
 class Administrator(models.Model):
     school_id = models.ForeignKey(School)
     user = models.ForeignKey(User)
@@ -93,8 +134,9 @@ def update_student(check_name, student_id, school_id, first_name, surname, gende
     student_updated = student_exists
     if student_exists:
         student = Student.objects.get(school_id=school_id, student_id=student_id)
-        student_updated = not ((student.first_name == first_name) and (student.surname == surname) and (student.gender == gender) and (student.dob == datetime.datetime.strptime(dob, "%Y-%m-%d").date()))
+        student_updated = not ((student.school_id == school_id) and (student.first_name == first_name) and (student.surname == surname) and (student.gender == gender) and (student.dob == datetime.datetime.strptime(dob, "%Y-%m-%d").date()))
         if student_updated:
+            student.school_id = school_id
             student.first_name = first_name
             student.surname = surname
             student.gender = gender

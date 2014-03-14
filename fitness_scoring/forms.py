@@ -18,3 +18,21 @@ class EditStudentForm(forms.ModelForm):
     class Meta:
         model = Student
         exclude = ('school_id',)
+
+
+class AddTeacherForm(forms.Form):
+    first_name = forms.CharField(max_length=100)
+    surname = forms.CharField(max_length=100)
+    username = forms.CharField(max_length=100)
+    password = forms.CharField(max_length=128)
+
+
+class AddTeachersForm(forms.Form):
+    add_teachers_file = forms.FileField()
+
+
+class EditTeacherForm(forms.Form):
+    first_name = forms.CharField(max_length=100)
+    surname = forms.CharField(max_length=100)
+    username = forms.CharField(max_length=100)
+    password = forms.CharField(max_length=128)
