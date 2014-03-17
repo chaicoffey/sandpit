@@ -120,7 +120,7 @@
 <div class="modal fade" id="editSchoolModal" tabindex="-1" role="dialog" aria-labelledby="editSchoolModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="POST"  name="editSchoolForm" enctype="multipart/form-data" action="{{ submit_to_page }}" class="form-horizontal">
+      <form method="POST"  name="editSchoolForm" enctype="multipart/form-data" action="{{ submit_to_page }}" class="form-horizontal" onsubmit="return validateEditSchoolFields()">
           <div class="modal-header">
               <h4 class="modal-title" id="editSchoolModalLabel">Edit School</h4>
           </div>
