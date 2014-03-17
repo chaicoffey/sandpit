@@ -341,3 +341,15 @@ def school_list(request):
                 messages.success(request, "School Deleted: " + school_name, extra_tags="school_list")
             else:
                 messages.success(request, "Error Deleting School: " + school_to_delete.name + "(School is being used)", extra_tags="school_list")
+        elif request.POST.get('SubmitIdentifier') == 'SaveSchool':
+                school_pk = request.POST.get('school_pk')
+                school = School.objects.get(pk=school_pk)
+                school_name_old = school.name
+                school_name_new = request.POST.get('name')
+                if (school_name_old == school_name_new) or (len(School.objects.filter(name=school_name_new)) == 0):
+                    school.name = school_name_new
+                    school.subscription_paid = (request.POST.get('subscription_paid') == "True")
+                    school.save()
+                    messages.success(request, "School Edited: " + school_name_old, extra_tags="school_list")
+                else:
+                    messages.success(request, "Error Editing Student: " + school_name_old + "(School Name Already Exists: " + school_name_new + ")", extra_tags="school_list")

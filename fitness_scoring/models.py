@@ -62,6 +62,7 @@ def update_school(name, subscription_paid):
 
     return school_updated
 
+
 def get_school_name_max_length():
     return len(max([school.name for school in School.objects.all()], key=len))
 

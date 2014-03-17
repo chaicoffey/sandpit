@@ -39,3 +39,17 @@ function validateAddSchoolsFields()
     return addSchoolsFileValid;
 
 }
+
+function showEditSchoolModal(fieldDataFormName)
+{
+
+    var fieldDataForm = document.forms[fieldDataFormName];
+    var modalForm = document.forms["editSchoolForm"]
+
+    modalForm.elements["school_pk"].value = fieldDataForm.elements["school_pk"].value
+    modalForm.elements["name"].value = fieldDataForm.elements["name"].value
+    modalForm.elements["subscription_paid"].checked = (fieldDataForm.elements["subscription_paid"].value == 'True');
+
+    $('#editSchoolModal').modal('show');
+
+}

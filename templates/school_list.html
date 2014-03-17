@@ -32,10 +32,12 @@
                 <tr><td>{{ administrator.school_id.name }}</td>
                     <td>{{ administrator.school_id.get_subscription_paid_text }}</td>
                     <td>{{ administrator.user.username }}</td>
-                    <td><form method="POST" action="{{ submit_to_page }}">
+                    <td><form method="POST" name="editSchoolFieldDataForm_{{ administrator.school_id.pk }}" action="{{ submit_to_page }}">
                         {% csrf_token %}
                         <input type="hidden" name="school_pk" value="{{ administrator.school_id.pk }}"/>
-                        <button type="submit" class="btn btn-default btn-xs" id="SubmitIdentifier" name="SubmitIdentifier" value="EditSchool">
+                        <input type="hidden" name="name" value="{{ administrator.school_id.name }}"/>
+                        <input type="hidden" name="subscription_paid" value="{{ administrator.school_id.subscription_paid }}"/>
+                        <button type="button" class="btn btn-default btn-xs" onclick="showEditSchoolModal('editSchoolFieldDataForm_{{ administrator.school_id.pk }}')">
                             <span class="glyphicon glyphicon-pencil"></span></a>
                         </button>
                         </form>
@@ -118,23 +120,27 @@
 <div class="modal fade" id="editSchoolModal" tabindex="-1" role="dialog" aria-labelledby="editSchoolModalLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
-      <form method="POST" enctype="multipart/form-data" action="{{ submit_to_page }}" class="form-horizontal">
+      <form method="POST"  name="editSchoolForm" enctype="multipart/form-data" action="{{ submit_to_page }}" class="form-horizontal">
           <div class="modal-header">
-            <h4 class="modal-title" id="editSchoolModalLabel">Edit School</h4>
+              <h4 class="modal-title" id="editSchoolModalLabel">Edit School</h4>
           </div>
           <div class="modal-body">
               {% csrf_token %}
-              {{ edit_school_form.non_field_errors }}
-              {% for field in edit_school_form %}
-                  <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
-                      <div class="col-sm-4">{{ field.label_tag }}</div>
-                      <div class="col-sm-8">{{ field }}
-                          {% if field.errors %}
-                              <span class="help-block">{{ field.errors }}</span>
-                          {%  endif %}
-                      </div>
-                  </div>
-              {% endfor %}
+              <input type="hidden" name="school_pk"/>
+              <div class="form-group">
+                  <div class="col-sm-4"><label>School Name:</label></div>
+                  <div class="col-sm-8"><input type="text" name="name" id="name"/></div>
+              </div>
+              <div class="error_message">
+                  <label name="editSchoolNameErrorMessageLabel" id="editSchoolNameErrorMessageLabel" style="display: none"/>
+              </div>
+              <div class="form-group">
+                  <div class="col-sm-4"><label>Subscription Paid:</label></div>
+                  <div class="col-sm-8"><input type="checkbox" name="subscription_paid" id="subscription_paid" value="True"/></div>
+              </div>
+              <div class="error_message">
+                  <label name="editSchoolSubscriptionPaidErrorMessageLabel" id="editSchoolSubscriptionPaidErrorMessageLabel" style="display: none"/>
+              </div>
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
