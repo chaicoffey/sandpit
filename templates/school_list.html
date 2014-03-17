@@ -1,0 +1,155 @@
+{% load staticfiles %}
+<div class="panel panel-default">
+    {% if True %}
+        {% if messages %}
+          <div class="alert alert-danger fade in">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+             {% for message in messages %}
+                 {% if "school_list" in message.tags %}
+                     {{ message }} <br>
+                 {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+    {% endif %}
+    <div class="panel-heading">
+        School List
+        <div class="btn-group">
+            <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                +
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li><a href="" data-toggle="modal" data-target="#addSchoolModal">Add School</a></li>
+                <li><a href="" data-toggle="modal" data-target="#addSchoolsModal">Add/Edit Schools from .CSV</a></li>
+            </ul>
+        </div>
+    </div>
+    <!--div id="table-wrapper"    This wrapper probably not required following use of dataTables-->
+        <div class="table-responsive">
+        <table class="table table-hover" id="school_list">
+        <thead><tr><th>School Name</th><th>Subscription</th><th>Administrator Username</th><th></th><th></th></tr></thead>
+            {% for administrator in administrator_list %}
+                <tr><td>{{ administrator.school_id.name }}</td>
+                    <td>{{ administrator.school_id.get_subscription_paid_text }}</td>
+                    <td>{{ administrator.user.username }}</td>
+                    <td><form method="POST" name="editSchoolFieldDataForm_{{ administrator.school_id.pk }}" action="{{ submit_to_page }}">
+                        {% csrf_token %}
+                        <input type="hidden" name="school_pk" value="{{ administrator.school_id.pk }}"/>
+                        <input type="hidden" name="name" value="{{ administrator.school_id.name }}"/>
+                        <input type="hidden" name="subscription_paid" value="{{ administrator.school_id.subscription_paid }}"/>
+                        <button type="button" class="btn btn-default btn-xs" onclick="showEditSchoolModal('editSchoolFieldDataForm_{{ administrator.school_id.pk }}')">
+                            <span class="glyphicon glyphicon-pencil"></span></a>
+                        </button>
+                        </form>
+                    </td>
+                    <td><form method="POST" action="{{ submit_to_page }}" onsubmit="return confirm('Are you sure you want to delete school {{ school.name }}?');">
+                        {% csrf_token %}
+                        <input type="hidden" name="school_pk" value="{{ administrator.school_id.pk }}"/>
+                        <button type="submit" class="btn btn-default btn-xs" id="SubmitIdentifier" name="SubmitIdentifier" value="DeleteSchool">
+                            <span class="glyphicon glyphicon-remove"></span></a>
+                        </button>
+                        </form>
+                    </td></tr>
+            {% endfor %}
+        </table>
+        </div>
+    <!--/div-->
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addSchoolModal" tabindex="-1" role="dialog" aria-labelledby="addSchoolModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" name="addSchoolForm" enctype="multipart/form-data" action="{{ submit_to_page }}" class="form-horizontal" onsubmit="return validateAddSchoolFields()">
+          <div class="modal-header">
+            <h4 class="modal-title" id="addSchoolModalLabel">Add School</h4>
+          </div>
+          <div class="modal-body">
+              {% csrf_token %}
+              <div class="form-group">
+                  <div class="col-sm-4"><label>School Name:</label></div>
+                  <div class="col-sm-8"><input type="text" name="name" id="name"/></div>
+              </div>
+              <div class="error_message">
+                  <label name="addSchoolNameErrorMessageLabel" id="addSchoolNameErrorMessageLabel" style="display: none"/>
+              </div>
+              <div class="form-group">
+                  <div class="col-sm-4"><label>Subscription Paid:</label></div>
+                  <div class="col-sm-8"><input type="checkbox" name="subscription_paid" id="subscription_paid" value="True"/></div>
+              </div>
+              <div class="error_message">
+                  <label name="addSchoolSubscriptionPaidErrorMessageLabel" id="addSchoolSubscriptionPaidErrorMessageLabel" style="display: none"/>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="SubmitIdentifier" name="SubmitIdentifier" value="AddSchool">Add School</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addSchoolsModal" tabindex="-1" role="dialog" aria-labelledby="addSchoolsModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" name="addSchoolsForm" enctype="multipart/form-data" action="{{ submit_to_page }}" class="form-horizontal" onsubmit="return validateAddSchoolsFields()">
+          <div class="modal-header">
+            <h4 class="modal-title" id="addSchoolsModalLabel">Add Schools</h4>
+          </div>
+          <div class="modal-body">
+              {% csrf_token %}
+              <div class="form-group">
+                  <div class="col-sm-4"><label>Add Schools File:</label></div>
+                  <div class="col-sm-8"><input type="file" name="add_schools_file" id="add_schools_file"/></div>
+              </div>
+              <div class="error_message">
+                  <label name="addSchoolsFileErrorMessageLabel" id="addSchoolsFileErrorMessageLabel" style="display: none"/>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="SubmitIdentifier" name="SubmitIdentifier" value="AddSchools">Add Schools</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="modal fade" id="editSchoolModal" tabindex="-1" role="dialog" aria-labelledby="editSchoolModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST"  name="editSchoolForm" enctype="multipart/form-data" action="{{ submit_to_page }}" class="form-horizontal">
+          <div class="modal-header">
+              <h4 class="modal-title" id="editSchoolModalLabel">Edit School</h4>
+          </div>
+          <div class="modal-body">
+              {% csrf_token %}
+              <input type="hidden" name="school_pk"/>
+              <div class="form-group">
+                  <div class="col-sm-4"><label>School Name:</label></div>
+                  <div class="col-sm-8"><input type="text" name="name" id="name"/></div>
+              </div>
+              <div class="error_message">
+                  <label name="editSchoolNameErrorMessageLabel" id="editSchoolNameErrorMessageLabel" style="display: none"/>
+              </div>
+              <div class="form-group">
+                  <div class="col-sm-4"><label>Subscription Paid:</label></div>
+                  <div class="col-sm-8"><input type="checkbox" name="subscription_paid" id="subscription_paid" value="True"/></div>
+              </div>
+              <div class="error_message">
+                  <label name="editSchoolSubscriptionPaidErrorMessageLabel" id="editSchoolSubscriptionPaidErrorMessageLabel" style="display: none"/>
+              </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="SubmitIdentifier" name="SubmitIdentifier" value="SaveSchool">Save Changes</button>
+          </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<div class="panel panel-default"></div>
+

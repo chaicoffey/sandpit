@@ -3,10 +3,12 @@ from django.template import RequestContext
 from django.contrib import messages
 from fitness_scoring.models import Teacher, Administrator, SuperUser, User, Student, School, Class, \
     StudentClassEnrolment, TeacherClassAllocation
-from fitness_scoring.models import create_student, create_teacher, get_school_name_max_length
-from fitness_scoring.forms import AddStudentForm, AddStudentsForm, EditStudentForm, AddTeacherForm,\
+from fitness_scoring.models import create_student, create_teacher, create_school_and_administrator
+from fitness_scoring.forms import AddStudentForm, AddStudentsForm, EditStudentForm, AddTeacherForm, \
     AddTeachersForm, EditTeacherForm, AddClassForm, EditClassForm
-from fileio import save_file, delete_file, add_students_from_file, add_teachers_from_file
+from fileio import save_file, delete_file, add_students_from_file, add_teachers_from_file, \
+    add_schools_from_file
+
 
 # Create your views here.
 last_active_tab = 'teacher_list'  # This is a hack and should be fixed.
@@ -61,7 +63,7 @@ def authenticate(username, password):
             user_type = 'SuperUser Failed'
     elif len(administrator) > 0:
         if check_password(password=password, encrypted_password=administrator[0].user.password):
-            if administrator[0].school_id.subscriptionPaid:
+            if administrator[0].school_id.subscription_paid:
                 user_type = 'Administrator'
             else:
                 user_type = 'Unpaid'
@@ -69,7 +71,7 @@ def authenticate(username, password):
             user_type = 'Administrator Failed'
     elif len(teacher) > 0:
         if check_password(password=password, encrypted_password=teacher[0].user.password):
-            if teacher[0].school_id.subscriptionPaid:
+            if teacher[0].school_id.subscription_paid:
                 user_type = 'Teacher'
             else:
                 user_type = 'Unpaid'
@@ -135,12 +137,15 @@ def administrator(request):
 
 def superuser(request):
     if request.session.get('user_type', None) == 'SuperUser':
-        school_name_max_length = get_school_name_max_length()
+
+        school_list(request)
+
         return render(request, 'superuser.html',
                       RequestContext(request,
                                      {'user_type': 'Super User',
                                       'name': request.session.get('username', None),
-                                      'school_list': [(school.get_school_name_padded(school_name_max_length), school.get_subscription_paid_text()) for school in School.objects.all()]
+                                      'submit_to_page': '/superuser/',
+                                      'administrator_list': Administrator.objects.all(),
                                       }))
     else:
         return redirect('fitness_scoring.views.login_user')
@@ -396,3 +401,48 @@ def class_list(request, school_id):
             #    edit_class_modal_visibility = 'show'
 
     return add_class_form, add_classes_form, edit_class_form, add_class_modal_visibility, add_classes_modal_visibility, edit_class_modal_visibility
+
+
+def school_list(request):
+
+    if request.method == 'POST':
+        if request.POST.get('SubmitIdentifier') == 'AddSchool':
+            name = request.POST.get('name')
+            subscription_paid = (request.POST.get('subscription_paid') == "True")
+            if create_school_and_administrator(name=name, subscription_paid=subscription_paid):
+                messages.success(request, "School Added: " + name, extra_tags="school_list")
+            else:
+                messages.success(request, "Error Adding School: " + name + " (School Name Already Exists)", extra_tags="school_list")
+        elif request.POST.get('SubmitIdentifier') == 'AddSchools':
+            add_schools_file = request.FILES['add_schools_file']
+            file_path_on_server = save_file(add_schools_file)
+            (n_created, n_updated, n_not_created_or_updated) = add_schools_from_file(file_path_on_server)
+            delete_file(file_path_on_server)
+            messages.success(request, "Summary of changes made from .CSV: ", extra_tags="school_list")
+            messages.success(request, "Schools Created: "+str(n_created), extra_tags="school_list")
+            messages.success(request, "Schools Updated: "+str(n_updated), extra_tags="school_list")
+            messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated), extra_tags="school_list")
+        elif request.POST.get('SubmitIdentifier') == 'DeleteSchool':
+            school_pk = request.POST.get('school_pk')
+            school_to_delete = School.objects.get(pk=school_pk)
+            if (len(Teacher.objects.filter(school_id=school_to_delete)) == 0) and (len(Class.objects.filter(school_id=school_to_delete)) == 0) and (len(Student.objects.filter(school_id=school_to_delete)) == 0):
+                school_name = school_to_delete.name
+                administrator_to_delete = Administrator.objects.get(school_id=school_to_delete)
+                administrator_to_delete.user.delete()
+                administrator_to_delete.delete()
+                school_to_delete.delete()
+                messages.success(request, "School Deleted: " + school_name, extra_tags="school_list")
+            else:
+                messages.success(request, "Error Deleting School: " + school_to_delete.name + "(School is being used)", extra_tags="school_list")
+        elif request.POST.get('SubmitIdentifier') == 'SaveSchool':
+                school_pk = request.POST.get('school_pk')
+                school = School.objects.get(pk=school_pk)
+                school_name_old = school.name
+                school_name_new = request.POST.get('name')
+                if (school_name_old == school_name_new) or (len(School.objects.filter(name=school_name_new)) == 0):
+                    school.name = school_name_new
+                    school.subscription_paid = (request.POST.get('subscription_paid') == "True")
+                    school.save()
+                    messages.success(request, "School Edited: " + school_name_old, extra_tags="school_list")
+                else:
+                    messages.success(request, "Error Editing Student: " + school_name_old + "(School Name Already Exists: " + school_name_new + ")", extra_tags="school_list")

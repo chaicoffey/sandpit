@@ -2,12 +2,28 @@ from django.db import models
 import datetime
 
 # Create your models here.
-#delete me...what is this crappy comment?
+
+
+def create_school_and_administrator(name, subscription_paid):
+
+    school_created = create_school(name, subscription_paid)
+
+    if school_created:
+
+        school = School.objects.get(name=name)
+
+        username_base = 'admin_' + name[0:3]
+        if not create_administrator(username=username_base, password='admin', school_id=school):
+            incremental = 1
+            while not create_administrator(username=(username_base + str(incremental)), password='admin', school_id=school):
+                incremental += 1
+
+    return school_created
 
 
 class School(models.Model):
-    name = models.CharField(max_length=300)
-    subscriptionPaid = models.BooleanField(default=False)
+    name = models.CharField(max_length=300, unique=True)
+    subscription_paid = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name
@@ -16,10 +32,35 @@ class School(models.Model):
         return self.name+"&nbsp"*(padding - len(self.name))
 
     def get_subscription_paid_text(self):
-        if self.subscriptionPaid:
+        if self.subscription_paid:
             return 'Paid'
         else:
             return 'Unpaid'
+
+
+def create_school(name, subscription_paid):
+
+    school_name_unique = (len(School.objects.filter(name=name)) == 0)
+
+    if school_name_unique:
+        School.objects.create(name=name, subscription_paid=subscription_paid)
+
+    return school_name_unique
+
+
+def update_school(name, subscription_paid):
+
+    school_updated = False
+
+    school_name_exists = (len(School.objects.filter(name=name)) == 1)
+    if school_name_exists:
+        school = School.objects.get(name=name)
+        school_updated = not (school.subscription_paid == subscription_paid)
+        if school_updated:
+            school.subscription_paid = subscription_paid
+            school.save()
+
+    return school_updated
 
 
 def get_school_name_max_length():
@@ -98,6 +139,17 @@ class Administrator(models.Model):
 
     def __unicode__(self):
         return self.user.username
+
+
+def create_administrator(username, password, school_id):
+
+    username_unique = (len(User.objects.filter(username=username)) == 0)
+
+    if username_unique:
+        user = User.objects.create(username=username, password=password)
+        Administrator.objects.create(school_id=school_id, user=user)
+
+    return username_unique
 
 
 class Student(models.Model):

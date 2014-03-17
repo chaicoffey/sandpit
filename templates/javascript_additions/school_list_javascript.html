@@ -1,0 +1,55 @@
+function validateAddSchoolFields()
+{
+
+    var form = document.forms['addSchoolForm'];
+
+    var schoolName = form.elements["name"].value
+    var schoolNameEntered = (schoolName != '')
+    var schoolNameLettersValid = (schoolName.length >= 3) && (/^[a-zA-Z][a-zA-Z][a-zA-Z]/i.test(schoolName))
+    var schoolNameValid = schoolNameEntered && schoolNameLettersValid
+    if(!schoolNameValid) {
+        var schoolNameErrorMessage = document.getElementById("addSchoolNameErrorMessageLabel")
+        schoolNameErrorMessage.style.display = 'inherit'
+        if(!schoolNameEntered)
+            schoolNameErrorMessage.innerHTML = "- Please enter School Name";
+        else if(!schoolNameLettersValid)
+            schoolNameErrorMessage.innerHTML = "- Invalid School Name (first 3 characters must be alphabetic)";
+    }
+
+    var schoolSubscriptionPaid = form.elements["subscription_paid"].value
+    var subscriptionPaidNameValid = true
+
+    return schoolNameValid && subscriptionPaidNameValid;
+
+}
+
+function validateAddSchoolsFields()
+{
+
+    var form = document.forms['addSchoolsForm'];
+
+    var addSchoolsFile = form.elements["add_schools_file"].value
+    var addSchoolsFileValid = (addSchoolsFile != '')
+    if(!addSchoolsFileValid) {
+        var addSchoolsFileErrorMessage = document.getElementById("addSchoolsFileErrorMessageLabel")
+        addSchoolsFileErrorMessage.style.display = 'inherit'
+        addSchoolsFileErrorMessage.innerHTML = "- Please select CSV file";
+    }
+
+    return addSchoolsFileValid;
+
+}
+
+function showEditSchoolModal(fieldDataFormName)
+{
+
+    var fieldDataForm = document.forms[fieldDataFormName];
+    var modalForm = document.forms["editSchoolForm"]
+
+    modalForm.elements["school_pk"].value = fieldDataForm.elements["school_pk"].value
+    modalForm.elements["name"].value = fieldDataForm.elements["name"].value
+    modalForm.elements["subscription_paid"].checked = (fieldDataForm.elements["subscription_paid"].value == 'True');
+
+    $('#editSchoolModal').modal('show');
+
+}
