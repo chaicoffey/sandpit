@@ -1,5 +1,5 @@
 from django import forms
-from fitness_scoring.models import Student
+from fitness_scoring.models import Student, Class, TeacherClassAllocation, Teacher
 
 
 class AddStudentForm(forms.Form):
@@ -36,3 +36,33 @@ class EditTeacherForm(forms.Form):
     surname = forms.CharField(max_length=100)
     username = forms.CharField(max_length=100)
     password = forms.CharField(max_length=128)
+
+
+class ClassForm(forms.ModelForm):
+    class Meta:
+        model = Class
+        exclude = ('school_id',)
+
+    def __init__(self, *args, **kwargs):
+        self.school_id = None
+        if 'school_id' in kwargs:
+            # First pop your kwargs that may bother the parent __init__ method
+            self.school_id = kwargs.pop('school_id')
+        # Then, let the ModelForm initialize:
+        super(ClassForm, self).__init__(*args, **kwargs)
+        if self.school_id is not None:
+            # Finally, access the fields dict that was created by the super().__init__ call
+            self.fields['teachers'].queryset = Teacher.objects.filter(school_id=self.school_id)
+
+
+class AddClassForm(ClassForm):
+    pass
+
+
+class EditClassForm(ClassForm):
+    pass
+
+
+#class EditTeacherClassAllocationForm(forms.ModelForm):
+#    class Meta:
+#        model = TeacherClassAllocation

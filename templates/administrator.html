@@ -6,15 +6,19 @@ Administrator
 
 {% block content_schooluser %}
     <ul class="nav nav-tabs">
-        <li {% if not student_list_active %}class="active"{% endif %}><a href="#teacher_list_tab" data-toggle="tab">Teacher List</a></li>
-        <li {% if student_list_active %}class="active"{% endif %}><a href="#student_list_tab" data-toggle="tab">Student List</a></li>
+        <li {% if last_active_tab|default:'teacher_list' == 'teacher_list' %}class="active"{% endif %}><a href="#teacher_list_tab" data-toggle="tab">Teacher List</a></li>
+        <li {% if last_active_tab == 'student_list' %}class="active"{% endif %}><a href="#student_list_tab" data-toggle="tab">Student List</a></li>
+        <li {% if last_active_tab == 'class_list' %}class="active"{% endif %}><a href="#class_list_tab" data-toggle="tab">Class List</a></li>
     </ul>
     <div class="tab-content">
-        <div class="tab-pane {% if not student_list_active %}active{% endif %}" id="teacher_list_tab">
+        <div class="tab-pane {% if last_active_tab|default:'teacher_list' == 'teacher_list' %}active{% endif %}" id="teacher_list_tab">
             {% include "teacher_list.html" %}
         </div>
-        <div class="tab-pane {% if student_list_active %}active{% endif %}" id="student_list_tab">
+        <div class="tab-pane {% if last_active_tab == 'student_list' %}active{% endif %}" id="student_list_tab">
             {% include "student_list.html" %}
+        </div>
+        <div class="tab-pane {% if last_active_tab == 'class_list' %}active{% endif %}" id="class_list_tab">
+            {% include "class_list.html" %}
         </div>
     </div>
 {% endblock %}

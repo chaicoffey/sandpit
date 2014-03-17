@@ -1,6 +1,6 @@
 {% load staticfiles %}
 <div class="panel panel-default">
-    {% if not student_list_active %}
+    {% if last_active_tab == 'teacher_list' %}
         {% if messages %}
           <div class="alert alert-danger fade in">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>

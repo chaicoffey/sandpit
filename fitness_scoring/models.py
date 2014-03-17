@@ -149,9 +149,13 @@ def update_student(check_name, student_id, school_id, first_name, surname, gende
 
 
 class Class(models.Model):
-    year = models.DateField()
+    YEAR_CHOICES = []
+    for r in range(2000, (datetime.datetime.now().year+2)):
+        YEAR_CHOICES.append((r, r))
+    year = models.IntegerField(max_length=4, choices=YEAR_CHOICES, default=datetime.datetime.now().year)
     class_name = models.CharField(max_length=200)
     school_id = models.ForeignKey(School)
+    teachers = models.ManyToManyField(Teacher, through='TeacherClassAllocation')
 
     def __unicode__(self):
         return self.class_name
