@@ -1,9 +1,16 @@
 from django.contrib import admin
-from fitness_scoring.models import School, Teacher, Administrator, Student, Class, Test, TeacherClassAllocation, StudentClassEnrolment, ClassTestSet, StudentClassTestResult, PercentileBracket, TestCategory, SuperUser, User
+from fitness_scoring.models import School, Teacher, Administrator, Student, Class, Test, \
+    TeacherClassAllocation, StudentClassEnrolment, ClassTestSet, StudentClassTestResult, \
+    PercentileBracket, TestCategory, SuperUser, User
+
 
 class SchoolAdmin(admin.ModelAdmin):
     list_display = ('name', 'subscription_paid')
     list_editable = ('subscription_paid',)
+
+
+class TeacherClassAllocationAdmin(admin.ModelAdmin):
+    list_display = ('teacher_id', 'class_id')
 
 # Register your models here.
 
@@ -15,10 +22,9 @@ admin.site.register(SuperUser)
 admin.site.register(Student)
 admin.site.register(Class)
 admin.site.register(Test)
-admin.site.register(TeacherClassAllocation)
+admin.site.register(TeacherClassAllocation, TeacherClassAllocationAdmin)
 admin.site.register(StudentClassEnrolment)
 admin.site.register(ClassTestSet)
 admin.site.register(StudentClassTestResult)
 admin.site.register(PercentileBracket)
 admin.site.register(TestCategory)
-

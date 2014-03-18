@@ -105,7 +105,7 @@ def administrator(request):
 
         (add_teacher_form, add_teachers_form, edit_teacher_form, add_teacher_modal_visibility, add_teachers_modal_visibility, edit_teacher_modal_visibility) = teacher_list(request, school_id)
         (add_student_form, add_students_form, edit_student_form, add_student_modal_visibility, add_students_modal_visibility, edit_student_modal_visibility) = student_list(request, school_id)
-        (add_class_form, add_classes_form, edit_class_form, add_class_modal_visibility, add_classes_modal_visibility, edit_classes_modal_visibility) = class_list(request, school_id)
+        (add_class_form, add_classes_form, edit_class_form, add_class_modal_visibility, add_classes_modal_visibility, edit_class_modal_visibility) = class_list(request, school_id)
 
         return render(request, 'administrator.html',
                       RequestContext(request,
@@ -129,7 +129,12 @@ def administrator(request):
                                       'add_teachers_modal_hide_or_show': add_teachers_modal_visibility,
                                       'edit_teacher_modal_hide_or_show': edit_teacher_modal_visibility,
                                       'class_list': Class.objects.filter(school_id=school_id),
-                                      'add_class_form': add_class_form}))
+                                      'add_class_form': add_class_form,
+                                      'add_classes_form': add_classes_form,
+                                      'edit_class_form': edit_class_form,
+                                      'add_class_modal_hide_or_show': add_class_modal_visibility,
+                                      'add_classes_modal_hide_or_show': add_classes_modal_visibility,
+                                      'edit_class_modal_hide_or_show': edit_class_modal_visibility}))
 
     else:
         return redirect('fitness_scoring.views.login_user')
@@ -344,7 +349,7 @@ def class_list(request, school_id):
                 #class_id = add_class_form.cleaned_data['class_id']
                 #if create_class(check_name=False, class_id=class_id, school_id=school_id, first_name=first_name, surname=surname, gender=gender, dob=dob):
                 #    add_class_form = AddClassForm()
-                #    messages.success(request, "Class Added: " + first_name + " " + surname + " (" + class_id + ")", extra_tags="class_list")
+                messages.success(request, "Class Added.", extra_tags="class_list")
                 #else:
                 #    messages.success(request, "Error Adding Class: " + first_name + " " + surname + " (" + class_id + ") (Class ID Already Exists)", extra_tags="class_list")
             else:
@@ -377,19 +382,20 @@ def class_list(request, school_id):
             #else:
             #    messages.success(request, "Error Deleting Class: " + class_to_delete.first_name + " " + class_to_delete.surname + " (" + class_to_delete.class_id + ") (Class Enrolled In Classes)", extra_tags="class_list")
         elif request.POST.get('SubmitIdentifier') == 'EditClass':
+            messages.success(request, "Test message", extra_tags='class_list')
             last_active_tab = 'class_list'
-            #class_pk = request.POST.get('class_pk')
-            #class = Class.objects.get(pk=class_pk)
-            #request.session['edit_class_pk'] = class_pk
-            #edit_class_form = EditClassForm(instance=class)
-            #edit_class_modal_visibility = 'show'
+            class_pk = request.POST.get('class_pk')
+            peclass = Class.objects.get(pk=class_pk)
+            request.session['edit_class_pk'] = class_pk
+            edit_class_form = EditClassForm(instance=peclass, school_id=school_id)
+            edit_class_modal_visibility = 'show'
         elif request.POST.get('SubmitIdentifier') == 'SaveClass':
             last_active_tab = 'class_list'
-            #edit_class_form = EditClassForm(request.POST)
-            #if edit_class_form.is_valid():
-            #    class_pk = request.session.get('edit_class_pk')
-            #    class = Class.objects.get(pk=class_pk)
-            #    edit_class_form = EditClassForm(request.POST, instance=class)
+            edit_class_form = EditClassForm(request.POST, school_id=school_id)
+            if edit_class_form.is_valid():
+                class_pk = request.session.get('edit_class_pk')
+                peclass = Class.objects.get(pk=class_pk)
+                edit_class_form = EditClassForm(request.POST, instance=peclass)
             #    class_id_old = class.class_id
             #    class_id_new = request.POST.get('class_id')
             #    if (class_id_old == class_id_new) or (len(Class.objects.filter(school_id=school_id, class_id=class_id_new)) == 0):
@@ -397,8 +403,16 @@ def class_list(request, school_id):
             #        messages.success(request, "Class Edited: " + class.first_name + " " + class.surname + " (" + class_id_old + ")", extra_tags="class_list")
             #    else:
             #        messages.success(request, "Error Editing Class: " + class.first_name + " " + class.surname + " (" + class_id_old + ") (Class ID Already Exists: " + class_id_new + ")", extra_tags="class_list")
-            #else:
-            #    edit_class_modal_visibility = 'show'
+                peclass = edit_class_form.save(commit=False)
+                peclass.school_id = school_id
+                peclass.save()
+                for classallocation in TeacherClassAllocation.objects.filter(class_id=peclass):
+                    classallocation.delete()
+                for teacher in edit_class_form.cleaned_data.get('teachers'):
+                    teacher_class_allocation = TeacherClassAllocation(teacher_id=teacher, class_id=peclass)
+                    teacher_class_allocation.save()
+            else:
+                edit_class_modal_visibility = 'show'
 
     return add_class_form, add_classes_form, edit_class_form, add_class_modal_visibility, add_classes_modal_visibility, edit_class_modal_visibility
 

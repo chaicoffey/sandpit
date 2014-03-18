@@ -207,7 +207,7 @@ class Class(models.Model):
     year = models.IntegerField(max_length=4, choices=YEAR_CHOICES, default=datetime.datetime.now().year)
     class_name = models.CharField(max_length=200)
     school_id = models.ForeignKey(School)
-    teachers = models.ManyToManyField(Teacher, through='TeacherClassAllocation')
+    teachers = models.ManyToManyField(Teacher, through='TeacherClassAllocation', null=True, blank=True)
 
     def __unicode__(self):
         return self.class_name
