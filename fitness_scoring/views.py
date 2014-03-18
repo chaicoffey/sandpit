@@ -1,14 +1,12 @@
 from django.shortcuts import render, redirect
 from django.template import RequestContext
 from django.contrib import messages
-from fitness_scoring.models import Teacher, Administrator, SuperUser, User, Student, School, Class, StudentClassEnrolment, TeacherClassAllocation
+from fitness_scoring.models import Teacher, Administrator, SuperUser, User, Student, School, StudentClassEnrolment, TeacherClassAllocation
 from fitness_scoring.models import create_student, create_teacher
 from fitness_scoring.forms import AddStudentForm, AddStudentsForm, EditStudentForm
 from fitness_scoring.forms import AddTeacherForm, AddTeachersForm, EditTeacherForm
 from fitness_scoring.forms import AddSchoolForm, EditSchoolForm
-from fileio import save_file, delete_file, add_students_from_file, add_teachers_from_file, add_schools_from_file
-
-# Create your views here.
+from fileio import save_file, delete_file, add_students_from_file, add_teachers_from_file, add_schools_from_file_upload
 
 
 def logout_user(request):
@@ -329,17 +327,13 @@ def school_list(request):
             else:
                 messages.success(request, "Add School Validation Error", extra_tags=message_tag)
         elif request.POST.get('SubmitIdentifier') == 'AddSchools':
-            add_schools_file = request.FILES['add_schools_file']
-            file_path_on_server = save_file(add_schools_file)
-            (n_created, n_updated, n_not_created_or_updated) = add_schools_from_file(file_path_on_server)
-            delete_file(file_path_on_server)
+            (n_created, n_updated, n_not_created_or_updated) = add_schools_from_file_upload(request.FILES['add_schools_file'])
             messages.success(request, "Summary of changes made from .CSV: ", extra_tags=message_tag)
             messages.success(request, "Schools Created: "+str(n_created), extra_tags=message_tag)
             messages.success(request, "Schools Updated: "+str(n_updated), extra_tags=message_tag)
             messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated), extra_tags=message_tag)
         elif request.POST.get('SubmitIdentifier') == 'DeleteSchool':
-            school_pk = request.POST.get('school_pk')
-            school_to_delete = School.objects.get(pk=school_pk)
+            school_to_delete = School.objects.get(pk=request.POST.get('school_pk'))
             school_name = school_to_delete.name
             if school_to_delete.delete_school_safe():
                 messages.success(request, "School Deleted: " + school_name, extra_tags=message_tag)

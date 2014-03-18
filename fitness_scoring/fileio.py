@@ -73,6 +73,13 @@ def add_teachers_from_file(file_path_on_server, school_id):
     return n_created, n_updated, n_not_created_or_updated
 
 
+def add_schools_from_file_upload(uploaded_file):
+    file_path_on_server = save_file(uploaded_file)
+    (n_created, n_updated, n_not_created_or_updated) = add_schools_from_file(file_path_on_server)
+    delete_file(file_path_on_server)
+    return n_created, n_updated, n_not_created_or_updated
+
+
 def add_schools_from_file(file_path_on_server):
     file_handle = open(file_path_on_server, 'rb')
 
