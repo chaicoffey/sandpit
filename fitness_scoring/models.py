@@ -37,6 +37,23 @@ class School(models.Model):
         else:
             return 'Unpaid'
 
+    def delete_school_safe(self):
+        school_not_used = (len(Teacher.objects.filter(school_id=self)) == 0) and (len(Class.objects.filter(school_id=self)) == 0) and (len(Student.objects.filter(school_id=self)) == 0)
+        if school_not_used:
+            administrator_to_delete = Administrator.objects.get(school_id=self)
+            administrator_to_delete.user.delete()
+            administrator_to_delete.delete()
+            self.delete()
+        return school_not_used
+
+    def edit_school_safe(self, name, subscription_paid):
+        is_edit_safe = (self.name == name) or (len(School.objects.filter(name=name)) == 0)
+        if is_edit_safe:
+            self.name = name
+            self.subscription_paid = subscription_paid
+            self.save()
+        return is_edit_safe
+
 
 def create_school(name, subscription_paid):
 

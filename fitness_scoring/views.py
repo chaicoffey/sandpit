@@ -2,8 +2,10 @@ from django.shortcuts import render, redirect
 from django.template import RequestContext
 from django.contrib import messages
 from fitness_scoring.models import Teacher, Administrator, SuperUser, User, Student, School, Class, StudentClassEnrolment, TeacherClassAllocation
-from fitness_scoring.models import create_student, create_teacher, create_school_and_administrator
-from fitness_scoring.forms import AddStudentForm, AddStudentsForm, EditStudentForm, AddTeacherForm, AddTeachersForm, EditTeacherForm
+from fitness_scoring.models import create_student, create_teacher
+from fitness_scoring.forms import AddStudentForm, AddStudentsForm, EditStudentForm
+from fitness_scoring.forms import AddTeacherForm, AddTeachersForm, EditTeacherForm
+from fitness_scoring.forms import AddSchoolForm, EditSchoolForm
 from fileio import save_file, delete_file, add_students_from_file, add_teachers_from_file, add_schools_from_file
 
 # Create your views here.
@@ -138,6 +140,8 @@ def superuser(request):
                                       'name': request.session.get('username', None),
                                       'submit_to_page': '/superuser/',
                                       'administrator_list': Administrator.objects.all(),
+                                      'add_school_form': AddSchoolForm(),
+                                      'edit_school_form': EditSchoolForm()
                                       }))
     else:
         return redirect('fitness_scoring.views.login_user')
@@ -312,44 +316,42 @@ def teacher_list(request, school_id):
 
 def school_list(request):
 
+    message_tag = "school_list"
+
     if request.method == 'POST':
         if request.POST.get('SubmitIdentifier') == 'AddSchool':
-            name = request.POST.get('name')
-            subscription_paid = (request.POST.get('subscription_paid') == "True")
-            if create_school_and_administrator(name=name, subscription_paid=subscription_paid):
-                messages.success(request, "School Added: " + name, extra_tags="school_list")
+            add_school_form = AddSchoolForm(request.POST)
+            if add_school_form.is_valid():
+                if add_school_form.add_school_safe():
+                    messages.success(request, "School Added: " + add_school_form.get_name(), extra_tags=message_tag)
+                else:
+                    messages.success(request, "Error Adding School: " + add_school_form.get_name() + " (School Name Already Exists)", extra_tags=message_tag)
             else:
-                messages.success(request, "Error Adding School: " + name + " (School Name Already Exists)", extra_tags="school_list")
+                messages.success(request, "Add School Validation Error", extra_tags=message_tag)
         elif request.POST.get('SubmitIdentifier') == 'AddSchools':
             add_schools_file = request.FILES['add_schools_file']
             file_path_on_server = save_file(add_schools_file)
             (n_created, n_updated, n_not_created_or_updated) = add_schools_from_file(file_path_on_server)
             delete_file(file_path_on_server)
-            messages.success(request, "Summary of changes made from .CSV: ", extra_tags="school_list")
-            messages.success(request, "Schools Created: "+str(n_created), extra_tags="school_list")
-            messages.success(request, "Schools Updated: "+str(n_updated), extra_tags="school_list")
-            messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated), extra_tags="school_list")
+            messages.success(request, "Summary of changes made from .CSV: ", extra_tags=message_tag)
+            messages.success(request, "Schools Created: "+str(n_created), extra_tags=message_tag)
+            messages.success(request, "Schools Updated: "+str(n_updated), extra_tags=message_tag)
+            messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated), extra_tags=message_tag)
         elif request.POST.get('SubmitIdentifier') == 'DeleteSchool':
             school_pk = request.POST.get('school_pk')
             school_to_delete = School.objects.get(pk=school_pk)
-            if (len(Teacher.objects.filter(school_id=school_to_delete)) == 0) and (len(Class.objects.filter(school_id=school_to_delete)) == 0) and (len(Student.objects.filter(school_id=school_to_delete)) == 0):
-                school_name = school_to_delete.name
-                administrator_to_delete = Administrator.objects.get(school_id=school_to_delete)
-                administrator_to_delete.user.delete()
-                administrator_to_delete.delete()
-                school_to_delete.delete()
-                messages.success(request, "School Deleted: " + school_name, extra_tags="school_list")
+            school_name = school_to_delete.name
+            if school_to_delete.delete_school_safe():
+                messages.success(request, "School Deleted: " + school_name, extra_tags=message_tag)
             else:
-                messages.success(request, "Error Deleting School: " + school_to_delete.name + "(School is being used)", extra_tags="school_list")
+                messages.success(request, "Error Deleting School: " + school_to_delete.name + " (School is being used)", extra_tags=message_tag)
         elif request.POST.get('SubmitIdentifier') == 'SaveSchool':
-                school_pk = request.POST.get('school_pk')
-                school = School.objects.get(pk=school_pk)
-                school_name_old = school.name
-                school_name_new = request.POST.get('name')
-                if (school_name_old == school_name_new) or (len(School.objects.filter(name=school_name_new)) == 0):
-                    school.name = school_name_new
-                    school.subscription_paid = (request.POST.get('subscription_paid') == "True")
-                    school.save()
-                    messages.success(request, "School Edited: " + school_name_old, extra_tags="school_list")
+                edit_school_form = EditSchoolForm(request.POST)
+                if edit_school_form.is_valid():
+                    school_name_old = School.objects.get(pk=edit_school_form.get_school_pk()).name
+                    if edit_school_form.save_school():
+                        messages.success(request, "School Edited: " + school_name_old, extra_tags=message_tag)
+                    else:
+                        messages.success(request, "Error Editing Student: " + school_name_old + " (School Name Already Exists: " + edit_school_form.get_name() + ")", extra_tags=message_tag)
                 else:
-                    messages.success(request, "Error Editing Student: " + school_name_old + "(School Name Already Exists: " + school_name_new + ")", extra_tags="school_list")
+                    messages.success(request, "Edit School Validation Error", extra_tags=message_tag)
