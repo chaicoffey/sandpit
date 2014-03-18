@@ -8,7 +8,7 @@ function validateAddSchoolFields()
     var schoolNameLettersValid = (schoolName.length >= 3) && (/^[a-zA-Z][a-zA-Z][a-zA-Z]/i.test(schoolName))
     var schoolNameValid = schoolNameEntered && schoolNameLettersValid
     if(!schoolNameValid) {
-        var schoolNameErrorMessage = document.getElementById("addSchoolNameErrorMessageLabel")
+        var schoolNameErrorMessage = document.getElementById("addSchool_name_ErrorMessageLabel")
         schoolNameErrorMessage.style.display = 'inherit'
         if(!schoolNameEntered)
             schoolNameErrorMessage.innerHTML = "- Please enter School Name";
@@ -40,15 +40,14 @@ function validateAddSchoolsFields()
 
 }
 
-function showEditSchoolModal(fieldDataFormName)
+function showEditSchoolModal(school_pk, name, subscription_paid)
 {
 
-    var fieldDataForm = document.forms[fieldDataFormName];
-    var modalForm = document.forms["editSchoolForm"]
+    var modalForm = document.forms['editSchoolForm']
 
-    modalForm.elements["school_pk"].value = fieldDataForm.elements["school_pk"].value
-    modalForm.elements["name"].value = fieldDataForm.elements["name"].value
-    modalForm.elements["subscription_paid"].checked = (fieldDataForm.elements["subscription_paid"].value == 'True');
+    modalForm.elements["school_pk"].value = school_pk
+    modalForm.elements["name"].value = name
+    modalForm.elements["subscription_paid"].checked = (subscription_paid == 'True');
 
     $('#editSchoolModal').modal('show');
 
@@ -64,7 +63,7 @@ function validateEditSchoolFields()
     var schoolNameLettersValid = (schoolName.length >= 3) && (/^[a-zA-Z][a-zA-Z][a-zA-Z]/i.test(schoolName))
     var schoolNameValid = schoolNameEntered && schoolNameLettersValid
     if(!schoolNameValid) {
-        var schoolNameErrorMessage = document.getElementById("editSchoolNameErrorMessageLabel")
+        var schoolNameErrorMessage = document.getElementById("editSchool_name_ErrorMessageLabel")
         schoolNameErrorMessage.style.display = 'inherit'
         if(!schoolNameEntered)
             schoolNameErrorMessage.innerHTML = "- Please enter School Name";
