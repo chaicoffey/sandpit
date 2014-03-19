@@ -3,8 +3,8 @@ import tempfile
 from fitness_scoring.models import create_student, update_student, create_teacher, update_teacher, create_school_and_administrator, update_school
 import os
 
-#destination_directory = 'C:\\fitness_scoring_file_uploads\\'
-destination_directory = '/tmp/fitness_scoring_file_uploads'
+destination_directory = 'C:\\fitness_scoring_file_uploads\\'
+#destination_directory = '/tmp/fitness_scoring_file_uploads'
 
 
 def save_file(f):

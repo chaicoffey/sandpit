@@ -1,27 +1,11 @@
-function validateAddSchoolFields()
-{
 
-    var form = document.forms['addSchoolForm'];
+{% autoescape off %}
 
-    var schoolName = form.elements["name"].value
-    var schoolNameEntered = (schoolName != '')
-    var schoolNameLettersValid = (schoolName.length >= 3) && (/^[a-zA-Z][a-zA-Z][a-zA-Z]/i.test(schoolName))
-    var schoolNameValid = schoolNameEntered && schoolNameLettersValid
-    if(!schoolNameValid) {
-        var schoolNameErrorMessage = document.getElementById("addSchool_name_ErrorMessageLabel")
-        schoolNameErrorMessage.style.display = 'inherit'
-        if(!schoolNameEntered)
-            schoolNameErrorMessage.innerHTML = "- Please enter School Name";
-        else if(!schoolNameLettersValid)
-            schoolNameErrorMessage.innerHTML = "- Invalid School Name (first 3 characters must be alphabetic)";
-    }
+{{ add_school_form.get_javascript_validation_function }}
+{{ edit_school_form.get_javascript_validation_function }}
+{{ edit_school_form.get_javascript_show_modal_function }}
 
-    var schoolSubscriptionPaid = form.elements["subscription_paid"].value
-    var subscriptionPaidNameValid = true
-
-    return schoolNameValid && subscriptionPaidNameValid;
-
-}
+{% endautoescape %}
 
 function validateAddSchoolsFields()
 {
@@ -39,42 +23,3 @@ function validateAddSchoolsFields()
     return addSchoolsFileValid;
 
 }
-
-function showEditSchoolModal(school_pk, name, subscription_paid)
-{
-
-    var modalForm = document.forms['editSchoolForm']
-
-    modalForm.elements["school_pk"].value = school_pk
-    modalForm.elements["name"].value = name
-    modalForm.elements["subscription_paid"].checked = (subscription_paid == 'True');
-
-    $('#editSchoolModal').modal('show');
-
-}
-
-function validateEditSchoolFields()
-{
-
-    var form = document.forms['editSchoolForm'];
-
-    var schoolName = form.elements["name"].value
-    var schoolNameEntered = (schoolName != '')
-    var schoolNameLettersValid = (schoolName.length >= 3) && (/^[a-zA-Z][a-zA-Z][a-zA-Z]/i.test(schoolName))
-    var schoolNameValid = schoolNameEntered && schoolNameLettersValid
-    if(!schoolNameValid) {
-        var schoolNameErrorMessage = document.getElementById("editSchool_name_ErrorMessageLabel")
-        schoolNameErrorMessage.style.display = 'inherit'
-        if(!schoolNameEntered)
-            schoolNameErrorMessage.innerHTML = "- Please enter School Name";
-        else if(!schoolNameLettersValid)
-            schoolNameErrorMessage.innerHTML = "- Invalid School Name (first 3 characters must be alphabetic)";
-    }
-
-    var schoolSubscriptionPaid = form.elements["subscription_paid"].value
-    var subscriptionPaidNameValid = true
-
-    return schoolNameValid && subscriptionPaidNameValid;
-
-}
-
