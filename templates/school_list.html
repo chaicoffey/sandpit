@@ -77,7 +77,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary" id="SubmitIdentifier" name="SubmitIdentifier" value="AddSchool">Add School</button>
+            <button type="submit" class="btn btn-primary" name="{{ add_school_form.get_add_school_button_name }}" value="{{ add_school_form.get_add_school_button_value }}">Add School</button>
           </div>
       </form>
     </div>
@@ -136,7 +136,7 @@
           </div>
           <div class="modal-footer">
             <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary" id="SubmitIdentifier" name="SubmitIdentifier" value="SaveSchool">Save Changes</button>
+            <button type="submit" class="btn btn-primary" name="{{ edit_school_form.get_edit_school_button_name }}" value="{{ edit_school_form.get_edit_school_button_value }}">Save Changes</button>
           </div>
       </form>
     </div>

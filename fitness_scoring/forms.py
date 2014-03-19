@@ -1,5 +1,6 @@
 from django import forms
-from fitness_scoring.models import Student, School, Class, TeacherClassAllocation, Teacher
+from django.contrib import messages
+from fitness_scoring.models import Student, School, Class, Teacher
 from fitness_scoring.models import create_school_and_administrator
 
 
@@ -68,6 +69,18 @@ class AddSchoolForm(forms.Form):
     name = forms.CharField(max_length=300)
     subscription_paid = forms.BooleanField(initial=False, required=False)
 
+    def handle_posted_form(self, request, messages_tag):
+        form_posted_from = (request.POST.get(self.get_add_school_button_name()) == self.get_add_school_button_value())
+        if form_posted_from:
+            if self.is_valid():
+                if self.add_school_safe():
+                    messages.success(request, "School Added: " + self.get_name(), extra_tags=messages_tag)
+                else:
+                    messages.success(request, "Error Adding School: " + self.get_name() + " (School Name Already Exists)", extra_tags=messages_tag)
+            else:
+                messages.success(request, "Add School Validation Error", extra_tags=messages_tag)
+        return form_posted_from
+
     def add_school_safe(self):
         return create_school_and_administrator(name=self.get_name(), subscription_paid=self.get_subscription_paid())
 
@@ -76,6 +89,14 @@ class AddSchoolForm(forms.Form):
 
     def get_subscription_paid(self):
         return self.cleaned_data['subscription_paid']
+
+    @staticmethod
+    def get_add_school_button_name():
+        return "AddSchoolIdentifier"
+
+    @staticmethod
+    def get_add_school_button_value():
+        return "AddSchool"
 
     @staticmethod
     def get_form_name():
@@ -123,6 +144,19 @@ class EditSchoolForm(forms.Form):
     name = forms.CharField(max_length=300)
     subscription_paid = forms.BooleanField(initial=False, required=False)
 
+    def handle_posted_form(self, request, messages_tag):
+        form_posted_from = (request.POST.get(self.get_edit_school_button_name()) == self.get_edit_school_button_value())
+        if form_posted_from:
+            if self.is_valid():
+                school_name_old = School.objects.get(pk=self.get_school_pk()).name
+                if self.save_school():
+                    messages.success(request, "School Edited: " + school_name_old, extra_tags=messages_tag)
+                else:
+                    messages.success(request, "Error Editing Student: " + school_name_old + " (School Name Already Exists: " + self.get_name() + ")", extra_tags=messages_tag)
+            else:
+                messages.success(request, "Edit School Validation Error", extra_tags=messages_tag)
+        return form_posted_from
+
     def save_school(self):
         school = School.objects.get(pk=self.get_school_pk())
         return school.edit_school_safe(self.get_name(), self.get_subscription_paid())
@@ -135,6 +169,14 @@ class EditSchoolForm(forms.Form):
 
     def get_subscription_paid(self):
         return self.cleaned_data['subscription_paid']
+
+    @staticmethod
+    def get_edit_school_button_name():
+        return "SaveSchoolIdentifier"
+
+    @staticmethod
+    def get_edit_school_button_value():
+        return "SaveSchool"
 
     @staticmethod
     def get_form_name():

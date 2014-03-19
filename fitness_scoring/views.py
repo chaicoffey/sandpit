@@ -144,7 +144,8 @@ def administrator(request):
 def superuser(request):
     if request.session.get('user_type', None) == 'SuperUser':
 
-        school_list(request)
+        if request.method == 'POST':
+            handle_post_school_list(request)
 
         return render(request, 'superuser.html',
                       RequestContext(request,
@@ -425,40 +426,40 @@ def class_list(request, school_id):
     return add_class_form, add_classes_form, edit_class_form, add_class_modal_visibility, add_classes_modal_visibility, edit_class_modal_visibility
 
 
-def school_list(request):
+def handle_post_school_list(request):
 
-    message_tag = "school_list"
+    school_list_message_tag = "school_list"
 
-    if request.method == 'POST':
-        if request.POST.get('SubmitIdentifier') == 'AddSchool':
-            add_school_form = AddSchoolForm(request.POST)
-            if add_school_form.is_valid():
-                if add_school_form.add_school_safe():
-                    messages.success(request, "School Added: " + add_school_form.get_name(), extra_tags=message_tag)
-                else:
-                    messages.success(request, "Error Adding School: " + add_school_form.get_name() + " (School Name Already Exists)", extra_tags=message_tag)
-            else:
-                messages.success(request, "Add School Validation Error", extra_tags=message_tag)
-        elif request.POST.get('SubmitIdentifier') == 'AddSchools':
+    def handle_post_add_schools():
+        handle_post = (request.POST.get('SubmitIdentifier') == 'AddSchools')
+        if handle_post:
             (n_created, n_updated, n_not_created_or_updated) = add_schools_from_file_upload(request.FILES['add_schools_file'])
-            messages.success(request, "Summary of changes made from .CSV: ", extra_tags=message_tag)
-            messages.success(request, "Schools Created: "+str(n_created), extra_tags=message_tag)
-            messages.success(request, "Schools Updated: "+str(n_updated), extra_tags=message_tag)
-            messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated), extra_tags=message_tag)
-        elif request.POST.get('SubmitIdentifier') == 'DeleteSchool':
+            messages.success(request, "Summary of changes made from .CSV: ", extra_tags=school_list_message_tag)
+            messages.success(request, "Schools Created: "+str(n_created), extra_tags=school_list_message_tag)
+            messages.success(request, "Schools Updated: "+str(n_updated), extra_tags=school_list_message_tag)
+            messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated), extra_tags=school_list_message_tag)
+        return handle_post
+
+    def handle_post_delete_school():
+        handle_post = (request.POST.get('SubmitIdentifier') == 'DeleteSchool')
+        if handle_post:
             school_to_delete = School.objects.get(pk=request.POST.get('school_pk'))
             school_name = school_to_delete.name
             if school_to_delete.delete_school_safe():
-                messages.success(request, "School Deleted: " + school_name, extra_tags=message_tag)
+                messages.success(request, "School Deleted: " + school_name, extra_tags=school_list_message_tag)
             else:
-                messages.success(request, "Error Deleting School: " + school_to_delete.name + " (School is being used)", extra_tags=message_tag)
-        elif request.POST.get('SubmitIdentifier') == 'SaveSchool':
-                edit_school_form = EditSchoolForm(request.POST)
-                if edit_school_form.is_valid():
-                    school_name_old = School.objects.get(pk=edit_school_form.get_school_pk()).name
-                    if edit_school_form.save_school():
-                        messages.success(request, "School Edited: " + school_name_old, extra_tags=message_tag)
-                    else:
-                        messages.success(request, "Error Editing Student: " + school_name_old + " (School Name Already Exists: " + edit_school_form.get_name() + ")", extra_tags=message_tag)
-                else:
-                    messages.success(request, "Edit School Validation Error", extra_tags=message_tag)
+                messages.success(request, "Error Deleting School: " + school_to_delete.name + " (School is being used)", extra_tags=school_list_message_tag)
+        return handle_post
+
+    school_list_handle_post = False
+
+    if not school_list_handle_post:
+        school_list_handle_post = AddSchoolForm(request.POST).handle_posted_form(request=request, messages_tag=school_list_message_tag)
+    if not school_list_handle_post:
+        school_list_handle_post = EditSchoolForm(request.POST).handle_posted_form(request=request, messages_tag=school_list_message_tag)
+    if not school_list_handle_post:
+        school_list_handle_post = handle_post_add_schools()
+    if not school_list_handle_post:
+        school_list_handle_post = handle_post_delete_school()
+
+    return school_list_handle_post
