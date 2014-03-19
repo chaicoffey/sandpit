@@ -451,15 +451,15 @@ def handle_post_school_list(request):
                 messages.success(request, "Error Deleting School: " + school_to_delete.name + " (School is being used)", extra_tags=school_list_message_tag)
         return handle_post
 
-    school_list_handle_post = False
+    post_handled = False
 
-    if not school_list_handle_post:
-        school_list_handle_post = AddSchoolForm(request.POST).handle_posted_form(request=request, messages_tag=school_list_message_tag)
-    if not school_list_handle_post:
-        school_list_handle_post = EditSchoolForm(request.POST).handle_posted_form(request=request, messages_tag=school_list_message_tag)
-    if not school_list_handle_post:
-        school_list_handle_post = handle_post_add_schools()
-    if not school_list_handle_post:
-        school_list_handle_post = handle_post_delete_school()
+    if not post_handled:
+        post_handled = AddSchoolForm(request.POST).handle_posted_form(request=request, messages_tag=school_list_message_tag)
+    if not post_handled:
+        post_handled = EditSchoolForm(request.POST).handle_posted_form(request=request, messages_tag=school_list_message_tag)
+    if not post_handled:
+        post_handled = handle_post_add_schools()
+    if not post_handled:
+        post_handled = handle_post_delete_school()
 
-    return school_list_handle_post
+    return post_handled
