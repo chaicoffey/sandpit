@@ -1,16 +1,14 @@
 {% load staticfiles %}
 <div class="panel panel-default">
-    {% if True %}
-        {% if messages %}
-          <div class="alert alert-danger fade in">
+    {% if messages %}
+        <div class="alert alert-danger fade in">
             <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-             {% for message in messages %}
-                 {% if "school_list" in message.tags %}
-                     {{ message }} <br>
-                 {% endif %}
+            {% for message in messages %}
+                {% if school_list_message_tag in message.tags %}
+                    {{ message }} <br>
+                {% endif %}
             {% endfor %}
-          </div>
-        {% endif %}
+        </div>
     {% endif %}
     <div class="panel-heading">
         School List
@@ -41,7 +39,7 @@
                         </form>
                     </td>
                     <td>
-                        <form method="POST" action="{{ submit_to_page }}" onsubmit="return confirm('Are you sure you want to delete school {{ school.name }}?');">
+                        <form method="POST" action="{{ submit_to_page }}" onsubmit="return confirm('Are you sure you want to delete school {{ administrator.school_id.name }}?');">
                         {% csrf_token %}
                             <input type="hidden" name="school_pk" value="{{ administrator.school_id.pk }}"/>
                             <button type="submit" class="btn btn-default btn-xs" id="SubmitIdentifier" name="SubmitIdentifier" value="DeleteSchool">

@@ -1,16 +1,66 @@
 
 from django.contrib import messages
-from fitness_scoring.forms import AddSchoolForm, EditSchoolForm
-from fitness_scoring.models import School, Administrator
-from fileio import add_schools_from_file_upload
+from fitness_scoring.forms import AddStudentForm, EditStudentForm, AddSchoolForm, EditSchoolForm
+from fitness_scoring.models import Student, School, Administrator
+from fileio import add_students_from_file_upload, add_schools_from_file_upload
 
 
 def handle_logged_in(request, context):
+#This handler goes with loggedin.html
     context['user_type'] = request.session.get('user_type', None)
     context['name'] = request.session.get('username', None)
 
 
+def handle_student_list(request, context):
+#This handler goes with student_list.html (remember to include student_list_javascript.html in the appropriate place)
+
+    student_list_message_tag = "student_list"
+
+    school_id = School.objects.get(name=request.session.get('school_name', None))
+
+    def handle_post_add_students():
+        handle_post = (request.POST.get('SubmitIdentifier') == 'AddStudents')
+        if handle_post:
+            (n_created, n_updated, n_not_created_or_updated) = add_students_from_file_upload(request.FILES['add_students_file'], school_id)
+            messages.success(request, "Summary of changes made from .CSV: ", extra_tags=student_list_message_tag)
+            messages.success(request, "Students Created: "+str(n_created), extra_tags=student_list_message_tag)
+            messages.success(request, "Students Updated: "+str(n_updated), extra_tags=student_list_message_tag)
+            messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated), extra_tags=student_list_message_tag)
+        return handle_post
+
+    def handle_post_delete_student():
+        handle_post = (request.POST.get('SubmitIdentifier') == 'DeleteStudent')
+        if handle_post:
+            student_to_delete = Student.objects.get(pk=request.POST.get('student_pk'))
+            student_string = student_to_delete.first_name + " " + student_to_delete.surname + " (" + student_to_delete.student_id + ")"
+            if student_to_delete.delete_student_safe():
+                messages.success(request, "Student Deleted: " + student_string, extra_tags=student_list_message_tag)
+            else:
+                messages.success(request, "Error Deleting Student: " + student_string + " (Student Enrolled In Classes)", extra_tags=student_list_message_tag)
+        return handle_post
+
+    context['student_list'] = Student.objects.filter(school_id=school_id)
+    context['student_list_message_tag'] = student_list_message_tag
+    context['add_student_form'] = AddStudentForm()
+    context['edit_student_form'] = EditStudentForm()
+
+    post_handled = False
+
+    if request.method == 'POST':
+        if not post_handled:
+            post_handled = AddStudentForm(request.POST).handle_posted_form(request=request, messages_tag=student_list_message_tag)
+        if not post_handled:
+            post_handled = EditStudentForm(request.POST).handle_posted_form(request=request, messages_tag=student_list_message_tag)
+        if not post_handled:
+            post_handled = handle_post_add_students()
+        if not post_handled:
+            post_handled = handle_post_delete_student()
+
+    return post_handled
+
+
 def handle_school_list(request, context):
+#This handler goes with school_list.html (remember to include school_list_javascript.html in the appropriate place)
 
     school_list_message_tag = "school_list"
 
@@ -36,6 +86,7 @@ def handle_school_list(request, context):
         return handle_post
 
     context['administrator_list'] = Administrator.objects.all()
+    context['school_list_message_tag'] = school_list_message_tag
     context['add_school_form'] = AddSchoolForm()
     context['edit_school_form'] = EditSchoolForm()
 

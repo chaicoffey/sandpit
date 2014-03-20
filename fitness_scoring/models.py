@@ -1,25 +1,6 @@
 from django.db import models
 import datetime
 
-# Create your models here.
-
-
-def create_school_and_administrator(name, subscription_paid):
-
-    school_created = create_school(name, subscription_paid)
-
-    if school_created:
-
-        school = School.objects.get(name=name)
-
-        username_base = 'admin_' + name[0:3]
-        if not create_administrator(username=username_base, password='admin', school_id=school):
-            incremental = 1
-            while not create_administrator(username=(username_base + str(incremental)), password='admin', school_id=school):
-                incremental += 1
-
-    return school_created
-
 
 class School(models.Model):
     name = models.CharField(max_length=300, unique=True)
@@ -27,9 +8,6 @@ class School(models.Model):
 
     def __unicode__(self):
         return self.name
-
-    def get_school_name_padded(self, padding):
-        return self.name+"&nbsp"*(padding - len(self.name))
 
     def get_subscription_paid_text(self):
         if self.subscription_paid:
@@ -54,34 +32,47 @@ class School(models.Model):
             self.save()
         return is_edit_safe
 
+    @staticmethod
+    def create_school_and_administrator(name, subscription_paid):
 
-def create_school(name, subscription_paid):
+        school_created = School.create_school(name, subscription_paid)
 
-    school_name_unique = (len(School.objects.filter(name=name)) == 0)
+        if school_created:
 
-    if school_name_unique:
-        School.objects.create(name=name, subscription_paid=subscription_paid)
+            school = School.objects.get(name=name)
 
-    return school_name_unique
+            username_base = 'admin_' + name[0:3]
+            if not Administrator.create_administrator(username=username_base, password='admin', school_id=school):
+                incremental = 1
+                while not Administrator.create_administrator(username=(username_base + str(incremental)), password='admin', school_id=school):
+                    incremental += 1
 
+        return school_created
 
-def update_school(name, subscription_paid):
+    @staticmethod
+    def create_school(name, subscription_paid):
 
-    school_updated = False
+        school_name_unique = (len(School.objects.filter(name=name)) == 0)
 
-    school_name_exists = (len(School.objects.filter(name=name)) == 1)
-    if school_name_exists:
-        school = School.objects.get(name=name)
-        school_updated = not (school.subscription_paid == subscription_paid)
-        if school_updated:
-            school.subscription_paid = subscription_paid
-            school.save()
+        if school_name_unique:
+            School.objects.create(name=name, subscription_paid=subscription_paid)
 
-    return school_updated
+        return school_name_unique
 
+    @staticmethod
+    def update_school(name, subscription_paid):
 
-def get_school_name_max_length():
-    return len(max([school.name for school in School.objects.all()], key=len))
+        school_updated = False
+
+        school_name_exists = (len(School.objects.filter(name=name)) == 1)
+        if school_name_exists:
+            school = School.objects.get(name=name)
+            school_updated = not (school.subscription_paid == subscription_paid)
+            if school_updated:
+                school.subscription_paid = subscription_paid
+                school.save()
+
+        return school_updated
 
 
 class User(models.Model):
@@ -108,46 +99,46 @@ class Teacher(models.Model):
     def __unicode__(self):
         return self.first_name + " " + self.surname
 
+    @staticmethod
+    def create_teacher(check_name, first_name, surname, school_id, username, password):
 
-def create_teacher(check_name, first_name, surname, school_id, username, password):
-
-    username_unique = (len(User.objects.filter(username=username)) == 0)
-    if check_name:
-        username_unique = username_unique and (len(Teacher.objects.filter(school_id=school_id, first_name=first_name, surname=surname)) == 0)
-
-    if username_unique:
-        user = User.objects.create(username=username, password=password)
-        Teacher.objects.create(first_name=first_name, surname=surname, school_id=school_id, user=user)
-
-    return username_unique
-
-
-def update_teacher(check_name, first_name, surname, school_id, username, password):
-
-    user_exists = (len(User.objects.filter(username=username)) == 1)
-
-    teacher_exists = False
-    if user_exists:
-        user = User.objects.get(username=username)
+        username_unique = (len(User.objects.filter(username=username)) == 0)
         if check_name:
-            teacher_exists = (len(Teacher.objects.filter(school_id=school_id, first_name=first_name, surname=surname, user=user)) == 1)
-        else:
-            teacher_exists = (len(Teacher.objects.filter(school_id=school_id, user=user)) == 1)
+            username_unique = username_unique and (len(Teacher.objects.filter(school_id=school_id, first_name=first_name, surname=surname)) == 0)
 
-    teacher_updated = False
-    if teacher_exists:
-        teacher = Teacher.objects.get(user=user)
-        teacher_updated = not ((teacher.first_name == first_name) and (teacher.surname == surname) and (teacher.school_id == school_id) and (user.password == password))
+        if username_unique:
+            user = User.objects.create(username=username, password=password)
+            Teacher.objects.create(first_name=first_name, surname=surname, school_id=school_id, user=user)
 
-    if teacher_updated:
-        teacher.first_name = first_name
-        teacher.surname = surname
-        teacher.school_id = school_id
-        teacher.save()
-        user.password = password
-        user.save()
+        return username_unique
 
-    return teacher_updated
+    @staticmethod
+    def update_teacher(check_name, first_name, surname, school_id, username, password):
+
+        user_exists = (len(User.objects.filter(username=username)) == 1)
+
+        teacher_exists = False
+        if user_exists:
+            user = User.objects.get(username=username)
+            if check_name:
+                teacher_exists = (len(Teacher.objects.filter(school_id=school_id, first_name=first_name, surname=surname, user=user)) == 1)
+            else:
+                teacher_exists = (len(Teacher.objects.filter(school_id=school_id, user=user)) == 1)
+
+        teacher_updated = False
+        if teacher_exists:
+            teacher = Teacher.objects.get(user=user)
+            teacher_updated = not ((teacher.first_name == first_name) and (teacher.surname == surname) and (teacher.school_id == school_id) and (user.password == password))
+
+        if teacher_updated:
+            teacher.first_name = first_name
+            teacher.surname = surname
+            teacher.school_id = school_id
+            teacher.save()
+            user.password = password
+            user.save()
+
+        return teacher_updated
 
 
 class Administrator(models.Model):
@@ -157,16 +148,16 @@ class Administrator(models.Model):
     def __unicode__(self):
         return self.user.username
 
+    @staticmethod
+    def create_administrator(username, password, school_id):
 
-def create_administrator(username, password, school_id):
+        username_unique = (len(User.objects.filter(username=username)) == 0)
 
-    username_unique = (len(User.objects.filter(username=username)) == 0)
+        if username_unique:
+            user = User.objects.create(username=username, password=password)
+            Administrator.objects.create(school_id=school_id, user=user)
 
-    if username_unique:
-        user = User.objects.create(username=username, password=password)
-        Administrator.objects.create(school_id=school_id, user=user)
-
-    return username_unique
+        return username_unique
 
 
 class Student(models.Model):
@@ -180,41 +171,59 @@ class Student(models.Model):
     def __unicode__(self):
         return self.first_name + " " + self.surname
 
+    def delete_student_safe(self):
+        student_not_used = len(StudentClassEnrolment.objects.filter(student_id=self)) == 0
+        if student_not_used:
+            self.delete()
+        return student_not_used
 
-def create_student(check_name, student_id, school_id, first_name, surname, gender, dob):
+    def edit_student_safe(self, student_id, school_id, first_name, surname, gender, dob):
+        is_edit_safe = (self.student_id == student_id) or (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 0)
+        if is_edit_safe:
+            self.student_id = student_id
+            self.school_id = school_id
+            self.first_name = first_name
+            self.surname = surname
+            self.gender = gender
+            self.dob = dob
+            self.save()
+        return is_edit_safe
 
-    student_unique = (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 0)
-    if check_name:
-        student_unique = student_unique and (len(Student.objects.filter(school_id=school_id,
-                                                                        first_name=first_name,
-                                                                        surname=surname)) == 0)
+    @staticmethod
+    def create_student(check_name, student_id, school_id, first_name, surname, gender, dob):
 
-    if student_unique:
-        Student.objects.create(student_id=student_id, school_id=school_id, first_name=first_name, surname=surname, gender=gender, dob=dob)
+        student_unique = (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 0)
+        if check_name:
+            student_unique = student_unique and (len(Student.objects.filter(school_id=school_id,
+                                                                            first_name=first_name,
+                                                                            surname=surname)) == 0)
 
-    return student_unique
+        if student_unique:
+            Student.objects.create(student_id=student_id, school_id=school_id, first_name=first_name, surname=surname, gender=gender, dob=dob)
 
+        return student_unique
 
-def update_student(check_name, student_id, school_id, first_name, surname, gender, dob):
+    @staticmethod
+    def update_student(check_name, student_id, school_id, first_name, surname, gender, dob):
 
-    if check_name:
-        student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id, first_name=first_name, surname=surname)) == 1)
-    else:
-        student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 1)
+        if check_name:
+            student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id, first_name=first_name, surname=surname)) == 1)
+        else:
+            student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 1)
 
-    student_updated = student_exists
-    if student_exists:
-        student = Student.objects.get(school_id=school_id, student_id=student_id)
-        student_updated = not ((student.school_id == school_id) and (student.first_name == first_name) and (student.surname == surname) and (student.gender == gender) and (student.dob == datetime.datetime.strptime(dob, "%Y-%m-%d").date()))
-        if student_updated:
-            student.school_id = school_id
-            student.first_name = first_name
-            student.surname = surname
-            student.gender = gender
-            student.dob = dob
-            student.save()
+        student_updated = student_exists
+        if student_exists:
+            student = Student.objects.get(school_id=school_id, student_id=student_id)
+            student_updated = not ((student.school_id == school_id) and (student.first_name == first_name) and (student.surname == surname) and (student.gender == gender) and (student.dob == datetime.datetime.strptime(dob, "%Y-%m-%d").date()))
+            if student_updated:
+                student.school_id = school_id
+                student.first_name = first_name
+                student.surname = surname
+                student.gender = gender
+                student.dob = dob
+                student.save()
 
-    return student_updated
+        return student_updated
 
 
 class Class(models.Model):
