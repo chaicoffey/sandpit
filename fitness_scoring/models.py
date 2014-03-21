@@ -178,11 +178,15 @@ class Administrator(models.Model):
 
 
 class Student(models.Model):
+    GENDER_CHOICES = (
+        ('M', 'Male'),
+        ('F', 'Female')
+    )
     student_id = models.CharField(max_length=30)
     school_id = models.ForeignKey(School)
     first_name = models.CharField(max_length=100)
     surname = models.CharField(max_length=100)
-    gender = models.CharField(max_length=1)
+    gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='M')
     dob = models.DateField()
 
     def __unicode__(self):
