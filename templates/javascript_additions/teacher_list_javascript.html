@@ -1,8 +1,29 @@
+{% autoescape off %}
+
+{{ add_teacher_form.get_javascript_validation_function }}
+{{ edit_teacher_form.get_javascript_validation_function }}
+{{ edit_teacher_form.get_javascript_show_modal_function }}
+
+{% endautoescape %}
+
+function validateAddTeachersFields()
+{
+
+    var form = document.forms['addTeachersForm'];
+
+    var addTeachersFile = form.elements["add_teachers_file"].value
+    var addTeachersFileValid = (addTeachersFile != '')
+    if(!addTeachersFileValid) {
+        var addTeachersFileErrorMessage = document.getElementById("addTeachersFileErrorMessageLabel")
+        addTeachersFileErrorMessage.style.display = 'inherit'
+        addTeachersFileErrorMessage.innerHTML = "- Please select CSV file";
+    }
+
+    return addTeachersFileValid;
+
+}
+
 $(document).ready(function(){
-    // jQuery methods go here...
-    $('#addTeacherModal').modal('{{ add_teacher_modal_hide_or_show }}');
-    $('#addTeachersModal').modal('{{ add_teachers_modal_hide_or_show }}');
-    $('#editTeacherModal').modal('{{ edit_teacher_modal_hide_or_show }}');
     $('#teacher_list').dataTable( {
         "aoColumnDefs": [
             { 'bSortable': false, 'aTargets': [ -2, -1 ] }

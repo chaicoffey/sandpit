@@ -99,6 +99,23 @@ class Teacher(models.Model):
     def __unicode__(self):
         return self.first_name + " " + self.surname
 
+    def delete_teacher_safe(self):
+        teacher_not_used = (len(TeacherClassAllocation.objects.filter(teacher_id=self)) == 0)
+        if teacher_not_used:
+            self.user.delete()
+            self.delete()
+        return teacher_not_used
+
+    def edit_teacher_safe(self, first_name, surname, school_id, username, password):
+        is_edit_safe = (self.user.username == username) or (len(User.objects.filter(username=username)) == 0)
+        if is_edit_safe:
+            self.first_name = first_name
+            self.surname = surname
+            self.user.delete()
+            self.user = User.objects.create(username=username, password=password)
+            self.save()
+        return is_edit_safe
+
     @staticmethod
     def create_teacher(check_name, first_name, surname, school_id, username, password):
 
@@ -172,7 +189,7 @@ class Student(models.Model):
         return self.first_name + " " + self.surname
 
     def delete_student_safe(self):
-        student_not_used = len(StudentClassEnrolment.objects.filter(student_id=self)) == 0
+        student_not_used = (len(StudentClassEnrolment.objects.filter(student_id=self)) == 0)
         if student_not_used:
             self.delete()
         return student_not_used

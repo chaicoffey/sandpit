@@ -1,14 +1,9 @@
 from django.shortcuts import render, redirect
 from django.template import RequestContext
 from django.contrib import messages
-from fitness_scoring.models import Teacher, Administrator, SuperUser, User, School, Class, TeacherClassAllocation
-from fitness_scoring.forms import AddTeacherForm, AddTeachersForm, EditTeacherForm
+from fitness_scoring.models import Teacher, Administrator, SuperUser, School, Class, TeacherClassAllocation
 from fitness_scoring.forms import AddClassForm, EditClassForm
-from fileio import add_teachers_from_file_upload
-from view_handlers import handle_logged_in, handle_student_list, handle_school_list
-
-# Create your views here.
-last_active_tab = 'teacher_list'  # This is a hack and should be fixed.
+from view_handlers import handle_logged_in, handle_teacher_list, handle_student_list, handle_school_list
 
 
 def logout_user(request):
@@ -98,23 +93,15 @@ def teacher(request):
 def administrator(request):
     if request.session.get('user_type', None) == 'Administrator':
 
+        last_active_tab1 = 'teacher_list'
+
         school_id = School.objects.get(name=request.session.get('school_name', None))
-        last_active_tab = 'student_list'
-        (add_teacher_form, add_teachers_form, edit_teacher_form, add_teacher_modal_visibility, add_teachers_modal_visibility, edit_teacher_modal_visibility) = teacher_list(request, school_id)
         (add_class_form, add_classes_form, edit_class_form, add_class_modal_visibility, add_classes_modal_visibility, edit_class_modal_visibility) = class_list(request, school_id)
 
         context = {'user_type': 'Administrator',
                    'name': request.session.get('username', None),
                    'school_name': request.session.get('school_name', None),
                    'submit_to_page': '/administrator/',
-                   'teacher_list': Teacher.objects.filter(school_id=school_id),
-                   'add_teacher_form': add_teacher_form,
-                   'add_teachers_form': add_teachers_form,
-                   'edit_teacher_form': edit_teacher_form,
-                   'last_active_tab': last_active_tab,
-                   'add_teacher_modal_hide_or_show': add_teacher_modal_visibility,
-                   'add_teachers_modal_hide_or_show': add_teachers_modal_visibility,
-                   'edit_teacher_modal_hide_or_show': edit_teacher_modal_visibility,
                    'class_list': Class.objects.filter(school_id=school_id),
                    'add_class_form': add_class_form,
                    'add_classes_form': add_classes_form,
@@ -123,7 +110,12 @@ def administrator(request):
                    'add_classes_modal_hide_or_show': add_classes_modal_visibility,
                    'edit_class_modal_hide_or_show': edit_class_modal_visibility}
 
-        handle_student_list(request, context)
+        if handle_teacher_list(request, context):
+            last_active_tab1 = 'teacher_list'
+        elif handle_student_list(request, context):
+            last_active_tab1 = 'student_list'
+
+        context['last_active_tab'] = last_active_tab1
 
         return render(request, 'administrator.html', RequestContext(request, context))
     else:
@@ -141,91 +133,6 @@ def superuser(request):
         return render(request, 'superuser.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
-
-
-def teacher_list(request, school_id):
-    add_teacher_form = AddTeacherForm()
-    add_teachers_form = AddTeachersForm()
-    edit_teacher_form = EditTeacherForm()
-    add_teacher_modal_visibility = 'hide'
-    add_teachers_modal_visibility = 'hide'
-    edit_teacher_modal_visibility = 'hide'
-    global last_active_tab
-    if request.method == 'POST':
-        if request.POST.get('SubmitIdentifier') == 'AddTeacher':
-            # If the form has been submitted
-            last_active_tab = 'teacher_list'
-            add_teacher_form = AddTeacherForm(request.POST)  # A form bound to the POST data
-            if add_teacher_form.is_valid():
-                first_name = add_teacher_form.cleaned_data['first_name']
-                surname = add_teacher_form.cleaned_data['surname']
-                username = add_teacher_form.cleaned_data['username']
-                password = add_teacher_form.cleaned_data['password']
-                if Teacher.create_teacher(check_name=False, first_name=first_name, surname=surname, school_id=school_id, username=username, password=password):
-                    add_teacher_form = AddTeacherForm()
-                    messages.success(request, "Teacher Added: " + first_name + " " + surname + " (" + username + ")", extra_tags="teacher_list")
-                else:
-                    messages.success(request, "Error Adding Teacher: " + first_name + " " + surname + " (" + username + ") (Username Already Exists)", extra_tags="teacher_list")
-            else:
-                add_teacher_modal_visibility = 'show'
-        elif request.POST.get('SubmitIdentifier') == 'AddTeachers':
-            # If the form has been submitted
-            last_active_tab = 'teacher_list'
-            add_teachers_form = AddTeachersForm(request.POST, request.FILES)  # A form bound to the POST data
-            if add_teachers_form.is_valid():
-                (n_created, n_updated, n_not_created_or_updated) = add_teachers_from_file_upload(request.FILES['add_teachers_file'], school_id)
-                messages.success(request, "Summary of changes made from .CSV: ", extra_tags="teacher_list")
-                messages.success(request, "Teachers Created: "+str(n_created), extra_tags="teacher_list")
-                messages.success(request, "Teachers Updated: "+str(n_updated), extra_tags="teacher_list")
-                messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated), extra_tags="teacher_list")
-            else:
-                add_teachers_modal_visibility = 'show'
-        elif request.POST.get('SubmitIdentifier') == 'DeleteTeacher':
-            last_active_tab = 'teacher_list'
-            teacher_pk = request.POST.get('teacher_pk')
-            teacher_to_delete = Teacher.objects.get(pk=teacher_pk)
-            if len(TeacherClassAllocation.objects.filter(teacher_id=teacher_to_delete)) == 0:
-                first_name = teacher_to_delete.first_name
-                surname = teacher_to_delete.surname
-                username = teacher_to_delete.user.username
-                teacher_to_delete.user.delete()
-                teacher_to_delete.delete()
-                messages.success(request, "Teacher Deleted: " + first_name + " " + surname + " (" + username + ")", extra_tags="teacher_list")
-            else:
-                messages.success(request, "Error Deleting Teacher: " + teacher_to_delete.first_name + " " + teacher_to_delete.surname + " (" + teacher_to_delete.user.username + ") (Teacher Has Classes)", extra_tags="teacher_list")
-        elif request.POST.get('SubmitIdentifier') == 'EditTeacher':
-            last_active_tab = 'teacher_list'
-            teacher_pk = request.POST.get('teacher_pk')
-            teacher = Teacher.objects.get(pk=teacher_pk)
-            request.session['edit_teacher_pk'] = teacher_pk
-            edit_teacher_form = EditTeacherForm(initial={'first_name': teacher.first_name, 'surname': teacher.surname, 'username': teacher.user.username, 'password': teacher.user.password})
-            edit_teacher_modal_visibility = 'show'
-        elif request.POST.get('SubmitIdentifier') == 'SaveTeacher':
-            last_active_tab = 'teacher_list'
-            edit_teacher_form = EditTeacherForm(request.POST)
-            if edit_teacher_form.is_valid():
-                teacher_pk = request.session.get('edit_teacher_pk')
-                teacher = Teacher.objects.get(pk=teacher_pk)
-                teacher_username_old = teacher.user.username
-                teacher_username_new = edit_teacher_form.cleaned_data['username']
-                if (teacher_username_old == teacher_username_new) or \
-                        (len(User.objects.filter(username=teacher_username_new)) == 0):
-                    teacher.first_name = edit_teacher_form.cleaned_data['first_name']
-                    teacher.surname = edit_teacher_form.cleaned_data['surname']
-                    teacher.user.delete()
-                    teacher.user = User.objects.create(username=teacher_username_new,
-                                                       password=edit_teacher_form.cleaned_data['password'])
-                    teacher.save()
-                    messages.success(request, "Teacher Edited: "
-                                              + teacher.first_name + " "
-                                              + teacher.surname + " (" + teacher_username_old + ")",
-                                     extra_tags="teacher_list")
-                else:
-                    messages.success(request, "Error Editing Teacher: " + teacher.first_name + " " + teacher.surname + " (" + teacher_username_old + ") (Username Already Exists: " + teacher_username_new + ")", extra_tags="teacher_list")
-            else:
-                edit_teacher_modal_visibility = 'show'
-
-    return add_teacher_form, add_teachers_form, edit_teacher_form, add_teacher_modal_visibility, add_teachers_modal_visibility, edit_teacher_modal_visibility
 
 
 def class_list(request, school_id):

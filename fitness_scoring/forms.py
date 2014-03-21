@@ -15,7 +15,7 @@ class AddStudentForm(forms.Form):
         if form_posted_from:
             if self.is_valid():
                 student_string = self.get_first_name() + " " + self.get_surname() + " (" + self.get_student_id() + ")"
-                if Student.create_student(check_name=False, student_id=self.get_student_id(), school_id=School.objects.get(name=request.session.get('school_name', None)), first_name=self.get_first_name(), surname=self.get_surname(), gender=self.get_gender(), dob=self.get_dob()):
+                if self.add_student_safe(School.objects.get(name=request.session.get('school_name', None))):
                     messages.success(request, "Student Added: " + student_string, extra_tags=messages_tag)
                 else:
                     messages.success(request, "Error Adding Student: " + student_string + " (Student ID Already Exists)", extra_tags=messages_tag)
@@ -317,16 +317,239 @@ class AddTeacherForm(forms.Form):
     username = forms.CharField(max_length=100)
     password = forms.CharField(max_length=128)
 
+    def handle_posted_form(self, request, messages_tag):
+        form_posted_from = (request.POST.get(self.get_add_teacher_button_name()) == self.get_add_teacher_button_value())
+        if form_posted_from:
+            if self.is_valid():
+                teacher_string = self.get_first_name() + " " + self.get_surname() + " (" + self.get_username() + ")"
+                if self.add_teacher_safe(School.objects.get(name=request.session.get('school_name', None))):
+                    messages.success(request, "Teacher Added: " + teacher_string, extra_tags=messages_tag)
+                else:
+                    messages.success(request, "Error Adding Teacher: " + teacher_string + " (Username Already Exists)", extra_tags=messages_tag)
+            else:
+                messages.success(request, "Add Teacher Validation Error", extra_tags=messages_tag)
+        return form_posted_from
 
-class AddTeachersForm(forms.Form):
-    add_teachers_file = forms.FileField()
+    def add_teacher_safe(self, school_id):
+        return Teacher.create_teacher(check_name=False, first_name=self.get_first_name(), surname=self.get_surname(), school_id=school_id, username=self.get_username(), password=self.get_password())
+
+    def get_first_name(self):
+        return self.cleaned_data['first_name']
+
+    def get_surname(self):
+        return self.cleaned_data['surname']
+
+    def get_username(self):
+        return self.cleaned_data['username']
+
+    def get_password(self):
+        return self.cleaned_data['password']
+
+    @staticmethod
+    def get_add_teacher_button_name():
+        return "AddTeacherIdentifier"
+
+    @staticmethod
+    def get_add_teacher_button_value():
+        return "AddTeacher"
+
+    @staticmethod
+    def get_form_name():
+        return "addTeacherForm"
+
+    @staticmethod
+    def get_error_message_label_id_prefix():
+        return "addTeacherErrorMessageLabel_"
+
+    @staticmethod
+    def get_javascript_validation_call():
+        return "validateAddTeacherFields()"
+
+    @staticmethod
+    def get_javascript_validation_function():
+        return \
+            "function validateAddTeacherFields()\n\
+            {\n\
+            \n\
+                var form = document.forms['addTeacherForm'];\n\
+            \n\
+                var firstNameErrorMessage = document.getElementById('addTeacherErrorMessageLabel_first_name');\n\
+                var surnameErrorMessage = document.getElementById('addTeacherErrorMessageLabel_surname');\n\
+                var usernameErrorMessage = document.getElementById('addTeacherErrorMessageLabel_username');\n\
+                var passwordErrorMessage = document.getElementById('addTeacherErrorMessageLabel_password');\n\
+                \n\
+                firstNameErrorMessage.style.display = 'none';\n\
+                surnameErrorMessage.style.display = 'none';\n\
+                usernameErrorMessage.style.display = 'none';\n\
+                passwordErrorMessage.style.display = 'none';\n\
+                \n\
+                var firstName = form.elements['first_name'].value;\n\
+                var firstNameEntered = (firstName != '')\n\
+                if(!firstNameEntered) {\n\
+                    firstNameErrorMessage.style.display = 'inherit';\n\
+                    firstNameErrorMessage.innerHTML = '- Please enter First Name';\n\
+                }\n\
+                \n\
+                var surname = form.elements['surname'].value;\n\
+                var surnameEntered = (surname != '')\n\
+                if(!surnameEntered) {\n\
+                    surnameErrorMessage.style.display = 'inherit';\n\
+                    surnameErrorMessage.innerHTML = '- Please enter Surname';\n\
+                }\n\
+                \n\
+                var username = form.elements['username'].value;\n\
+                var usernameEntered = (username != '')\n\
+                if(!usernameEntered) {\n\
+                    usernameErrorMessage.style.display = 'inherit';\n\
+                    usernameErrorMessage.innerHTML = '- Please enter Username';\n\
+                }\n\
+                \n\
+                var password = form.elements['password'].value;\n\
+                var passwordEntered = (password != '')\n\
+                if(!passwordEntered) {\n\
+                    passwordErrorMessage.style.display = 'inherit';\n\
+                    passwordErrorMessage.innerHTML = '- Please enter Password';\n\
+                }\n\
+            \n\
+                return firstNameEntered && surnameEntered && usernameEntered && passwordEntered;\n\
+            \n\
+            }\n"
 
 
 class EditTeacherForm(forms.Form):
+    teacher_pk = forms.CharField(widget=forms.HiddenInput())
     first_name = forms.CharField(max_length=100)
     surname = forms.CharField(max_length=100)
     username = forms.CharField(max_length=100)
     password = forms.CharField(max_length=128)
+
+    def handle_posted_form(self, request, messages_tag):
+        form_posted_from = (request.POST.get(self.get_edit_teacher_button_name()) == self.get_edit_teacher_button_value())
+        if form_posted_from:
+            if self.is_valid():
+                teacher_string = self.get_first_name() + " " + self.get_surname() + " (" + self.get_username() + ")"
+                if self.edit_teacher_safe(School.objects.get(name=request.session.get('school_name', None))):
+                    messages.success(request, "Teacher Edited: " + teacher_string, extra_tags=messages_tag)
+                else:
+                    messages.success(request, "Error Editing Teacher: " + teacher_string + " (Username Already Exists)", extra_tags=messages_tag)
+            else:
+                messages.success(request, "Edit Teacher Validation Error", extra_tags=messages_tag)
+        return form_posted_from
+
+    def edit_teacher_safe(self, school_id):
+        return Teacher.objects.get(pk=self.get_teacher_pk()).edit_teacher_safe(first_name=self.get_first_name(), surname=self.get_surname(), school_id=school_id, username=self.get_username(), password=self.get_password())
+
+    def get_teacher_pk(self):
+        return self.cleaned_data['teacher_pk']
+
+    def get_first_name(self):
+        return self.cleaned_data['first_name']
+
+    def get_surname(self):
+        return self.cleaned_data['surname']
+
+    def get_username(self):
+        return self.cleaned_data['username']
+
+    def get_password(self):
+        return self.cleaned_data['password']
+
+    @staticmethod
+    def get_edit_teacher_button_name():
+        return "EditTeacherIdentifier"
+
+    @staticmethod
+    def get_edit_teacher_button_value():
+        return "EditTeacher"
+
+    @staticmethod
+    def get_form_name():
+        return "editTeacherForm"
+
+    @staticmethod
+    def get_modal_id():
+        return "editTeacherModal"
+
+    @staticmethod
+    def get_error_message_label_id_prefix():
+        return "editTeacherErrorMessageLabel_"
+
+    @staticmethod
+    def get_javascript_validation_call():
+        return "validateEditTeacherFields()"
+
+    @staticmethod
+    def get_javascript_show_modal_call():
+        return "showEditTeacherModal"
+
+    @staticmethod
+    def get_javascript_validation_function():
+        return \
+            "function validateEditTeacherFields()\n\
+            {\n\
+            \n\
+                var form = document.forms['editTeacherForm'];\n\
+            \n\
+                var firstNameErrorMessage = document.getElementById('editTeacherErrorMessageLabel_first_name');\n\
+                var surnameErrorMessage = document.getElementById('editTeacherErrorMessageLabel_surname');\n\
+                var usernameErrorMessage = document.getElementById('editTeacherErrorMessageLabel_username');\n\
+                var passwordErrorMessage = document.getElementById('editTeacherErrorMessageLabel_password');\n\
+                \n\
+                firstNameErrorMessage.style.display = 'none';\n\
+                surnameErrorMessage.style.display = 'none';\n\
+                usernameErrorMessage.style.display = 'none';\n\
+                passwordErrorMessage.style.display = 'none';\n\
+                \n\
+                var firstName = form.elements['first_name'].value;\n\
+                var firstNameEntered = (firstName != '')\n\
+                if(!firstNameEntered) {\n\
+                    firstNameErrorMessage.style.display = 'inherit';\n\
+                    firstNameErrorMessage.innerHTML = '- Please enter First Name';\n\
+                }\n\
+                \n\
+                var surname = form.elements['surname'].value;\n\
+                var surnameEntered = (surname != '')\n\
+                if(!surnameEntered) {\n\
+                    surnameErrorMessage.style.display = 'inherit';\n\
+                    surnameErrorMessage.innerHTML = '- Please enter Surname';\n\
+                }\n\
+                \n\
+                var username = form.elements['username'].value;\n\
+                var usernameEntered = (username != '')\n\
+                if(!usernameEntered) {\n\
+                    usernameErrorMessage.style.display = 'inherit';\n\
+                    usernameErrorMessage.innerHTML = '- Please enter Username';\n\
+                }\n\
+                \n\
+                var password = form.elements['password'].value;\n\
+                var passwordEntered = (password != '')\n\
+                if(!passwordEntered) {\n\
+                    passwordErrorMessage.style.display = 'inherit';\n\
+                    passwordErrorMessage.innerHTML = '- Please enter Password';\n\
+                }\n\
+            \n\
+                return firstNameEntered && surnameEntered && usernameEntered && passwordEntered;\n\
+            \n\
+            }\n"
+
+    @staticmethod
+    def get_javascript_show_modal_function():
+        return \
+            "function showEditTeacherModal(teacher_pk, first_name, surname, username, password)\n\
+            {\n\
+            \n\
+                var modalForm = document.forms['editTeacherForm'];\n\
+            \n\
+                modalForm.elements['teacher_pk'].value = teacher_pk;\n\
+                modalForm.elements['first_name'].value = first_name;\n\
+                modalForm.elements['surname'].value = surname;\n\
+                modalForm.elements['username'].value = username;\n\
+                modalForm.elements['password'].value = password;\n\
+                validateEditTeacherFields()\n\
+            \n\
+                $('#editTeacherModal').modal('show');\n\
+            \n\
+            }\n"
 
 
 class ClassForm(forms.ModelForm):
@@ -446,7 +669,7 @@ class EditSchoolForm(forms.Form):
                 if self.save_school():
                     messages.success(request, "School Edited: " + school_name_old, extra_tags=messages_tag)
                 else:
-                    messages.success(request, "Error Editing Student: " + school_name_old + " (School Name Already Exists: " + self.get_name() + ")", extra_tags=messages_tag)
+                    messages.success(request, "Error Editing School: " + school_name_old + " (School Name Already Exists: " + self.get_name() + ")", extra_tags=messages_tag)
             else:
                 messages.success(request, "Edit School Validation Error", extra_tags=messages_tag)
         return form_posted_from
