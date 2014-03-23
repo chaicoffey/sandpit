@@ -81,11 +81,20 @@ def check_password(password, encrypted_password):
 
 def teacher(request):
     if request.session.get('user_type', None) == 'Teacher':
-        return render(request, 'teacher.html',
-                      RequestContext(request,
-                                     {'user_type': 'Teacher',
-                                      'name': request.session.get('teacher_full_name', None),
-                                      'school_name': request.session.get('school_name', None)}))
+
+        last_active_tab1 = 'student_list'
+
+        context = {'user_type': 'Teacher',
+                   'name': request.session.get('username', None),
+                   'school_name': request.session.get('school_name', None),
+                   'submit_to_page': '/teacher/'}
+
+        if handle_student_list(request, context, csv_available=False):
+            last_active_tab1 = 'student_list'
+
+        context['last_active_tab'] = last_active_tab1
+
+        return render(request, 'teacher.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
 

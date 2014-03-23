@@ -59,7 +59,7 @@ def handle_teacher_list(request, context):
     return post_handled
 
 
-def handle_student_list(request, context):
+def handle_student_list(request, context, csv_available=True):
 #This handler goes with student_list.html (remember to include student_list_javascript.html in the appropriate place)
 
     student_list_message_tag = "student_list"
@@ -91,6 +91,7 @@ def handle_student_list(request, context):
     context['student_list_message_tag'] = student_list_message_tag
     context['add_student_form'] = AddStudentForm()
     context['edit_student_form'] = EditStudentForm()
+    context['csv_available'] = csv_available
 
     post_handled = False
 

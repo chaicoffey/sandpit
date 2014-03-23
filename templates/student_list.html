@@ -18,7 +18,9 @@
             </button>
             <ul class="dropdown-menu" role="menu">
                 <li><a href="" data-toggle="modal" data-target="#addStudentModal">Add Student</a></li>
+                {% if csv_available %}
                 <li><a href="" data-toggle="modal" data-target="#addStudentsModal">Add/Edit Students from .CSV</a></li>
+                {% endif %}
             </ul>
         </div>
     </div>
@@ -83,31 +85,33 @@
 </div>
 
 <!-- Add Students Modal -->
-<div class="modal fade" id="addStudentsModal" tabindex="-1" role="dialog" aria-labelledby="addStudentsModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form method="POST" name="addStudentsForm" enctype="multipart/form-data" action="{{ submit_to_page }}" class="form-horizontal" onsubmit="return validateAddStudentsFields()">
-          <div class="modal-header">
-            <h4 class="modal-title" id="addStudentsModalLabel">Add Students</h4>
-          </div>
-          <div class="modal-body">
-              {% csrf_token %}
-              <div class="form-group">
-                  <div class="col-sm-4"><label>Add Students File:</label></div>
-                  <div class="col-sm-8"><input type="file" name="add_students_file" id="add_students_file"/></div>
+{% if csv_available %}
+    <div class="modal fade" id="addStudentsModal" tabindex="-1" role="dialog" aria-labelledby="addStudentsModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form method="POST" name="addStudentsForm" enctype="multipart/form-data" action="{{ submit_to_page }}" class="form-horizontal" onsubmit="return validateAddStudentsFields()">
+              <div class="modal-header">
+                <h4 class="modal-title" id="addStudentsModalLabel">Add Students</h4>
               </div>
-              <div class="error_message">
-                  <label name="addStudentsFileErrorMessageLabel" id="addStudentsFileErrorMessageLabel" style="display: none"/>
+              <div class="modal-body">
+                  {% csrf_token %}
+                  <div class="form-group">
+                      <div class="col-sm-4"><label>Add Students File:</label></div>
+                      <div class="col-sm-8"><input type="file" name="add_students_file" id="add_students_file"/></div>
+                  </div>
+                  <div class="error_message">
+                      <label name="addStudentsFileErrorMessageLabel" id="addStudentsFileErrorMessageLabel" style="display: none"/>
+                  </div>
               </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary" id="SubmitIdentifier" name="SubmitIdentifier" value="AddStudents">Add Students</button>
-          </div>
-      </form>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" id="SubmitIdentifier" name="SubmitIdentifier" value="AddStudents">Add Students</button>
+              </div>
+          </form>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+{% endif %}
 
 <!-- Edit Student Modal -->
 <div class="modal fade" id="{{ edit_student_form.get_modal_id }}" tabindex="-1" role="dialog" aria-labelledby="editStudentModalLabel" aria-hidden="true">

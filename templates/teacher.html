@@ -4,6 +4,17 @@
 Teacher
 {% endblock %}
 
-{% block content_schooluser %}	
-Teacher page.   
+{% block content_schooluser %}
+    <ul class="nav nav-tabs">
+        <li {% if last_active_tab == 'student_list' %}class="active"{% endif %}><a href="#student_list_tab" data-toggle="tab">Student List</a></li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane {% if last_active_tab == 'student_list' %}active{% endif %}" id="student_list_tab">
+            {% include "student_list.html" %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascript_functionality %}
+    {% include "javascript_additions/student_list_javascript.html" %}
 {% endblock %}
