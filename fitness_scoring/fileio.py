@@ -1,6 +1,6 @@
 import csv
 import tempfile
-from fitness_scoring.models import Student, Teacher, School
+from fitness_scoring.models import Student, Teacher, Class, School
 import os
 
 destination_directory = 'C:\\fitness_scoring_file_uploads\\'
@@ -80,6 +80,39 @@ def add_teachers_from_file(file_path_on_server, school_id):
             n_created += 1
         else:
             if Teacher.update_teacher(check_name=False, first_name=first_name, surname=surname, school_id=school_id, username=username, password=password):
+                n_updated += 1
+            else:
+                n_not_created_or_updated += 1
+
+    return n_created, n_updated, n_not_created_or_updated
+
+
+def add_classes_from_file_upload(uploaded_file, school_id):
+    file_path_on_server = save_file(uploaded_file)
+    (n_created, n_updated, n_not_created_or_updated) = add_classes_from_file(file_path_on_server, school_id)
+    delete_file(file_path_on_server)
+    return n_created, n_updated, n_not_created_or_updated
+
+
+def add_classes_from_file(file_path_on_server, school_id):
+    file_handle = open(file_path_on_server, 'rb')
+
+    dialect = csv.Sniffer().sniff(file_handle.read(1024))
+    dialect.strict = True
+
+    file_handle.seek(0)
+    classes_list_reader = csv.DictReader(file_handle, dialect=dialect)
+    # check headings are correct else throw exception
+
+    n_created = 0
+    n_updated = 0
+    n_not_created_or_updated = 0
+    for line in classes_list_reader:
+        (year, class_name) = (line['year'], line['class_name'])
+        if Class.create_class(year=year, class_name=class_name, school_id=school_id):
+            n_created += 1
+        else:
+            if Class.update_class(year=year, class_name=class_name, school_id=school_id):
                 n_updated += 1
             else:
                 n_not_created_or_updated += 1

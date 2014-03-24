@@ -1,14 +1,19 @@
 
 from django.contrib import messages
-from fitness_scoring.forms import AddTeacherForm, EditTeacherForm, AddStudentForm, EditStudentForm, AddSchoolForm, EditSchoolForm
-from fitness_scoring.models import Teacher, Student, School, Administrator
-from fileio import add_teachers_from_file_upload, add_students_from_file_upload, add_schools_from_file_upload
+from fitness_scoring.forms import AddTeacherForm, EditTeacherForm, AddStudentForm, EditStudentForm, AddClassForm, EditClassForm, AddSchoolForm, EditSchoolForm
+from fitness_scoring.models import Teacher, Student, Class, School, Administrator
+from fileio import add_teachers_from_file_upload, add_students_from_file_upload, add_classes_from_file_upload, add_schools_from_file_upload
 
 
 def handle_logged_in(request, context):
 #This handler goes with loggedin.html
     context['user_type'] = request.session.get('user_type', None)
     context['name'] = request.session.get('username', None)
+
+
+def handle_school_user(request, context):
+#This handler goes with schooluser.html
+    context['school_name'] = request.session.get('school_name', None)
 
 
 def handle_teacher_list(request, context):
@@ -104,6 +109,55 @@ def handle_student_list(request, context, csv_available=True):
             post_handled = handle_post_add_students()
         if not post_handled:
             post_handled = handle_post_delete_student()
+
+    return post_handled
+
+
+def handle_class_list(request, context, csv_available=True):
+#This handler goes with class_list.html (remember to include class_list_javascript.html in the appropriate place)
+
+    class_list_message_tag = "class_list"
+
+    school_id = School.objects.get(name=request.session.get('school_name', None))
+
+    def handle_post_add_classes():
+        handle_post = (request.POST.get('SubmitIdentifier') == 'AddClasses')
+        if handle_post:
+            (n_created, n_updated, n_not_created_or_updated) = add_classes_from_file_upload(request.FILES['add_classes_file'], school_id)
+            messages.success(request, "Summary of changes made from .CSV: ", extra_tags=class_list_message_tag)
+            messages.success(request, "Classes Created: "+str(n_created), extra_tags=class_list_message_tag)
+            messages.success(request, "Classes Updated: "+str(n_updated), extra_tags=class_list_message_tag)
+            messages.success(request, "No Changes From Data Lines: "+str(n_not_created_or_updated), extra_tags=class_list_message_tag)
+        return handle_post
+
+    def handle_post_delete_class():
+        handle_post = (request.POST.get('SubmitIdentifier') == 'DeleteClass')
+        if handle_post:
+            class_to_delete = Class.objects.get(pk=request.POST.get('class_pk'))
+            class_string = class_to_delete.class_name + " (" + str(class_to_delete.year) + ")"
+            if class_to_delete.delete_class_safe():
+                messages.success(request, "Class Deleted: " + class_string, extra_tags=class_list_message_tag)
+            else:
+                messages.success(request, "Error Deleting Class: " + class_string + " (Class Enrolled In Classes)", extra_tags=class_list_message_tag)
+        return handle_post
+
+    context['class_list'] = Class.objects.filter(school_id=school_id)
+    context['class_list_message_tag'] = class_list_message_tag
+    context['add_class_form'] = AddClassForm()
+    context['edit_class_form'] = EditClassForm()
+    context['csv_available'] = csv_available
+
+    post_handled = False
+
+    if request.method == 'POST':
+        if not post_handled:
+            post_handled = AddClassForm(request.POST).handle_posted_form(request=request, messages_tag=class_list_message_tag)
+        if not post_handled:
+            post_handled = EditClassForm(request.POST).handle_posted_form(request=request, messages_tag=class_list_message_tag)
+        if not post_handled:
+            post_handled = handle_post_add_classes()
+        if not post_handled:
+            post_handled = handle_post_delete_class()
 
     return post_handled
 

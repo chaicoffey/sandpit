@@ -248,16 +248,54 @@ class Student(models.Model):
 
 
 class Class(models.Model):
-    YEAR_CHOICES = []
-    for r in range(2000, (datetime.datetime.now().year+2)):
-        YEAR_CHOICES.append((r, r))
-    year = models.IntegerField(max_length=4, choices=YEAR_CHOICES, default=datetime.datetime.now().year)
+    year = models.IntegerField(max_length=5)
     class_name = models.CharField(max_length=200)
     school_id = models.ForeignKey(School)
-    teachers = models.ManyToManyField(Teacher, through='TeacherClassAllocation', null=True, blank=True)
 
     def __unicode__(self):
         return self.class_name
+
+    def delete_class_safe(self):
+        class_not_used = (len(StudentClassEnrolment.objects.filter(class_id=self)) == 0) and (len(ClassTestSet.objects.filter(class_id=self)) == 0)
+        if class_not_used:
+            self.delete()
+        return class_not_used
+
+    def edit_class_safe(self, year, class_name, school_id):
+        is_edit_safe = ((self.year == year) and (self.class_name == class_name))or (len(Class.objects.filter(year=year, class_name=class_name, school_id=school_id)) == 0)
+        if is_edit_safe:
+            self.year = year
+            self.class_name = class_name
+            self.school_id = school_id
+            self.save()
+        return is_edit_safe
+
+    @staticmethod
+    def create_class(year, class_name, school_id):
+
+        class_unique = (len(Class.objects.filter(year=year, class_name=class_name, school_id=school_id)) == 0)
+
+        if class_unique:
+            Class.objects.create(year=year, class_name=class_name, school_id=school_id)
+
+        return class_unique
+
+    @staticmethod
+    def update_class(year, class_name, school_id):
+
+        class_exists = (len(Class.objects.filter(year=year, class_name=class_name, school_id=school_id)) == 1)
+
+        class_updated = class_exists
+        if class_exists:
+            classInstance = Class.objects.get(year=year, class_name=class_name, school_id=school_id)
+            class_updated = not ((classInstance.year == year) and (classInstance.class_name == class_name) and (classInstance.school_id == school_id))
+            if class_updated:
+                classInstance.year = year
+                classInstance.class_name = class_name
+                classInstance.school_id = school_id
+                classInstance.save()
+
+        return class_updated
 
 
 class TestCategory(models.Model):

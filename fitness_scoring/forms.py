@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib import messages
 from fitness_scoring.models import Student, School, Class, Teacher
+import datetime
 
 
 class AddStudentForm(forms.Form):
@@ -552,29 +553,199 @@ class EditTeacherForm(forms.Form):
             }\n"
 
 
-class ClassForm(forms.ModelForm):
-    class Meta:
-        model = Class
-        exclude = ('school_id',)
+class AddClassForm(forms.Form):
+    current_year = datetime.datetime.now().year
+    YEAR_CHOICES = []
+    for year in range(2000, (current_year+2)):
+        YEAR_CHOICES.append((str(year), str(year)))
+    year = forms.ChoiceField(choices=YEAR_CHOICES, initial=str(current_year))
+    class_name = forms.CharField(max_length=200)
 
-    def __init__(self, *args, **kwargs):
-        self.school_id = None
-        if 'school_id' in kwargs:
-            # First pop your kwargs that may bother the parent __init__ method
-            self.school_id = kwargs.pop('school_id')
-        # Then, let the ModelForm initialize:
-        super(ClassForm, self).__init__(*args, **kwargs)
-        if self.school_id is not None:
-            # Finally, access the fields dict that was created by the super().__init__ call
-            self.fields['teachers'].queryset = Teacher.objects.filter(school_id=self.school_id)
+    def handle_posted_form(self, request, messages_tag):
+        form_posted_from = (request.POST.get(self.get_add_class_button_name()) == self.get_add_class_button_value())
+        if form_posted_from:
+            if self.is_valid():
+                class_string = self.get_class_name() + " (" + self.get_year() + ")"
+                if self.add_class_safe(School.objects.get(name=request.session.get('school_name', None))):
+                    messages.success(request, "Class Added: " + class_string, extra_tags=messages_tag)
+                else:
+                    messages.success(request, "Error Adding Class: " + class_string + " Already Exists", extra_tags=messages_tag)
+            else:
+                messages.success(request, "Add Class Validation Error", extra_tags=messages_tag)
+        return form_posted_from
+
+    def add_class_safe(self, school_id):
+        return Class.create_class(year=self.get_year(), class_name=self.get_class_name(), school_id=school_id)
+
+    def get_year(self):
+        return self.cleaned_data['year']
+
+    def get_class_name(self):
+        return self.cleaned_data['class_name']
+
+    @staticmethod
+    def get_add_class_button_name():
+        return "AddClassIdentifier"
+
+    @staticmethod
+    def get_add_class_button_value():
+        return "AddClass"
+
+    @staticmethod
+    def get_form_name():
+        return "addClassForm"
+
+    @staticmethod
+    def get_error_message_label_id_prefix():
+        return "addClassErrorMessageLabel_"
+
+    @staticmethod
+    def get_javascript_validation_call():
+        return "validateAddClassFields()"
+
+    @staticmethod
+    def get_javascript_validation_function():
+        return \
+            "function validateAddClassFields()\n\
+            {\n\
+                \n\
+                var form = document.forms['addClassForm'];\n\
+                \n\
+                var yearErrorMessage = document.getElementById('addClassErrorMessageLabel_year');\n\
+                var classNameErrorMessage = document.getElementById('addClassErrorMessageLabel_class_name');\n\
+                \n\
+                yearErrorMessage.style.display = 'none';\n\
+                classNameErrorMessage.style.display = 'none';\n\
+                \n\
+                var year = form.elements['year'].value;\n\
+                var yearEntered = (year != '')\n\
+                if(!yearEntered) {\n\
+                    yearErrorMessage.style.display = 'inherit';\n\
+                    yearErrorMessage.innerHTML = '- Please enter Year';\n\
+                }\n\
+                \n\
+                var className = form.elements['class_name'].value;\n\
+                var classNameEntered = (className != '')\n\
+                if(!classNameEntered) {\n\
+                    classNameErrorMessage.style.display = 'inherit';\n\
+                    classNameErrorMessage.innerHTML = '- Please enter Class Name';\n\
+                }\n\
+                \n\
+                return yearEntered && classNameEntered;\n\
+                \n\
+            }\n"
 
 
-class AddClassForm(ClassForm):
-    pass
+class EditClassForm(forms.Form):
+    current_year = datetime.datetime.now().year
+    YEAR_CHOICES = []
+    for year in range(2000, (current_year+2)):
+        YEAR_CHOICES.append((str(year), str(year)))
+    class_pk = forms.CharField(widget=forms.HiddenInput())
+    year = forms.ChoiceField(choices=YEAR_CHOICES, initial=str(current_year))
+    class_name = forms.CharField(max_length=200)
 
+    def handle_posted_form(self, request, messages_tag):
+        form_posted_from = (request.POST.get(self.get_edit_class_button_name()) == self.get_edit_class_button_value())
+        if form_posted_from:
+            if self.is_valid():
+                class_string = self.get_class_name() + " (" + self.get_year() + ")"
+                if self.edit_class_safe(School.objects.get(name=request.session.get('school_name', None))):
+                    messages.success(request, "Class Edited: " + class_string, extra_tags=messages_tag)
+                else:
+                    messages.success(request, "Error Editing Class: " + class_string + " Already Exists", extra_tags=messages_tag)
+            else:
+                messages.success(request, "Edit Class Validation Error", extra_tags=messages_tag)
+        return form_posted_from
 
-class EditClassForm(ClassForm):
-    pass
+    def edit_class_safe(self, school_id):
+        return Class.objects.get(pk=self.get_class_pk()).edit_class_safe(year=self.get_year(), class_name=self.get_class_name(), school_id=school_id)
+
+    def get_class_pk(self):
+        return self.cleaned_data['class_pk']
+
+    def get_year(self):
+        return self.cleaned_data['year']
+
+    def get_class_name(self):
+        return self.cleaned_data['class_name']
+
+    @staticmethod
+    def get_edit_class_button_name():
+        return "EditClassIdentifier"
+
+    @staticmethod
+    def get_edit_class_button_value():
+        return "EditClass"
+
+    @staticmethod
+    def get_form_name():
+        return "editClassForm"
+
+    @staticmethod
+    def get_modal_id():
+        return "editClassModal"
+
+    @staticmethod
+    def get_error_message_label_id_prefix():
+        return "editClassErrorMessageLabel_"
+
+    @staticmethod
+    def get_javascript_validation_call():
+        return "validateEditClassFields()"
+
+    @staticmethod
+    def get_javascript_show_modal_call():
+        return "showEditClassModal"
+
+    @staticmethod
+    def get_javascript_validation_function():
+        return \
+            "function validateEditClassFields()\n\
+            {\n\
+                \n\
+                var form = document.forms['editClassForm'];\n\
+                \n\
+                var yearErrorMessage = document.getElementById('editClassErrorMessageLabel_year');\n\
+                var classNameErrorMessage = document.getElementById('editClassErrorMessageLabel_class_name');\n\
+                \n\
+                yearErrorMessage.style.display = 'none';\n\
+                classNameErrorMessage.style.display = 'none';\n\
+                \n\
+                var year = form.elements['year'].value;\n\
+                var yearEntered = (year != '')\n\
+                if(!yearEntered) {\n\
+                    yearErrorMessage.style.display = 'inherit';\n\
+                    yearErrorMessage.innerHTML = '- Please enter Year';\n\
+                }\n\
+                \n\
+                var className = form.elements['class_name'].value;\n\
+                var classNameEntered = (className != '')\n\
+                if(!classNameEntered) {\n\
+                    classNameErrorMessage.style.display = 'inherit';\n\
+                    classNameErrorMessage.innerHTML = '- Please enter Class Name';\n\
+                }\n\
+                \n\
+                return yearEntered && classNameEntered;\n\
+                \n\
+            }\n"
+
+    @staticmethod
+    def get_javascript_show_modal_function():
+        return \
+            "function showEditClassModal(class_pk, year, class_name)\n\
+            {\n\
+            \n\
+                var modalForm = document.forms['editClassForm'];\n\
+            \n\
+                modalForm.elements['class_pk'].value = class_pk;\n\
+                modalForm.elements['year'].value = year;\n\
+                modalForm.elements['class_name'].value = class_name;\n\
+                validateEditClassFields()\n\
+            \n\
+                $('#editClassModal').modal('show');\n\
+            \n\
+            }\n"
 
 
 class AddSchoolForm(forms.Form):

@@ -1,8 +1,29 @@
+{% autoescape off %}
+
+{{ add_class_form.get_javascript_validation_function }}
+{{ edit_class_form.get_javascript_validation_function }}
+{{ edit_class_form.get_javascript_show_modal_function }}
+
+{% endautoescape %}
+
+function validateAddClassesFields()
+{
+
+    var form = document.forms['addClassesForm'];
+
+    var addClassesFile = form.elements["add_classes_file"].value
+    var addClassesFileValid = (addClassesFile != '')
+    if(!addClassesFileValid) {
+        var addClassesFileErrorMessage = document.getElementById("addClassesFileErrorMessageLabel")
+        addClassesFileErrorMessage.style.display = 'inherit'
+        addClassesFileErrorMessage.innerHTML = "- Please select CSV file";
+    }
+
+    return addClassesFileValid;
+
+}
+
 $(document).ready(function(){
-    // jQuery methods go here...
-    $('#addClassModal').modal('{{ add_class_modal_hide_or_show }}');
-    $('#addClassesModal').modal('{{ add_classes_modal_hide_or_show }}');
-    $('#editClassModal').modal('{{ edit_class_modal_hide_or_show }}');
     $('#class_list').dataTable( {
         "aoColumnDefs": [
             { 'bSortable': false, 'aTargets': [ -2, -1 ] }
