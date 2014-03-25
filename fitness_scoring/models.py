@@ -267,6 +267,7 @@ class Class(models.Model):
 
     def edit_class_safe(self, year, class_name, school_id, teacher_id):
         is_edit_safe = ((str(self.year) == str(year)) and (self.class_name == class_name) and (self.school_id == school_id)) or (len(Class.objects.filter(year=year, class_name=class_name, school_id=school_id)) == 0)
+        is_edit_safe = is_edit_safe and (teacher_id.school_id == school_id)
         if is_edit_safe:
             allocation = TeacherClassAllocation.objects.get(class_id=self)
             allocation.teacher_id = teacher_id
@@ -281,19 +282,22 @@ class Class(models.Model):
     def create_class(year, class_name, school_id, teacher_id):
 
         class_unique = (len(Class.objects.filter(year=year, class_name=class_name, school_id=school_id)) == 0)
+        teacher_in_school = (teacher_id.school_id == school_id)
+        will_create = class_unique and teacher_in_school
 
-        if class_unique:
+        if will_create:
             classInstance = Class.objects.create(year=year, class_name=class_name, school_id=school_id)
             TeacherClassAllocation.objects.create(class_id=classInstance, teacher_id=teacher_id)
 
-        return class_unique
+        return will_create
 
     @staticmethod
     def update_class(year, class_name, school_id, teacher_id):
 
         class_exists = (len(Class.objects.filter(year=year, class_name=class_name, school_id=school_id)) == 1)
+        teacher_in_school = (teacher_id.school_id == school_id)
 
-        class_updated = class_exists
+        class_updated = class_exists and teacher_in_school
         if class_exists:
             classInstance = Class.objects.get(year=year, class_name=class_name, school_id=school_id)
             allocation = TeacherClassAllocation.objects.get(class_id=classInstance)
