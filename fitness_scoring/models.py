@@ -111,8 +111,10 @@ class Teacher(models.Model):
         if is_edit_safe:
             self.first_name = first_name
             self.surname = surname
-            self.user.delete()
-            self.user = User.objects.create(username=username, password=password)
+            self.school_id = school_id
+            self.user.username = username
+            self.user.password = password
+            self.user.save()
             self.save()
         return is_edit_safe
 
@@ -199,7 +201,7 @@ class Student(models.Model):
         return student_not_used
 
     def edit_student_safe(self, student_id, school_id, first_name, surname, gender, dob):
-        is_edit_safe = (self.student_id == student_id) or (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 0)
+        is_edit_safe = ((self.student_id == student_id) and (self.school_id == school_id)) or (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 0)
         if is_edit_safe:
             self.student_id = student_id
             self.school_id = school_id
