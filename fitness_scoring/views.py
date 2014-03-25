@@ -107,11 +107,12 @@ def administrator(request):
         handle_school_user(request, context)
 
         last_active_tab = 'teacher_list'
+
         if handle_teacher_list(request, context):
             last_active_tab = 'teacher_list'
-        elif handle_student_list(request, context):
+        if handle_student_list(request, context):
             last_active_tab = 'student_list'
-        elif handle_class_list(request, context):
+        if handle_class_list(request, context):
             last_active_tab = 'class_list'
 
         context['last_active_tab'] = last_active_tab

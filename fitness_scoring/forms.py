@@ -554,12 +554,23 @@ class EditTeacherForm(forms.Form):
 
 
 class AddClassForm(forms.Form):
-    current_year = datetime.datetime.now().year
-    YEAR_CHOICES = []
-    for year in range(2000, (current_year+2)):
-        YEAR_CHOICES.append((str(year), str(year)))
-    year = forms.ChoiceField(choices=YEAR_CHOICES, initial=str(current_year))
+    year = forms.ChoiceField()
     class_name = forms.CharField(max_length=200)
+    teacher = forms.ChoiceField()
+
+    def __init__(self, school_id, *args, **kwargs):
+        super(AddClassForm, self).__init__(*args, **kwargs)
+        current_year = datetime.datetime.now().year
+        YEAR_CHOICES = []
+        for year in range(2000, (current_year+2)):
+            YEAR_CHOICES.append((str(year), str(year)))
+        self.fields['year'].choices = YEAR_CHOICES
+        self.fields['year'].initial = str(current_year)
+        TEACHER_CHOICES = [('', '')]
+        for teacher in Teacher.objects.filter(school_id=school_id):
+            TEACHER_CHOICES.append((teacher.pk, teacher.first_name + " " + teacher.surname + " (" + teacher.user.username + ")"))
+        self.fields['teacher'].choices = TEACHER_CHOICES
+        self.fields['teacher'].initial = ''
 
     def handle_posted_form(self, request, messages_tag):
         form_posted_from = (request.POST.get(self.get_add_class_button_name()) == self.get_add_class_button_value())
@@ -575,13 +586,16 @@ class AddClassForm(forms.Form):
         return form_posted_from
 
     def add_class_safe(self, school_id):
-        return Class.create_class(year=self.get_year(), class_name=self.get_class_name(), school_id=school_id)
+        return Class.create_class(year=self.get_year(), class_name=self.get_class_name(), school_id=school_id, teacher_id=self.get_teacher())
 
     def get_year(self):
         return self.cleaned_data['year']
 
     def get_class_name(self):
         return self.cleaned_data['class_name']
+
+    def get_teacher(self):
+        return Teacher.objects.get(pk=self.cleaned_data['teacher'])
 
     @staticmethod
     def get_add_class_button_name():
@@ -613,11 +627,14 @@ class AddClassForm(forms.Form):
                 \n\
                 var yearErrorMessage = document.getElementById('addClassErrorMessageLabel_year');\n\
                 var classNameErrorMessage = document.getElementById('addClassErrorMessageLabel_class_name');\n\
+                var teacherErrorMessage = document.getElementById('addClassErrorMessageLabel_teacher');\n\
                 \n\
                 yearErrorMessage.style.display = 'none';\n\
                 classNameErrorMessage.style.display = 'none';\n\
+                teacherErrorMessage.style.display = 'none';\n\
                 \n\
-                var year = form.elements['year'].value;\n\
+                var yearSelect = form.elements['year']\n\
+                var year =  yearSelect.options[yearSelect.selectedIndex].value;\n\
                 var yearEntered = (year != '')\n\
                 if(!yearEntered) {\n\
                     yearErrorMessage.style.display = 'inherit';\n\
@@ -631,25 +648,45 @@ class AddClassForm(forms.Form):
                     classNameErrorMessage.innerHTML = '- Please enter Class Name';\n\
                 }\n\
                 \n\
-                return yearEntered && classNameEntered;\n\
+                var teacherSelect = form.elements['teacher']\n\
+                var teacher =  teacherSelect.options[teacherSelect.selectedIndex].value;\n\
+                var teacherEntered = (teacher != '')\n\
+                if(!teacherEntered) {\n\
+                    teacherErrorMessage.style.display = 'inherit';\n\
+                    teacherErrorMessage.innerHTML = '- Please enter Teacher';\n\
+                }\n\
+                \n\
+                return yearEntered && classNameEntered && teacherEntered;\n\
                 \n\
             }\n"
 
 
 class EditClassForm(forms.Form):
-    current_year = datetime.datetime.now().year
-    YEAR_CHOICES = []
-    for year in range(2000, (current_year+2)):
-        YEAR_CHOICES.append((str(year), str(year)))
     class_pk = forms.CharField(widget=forms.HiddenInput())
-    year = forms.ChoiceField(choices=YEAR_CHOICES, initial=str(current_year))
+    year = forms.ChoiceField()
     class_name = forms.CharField(max_length=200)
+    teacher = forms.ChoiceField()
+
+    def __init__(self, school_id, *args, **kwargs):
+        super(EditClassForm, self).__init__(*args, **kwargs)
+        current_year = datetime.datetime.now().year
+        YEAR_CHOICES = []
+        for year in range(2000, (current_year+2)):
+            YEAR_CHOICES.append((str(year), str(year)))
+        self.fields['year'].choices = YEAR_CHOICES
+        self.fields['year'].initial = str(current_year)
+        TEACHER_CHOICES = [('', '')]
+        for teacher in Teacher.objects.filter(school_id=school_id):
+            TEACHER_CHOICES.append((teacher.pk, teacher.first_name + " " + teacher.surname + " (" + teacher.user.username + ")"))
+        self.fields['teacher'].choices = TEACHER_CHOICES
+        self.fields['teacher'].initial = ''
 
     def handle_posted_form(self, request, messages_tag):
         form_posted_from = (request.POST.get(self.get_edit_class_button_name()) == self.get_edit_class_button_value())
         if form_posted_from:
             if self.is_valid():
                 class_string = self.get_class_name() + " (" + self.get_year() + ")"
+                class_string += " " + request.session.get('school_name', None) + " "
                 if self.edit_class_safe(School.objects.get(name=request.session.get('school_name', None))):
                     messages.success(request, "Class Edited: " + class_string, extra_tags=messages_tag)
                 else:
@@ -659,7 +696,7 @@ class EditClassForm(forms.Form):
         return form_posted_from
 
     def edit_class_safe(self, school_id):
-        return Class.objects.get(pk=self.get_class_pk()).edit_class_safe(year=self.get_year(), class_name=self.get_class_name(), school_id=school_id)
+        return Class.objects.get(pk=self.get_class_pk()).edit_class_safe(year=self.get_year(), class_name=self.get_class_name(), school_id=school_id, teacher_id=self.get_teacher())
 
     def get_class_pk(self):
         return self.cleaned_data['class_pk']
@@ -669,6 +706,9 @@ class EditClassForm(forms.Form):
 
     def get_class_name(self):
         return self.cleaned_data['class_name']
+
+    def get_teacher(self):
+        return Teacher.objects.get(pk=self.cleaned_data['teacher'])
 
     @staticmethod
     def get_edit_class_button_name():
@@ -708,11 +748,14 @@ class EditClassForm(forms.Form):
                 \n\
                 var yearErrorMessage = document.getElementById('editClassErrorMessageLabel_year');\n\
                 var classNameErrorMessage = document.getElementById('editClassErrorMessageLabel_class_name');\n\
+                var teacherErrorMessage = document.getElementById('editClassErrorMessageLabel_teacher');\n\
                 \n\
                 yearErrorMessage.style.display = 'none';\n\
                 classNameErrorMessage.style.display = 'none';\n\
+                teacherErrorMessage.style.display = 'none';\n\
                 \n\
-                var year = form.elements['year'].value;\n\
+                var yearSelect = form.elements['year']\n\
+                var year =  yearSelect.options[yearSelect.selectedIndex].value;\n\
                 var yearEntered = (year != '')\n\
                 if(!yearEntered) {\n\
                     yearErrorMessage.style.display = 'inherit';\n\
@@ -726,14 +769,22 @@ class EditClassForm(forms.Form):
                     classNameErrorMessage.innerHTML = '- Please enter Class Name';\n\
                 }\n\
                 \n\
-                return yearEntered && classNameEntered;\n\
+                var teacherSelect = form.elements['teacher']\n\
+                var teacher =  teacherSelect.options[teacherSelect.selectedIndex].value;\n\
+                var teacherEntered = (teacher != '')\n\
+                if(!teacherEntered) {\n\
+                    teacherErrorMessage.style.display = 'inherit';\n\
+                    teacherErrorMessage.innerHTML = '- Please enter Teacher';\n\
+                }\n\
+                \n\
+                return yearEntered && classNameEntered && teacherEntered;\n\
                 \n\
             }\n"
 
     @staticmethod
     def get_javascript_show_modal_function():
         return \
-            "function showEditClassModal(class_pk, year, class_name)\n\
+            "function showEditClassModal(class_pk, year, class_name, teacher_pk)\n\
             {\n\
             \n\
                 var modalForm = document.forms['editClassForm'];\n\
@@ -741,6 +792,7 @@ class EditClassForm(forms.Form):
                 modalForm.elements['class_pk'].value = class_pk;\n\
                 modalForm.elements['year'].value = year;\n\
                 modalForm.elements['class_name'].value = class_name;\n\
+                modalForm.elements['teacher'].value = teacher_pk;\n\
                 validateEditClassFields()\n\
             \n\
                 $('#editClassModal').modal('show');\n\

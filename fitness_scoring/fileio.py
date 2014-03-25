@@ -1,6 +1,6 @@
 import csv
 import tempfile
-from fitness_scoring.models import Student, Teacher, Class, School
+from fitness_scoring.models import Student, Teacher, Class, School, User
 import os
 
 destination_directory = 'C:\\fitness_scoring_file_uploads\\'
@@ -108,14 +108,18 @@ def add_classes_from_file(file_path_on_server, school_id):
     n_updated = 0
     n_not_created_or_updated = 0
     for line in classes_list_reader:
-        (year, class_name) = (line['year'], line['class_name'])
-        if Class.create_class(year=year, class_name=class_name, school_id=school_id):
-            n_created += 1
-        else:
-            if Class.update_class(year=year, class_name=class_name, school_id=school_id):
-                n_updated += 1
+        (year, class_name, teacher_username) = (line['year'], line['class_name'], line['teacher_username'])
+        if (len(User.objects.filter(username=teacher_username)) == 1) and (len(Teacher.objects.filter(user=User.objects.get(username=teacher_username))) == 1):
+            teacher_id = Teacher.objects.get(user=User.objects.get(username=teacher_username))
+            if Class.create_class(year=year, class_name=class_name, school_id=school_id, teacher_id=teacher_id):
+                n_created += 1
             else:
-                n_not_created_or_updated += 1
+                if Class.update_class(year=year, class_name=class_name, school_id=school_id, teacher_id=teacher_id):
+                    n_updated += 1
+                else:
+                    n_not_created_or_updated += 1
+        else:
+            n_not_created_or_updated += 1
 
     return n_created, n_updated, n_not_created_or_updated
 

@@ -1,7 +1,7 @@
 
 from django.contrib import messages
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm, AddStudentForm, EditStudentForm, AddClassForm, EditClassForm, AddSchoolForm, EditSchoolForm
-from fitness_scoring.models import Teacher, Student, Class, School, Administrator
+from fitness_scoring.models import Teacher, Student, Class, School, Administrator, TeacherClassAllocation
 from fileio import add_teachers_from_file_upload, add_students_from_file_upload, add_classes_from_file_upload, add_schools_from_file_upload
 
 
@@ -113,7 +113,7 @@ def handle_student_list(request, context, csv_available=True):
     return post_handled
 
 
-def handle_class_list(request, context, csv_available=True):
+def handle_class_list(request, context):
 #This handler goes with class_list.html (remember to include class_list_javascript.html in the appropriate place)
 
     class_list_message_tag = "class_list"
@@ -141,23 +141,23 @@ def handle_class_list(request, context, csv_available=True):
                 messages.success(request, "Error Deleting Class: " + class_string + " (Class Enrolled In Classes)", extra_tags=class_list_message_tag)
         return handle_post
 
-    context['class_list'] = Class.objects.filter(school_id=school_id)
-    context['class_list_message_tag'] = class_list_message_tag
-    context['add_class_form'] = AddClassForm()
-    context['edit_class_form'] = EditClassForm()
-    context['csv_available'] = csv_available
-
     post_handled = False
 
     if request.method == 'POST':
         if not post_handled:
-            post_handled = AddClassForm(request.POST).handle_posted_form(request=request, messages_tag=class_list_message_tag)
+            post_handled = AddClassForm(school_id, request.POST).handle_posted_form(request=request, messages_tag=class_list_message_tag)
         if not post_handled:
-            post_handled = EditClassForm(request.POST).handle_posted_form(request=request, messages_tag=class_list_message_tag)
+            post_handled = EditClassForm(school_id, request.POST).handle_posted_form(request=request, messages_tag=class_list_message_tag)
         if not post_handled:
             post_handled = handle_post_add_classes()
         if not post_handled:
             post_handled = handle_post_delete_class()
+
+    class_list = Class.objects.filter(school_id=school_id)
+    context['class_list'] = [(classInstance, TeacherClassAllocation.objects.get(class_id=classInstance).teacher_id) for classInstance in class_list]
+    context['class_list_message_tag'] = class_list_message_tag
+    context['add_class_form'] = AddClassForm(school_id=school_id)
+    context['edit_class_form'] = EditClassForm(school_id=school_id)
 
     return post_handled
 

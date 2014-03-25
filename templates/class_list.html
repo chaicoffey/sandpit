@@ -18,24 +18,22 @@
             </button>
             <ul class="dropdown-menu" role="menu">
                 <li><a href="" data-toggle="modal" data-target="#addClassModal">Add Class</a></li>
-                {% if csv_available %}
                 <li><a href="" data-toggle="modal" data-target="#addClassesModal">Add/Edit Classes from .CSV</a></li>
-                {% endif %}
             </ul>
         </div>
     </div>
     <div class="table-responsive">
         <table class="table table-hover" id="class_list">
             <thead><tr><th>Year</th><th>Class Name</th><th>Teacher Name</th><th></th><th></th></tr></thead>
-            {% for class in class_list %}
+            {% for class, teacher in class_list %}
                 <tr>
                     <td>{{ class.year }}</td>
                     <td>{{ class.class_name }}</td>
-                    <td>Teacher Here</td>
+                    <td>{{ teacher.first_name }} {{ teacher.surname }} ({{ teacher.user.username }})</td>
                     <td>
                         <form method="POST" action="{{ submit_to_page }}">
                             {% csrf_token %}
-                            <button type="button" class="btn btn-default btn-xs" onclick="return {{ edit_class_form.get_javascript_show_modal_call }}('{{ class.pk }}', '{{ class.year }}', '{{ class.class_name }}')">
+                            <button type="button" class="btn btn-default btn-xs" onclick="return {{ edit_class_form.get_javascript_show_modal_call }}('{{ class.pk }}', '{{ class.year }}', '{{ class.class_name }}', '{{ teacher.pk }}')">
                                 <span class="glyphicon glyphicon-pencil"/>
                             </button>
                         </form>
@@ -85,33 +83,31 @@
 </div>
 
 <!-- Add Classes Modal -->
-{% if csv_available %}
-    <div class="modal fade" id="addClassesModal" tabindex="-1" role="dialog" aria-labelledby="addClassesModalLabel" aria-hidden="true">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <form method="POST" name="addClassesForm" enctype="multipart/form-data" action="{{ submit_to_page }}" class="form-horizontal" onsubmit="return validateAddClassesFields()">
-              <div class="modal-header">
-                <h4 class="modal-title" id="addClassesModalLabel">Add Classes</h4>
+<div class="modal fade" id="addClassesModal" tabindex="-1" role="dialog" aria-labelledby="addClassesModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <form method="POST" name="addClassesForm" enctype="multipart/form-data" action="{{ submit_to_page }}" class="form-horizontal" onsubmit="return validateAddClassesFields()">
+          <div class="modal-header">
+            <h4 class="modal-title" id="addClassesModalLabel">Add Classes</h4>
+          </div>
+          <div class="modal-body">
+              {% csrf_token %}
+              <div class="form-group">
+                  <div class="col-sm-4"><label>Add Classes File:</label></div>
+                  <div class="col-sm-8"><input type="file" name="add_classes_file" id="add_classes_file"/></div>
               </div>
-              <div class="modal-body">
-                  {% csrf_token %}
-                  <div class="form-group">
-                      <div class="col-sm-4"><label>Add Classes File:</label></div>
-                      <div class="col-sm-8"><input type="file" name="add_classes_file" id="add_classes_file"/></div>
-                  </div>
-                  <div class="error_message">
-                      <label name="addClassesFileErrorMessageLabel" id="addClassesFileErrorMessageLabel" style="display: none"/>
-                  </div>
+              <div class="error_message">
+                  <label name="addClassesFileErrorMessageLabel" id="addClassesFileErrorMessageLabel" style="display: none"/>
               </div>
-              <div class="modal-footer">
-                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-primary" id="SubmitIdentifier" name="SubmitIdentifier" value="AddClasses">Add Classes</button>
-              </div>
-          </form>
-        </div>
-      </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="SubmitIdentifier" name="SubmitIdentifier" value="AddClasses">Add Classes</button>
+          </div>
+      </form>
     </div>
-{% endif %}
+  </div>
+</div>
 
 <!-- Edit Class Modal -->
 <div class="modal fade" id="{{ edit_class_form.get_modal_id }}" tabindex="-1" role="dialog" aria-labelledby="editClassModalLabel" aria-hidden="true">
