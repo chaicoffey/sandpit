@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect
 from django.template import RequestContext
-from fitness_scoring.models import Teacher, Administrator, SuperUser
+from fitness_scoring.models import User, Teacher, Administrator, SuperUser
 from view_handlers import handle_logged_in, handle_school_user
 from view_handlers import handle_teacher_list, handle_student_list, handle_class_list, handle_school_list
 
@@ -16,16 +16,17 @@ def login_user(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
+        user = User.objects.get(username=username)
         user_type = authenticate(username=username, password=password)
         request.session['user_type'] = user_type   
         request.session['username'] = username
         if user_type == 'SuperUser':
             return redirect('fitness_scoring.views.superuser')
         elif user_type == 'Administrator':
-            request.session['school_name'] = Administrator.objects.get(user=username).school_id.name
+            request.session['school_name'] = Administrator.objects.get(user=user).school_id.name
             return redirect('fitness_scoring.views.administrator')
         elif user_type == 'Teacher':
-            teacher = Teacher.objects.get(user=username)
+            teacher = Teacher.objects.get(user=user)
             request.session['school_name'] = teacher.school_id.name
             request.session['teacher_full_name'] = teacher.first_name + " " + teacher.surname
             return redirect('fitness_scoring.views.teacher')
@@ -44,9 +45,10 @@ def login_user(request):
 
 
 def authenticate(username, password):
-    superuser = SuperUser.objects.filter(user=username)
-    administrator = Administrator.objects.filter(user=username)
-    teacher = Teacher.objects.filter(user=username)
+    user = User.objects.get(username=username)
+    superuser = SuperUser.objects.filter(user=user)
+    administrator = Administrator.objects.filter(user=user)
+    teacher = Teacher.objects.filter(user=user)
     if len(superuser) > 0:
         if check_password(password=password, encrypted_password=superuser[0].user.password):
             user_type = 'SuperUser'
