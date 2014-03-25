@@ -16,17 +16,16 @@ def login_user(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        user = User.objects.get(username=username)
         user_type = authenticate(username=username, password=password)
         request.session['user_type'] = user_type   
         request.session['username'] = username
         if user_type == 'SuperUser':
             return redirect('fitness_scoring.views.superuser')
         elif user_type == 'Administrator':
-            request.session['school_name'] = Administrator.objects.get(user=user).school_id.name
+            request.session['school_name'] = Administrator.objects.get(user=User.objects.get(username=username)).school_id.name
             return redirect('fitness_scoring.views.administrator')
         elif user_type == 'Teacher':
-            teacher = Teacher.objects.get(user=user)
+            teacher = Teacher.objects.get(user=User.objects.get(username=username))
             request.session['school_name'] = teacher.school_id.name
             request.session['teacher_full_name'] = teacher.first_name + " " + teacher.surname
             return redirect('fitness_scoring.views.teacher')
@@ -45,31 +44,36 @@ def login_user(request):
 
 
 def authenticate(username, password):
-    user = User.objects.get(username=username)
-    superuser = SuperUser.objects.filter(user=user)
-    administrator = Administrator.objects.filter(user=user)
-    teacher = Teacher.objects.filter(user=user)
-    if len(superuser) > 0:
-        if check_password(password=password, encrypted_password=superuser[0].user.password):
-            user_type = 'SuperUser'
-        else:
-            user_type = 'SuperUser Failed'
-    elif len(administrator) > 0:
-        if check_password(password=password, encrypted_password=administrator[0].user.password):
-            if administrator[0].school_id.subscription_paid:
-                user_type = 'Administrator'
+
+    if len(User.objects.filter(username=username)) == 1:
+        user = User.objects.get(username=username)
+        superusers = SuperUser.objects.filter(user=user)
+        administrators = Administrator.objects.filter(user=user)
+        teachers = Teacher.objects.filter(user=user)
+        if len(superusers) == 1:
+            if check_password(password=password, encrypted_password=superusers[0].user.password):
+                user_type = 'SuperUser'
             else:
-                user_type = 'Unpaid'
-        else:
-            user_type = 'Administrator Failed'
-    elif len(teacher) > 0:
-        if check_password(password=password, encrypted_password=teacher[0].user.password):
-            if teacher[0].school_id.subscription_paid:
-                user_type = 'Teacher'
+                user_type = 'SuperUser Failed'
+        elif len(administrators) == 1:
+            if check_password(password=password, encrypted_password=administrators[0].user.password):
+                if administrators[0].school_id.subscription_paid:
+                    user_type = 'Administrator'
+                else:
+                    user_type = 'Unpaid'
             else:
-                user_type = 'Unpaid'
+                user_type = 'Administrator Failed'
+        elif len(teachers) == 1:
+            if check_password(password=password, encrypted_password=teachers[0].user.password):
+                if teachers[0].school_id.subscription_paid:
+                    user_type = 'Teacher'
+                else:
+                    user_type = 'Unpaid'
+            else:
+                user_type = 'Teacher Failed'
+
         else:
-            user_type = 'Teacher Failed'
+            user_type = 'Failed'
     else:
         user_type = 'Failed'
 
