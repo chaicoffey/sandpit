@@ -96,7 +96,7 @@ def handle_student_list(request, context, csv_available=True):
     context['student_list_message_tag'] = student_list_message_tag
     context['add_student_form'] = AddStudentForm()
     context['edit_student_form'] = EditStudentForm()
-    context['csv_available'] = csv_available
+    context['student_list_csv_available'] = csv_available
 
     post_handled = False
 
