@@ -36,6 +36,10 @@ class SchoolMethodTests(TestCase):
 
 class AdministratorViewTests(SessionTestCase):
 
+    def setUp(self):
+        super(AdministratorViewTests, self).setUp()
+        School.objects.create(name="Test School")
+
     def test_administrator_view_without_authorisation(self):
         """
         Accessing the administrator view if you're not logged in should result
@@ -55,9 +59,6 @@ class AdministratorViewTests(SessionTestCase):
         session['user_type'] = 'Administrator'
         session.save()
         ##  Workaround: the admin view will fail if school does not exist.
-        ##              Look into putting data creation elsewhere.
-        testschool = School(name="Test School")
-        testschool.save()
         session['school_name'] = "Test School"
         session.save()
         ##  Workaround end.
