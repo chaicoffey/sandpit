@@ -255,23 +255,30 @@ class Class(models.Model):
     school_id = models.ForeignKey(School)
 
     def __unicode__(self):
-        return self.class_name
+        return self.class_name + " (" + str(self.year) + ") - " + self.school_id.name
 
     def delete_class_safe(self):
         class_not_used = (len(StudentClassEnrolment.objects.filter(class_id=self)) == 0) and (len(ClassTestSet.objects.filter(class_id=self)) == 0)
         if class_not_used:
-            allocation = TeacherClassAllocation.objects.get(class_id=self)
-            allocation.delete()
+            if len(TeacherClassAllocation.objects.filter(class_id=self)) == 1:
+                allocation = TeacherClassAllocation.objects.get(class_id=self)
+                allocation.delete()
             self.delete()
         return class_not_used
 
     def edit_class_safe(self, year, class_name, school_id, teacher_id):
         is_edit_safe = ((str(self.year) == str(year)) and (self.class_name == class_name) and (self.school_id == school_id)) or (len(Class.objects.filter(year=year, class_name=class_name, school_id=school_id)) == 0)
-        is_edit_safe = is_edit_safe and (teacher_id.school_id == school_id)
+        is_edit_safe = is_edit_safe and ((teacher_id is None) or (teacher_id.school_id == school_id))
         if is_edit_safe:
-            allocation = TeacherClassAllocation.objects.get(class_id=self)
-            allocation.teacher_id = teacher_id
-            allocation.save()
+            if len(TeacherClassAllocation.objects.filter(class_id=self)) == 1:
+                allocation = TeacherClassAllocation.objects.get(class_id=self)
+                if teacher_id is None:
+                    allocation.delete()
+                else:
+                    allocation.teacher_id = teacher_id
+                    allocation.save()
+            elif teacher_id is not None:
+                    TeacherClassAllocation.objects.create(class_id=self, teacher_id=teacher_id)
             self.year = year
             self.class_name = class_name
             self.school_id = school_id
@@ -282,12 +289,13 @@ class Class(models.Model):
     def create_class(year, class_name, school_id, teacher_id):
 
         class_unique = (len(Class.objects.filter(year=year, class_name=class_name, school_id=school_id)) == 0)
-        teacher_in_school = (teacher_id.school_id == school_id)
+        teacher_in_school = (teacher_id is None) or (teacher_id.school_id == school_id)
         will_create = class_unique and teacher_in_school
 
         if will_create:
-            classInstance = Class.objects.create(year=year, class_name=class_name, school_id=school_id)
-            TeacherClassAllocation.objects.create(class_id=classInstance, teacher_id=teacher_id)
+            class_instance = Class.objects.create(year=year, class_name=class_name, school_id=school_id)
+            if teacher_id is not None:
+                TeacherClassAllocation.objects.create(class_id=class_instance, teacher_id=teacher_id)
 
         return will_create
 
@@ -295,20 +303,31 @@ class Class(models.Model):
     def update_class(year, class_name, school_id, teacher_id):
 
         class_exists = (len(Class.objects.filter(year=year, class_name=class_name, school_id=school_id)) == 1)
-        teacher_in_school = (teacher_id.school_id == school_id)
+        teacher_in_school = (teacher_id is None) or (teacher_id.school_id == school_id)
 
         class_updated = class_exists and teacher_in_school
         if class_exists:
-            classInstance = Class.objects.get(year=year, class_name=class_name, school_id=school_id)
-            allocation = TeacherClassAllocation.objects.get(class_id=classInstance)
-            class_updated = not ((str(classInstance.year) == str(year)) and (classInstance.class_name == class_name) and (classInstance.school_id == school_id) and (allocation.teacher_id == teacher_id))
+            class_instance = Class.objects.get(year=year, class_name=class_name, school_id=school_id)
+            teacher_is_allocated = len(TeacherClassAllocation.objects.filter(class_id=class_instance)) == 1
+            teacher_is_to_be_allocated = teacher_id is not None
+            if teacher_is_allocated:
+                allocation = TeacherClassAllocation.objects.get(class_id=class_instance)
+                class_updated = not ((str(class_instance.year) == str(year)) and (class_instance.class_name == class_name) and (class_instance.school_id == school_id) and (allocation.teacher_id == teacher_id))
+            else:
+                class_updated = not ((str(class_instance.year) == str(year)) and (class_instance.class_name == class_name) and (class_instance.school_id == school_id) and (not teacher_is_to_be_allocated))
             if class_updated:
-                classInstance.year = year
-                classInstance.class_name = class_name
-                classInstance.school_id = school_id
-                classInstance.save()
-                allocation.teacher_id = teacher_id
-                allocation.save()
+                if teacher_is_allocated:
+                    if teacher_is_to_be_allocated:
+                        allocation.teacher_id = teacher_id
+                        allocation.save()
+                    else:
+                        allocation.delete()
+                elif teacher_is_to_be_allocated:
+                    TeacherClassAllocation.objects.create(class_id=class_instance, teacher_id=teacher_id)
+                class_instance.year = year
+                class_instance.class_name = class_name
+                class_instance.school_id = school_id
+                class_instance.save()
 
         return class_updated
 

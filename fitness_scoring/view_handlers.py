@@ -154,7 +154,11 @@ def handle_class_list(request, context):
             post_handled = handle_post_delete_class()
 
     class_list = Class.objects.filter(school_id=school_id)
-    context['class_list'] = [(classInstance, TeacherClassAllocation.objects.get(class_id=classInstance).teacher_id) for classInstance in class_list]
+    context['class_list'] = [(classInstance,
+                              TeacherClassAllocation.objects.get(class_id=classInstance).teacher_id
+                              if (len(TeacherClassAllocation.objects.filter(class_id=classInstance)) == 1)
+                              else None)
+                             for classInstance in class_list]
     context['class_list_message_tag'] = class_list_message_tag
     context['add_class_form'] = AddClassForm(school_id=school_id)
     context['edit_class_form'] = EditClassForm(school_id=school_id)

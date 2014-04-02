@@ -556,7 +556,7 @@ class EditTeacherForm(forms.Form):
 class AddClassForm(forms.Form):
     year = forms.ChoiceField()
     class_name = forms.CharField(max_length=200)
-    teacher = forms.ChoiceField()
+    teacher = forms.ChoiceField(required=False)
 
     def __init__(self, school_id, *args, **kwargs):
         super(AddClassForm, self).__init__(*args, **kwargs)
@@ -595,7 +595,8 @@ class AddClassForm(forms.Form):
         return self.cleaned_data['class_name']
 
     def get_teacher(self):
-        return Teacher.objects.get(pk=self.cleaned_data['teacher'])
+        teacher_pk = self.cleaned_data['teacher']
+        return None if (teacher_pk == '') else Teacher.objects.get(pk=teacher_pk)
 
     @staticmethod
     def get_add_class_button_name():
@@ -648,15 +649,7 @@ class AddClassForm(forms.Form):
                     classNameErrorMessage.innerHTML = '- Please enter Class Name';\n\
                 }\n\
                 \n\
-                var teacherSelect = form.elements['teacher']\n\
-                var teacher =  teacherSelect.options[teacherSelect.selectedIndex].value;\n\
-                var teacherEntered = (teacher != '')\n\
-                if(!teacherEntered) {\n\
-                    teacherErrorMessage.style.display = 'inherit';\n\
-                    teacherErrorMessage.innerHTML = '- Please enter Teacher';\n\
-                }\n\
-                \n\
-                return yearEntered && classNameEntered && teacherEntered;\n\
+                return yearEntered && classNameEntered;\n\
                 \n\
             }\n"
 
@@ -665,7 +658,7 @@ class EditClassForm(forms.Form):
     class_pk = forms.CharField(widget=forms.HiddenInput())
     year = forms.ChoiceField()
     class_name = forms.CharField(max_length=200)
-    teacher = forms.ChoiceField()
+    teacher = forms.ChoiceField(required=False)
 
     def __init__(self, school_id, *args, **kwargs):
         super(EditClassForm, self).__init__(*args, **kwargs)
@@ -686,7 +679,6 @@ class EditClassForm(forms.Form):
         if form_posted_from:
             if self.is_valid():
                 class_string = self.get_class_name() + " (" + self.get_year() + ")"
-                class_string += " " + request.session.get('school_name', None) + " "
                 if self.edit_class_safe(School.objects.get(name=request.session.get('school_name', None))):
                     messages.success(request, "Class Edited: " + class_string, extra_tags=messages_tag)
                 else:
@@ -708,7 +700,8 @@ class EditClassForm(forms.Form):
         return self.cleaned_data['class_name']
 
     def get_teacher(self):
-        return Teacher.objects.get(pk=self.cleaned_data['teacher'])
+        teacher_pk = self.cleaned_data['teacher']
+        return None if (teacher_pk == '') else Teacher.objects.get(pk=teacher_pk)
 
     @staticmethod
     def get_edit_class_button_name():
@@ -769,15 +762,7 @@ class EditClassForm(forms.Form):
                     classNameErrorMessage.innerHTML = '- Please enter Class Name';\n\
                 }\n\
                 \n\
-                var teacherSelect = form.elements['teacher']\n\
-                var teacher =  teacherSelect.options[teacherSelect.selectedIndex].value;\n\
-                var teacherEntered = (teacher != '')\n\
-                if(!teacherEntered) {\n\
-                    teacherErrorMessage.style.display = 'inherit';\n\
-                    teacherErrorMessage.innerHTML = '- Please enter Teacher';\n\
-                }\n\
-                \n\
-                return yearEntered && classNameEntered && teacherEntered;\n\
+                return yearEntered && classNameEntered;\n\
                 \n\
             }\n"
 

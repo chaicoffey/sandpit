@@ -29,7 +29,7 @@
                 <tr>
                     <td>{{ class.year }}</td>
                     <td>{{ class.class_name }}</td>
-                    <td>{{ teacher.first_name }} {{ teacher.surname }} ({{ teacher.user.username }})</td>
+                    <td>{% if teacher %}{{ teacher.first_name }} {{ teacher.surname }} ({{ teacher.user.username }}) {% else %} No Teacher Assigned {% endif %}</td>
                     <td>
                         <form method="POST" action="{{ submit_to_page }}">
                             {% csrf_token %}
