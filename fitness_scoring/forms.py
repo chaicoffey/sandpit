@@ -1,6 +1,8 @@
 from django import forms
 from django.contrib import messages
 from fitness_scoring.models import Student, School, Class, Teacher
+from fitness_scoring.validators import validate_school_unique
+from django.core.validators import MinLengthValidator
 import datetime
 
 
@@ -786,82 +788,19 @@ class EditClassForm(forms.Form):
 
 
 class AddSchoolForm(forms.Form):
-    name = forms.CharField(max_length=300)
+    name = forms.CharField(max_length=300, required=True, validators=[MinLengthValidator(3), validate_school_unique])
     subscription_paid = forms.BooleanField(initial=False, required=False)
 
-    def handle_posted_form(self, request, messages_tag):
-        form_posted_from = (request.POST.get(self.get_add_school_button_name()) == self.get_add_school_button_value())
-        if form_posted_from:
-            if self.is_valid():
-                if self.add_school_safe():
-                    messages.success(request, "School Added: " + self.get_name(), extra_tags=messages_tag)
-                else:
-                    messages.success(request, "Error Adding School: " + self.get_name() + " (School Name Already Exists)", extra_tags=messages_tag)
-            else:
-                messages.success(request, "Add School Validation Error", extra_tags=messages_tag)
-        return form_posted_from
+    def __init__(self, *args, **kwargs):
+        super(AddSchoolForm, self).__init__(*args, **kwargs)
+        self.fields['name'].error_messages = {'required': 'Please Enter School Name',
+                                              'min_length': 'School Name Must be at Least 3 Characters'}
 
-    def add_school_safe(self):
-        return School.create_school_and_administrator(name=self.get_name(), subscription_paid=self.get_subscription_paid())
-
-    def get_name(self):
-        return self.cleaned_data['name']
-
-    def get_subscription_paid(self):
-        return self.cleaned_data['subscription_paid']
-
-    @staticmethod
-    def get_add_school_button_name():
-        return "AddSchoolIdentifier"
-
-    @staticmethod
-    def get_add_school_button_value():
-        return "AddSchool"
-
-    @staticmethod
-    def get_form_name():
-        return "addSchoolForm"
-
-    @staticmethod
-    def get_error_message_label_id_prefix():
-        return "addSchoolErrorMessageLabel_"
-
-    @staticmethod
-    def get_javascript_validation_call():
-        return "validateAddSchoolFields()"
-
-    @staticmethod
-    def get_javascript_validation_function():
-        return \
-            "function validateAddSchoolFields()\n\
-            {\n\
-            \n\
-                var form = document.forms['addSchoolForm'];\n\
-                \n\
-                var schoolNameErrorMessage = document.getElementById('addSchoolErrorMessageLabel_name');\n\
-                var subscriptionPaidErrorMessage = document.getElementById('addSchoolErrorMessageLabel_subscription_paid');\n\
-                \n\
-                schoolNameErrorMessage.style.display = 'none'\n\
-                subscriptionPaidErrorMessage.style.display = 'none'\n\
-                \n\
-                var schoolName = form.elements['name'].value\n\
-                var schoolNameEntered = (schoolName != '')\n\
-                var schoolNameLettersValid = (schoolName.length >= 3) && (/^[a-zA-Z][a-zA-Z][a-zA-Z]/i.test(schoolName))\n\
-                var schoolNameValid = schoolNameEntered && schoolNameLettersValid\n\
-                if(!schoolNameValid) {\n\
-                    schoolNameErrorMessage.style.display = 'inherit'\n\
-                    if(!schoolNameEntered)\n\
-                        schoolNameErrorMessage.innerHTML = '- Please enter School Name';\n\
-                    else if(!schoolNameLettersValid)\n\
-                        schoolNameErrorMessage.innerHTML = '- Invalid School Name (first 3 characters must be alphabetic)';\n\
-                }\n\
-            \n\
-                var schoolSubscriptionPaid = form.elements['subscription_paid'].value\n\
-                var subscriptionPaidNameValid = true\n\
-            \n\
-                return schoolNameValid && subscriptionPaidNameValid;\n\
-            \n\
-            }\n"
+    def add_school(self):
+        school_saved = self.is_valid()
+        if school_saved:
+            school_saved = School.create_school_and_administrator(name=self.cleaned_data['name'], subscription_paid=self.cleaned_data['subscription_paid'])
+        return school_saved
 
 
 class EditSchoolForm(forms.Form):
@@ -972,3 +911,5 @@ class EditSchoolForm(forms.Form):
                 $('#editSchoolModal').modal('show');\n\
             \n\
             }\n"
+
+

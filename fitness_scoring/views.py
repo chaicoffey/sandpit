@@ -1,8 +1,10 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, HttpResponse
+from django.http import HttpResponseForbidden
 from django.template import RequestContext
-from fitness_scoring.models import User, Teacher, Administrator, SuperUser
+from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School
+from fitness_scoring.forms import AddSchoolForm
 from view_handlers import handle_logged_in, handle_school_user
-from view_handlers import handle_teacher_list, handle_student_list, handle_class_list, handle_school_list
+from view_handlers import handle_teacher_list, handle_student_list, handle_class_list
 
 
 def logout_user(request):
@@ -134,8 +136,41 @@ def superuser(request):
         context = {'submit_to_page': '/superuser/'}
 
         handle_logged_in(request, context)
-        handle_school_list(request, context)
 
         return render(request, 'superuser.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
+
+
+def school_list(request):
+    if request.session.get('user_type', None) == 'SuperUser':
+        return render(request, 'school_list.html', RequestContext(request, {'administrator_list': Administrator.objects.all()}))
+    else:
+        return HttpResponseForbidden("You are not authorised to view school list")
+
+
+def school_add(request):
+    if request.session.get('user_type', None) == 'SuperUser':
+        if request.POST:
+            school_add_form = AddSchoolForm(request.POST)
+            if school_add_form.add_school():
+                context = {'finish_title': 'School Added', 'finish_message': 'School Added Successfully: ' + school_add_form.cleaned_data['name']}
+                return render(request, 'modal_finished_message.html', RequestContext(request, context))
+            else:
+                return render(request, 'school_add.html', RequestContext(request, {'school_add_form': school_add_form}))
+        else:
+            return render(request, 'school_add.html', RequestContext(request, {'school_add_form': AddSchoolForm()}))
+    else:
+        return HttpResponseForbidden("You are not authorised to add a school")
+
+
+def school_adds(request):
+    pass
+
+
+def school_edit(request, school_pk):
+    pass
+
+
+def school_delete(request, school_pk):
+    pass

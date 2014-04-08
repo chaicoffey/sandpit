@@ -1,25 +1,42 @@
 
-{% autoescape off %}
+var base_url = 'http://127.0.0.1:8000/school'
 
-{{ add_school_form.get_javascript_validation_function }}
-{{ edit_school_form.get_javascript_validation_function }}
-{{ edit_school_form.get_javascript_show_modal_function }}
+//makes list a data table (search functionality etc)
+$(document).ready(function(){
+    $('#school_list_tab').load(base_url + '/list/');
+    $('#school_list').dataTable( {
+        "aoColumnDefs": [
+            { 'bSortable': false, 'aTargets': [ -2, -1 ] }
+        ]
+    });
+});
 
-{% endautoescape %}
+//loads add school modal window after submission from the modal window
+$(document).on('submit', '#schoolAdd', function(addSchoolEvent) {
 
-function validateAddSchoolsFields()
-{
+    addSchoolEvent.preventDefault();
+    var addSchoolForm = $('#schoolAdd');
+    $.ajax({
+        type: addSchoolForm.attr('method'),
+        url: addSchoolForm.attr('action'),
+        data: addSchoolForm.serialize(),
+        success: function(data, textStatus, jqXHR){
+            $("#remoteModal .modal-content").html(data);
+        },
+        error: function(data, textStatus, jqXHR){
+            $("#remoteModal .modal-content").html("An error occured accessing add school view");
+        }
+    });
 
-    var form = document.forms['addSchoolsForm'];
+});
 
-    var addSchoolsFile = form.elements["add_schools_file"].value
-    var addSchoolsFileValid = (addSchoolsFile != '')
-    if(!addSchoolsFileValid) {
-        var addSchoolsFileErrorMessage = document.getElementById("addSchoolsFileErrorMessageLabel")
-        addSchoolsFileErrorMessage.style.display = 'inherit'
-        addSchoolsFileErrorMessage.innerHTML = "- Please select CSV file";
-    }
+//reload school list tab when modal is hidden
+$(document).on('hidden.bs.modal', '#remoteModal', function() {
 
-    return addSchoolsFileValid;
-
-}
+    $('#school_list_tab').load(base_url + '/list/');
+    $('#school_list').dataTable( {
+        "aoColumnDefs": [
+            { 'bSortable': false, 'aTargets': [ -2, -1 ] }
+        ]
+    });
+});

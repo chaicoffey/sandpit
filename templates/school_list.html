@@ -17,8 +17,8 @@
                 +
             </button>
             <ul class="dropdown-menu" role="menu">
-                <li><a href="" data-toggle="modal" data-target="#addSchoolModal">Add School</a></li>
-                <li><a href="" data-toggle="modal" data-target="#addSchoolsModal">Add/Edit Schools from .CSV</a></li>
+                <li><a href="/school/add/" data-toggle="modal" data-target="#remoteModal">Add School</a></li>
+                <li><a href="" data-toggle="modal" data-target="#remoteModal">Add/Edit Schools from .CSV</a></li>
             </ul>
         </div>
     </div>
@@ -33,7 +33,7 @@
                     <td>
                         <form method="POST" action="{{ submit_to_page }}">
                             {% csrf_token %}
-                            <button type="button" class="btn btn-default btn-xs" onclick="return {{ edit_school_form.get_javascript_show_modal_call }}('{{ administrator.school_id.pk }}', '{{ administrator.school_id.name }}', '{{ administrator.school_id.subscription_paid }}')">
+                            <button type="button" class="btn btn-default btn-xs">
                                 <span class="glyphicon glyphicon-pencil"/>
                             </button>
                         </form>
@@ -53,92 +53,9 @@
     </div>
 </div>
 
-<!-- Add School Modal -->
-<div class="modal fade" id="addSchoolModal" tabindex="-1" role="dialog" aria-labelledby="addSchoolModalLabel" aria-hidden="true">
+<!-- Remote Modal -->
+<div class="modal fade" id="remoteModal" tabindex="-1" role="dialog" aria-labelledby="remoteModalLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <div class="modal-content">
-      <form method="POST" name="{{ add_school_form.get_form_name }}" enctype="multipart/form-data" action="{{ submit_to_page }}" class="form-horizontal" onsubmit="return {{ add_school_form.get_javascript_validation_call }}">
-          <div class="modal-header">
-            <h4 class="modal-title" id="addSchoolModalLabel">Add School</h4>
-          </div>
-          <div class="modal-body">
-              {% csrf_token %}
-              {% for field in add_school_form %}
-                  <div class="form-group">
-                      <div class="col-sm-4">{{ field.label_tag }}</div>
-                      <div class="col-sm-8">{{ field }}</div>
-                  </div>
-                  <div class="error_message">
-                      <label id="{{ add_school_form.get_error_message_label_id_prefix }}{{ field.html_name  }}" style="display: none"/>
-                  </div>
-              {% endfor %}
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary" name="{{ add_school_form.get_add_school_button_name }}" value="{{ add_school_form.get_add_school_button_value }}">Add School</button>
-          </div>
-      </form>
-    </div>
+    <div class="modal-content"></div>
   </div>
 </div>
-
-<!-- Add Schools Modal -->
-<div class="modal fade" id="addSchoolsModal" tabindex="-1" role="dialog" aria-labelledby="addSchoolsModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form method="POST" name="addSchoolsForm" enctype="multipart/form-data" action="{{ submit_to_page }}" class="form-horizontal" onsubmit="return validateAddSchoolsFields()">
-          <div class="modal-header">
-            <h4 class="modal-title" id="addSchoolsModalLabel">Add Schools</h4>
-          </div>
-          <div class="modal-body">
-              {% csrf_token %}
-              <div class="form-group">
-                  <div class="col-sm-4"><label>Add Schools File:</label></div>
-                  <div class="col-sm-8"><input type="file" name="add_schools_file" id="add_schools_file"/></div>
-              </div>
-              <div class="error_message">
-                  <label name="addSchoolsFileErrorMessageLabel" id="addSchoolsFileErrorMessageLabel" style="display: none"/>
-              </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary" id="SubmitIdentifier" name="SubmitIdentifier" value="AddSchools">Add Schools</button>
-          </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-<!-- Edit School Modal -->
-<div class="modal fade" id="{{ edit_school_form.get_modal_id }}" tabindex="-1" role="dialog" aria-labelledby="editSchoolModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <form method="POST"  name="{{ edit_school_form.get_form_name }}" enctype="multipart/form-data" action="{{ submit_to_page }}" class="form-horizontal" onsubmit="return {{ edit_school_form.get_javascript_validation_call }}">
-          <div class="modal-header">
-              <h4 class="modal-title" id="editSchoolModalLabel">Edit School</h4>
-          </div>
-          <div class="modal-body">
-              {% csrf_token %}
-              {% for field in edit_school_form.hidden_fields %}
-                  <div class="form-group" style="display: none">{{ field }}</div>
-              {% endfor %}
-              {% for field in edit_school_form.visible_fields %}
-                  <div class="form-group">
-                      <div class="col-sm-4">{{ field.label_tag }}</div>
-                      <div class="col-sm-8">{{ field }}</div>
-                  </div>
-                  <div class="error_message">
-                      <label id="{{ edit_school_form.get_error_message_label_id_prefix }}{{ field.html_name  }}" style="display: none"/>
-                  </div>
-              {% endfor %}
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-            <button type="submit" class="btn btn-primary" name="{{ edit_school_form.get_edit_school_button_name }}" value="{{ edit_school_form.get_edit_school_button_value }}">Save Changes</button>
-          </div>
-      </form>
-    </div>
-  </div>
-</div>
-
-
