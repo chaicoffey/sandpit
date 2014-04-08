@@ -1,0 +1,19 @@
+
+//loads add item modal window after submission from the modal window
+$(document).on('submit', '#itemAdd', function(addItemEvent) {
+
+    addItemEvent.preventDefault();
+    var addItemForm = $('#itemAdd');
+    $.ajax({
+        type: addItemForm.attr('method'),
+        url: addItemForm.attr('action'),
+        data: addItemForm.serialize(),
+        success: function(data, textStatus, jqXHR){
+            $("#remoteModal .modal-content").html(data);
+        },
+        error: function(data, textStatus, jqXHR){
+            $("#remoteModal .modal-content").html("An error occured accessing add item view");
+        }
+    });
+
+});

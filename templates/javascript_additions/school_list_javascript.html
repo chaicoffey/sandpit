@@ -11,25 +11,6 @@ $(document).ready(function(){
     });
 });
 
-//loads add school modal window after submission from the modal window
-$(document).on('submit', '#schoolAdd', function(addSchoolEvent) {
-
-    addSchoolEvent.preventDefault();
-    var addSchoolForm = $('#schoolAdd');
-    $.ajax({
-        type: addSchoolForm.attr('method'),
-        url: addSchoolForm.attr('action'),
-        data: addSchoolForm.serialize(),
-        success: function(data, textStatus, jqXHR){
-            $("#remoteModal .modal-content").html(data);
-        },
-        error: function(data, textStatus, jqXHR){
-            $("#remoteModal .modal-content").html("An error occured accessing add school view");
-        }
-    });
-
-});
-
 //reload school list tab when modal is hidden
 $(document).on('hidden.bs.modal', '#remoteModal', function() {
 
