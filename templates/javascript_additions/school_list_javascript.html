@@ -3,21 +3,22 @@ var base_url = 'http://127.0.0.1:8000/school'
 
 //makes list a data table (search functionality etc)
 $(document).ready(function(){
-    $('#school_list_tab').load(base_url + '/list/');
-    $('#school_list').dataTable( {
-        "aoColumnDefs": [
-            { 'bSortable': false, 'aTargets': [ -2, -1 ] }
-        ]
+    $('#school_list_tab').load(base_url + '/list/', function() {
+        $('#school_list').dataTable( {
+            "aoColumnDefs": [
+                { 'bSortable': false, 'aTargets': [ -2, -1 ] }
+            ]
+        });
     });
 });
 
 //reload school list tab when modal is hidden
 $(document).on('hidden.bs.modal', '#remoteModal', function() {
-
-    $('#school_list_tab').load(base_url + '/list/');
-    $('#school_list').dataTable( {
-        "aoColumnDefs": [
-            { 'bSortable': false, 'aTargets': [ -2, -1 ] }
-        ]
+    $('#school_list_tab').load(base_url + '/list/', function() {
+        $('#school_list').dataTable( {
+            "aoColumnDefs": [
+                { 'bSortable': false, 'aTargets': [ -2, -1 ] }
+            ]
+        });
     });
 });
