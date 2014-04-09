@@ -1,5 +1,5 @@
 
-<form method="POST" name="itemAdd" id="itemAdd" enctype="multipart/form-data" action="/{{ post_to_url }}/" class="form-horizontal">
+<form method="POST" id="itemAdd" enctype="multipart/form-data" action="/{{ post_to_url }}/" class="form-horizontal">
 
     <div class="modal-header"><h4 class="modal-title">Add {{ item_name }}</h4></div>
 
@@ -13,7 +13,7 @@
                 <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
                     <div class="col-sm-4">{{ field.label_tag }}</div>
                     <div class="col-sm-8">{{ field }}
-                        {% if field.errors %}<span class="help-block">{{ field.errors }}</span>{%  endif %}
+                        {% if field.errors %}<span class="help-block">{{ field.errors }}</span>{% endif %}
                     </div>
                 </div>
             {% endif %}

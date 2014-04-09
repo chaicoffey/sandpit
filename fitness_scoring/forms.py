@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib import messages
 from fitness_scoring.models import Student, School, Class, Teacher
-from fitness_scoring.validators import validate_school_unique
+from fitness_scoring.validators import validate_no_space, validate_school_unique
 from django.core.validators import MinLengthValidator
 import datetime
 
@@ -788,13 +788,15 @@ class EditClassForm(forms.Form):
 
 
 class AddSchoolForm(forms.Form):
-    name = forms.CharField(max_length=300, required=True, validators=[MinLengthValidator(3), validate_school_unique])
+    name = forms.CharField(max_length=300, required=True, validators=[MinLengthValidator(3), validate_no_space(3),
+                                                                      validate_school_unique])
     subscription_paid = forms.BooleanField(initial=False, required=False)
 
     def __init__(self, *args, **kwargs):
         super(AddSchoolForm, self).__init__(*args, **kwargs)
         self.fields['name'].error_messages = {'required': 'Please Enter School Name',
-                                              'min_length': 'School Name Must be at Least 3 Characters'}
+                                              'min_length': 'School Name Must be at Least 3 Characters',
+                                              'no_space': 'School Name Must not Have Spaces in First 3 Characters'}
 
     def add_school(self):
         school_saved = self.is_valid()
