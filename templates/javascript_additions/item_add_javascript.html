@@ -1,9 +1,9 @@
 
 //loads add item modal window after submission from the modal window
-$(document).on('submit', '#itemAdd', function(addItemEvent) {
+$(document).on('submit', '#modalForm', function(addItemEvent) {
 
     addItemEvent.preventDefault();
-    var addItemForm = $('#itemAdd');
+    var addItemForm = $('#modalForm');
     $.ajax({
         type: addItemForm.attr('method'),
         url: addItemForm.attr('action'),

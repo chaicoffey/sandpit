@@ -157,11 +157,11 @@ def school_add(request):
                 context = {'finish_title': 'School Added', 'finish_message': 'School Added Successfully: ' + school_add_form.cleaned_data['name']}
                 return render(request, 'modal_finished_message.html', RequestContext(request, context))
             else:
-                context = {'post_to_url': 'school/add', 'item_name': 'School', 'item_add_form': school_add_form}
-                return render(request, 'item_add.html', RequestContext(request, context))
+                context = {'post_to_url': '/school/add/', 'functionality_name': 'Add School', 'form': school_add_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
         else:
-            context = {'post_to_url': 'school/add', 'item_name': 'School', 'item_add_form': AddSchoolForm()}
-            return render(request, 'item_add.html', RequestContext(request, context))
+            context = {'post_to_url': '/school/add/', 'functionality_name': 'Add School', 'form': AddSchoolForm()}
+            return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to add a school")
 

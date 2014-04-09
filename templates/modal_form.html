@@ -1,12 +1,14 @@
 
-<form method="POST" id="itemAdd" enctype="multipart/form-data" action="/{{ post_to_url }}/" class="form-horizontal">
+<form method="POST" id="modalForm" enctype="multipart/form-data" action="{{ post_to_url }}" class="form-horizontal">
 
-    <div class="modal-header"><h4 class="modal-title">Add {{ item_name }}</h4></div>
+    <div class="modal-header">
+        <h4 class="modal-title">{% if modal_title %}{{ modal_title }}{% else %}{{ functionality_name }}{% endif %}</h4>
+    </div>
 
     <div class="modal-body">
         {% csrf_token %}
-        {{ item_add_form.non_field_errors }}
-        {% for field in item_add_form %}
+        {{ form.non_field_errors }}
+        {% for field in form %}
             {% if field.is_hidden %}
                 <div class="form-group" style="display: none">{{ field }}</div>
             {% else %}
@@ -22,7 +24,7 @@
 
     <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        <button type="submit" class="btn btn-primary">Add {{ item_name }}</button>
+        <button type="submit" class="btn btn-primary">{{ functionality_name }}</button>
     </div>
 
 </form>

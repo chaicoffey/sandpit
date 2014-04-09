@@ -11,7 +11,7 @@ def validate_school_unique(name):
 def validate_no_space(n_characters):
 
     def space_test(value):
-        if ' ' in value[0:(n_characters)]:
+        if ' ' in value[0:n_characters]:
             raise ValidationError('Spaces Found', code='no_space')
 
     return space_test
