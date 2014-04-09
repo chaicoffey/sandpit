@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, HttpResponse
 from django.http import HttpResponseForbidden
 from django.template import RequestContext
 from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School
-from fitness_scoring.forms import AddSchoolForm
+from fitness_scoring.forms import AddSchoolForm, EditSchoolForm
 from view_handlers import handle_logged_in, handle_school_user
 from view_handlers import handle_teacher_list, handle_student_list, handle_class_list
 
@@ -171,7 +171,25 @@ def school_adds(request):
 
 
 def school_edit(request, school_pk):
-    pass
+    if request.session.get('user_type', None) == 'SuperUser':
+        if request.POST:
+            school_edit_form = EditSchoolForm(data=request.POST)
+            if school_edit_form.edit_school():
+                context = {'finish_title': 'School Edited',
+                           'finish_message': 'School Edited Successfully: ' + school_edit_form.cleaned_data['name']}
+                return render(request, 'modal_finished_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/school/edit/' + str(school_pk),
+                           'functionality_name': 'Edit School',
+                           'form': school_edit_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/school/edit/' + str(school_pk),
+                       'functionality_name': 'Edit School',
+                       'form': EditSchoolForm(school_pk=school_pk)}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to add a school")
 
 
 def school_delete(request, school_pk):

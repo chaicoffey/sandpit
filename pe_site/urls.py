@@ -1,13 +1,10 @@
-from django.conf.urls import patterns, include, url
 
+from django.conf.urls import patterns, include, url
 from django.contrib import admin
+
 admin.autodiscover()
 
 urlpatterns = patterns('',
-    # Examples:
-    # url(r'^$', 'pe_site.views.home', name='home'),
-    # url(r'^blog/', include('blog.urls')),
-
     url(r'^admin/', include(admin.site.urls)),
     url(r'^$', 'fitness_scoring.views.login_user'),
     url(r'^login', 'fitness_scoring.views.login_user', name='login'),

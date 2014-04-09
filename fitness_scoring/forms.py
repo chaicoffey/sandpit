@@ -2,6 +2,7 @@ from django import forms
 from django.contrib import messages
 from fitness_scoring.models import Student, School, Class, Teacher
 from fitness_scoring.validators import validate_no_space, validate_school_unique
+from fitness_scoring.fileio import add_students_from_file_upload
 from django.core.validators import MinLengthValidator
 import datetime
 
@@ -801,117 +802,62 @@ class AddSchoolForm(forms.Form):
     def add_school(self):
         school_saved = self.is_valid()
         if school_saved:
-            school_saved = School.create_school_and_administrator(name=self.cleaned_data['name'], subscription_paid=self.cleaned_data['subscription_paid'])
+            name = self.cleaned_data['name']
+            subscription_paid = self.cleaned_data['subscription_paid']
+            school_saved = School.create_school_and_administrator(name=name, subscription_paid=subscription_paid)
         return school_saved
+
+
+class AddSchoolsForm(forms.Form):
+    add_schools_file = forms.FileField(required=True)
+
+    def add_schools(self):
+        schools_added = self.is_valid()
+        if schools_added:
+            add_schools_file = self.cleaned_data['add_schools_file']
+            #(n_created, n_updated, n_not_created_or_updated) = add_students_from_file_upload(add_schools_file, school_id)
+            #add stuff in here
+
+        return schools_added
 
 
 class EditSchoolForm(forms.Form):
     school_pk = forms.CharField(widget=forms.HiddenInput())
-    name = forms.CharField(max_length=300)
+    name = forms.CharField(max_length=300, required=True, validators=[MinLengthValidator(3), validate_no_space(3)])
     subscription_paid = forms.BooleanField(initial=False, required=False)
 
-    def handle_posted_form(self, request, messages_tag):
-        form_posted_from = (request.POST.get(self.get_edit_school_button_name()) == self.get_edit_school_button_value())
-        if form_posted_from:
-            if self.is_valid():
-                school_name_old = School.objects.get(pk=self.get_school_pk()).name
-                if self.save_school():
-                    messages.success(request, "School Edited: " + school_name_old, extra_tags=messages_tag)
-                else:
-                    messages.success(request, "Error Editing School: " + school_name_old + " (School Name Already Exists: " + self.get_name() + ")", extra_tags=messages_tag)
-            else:
-                messages.success(request, "Edit School Validation Error", extra_tags=messages_tag)
-        return form_posted_from
+    def __init__(self, school_pk=None, *args, **kwargs):
+        super(EditSchoolForm, self).__init__(*args, **kwargs)
+        self.fields['name'].error_messages = {'required': 'Please Enter School Name',
+                                              'min_length': 'School Name Must be at Least 3 Characters',
+                                              'no_space': 'School Name Must not Have Spaces in First 3 Characters'}
+        if school_pk:
+            school = School.objects.get(pk=school_pk)
+            self.fields['school_pk'].initial = school_pk
+            self.fields['name'].initial = school.name
+            self.fields['subscription_paid'].initial = school.subscription_paid
 
-    def save_school(self):
-        school = School.objects.get(pk=self.get_school_pk())
-        return school.edit_school_safe(self.get_name(), self.get_subscription_paid())
+    def clean(self):
+        cleaned_data = super(EditSchoolForm, self).clean()
+        school_pk = cleaned_data.get("school_pk")
+        name = cleaned_data.get("name")
 
-    def get_school_pk(self):
-        return self.cleaned_data['school_pk']
+        if school_pk and name:
+            school = School.objects.get(pk=school_pk)
+            if (school.name != name) and School.objects.filter(name=name).exists():
+                self._errors["name"] = self.error_class(['School Name Already Exists: ' + name])
+                del cleaned_data["school_pk"]
+                del cleaned_data["name"]
+                del cleaned_data["subscription_paid"]
 
-    def get_name(self):
-        return self.cleaned_data['name']
+        return cleaned_data
 
-    def get_subscription_paid(self):
-        return self.cleaned_data['subscription_paid']
-
-    @staticmethod
-    def get_edit_school_button_name():
-        return "SaveSchoolIdentifier"
-
-    @staticmethod
-    def get_edit_school_button_value():
-        return "SaveSchool"
-
-    @staticmethod
-    def get_form_name():
-        return "editSchoolForm"
-
-    @staticmethod
-    def get_modal_id():
-        return "editSchoolModal"
-
-    @staticmethod
-    def get_error_message_label_id_prefix():
-        return "editSchoolErrorMessageLabel_"
-
-    @staticmethod
-    def get_javascript_validation_call():
-        return "validateEditSchoolFields()"
-
-    @staticmethod
-    def get_javascript_show_modal_call():
-        return "showEditSchoolModal"
-
-    @staticmethod
-    def get_javascript_validation_function():
-        return \
-            "function validateEditSchoolFields()\n\
-            {\n\
-            \n\
-                var form = document.forms['editSchoolForm'];\n\
-                \n\
-                var schoolNameErrorMessage = document.getElementById('editSchoolErrorMessageLabel_name');\n\
-                var subscriptionPaidErrorMessage = document.getElementById('editSchoolErrorMessageLabel_subscription_paid');\n\
-                \n\
-                schoolNameErrorMessage.style.display = 'none'\n\
-                subscriptionPaidErrorMessage.style.display = 'none'\n\
-                \n\
-                var schoolName = form.elements['name'].value\n\
-                var schoolNameEntered = (schoolName != '')\n\
-                var schoolNameLettersValid = (schoolName.length >= 3) && (/^[a-zA-Z][a-zA-Z][a-zA-Z]/i.test(schoolName))\n\
-                var schoolNameValid = schoolNameEntered && schoolNameLettersValid\n\
-                if(!schoolNameValid) {\n\
-                    schoolNameErrorMessage.style.display = 'inherit'\n\
-                    if(!schoolNameEntered)\n\
-                        schoolNameErrorMessage.innerHTML = '- Please enter School Name';\n\
-                    else if(!schoolNameLettersValid)\n\
-                        schoolNameErrorMessage.innerHTML = '- Invalid School Name (first 3 characters must be alphabetic)';\n\
-                }\n\
-            \n\
-                var schoolSubscriptionPaid = form.elements['subscription_paid'].value\n\
-                var subscriptionPaidNameValid = true\n\
-            \n\
-                return schoolNameValid && subscriptionPaidNameValid;\n\
-            \n\
-            }\n"
-
-    @staticmethod
-    def get_javascript_show_modal_function():
-        return \
-            "function showEditSchoolModal(school_pk, name, subscription_paid)\n\
-            {\n\
-            \n\
-                var modalForm = document.forms['editSchoolForm']\n\
-            \n\
-                modalForm.elements['school_pk'].value = school_pk\n\
-                modalForm.elements['name'].value = name\n\
-                modalForm.elements['subscription_paid'].checked = (subscription_paid == 'True');\n\
-                validateEditSchoolFields();\n\
-            \n\
-                $('#editSchoolModal').modal('show');\n\
-            \n\
-            }\n"
-
-
+    def edit_school(self):
+        school_edited = self.is_valid()
+        if school_edited:
+            school_pk = self.cleaned_data['school_pk']
+            name = self.cleaned_data['name']
+            subscription_paid = self.cleaned_data['subscription_paid']
+            school_editing = School.objects.get(pk=school_pk)
+            school_edited = school_editing.edit_school_safe(name=name, subscription_paid=subscription_paid)
+        return school_edited
