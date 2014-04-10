@@ -815,9 +815,9 @@ class AddSchoolsForm(forms.Form):
         super(AddSchoolsForm, self).__init__(*args, **kwargs)
         self.fields['add_schools_file'].error_messages = {'required': 'Please Choose Add Schools File'}
 
-    def add_schools(self, uploaded_file):
+    def add_schools(self, request):
         if self.is_valid():
-            return add_schools_from_file_upload(uploaded_file)
+            return add_schools_from_file_upload(request.FILES['add_schools_file'])
         else:
             return False
 

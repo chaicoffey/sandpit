@@ -170,7 +170,7 @@ def school_adds(request):
     if request.session.get('user_type', None) == 'SuperUser':
         if request.POST:
             school_adds_form = AddSchoolsForm(request.POST, request.FILES)
-            result = school_adds_form.add_schools(request.FILES['add_schools_file'])
+            result = school_adds_form.add_schools(request)
             if result:
                 (n_created, n_updated, n_not_created_or_updated) = result
                 result_message = \
