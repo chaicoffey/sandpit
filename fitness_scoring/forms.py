@@ -2,7 +2,7 @@ from django import forms
 from django.contrib import messages
 from fitness_scoring.models import Student, School, Class, Teacher
 from fitness_scoring.validators import validate_no_space, validate_school_unique
-from fitness_scoring.fileio import add_students_from_file_upload
+from fitness_scoring.fileio import add_schools_from_file_upload
 from django.core.validators import MinLengthValidator
 import datetime
 
@@ -811,14 +811,15 @@ class AddSchoolForm(forms.Form):
 class AddSchoolsForm(forms.Form):
     add_schools_file = forms.FileField(required=True)
 
-    def add_schools(self):
-        schools_added = self.is_valid()
-        if schools_added:
-            add_schools_file = self.cleaned_data['add_schools_file']
-            #(n_created, n_updated, n_not_created_or_updated) = add_students_from_file_upload(add_schools_file, school_id)
-            #add stuff in here
+    def __init__(self, *args, **kwargs):
+        super(AddSchoolsForm, self).__init__(*args, **kwargs)
+        self.fields['add_schools_file'].error_messages = {'required': 'Please Choose Add Schools File'}
 
-        return schools_added
+    def add_schools(self, uploaded_file):
+        if self.is_valid():
+            return add_schools_from_file_upload(uploaded_file)
+        else:
+            return False
 
 
 class EditSchoolForm(forms.Form):

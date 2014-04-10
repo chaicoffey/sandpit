@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect, HttpResponse
 from django.http import HttpResponseForbidden
 from django.template import RequestContext
 from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School
-from fitness_scoring.forms import AddSchoolForm, EditSchoolForm
+from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from view_handlers import handle_logged_in, handle_school_user
 from view_handlers import handle_teacher_list, handle_student_list, handle_class_list
 
@@ -167,7 +167,26 @@ def school_add(request):
 
 
 def school_adds(request):
-    pass
+    if request.session.get('user_type', None) == 'SuperUser':
+        if request.POST:
+            school_adds_form = AddSchoolsForm(request.POST, request.FILES)
+            result = school_adds_form.add_schools(request.FILES['add_schools_file'])
+            if result:
+                (n_created, n_updated, n_not_created_or_updated) = result
+                result_message = \
+                    'Schools Created: '+str(n_created) + '\n' + \
+                    'Schools Updated: '+str(n_updated) + '\n' + \
+                    'No Changes From Data Lines: '+str(n_not_created_or_updated)
+                context = {'finish_title': 'Schools Added/Updated', 'finish_message': result_message}
+                return render(request, 'modal_finished_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/school/adds/', 'functionality_name': 'Add Schools', 'form': school_adds_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/school/adds/', 'functionality_name': 'Add Schools', 'form': AddSchoolsForm()}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to add schools")
 
 
 def school_edit(request, school_pk):
