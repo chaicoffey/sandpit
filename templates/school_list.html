@@ -28,13 +28,9 @@
                         </a>
                     </td>
                     <td>
-                        <form method="POST" action="{{ submit_to_page }}" onsubmit="return confirm('Are you sure you want to delete school {{ administrator.school_id.name }}?');">
-                        {% csrf_token %}
-                            <input type="hidden" name="school_pk" value="{{ administrator.school_id.pk }}"/>
-                            <button type="submit" class="btn btn-default btn-xs" id="SubmitIdentifier" name="SubmitIdentifier" value="DeleteSchool">
+                        <a href="/school/delete/{{ administrator.school_id.pk }}" data-toggle="modal" data-target="#remoteModal">
                                 <span class="glyphicon glyphicon-remove"/>
-                            </button>
-                        </form>
+                        </a>
                     </td>
                 </tr>
             {% endfor %}

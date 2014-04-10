@@ -7,19 +7,23 @@
 
     <div class="modal-body">
         {% csrf_token %}
-        {{ form.non_field_errors }}
-        {% for field in form %}
-            {% if field.is_hidden %}
-                <div class="form-group" style="display: none">{{ field }}</div>
-            {% else %}
-                <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
-                    <div class="col-sm-4">{{ field.label_tag }}</div>
-                    <div class="col-sm-8">{{ field }}
-                        {% if field.errors %}<span class="help-block">{{ field.errors }}</span>{% endif %}
+        {% if form %}
+            {{ form.non_field_errors }}
+            {% for field in form %}
+                {% if field.is_hidden %}
+                    <div class="form-group" style="display: none">{{ field }}</div>
+                {% else %}
+                    <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
+                        <div class="col-sm-4">{{ field.label_tag }}</div>
+                        <div class="col-sm-8">{{ field }}
+                            {% if field.errors %}<span class="help-block">{{ field.errors }}</span>{% endif %}
+                        </div>
                     </div>
-                </div>
-            {% endif %}
-        {% endfor %}
+                {% endif %}
+            {% endfor %}
+        {% elif prompt_message %}
+            {{ prompt_message }}
+        {% endif %}
     </div>
 
     <div class="modal-footer">

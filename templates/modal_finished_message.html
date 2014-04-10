@@ -2,7 +2,11 @@
     <h4 class="modal-title">{{ finish_title }}</h4>
 </div>
 <div class="modal-body">
-    {{ finish_message }}
+    {% if finish_message %}
+        {{ finish_message }}
+    {% elif finish_error_message %}
+        <div class="has-error"><span class="help-block">{{ finish_error_message }}</span></div>
+    {% endif %}
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-default" data-dismiss="modal" id="modal_close_button">OK</button>

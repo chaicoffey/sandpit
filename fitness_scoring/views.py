@@ -189,8 +189,25 @@ def school_edit(request, school_pk):
                        'form': EditSchoolForm(school_pk=school_pk)}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to add a school")
+        return HttpResponseForbidden("You are not authorised to edit a school")
 
 
 def school_delete(request, school_pk):
-    pass
+    if request.session.get('user_type', None) == 'SuperUser':
+        school_to_delete = School.objects.get(pk=school_pk)
+        school_name = school_to_delete.name
+        if request.POST:
+            if school_to_delete.delete_school_safe():
+                context = {'finish_title': 'School Deleted',
+                           'finish_message': 'School Deleted Successfully: ' + school_name}
+            else:
+                context = {'finish_title': 'School Not Deleted',
+                           'finish_error_message': 'Could Not Delete ' + school_name + ' (School Being Used)'}
+            return render(request, 'modal_finished_message.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/school/delete/' + str(school_pk),
+                       'functionality_name': 'Delete School',
+                       'prompt_message': 'Are You Sure You Wish To Delete ' + school_name + "?"}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to delete a school")
