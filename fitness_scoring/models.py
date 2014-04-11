@@ -9,11 +9,10 @@ class School(models.Model):
     def __unicode__(self):
         return self.name
 
-    def get_subscription_paid_text(self):
-        if self.subscription_paid:
-            return 'Paid'
-        else:
-            return 'Unpaid'
+    def get_display_items(self):
+        return [self.name,
+                'Paid' if self.subscription_paid else 'Unpaid',
+                Administrator.objects.get(school_id=self).user.username]
 
     def delete_school_safe(self):
         school_not_used = (len(Teacher.objects.filter(school_id=self)) == 0) and (len(Class.objects.filter(school_id=self)) == 0) and (len(Student.objects.filter(school_id=self)) == 0)
@@ -31,6 +30,10 @@ class School(models.Model):
             self.subscription_paid = subscription_paid
             self.save()
         return is_edit_safe
+
+    @staticmethod
+    def get_display_list_headings():
+        return ['School Name', 'Subscription', 'Administrator Username']
 
     @staticmethod
     def create_school_and_administrator(name, subscription_paid):

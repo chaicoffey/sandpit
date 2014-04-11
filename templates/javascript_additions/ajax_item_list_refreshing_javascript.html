@@ -1,8 +1,8 @@
 
-// Refresh the school list when the modal close button is clicked
+// Refresh the item list when the modal close button is clicked
 $(document).on('click', '#modal_close_button', function() {
     $('#remoteModal').modal('hide');
     $('body').removeClass('modal-open');
     $('.modal-backdrop').remove();
-    loadSchoolList();
+    load_item_list('{{ item_list_tab_id }}', '{{ item_list_table_id }}', '{{ item_list_url }}');
 });

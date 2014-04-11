@@ -1,0 +1,60 @@
+{% load staticfiles %}
+<div class="panel panel-default">
+
+    <div class="panel-heading">
+        {{ item_list_title }}
+        {% for button_label, button_options in item_list_buttons %}
+            <div class="btn-group">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    {{ button_label }}
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    {% for link_url, label in button_options %}
+                        <li><a href="{{ link_url }}" data-toggle="modal" data-target="#remoteModal">{{ label }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover" id="{{ item_list_table_id }}">
+            <thead>
+                <tr>
+                    {% for heading in item_list_table_headings %}
+                        <th>{{ heading }}</th>
+                    {% endfor %}
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            {% for item, display_items in item_list %}
+                <tr>
+                    {% for display_item in display_items %}
+                        <td>{{ display_item }}</td>
+                    {% endfor %}
+                    {% for option_link, option_glyph_icon in item_list_options %}
+                        <td>
+                            <a href="{{ option_link }}{{ item.pk }}" data-toggle="modal" data-target="#remoteModal">
+                                <span class="glyphicon glyphicon-{{ option_glyph_icon }}"/>
+                            </a>
+                        </td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+</div>
+
+<!-- Remote Modal -->
+<div class="modal fade" id="remoteModal" tabindex="-1" role="dialog" aria-labelledby="remoteModalLabel" aria-hidden="true"
+        data-keyboard="false" data-backdrop="static">
+  <div class="modal-dialog">
+    <div class="modal-content"></div>
+  </div>
+</div>
+
+<script>
+    {% include "javascript_additions/ajax_item_list_refreshing_javascript.html" %}
+</script>

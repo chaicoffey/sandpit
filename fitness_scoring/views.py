@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect, HttpResponse
+from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.template import RequestContext
 from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School
@@ -144,7 +144,23 @@ def superuser(request):
 
 def school_list(request):
     if request.session.get('user_type', None) == 'SuperUser':
-        return render(request, 'school_list.html', RequestContext(request, {'administrator_list': Administrator.objects.all()}))
+        context = {
+            'item_list': [(school, school.get_display_items()) for school in School.objects.all()],
+            'item_list_title': 'School List',
+            'item_list_table_headings': School.get_display_list_headings(),
+            'item_list_tab_id': 'school_list_tab',
+            'item_list_table_id': 'school_list',
+            'item_list_url': '/school/list/',
+            'item_list_buttons': [
+                ['+', [['/school/add/', 'Add School'],
+                       ['/school/adds/', 'Add/Edit Schools From .CSV']]]
+            ],
+            'item_list_options': [
+                ['/school/edit/', 'pencil'],
+                ['/school/delete/', 'remove']
+            ]
+        }
+        return render(request, 'item_list.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to view school list")
 
