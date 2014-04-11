@@ -5,15 +5,14 @@ Super User
 {% endblock %}
 
 {% block content_loggedin %}
+    <script>
+        {% include "javascript_additions/ajax_school_list_loading.js" %}
+        {% include "javascript_additions/ajax_modal_form.js" %}
+    </script>
     <ul class="nav nav-tabs">
         <li class="active"><a href="#school_list_tab" data-toggle="tab">School List</a></li>
     </ul>
     <div class="tab-content">
         <div class="tab-pane active" id="school_list_tab"></div>
     </div>
-{% endblock %}
-
-{% block javascript_functionality %}
-    {% include "javascript_additions/school_list_javascript.html" %}
-    {% include "javascript_additions/modal_form_javascript.html" %}
 {% endblock %}

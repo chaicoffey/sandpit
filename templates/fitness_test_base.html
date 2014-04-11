@@ -35,13 +35,6 @@
 	<link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
 	<link rel="apple-touch-icon" sizes="72x72" href="{% static 'images/apple-touch-icon-72x72.png' %}">
 	<link rel="apple-touch-icon" sizes="114x114" href="{% static 'images/apple-touch-icon-114x114.png' %}">
-</head>
-<body>
-
-    <div class="container">
-
-        {% block content_fitness_testing_base %} {% endblock %}
-    </div><!-- container -->
 
     <!-- Bootstrap core JavaScript
     ================================================== -->
@@ -53,5 +46,13 @@
     <script type="text/javascript" charset="utf8" src="http://cdn.datatables.net/1.10.0-beta.2/js/jquery.dataTables.js"></script>
     <script type="text/javascript" src="http://cdn.datatables.net/plug-ins/505bef35b56/integration/bootstrap/3/dataTables.bootstrap.js"></script>
     <script>{% block javascript_functionality %} {% endblock %}</script>
+
+</head>
+<body>
+
+    <div class="container">
+
+        {% block content_fitness_testing_base %} {% endblock %}
+    </div><!-- container -->
 </body>
 </html>

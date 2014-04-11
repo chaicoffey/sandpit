@@ -1,29 +1,12 @@
+
 var base_url = window.location.protocol + "//" + window.location.host;
 
 // Load school list when page is first accessed.
-
 $(document).ready(function(){
     loadSchoolList();
 });
 
-// Clear contents of remote modal when it is hidden so that it can be loaded with new contents
-// next time it is accessed.
-
-$(document).on('hidden.bs.modal', '#remoteModal', function() {
-    $('#remoteModal').removeData('bs.modal');
-});
-
-// Refresh the school list when the modal close button is clicked
-
-$(document).on('click', '#modal_close_button', function() {
-    $('#remoteModal').modal('hide');
-    $('body').removeClass('modal-open');
-    $('.modal-backdrop').remove();
-    loadSchoolList();
-});
-
 // Loads school list tab and makes the list a dataTable (search functionality, etc.)
-
 function loadSchoolList() {
     $('#school_list_tab').load(base_url + '/school/list/', function() {
         $('#school_list').dataTable( {
