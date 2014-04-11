@@ -24,8 +24,9 @@
                     {% for heading in item_list_table_headings %}
                         <th>{{ heading }}</th>
                     {% endfor %}
-                    <th></th>
-                    <th></th>
+                    {%  for heading in item_list_options %}
+                        <th></th>
+                    {% endfor %}
                 </tr>
             </thead>
             {% for item, display_items in item_list %}
