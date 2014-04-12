@@ -149,7 +149,6 @@ def school_list(request):
             'item_list_title': 'School List',
             'item_list_table_headings': School.get_display_list_headings(),
             'item_list_tab_id': 'school_list_tab',
-            'item_list_table_id': 'school_list',
             'item_list_url': '/school/list/',
             'item_list_buttons': [
                 ['+', [['/school/add/', 'Add School'],
