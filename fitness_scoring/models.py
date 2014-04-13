@@ -336,10 +336,51 @@ class Class(models.Model):
 
 
 class TestCategory(models.Model):
-    test_category_name = models.CharField(max_length=200, primary_key=True)
+    test_category_name = models.CharField(max_length=200, unique=True)
 
     def __unicode__(self):
         return self.test_category_name
+
+    def get_display_items(self):
+        return [self.test_category_name]
+
+    def delete_test_category_safe(self):
+        test_category_not_used = not Test.objects.filter(test_category=self).exists()
+        if test_category_not_used:
+            self.delete()
+        return test_category_not_used
+
+    def edit_test_category_safe(self, test_category_name):
+        is_edit_safe = (self.test_category_name == test_category_name) or not TestCategory.objects.filter(test_category_name=test_category_name).exists()
+        if is_edit_safe:
+            self.test_category_name = test_category_name
+            self.save()
+        return is_edit_safe
+
+    @staticmethod
+    def get_display_list_headings():
+        return ['Test Category']
+
+    @staticmethod
+    def create_test_category(test_category_name):
+        test_category_name_unique = not TestCategory.objects.filter(test_category_name=test_category_name).exists()
+        if test_category_name_unique:
+            School.objects.create(test_category_name=test_category_name)
+        return test_category_name_unique
+
+    @staticmethod
+    def update_test_category(test_category_name):
+
+        test_category_updated = False
+
+        test_category_exists = TestCategory.objects.filter(test_category_name=test_category_name).exists()
+        if test_category_exists:
+            test_category = TestCategory.objects.get(test_category_name=test_category_name)
+            test_category_updated = not (test_category.test_category_name == test_category_name)
+            if test_category_updated:
+                test_category.save()
+
+        return test_category_updated
 
 
 class Test(models.Model):
@@ -352,8 +393,8 @@ class Test(models.Model):
         ('DIRECT', 'Direct'),
         ('HIGH_MIDDLE', 'High Middle')
     )
-    test_name = models.CharField(max_length=200, primary_key=True)
-    test_category_name = models.ForeignKey(TestCategory)
+    test_name = models.CharField(max_length=200, unique=True)
+    test_category = models.ForeignKey(TestCategory)
     description = models.CharField(max_length=400)
     result_type = models.CharField(max_length=20, choices=RESULT_TYPE_CHOICES, default='DOUBLE')
     is_upward_percentile_brackets = models.BooleanField(default=True)
