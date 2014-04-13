@@ -134,26 +134,27 @@ def superuser(request):
     if request.session.get('user_type', None) == 'SuperUser':
 
         context = {
-            'super_user_tabs': [
-                ['school_list_tab', 'School List', '/school/list/', 2, True]
+            'user_tab_page_title': 'Super User',
+            'user_tabs': [
+                ['school_list_tab', 'School List', '/school/list/school_list_tab', 2, True]
             ]
         }
 
         handle_logged_in(request, context)
 
-        return render(request, 'superuser.html', RequestContext(request, context))
+        return render(request, 'user_tab_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
 
 
-def school_list(request):
+def school_list(request, school_list_tab_id):
     if request.session.get('user_type', None) == 'SuperUser':
         context = {
             'item_list': [(school, school.get_display_items()) for school in School.objects.all()],
             'item_list_title': 'School List',
             'item_list_table_headings': School.get_display_list_headings(),
-            'item_list_tab_id': 'school_list_tab',
-            'item_list_url': '/school/list/',
+            'item_list_tab_id': school_list_tab_id,
+            'item_list_url': '/school/list/' + school_list_tab_id,
             'item_list_buttons': [
                 ['+', [['/school/add/', 'Add School'],
                        ['/school/adds/', 'Add/Edit Schools From .CSV']]]
