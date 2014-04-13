@@ -11,11 +11,6 @@ def handle_logged_in(request, context):
     context['name'] = request.session.get('username', None)
 
 
-def handle_school_user(request, context):
-#This handler goes with schooluser.html
-    context['school_name'] = request.session.get('school_name', None)
-
-
 def handle_teacher_list(request, context):
 #This handler goes with teacher_list.html (remember to include teacher_list_javascript.html in the appropriate place)
 

@@ -1,10 +1,10 @@
-{% extends "schooluser.html" %}
+{% extends "loggedin.html" %}
 
 {% block title_fitness_testing_base %}
 Teacher
 {% endblock %}
 
-{% block content_schooluser %}
+{% block content_loggedin %}
     <ul class="nav nav-tabs">
         <li {% if last_active_tab == 'student_list' %}class="active"{% endif %}><a href="#student_list_tab" data-toggle="tab">Student List</a></li>
     </ul>

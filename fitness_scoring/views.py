@@ -3,7 +3,7 @@ from django.http import HttpResponseForbidden
 from django.template import RequestContext
 from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
-from view_handlers import handle_logged_in, handle_school_user
+from view_handlers import handle_logged_in
 from view_handlers import handle_teacher_list, handle_student_list, handle_class_list
 
 
@@ -87,7 +87,6 @@ def teacher(request):
 
         context = {'user_type': 'Teacher',
                    'name': request.session.get('username', None),
-                   'school_name': request.session.get('school_name', None),
                    'submit_to_page': '/teacher/'}
 
         if handle_student_list(request, context, csv_available=False):
@@ -106,7 +105,6 @@ def administrator(request):
         context = {'submit_to_page': '/administrator/'}
 
         handle_logged_in(request, context)
-        handle_school_user(request, context)
 
         last_active_tab = 'teacher_list'
 
