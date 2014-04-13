@@ -1,14 +1,8 @@
 
 from django.contrib import messages
-from fitness_scoring.forms import AddTeacherForm, EditTeacherForm, AddStudentForm, EditStudentForm, AddClassForm, EditClassForm, AddSchoolForm, EditSchoolForm
-from fitness_scoring.models import Teacher, Student, Class, School, Administrator, TeacherClassAllocation
-from fileio import add_teachers_from_file_upload, add_students_from_file_upload, add_classes_from_file_upload, add_schools_from_file_upload
-
-
-def handle_logged_in(request, context):
-#This handler goes with loggedin.html
-    context['user_type'] = request.session.get('user_type', None)
-    context['name'] = request.session.get('username', None)
+from fitness_scoring.forms import AddTeacherForm, EditTeacherForm, AddStudentForm, EditStudentForm, AddClassForm, EditClassForm
+from fitness_scoring.models import Teacher, Student, Class, School, TeacherClassAllocation
+from fileio import add_teachers_from_file_upload, add_students_from_file_upload, add_classes_from_file_upload
 
 
 def handle_teacher_list(request, context):
