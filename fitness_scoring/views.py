@@ -84,7 +84,11 @@ def teacher(request):
 
         last_active_tab1 = 'student_list'
 
-        context = {'submit_to_page': '/teacher/'}
+        teacher = Teacher.objects.get(user=User.objects.get(username=request.session.get('username')))
+        heading = teacher.first_name + ' ' + teacher.surname + ' (' + teacher.school_id.name + ')'
+        context = {'loggedin_heading': heading,
+                   'user_name': request.session.get('username'),
+                   'submit_to_page': '/teacher/'}
 
         if handle_student_list(request, context, csv_available=False):
             last_active_tab1 = 'student_list'
@@ -99,7 +103,10 @@ def teacher(request):
 def administrator(request):
     if request.session.get('user_type', None) == 'Administrator':
 
-        context = {'submit_to_page': '/administrator/'}
+        administrator = Administrator.objects.get(user=User.objects.get(username=request.session.get('username')))
+        context = {'loggedin_heading': 'Administrator: ' + administrator.school_id.name,
+                   'user_name': request.session.get('username'),
+                   'submit_to_page': '/administrator/'}
 
         last_active_tab = 'teacher_list'
 
@@ -121,6 +128,8 @@ def superuser(request):
     if request.session.get('user_type', None) == 'SuperUser':
 
         context = {
+            'loggedin_heading': 'Super User Page',
+            'user_name': request.session.get('username'),
             'user_tab_page_title': 'Super User',
             'user_tabs': [
                 ['school_list_tab', 'School List', '/school/list/school_list_tab', 2, True]
