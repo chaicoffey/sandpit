@@ -1,4 +1,6 @@
 
+var base_url = window.location.protocol + "//" + window.location.host;
+
 // Loads school list tab and makes the list a dataTable (search functionality, etc.)
 function load_item_list(item_tab_id, item_list_url, n_headings_to_exclude) {
     var exclude_headings = new Array();

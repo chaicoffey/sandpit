@@ -8,12 +8,20 @@ Super User
     <script>
         {% include "javascript_additions/ajax_item_list_loader.js" %}
         {% include "javascript_additions/ajax_modal_form.js" %}
-        {% include "javascript_additions/ajax_school_list_loading.js" %}
+        {% for item_list_tab_id, item_list_tab_label, item_list_url, item_list_options_length, tab_active in super_user_tabs %}
+            {% include "javascript_additions/ajax_item_list_loading_javascript.html" %}
+        {% endfor %}
     </script>
     <ul class="nav nav-tabs">
-        <li class="active"><a href="#school_list_tab" data-toggle="tab">School List</a></li>
+        {% for item_list_tab_id, item_list_tab_label, item_list_url, item_list_options_length, tab_active in super_user_tabs %}
+            <li {% if tab_active %}class="active"{% endif %}>
+                <a href="#{{ item_list_tab_id }}" data-toggle="tab">{{ item_list_tab_label }}</a>
+            </li>
+        {% endfor %}
     </ul>
     <div class="tab-content">
-        <div class="tab-pane active" id="school_list_tab"></div>
+        {% for item_list_tab_id, item_list_tab_label, item_list_url, item_list_options_length, tab_active in super_user_tabs %}
+            <div class="tab-pane {% if tab_active %}active{% endif %}" id="{{ item_list_tab_id }}"></div>
+        {% endfor %}
     </div>
 {% endblock %}

@@ -133,7 +133,11 @@ def administrator(request):
 def superuser(request):
     if request.session.get('user_type', None) == 'SuperUser':
 
-        context = {'submit_to_page': '/superuser/'}
+        context = {
+            'super_user_tabs': [
+                ['school_list_tab', 'School List', '/school/list/', 2, True]
+            ]
+        }
 
         handle_logged_in(request, context)
 
