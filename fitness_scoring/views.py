@@ -71,12 +71,12 @@ def login_user(request):
             return redirect('fitness_scoring.views.teacher')
         elif user_type == 'Unpaid':
             state = "Subscription fee has not been paid for your school."
-            return render(request, 'auth.html', RequestContext(request, {'state': state, 'username': username}))
+            return render(request, 'authentication.html', RequestContext(request, {'state': state, 'username': username}))
         else:
             state = "Incorrect username and/or password."
-            return render(request, 'auth.html', RequestContext(request, {'state': state, 'username': username}))
+            return render(request, 'authentication.html', RequestContext(request, {'state': state, 'username': username}))
     else:
-        return render(request, 'auth.html', RequestContext(request, {'state': '', 'username': ''}))
+        return render(request, 'authentication.html', RequestContext(request, {'state': '', 'username': ''}))
 
 
 def teacher(request):
@@ -86,7 +86,7 @@ def teacher(request):
 
         teacher = Teacher.objects.get(user=User.objects.get(username=request.session.get('username')))
         heading = teacher.first_name + ' ' + teacher.surname + ' (' + teacher.school_id.name + ')'
-        context = {'loggedin_heading': heading,
+        context = {'logged_in_heading': heading,
                    'user_name': request.session.get('username'),
                    'submit_to_page': '/teacher/'}
 
@@ -104,7 +104,7 @@ def administrator(request):
     if request.session.get('user_type', None) == 'Administrator':
 
         administrator = Administrator.objects.get(user=User.objects.get(username=request.session.get('username')))
-        context = {'loggedin_heading': 'Administrator: ' + administrator.school_id.name,
+        context = {'logged_in_heading': 'Administrator: ' + administrator.school_id.name,
                    'user_name': request.session.get('username'),
                    'submit_to_page': '/administrator/'}
 
@@ -128,7 +128,7 @@ def superuser(request):
     if request.session.get('user_type', None) == 'SuperUser':
 
         context = {
-            'loggedin_heading': 'Super User Page',
+            'logged_in_heading': 'Super User Page',
             'user_name': request.session.get('username'),
             'user_tab_page_title': 'Super User',
             'user_tabs': [

@@ -1,10 +1,10 @@
-{% extends "loggedin.html" %}
+{% extends "logged_in.html" %}
 
 {% block title_fitness_testing_base %}
     {{ user_tab_page_title }}
 {% endblock %}
 
-{% block content_loggedin %}
+{% block content_logged_in %}
     <script>
         {% include "javascript_additions/ajax_item_list_loader.js" %}
         {% include "javascript_additions/ajax_modal_form.js" %}
