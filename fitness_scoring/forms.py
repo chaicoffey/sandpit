@@ -1,8 +1,8 @@
 from django import forms
 from django.contrib import messages
-from fitness_scoring.models import Student, School, Class, Teacher
-from fitness_scoring.validators import validate_no_space, validate_school_unique
-from fitness_scoring.fileio import add_schools_from_file_upload
+from fitness_scoring.models import Student, School, Class, Teacher, TestCategory
+from fitness_scoring.validators import validate_no_space, validate_school_unique, validate_test_category_unique
+from fitness_scoring.fileio import add_schools_from_file_upload, add_test_categories_from_file_upload
 from django.core.validators import MinLengthValidator
 import datetime
 
@@ -862,3 +862,69 @@ class EditSchoolForm(forms.Form):
             school_editing = School.objects.get(pk=school_pk)
             school_edited = school_editing.edit_school_safe(name=name, subscription_paid=subscription_paid)
         return school_edited
+
+
+class AddTestCategoryForm(forms.Form):
+    test_category_name = forms.CharField(max_length=200, required=True, validators=[validate_test_category_unique])
+
+    def __init__(self, *args, **kwargs):
+        super(AddTestCategoryForm, self).__init__(*args, **kwargs)
+        self.fields['test_category_name'].error_messages = {'required': 'Please Enter Test Category Name'}
+
+    def add_test_category(self):
+        test_category_saved = self.is_valid()
+        if test_category_saved:
+            test_category_name = self.cleaned_data['test_category_name']
+            test_category_saved = TestCategory.create_test_category(test_category_name=test_category_name)
+        return test_category_saved
+
+
+class AddTestCategoriesForm(forms.Form):
+    add_test_categories_file = forms.FileField(required=True)
+
+    def __init__(self, *args, **kwargs):
+        super(AddTestCategoriesForm, self).__init__(*args, **kwargs)
+        self.fields['add_test_categories_file'].error_messages = {'required': 'Please Choose Add Test Categories File'}
+
+    def add_test_categories(self, request):
+        if self.is_valid():
+            return add_test_categories_from_file_upload(request.FILES['add_test_categories_file'])
+        else:
+            return False
+
+
+class EditTestCategoryForm(forms.Form):
+    test_category_pk = forms.CharField(widget=forms.HiddenInput())
+    test_category_name = forms.CharField(max_length=200, required=True, validators=[validate_test_category_unique])
+
+    def __init__(self, test_category_pk=None, *args, **kwargs):
+        super(EditTestCategoryForm, self).__init__(*args, **kwargs)
+        self.fields['test_category_name'].error_messages = {'required': 'Please Enter Test Category Name'}
+        if test_category_pk:
+            test_category = TestCategory.objects.get(pk=test_category_pk)
+            self.fields['test_category_pk'].initial = test_category_pk
+            self.fields['test_category_name'].initial = test_category.test_category_name
+
+    def clean(self):
+        cleaned_data = super(EditTestCategoryForm, self).clean()
+        test_category_pk = cleaned_data.get("test_category_pk")
+        test_category_name = cleaned_data.get("test_category_name")
+
+        if test_category_pk and test_category_name:
+            test_category = TestCategory.objects.get(pk=test_category_pk)
+            if (test_category.test_category_name != test_category_name) and TestCategory.objects.filter(test_category_name=test_category_name).exists():
+                self._errors["test_category_name"] = self.error_class(['Test Category Name Already Exists: ' + test_category_name])
+                del cleaned_data["test_category_pk"]
+                del cleaned_data["test_category_name"]
+
+        return cleaned_data
+
+    def edit_test_category(self):
+        test_category_edited = self.is_valid()
+        if test_category_edited:
+            test_category_pk = self.cleaned_data['test_category_pk']
+            test_category_name = self.cleaned_data['test_category_name']
+            test_category_editing = TestCategory.objects.get(pk=test_category_pk)
+            test_category_edited = test_category_editing.edit_test_category_safe(test_category_name=test_category_name)
+        return test_category_edited
+
