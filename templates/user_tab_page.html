@@ -7,10 +7,12 @@
 {% block content_logged_in %}
     <script>
         {% include "javascript_additions/ajax_item_list_loader.js" %}
-        {% include "javascript_additions/ajax_modal_form.js" %}
-        {% for item_list_tab_id, item_list_tab_label, item_list_url, item_list_options_length, tab_active in user_tabs %}
-            {% include "javascript_additions/ajax_item_list_loading_javascript.html" %}
-        {% endfor %}
+        // Load item lists when page is first accessed.
+        $(document).ready(function(){
+            {% for item_list_tab_id, item_list_tab_label, item_list_url, item_list_options_length, tab_active in user_tabs %}
+                load_item_list('{{ item_list_tab_id }}', '{{ item_list_url }}', {{item_list_options_length}}, true);
+            {% endfor %}
+        });
     </script>
     <ul class="nav nav-tabs">
         {% for item_list_tab_id, item_list_tab_label, item_list_url, item_list_options_length, tab_active in user_tabs %}

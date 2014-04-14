@@ -1,8 +1,0 @@
-
-// Refresh the item list when the modal close button is clicked
-$(document).on('click', '#modal_close_button', function() {
-    $('#remoteModal').modal('hide');
-    $('body').removeClass('modal-open');
-    $('.modal-backdrop').remove();
-    load_item_list('{{ item_list_tab_id }}', '{{ item_list_url }}', {{item_list_options|length}}, false);
-});
