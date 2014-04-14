@@ -1,8 +1,9 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.template import RequestContext
-from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School
+from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, TestCategory
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
+from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
 from view_handlers import handle_teacher_list, handle_student_list, handle_class_list
 
 
@@ -244,3 +245,109 @@ def school_delete(request, school_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to delete a school")
+
+
+def test_category_list(request, test_category_list_tab_id):
+    if request.session.get('user_type', None) == 'SuperUser':
+        context = {
+            'item_list': [(test_category, test_category.get_display_items()) for test_category in TestCategory.objects.all()],
+            'item_list_title': 'Test Category List',
+            'item_list_table_headings': TestCategory.get_display_list_headings(),
+            'item_list_tab_id': test_category_list_tab_id,
+            'item_list_url': '/test_category/list/' + test_category_list_tab_id,
+            'item_list_buttons': [
+                ['+', [['/test_category/add/', 'Add Test Category'],
+                       ['/test_category/adds/', 'Add/Edit Test Categories From .CSV']]]
+            ],
+            'item_list_options': [
+                ['/test_category/edit/', 'pencil'],
+                ['/test_category/delete/', 'remove']
+            ]
+        }
+        return render(request, 'item_list.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to view test category list")
+
+
+def test_category_add(request):
+    if request.session.get('user_type', None) == 'SuperUser':
+        if request.POST:
+            test_category_add_form = AddTestCategoryForm(request.POST)
+            if test_category_add_form.add_test_category():
+                context = {'finish_title': 'Test Category Added', 'finish_message': 'Test Category Added Successfully: ' + test_category_add_form.cleaned_data['test_category_name']}
+                return render(request, 'modal_finished_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/test_category/add/', 'functionality_name': 'Add Test Category', 'form': test_category_add_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/test_category/add/', 'functionality_name': 'Add Test Category', 'form': AddTestCategoryForm()}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to add a test category")
+
+
+def test_category_adds(request):
+    if request.session.get('user_type', None) == 'SuperUser':
+        if request.POST:
+            test_category_adds_form = AddTestCategoriesForm(request.POST, request.FILES)
+            result = test_category_adds_form.add_test_categories(request)
+            if result:
+                (n_created, n_updated, n_not_created_or_updated) = result
+                result_message = \
+                    'Test Categories Created: '+str(n_created) + '\n' + \
+                    'Test Categories Updated: '+str(n_updated) + '\n' + \
+                    'No Changes From Data Lines: '+str(n_not_created_or_updated)
+                context = {'finish_title': 'Test Categories Added/Updated', 'finish_message': result_message}
+                return render(request, 'modal_finished_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/test_category/adds/', 'functionality_name': 'Add Test Categories', 'form': test_category_adds_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/test_category/adds/', 'functionality_name': 'Add Test Categories', 'form': AddTestCategoriesForm()}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to add test categories")
+
+
+def test_category_edit(request, test_category_pk):
+    if request.session.get('user_type', None) == 'SuperUser':
+        if request.POST:
+            test_category_edit_form = EditTestCategoryForm(data=request.POST)
+            if test_category_edit_form.edit_test_category():
+                context = {'finish_title': 'Test Category Edited',
+                           'finish_message': 'Test Category Edited Successfully: ' + test_category_edit_form.cleaned_data['test_category_name']}
+                return render(request, 'modal_finished_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/test_category/edit/' + str(test_category_pk),
+                           'functionality_name': 'Edit Test Category',
+                           'form': test_category_edit_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/test_category/edit/' + str(test_category_pk),
+                       'functionality_name': 'Edit Test Category',
+                       'form': EditTestCategoryForm(test_category_pk=test_category_pk)}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to edit a test category")
+
+
+def test_category_delete(request, test_category_pk):
+    if request.session.get('user_type', None) == 'SuperUser':
+        test_category_to_delete = TestCategory.objects.get(pk=test_category_pk)
+        test_category_name = test_category_to_delete.test_category_name
+        if request.POST:
+            if test_category_to_delete.delete_test_category_safe():
+                context = {'finish_title': 'Test Category Deleted',
+                           'finish_message': 'Test Category Deleted Successfully: ' + test_category_name}
+            else:
+                context = {'finish_title': 'Test Category Not Deleted',
+                           'finish_error_message': 'Could Not Delete ' + test_category_name + ' (Test Category Being Used)'}
+            return render(request, 'modal_finished_message.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/test_category/delete/' + str(test_category_pk),
+                       'functionality_name': 'Delete Test Category',
+                       'prompt_message': 'Are You Sure You Wish To Delete ' + test_category_name + "?"}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to delete a test category")
+
