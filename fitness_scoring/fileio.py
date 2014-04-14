@@ -1,6 +1,6 @@
 import csv
 import tempfile
-from fitness_scoring.models import Student, Teacher, Class, School, User
+from fitness_scoring.models import Student, Teacher, Class, School, User, TestCategory
 import os
 
 destination_directory = 'C:\\fitness_scoring_file_uploads\\'
@@ -148,6 +148,38 @@ def add_schools_from_file(file_path_on_server):
         if School.create_school_and_administrator(name=name, subscription_paid=subscription_paid):
             n_created += 1
         elif School.update_school(name=name, subscription_paid=subscription_paid):
+            n_updated += 1
+        else:
+            n_not_created_or_updated += 1
+
+    return n_created, n_updated, n_not_created_or_updated
+
+
+def add_test_categories_from_file_upload(uploaded_file):
+    file_path_on_server = save_file(uploaded_file)
+    (n_created, n_updated, n_not_created_or_updated) = add_test_categories_from_file(file_path_on_server)
+    delete_file(file_path_on_server)
+    return n_created, n_updated, n_not_created_or_updated
+
+
+def add_test_categories_from_file(file_path_on_server):
+    file_handle = open(file_path_on_server, 'rb')
+
+    dialect = csv.Sniffer().sniff(file_handle.read(1024))
+    dialect.strict = True
+
+    file_handle.seek(0)
+    test_categories_list_reader = csv.DictReader(file_handle, dialect=dialect)
+    # check headings are correct else throw exception
+
+    n_created = 0
+    n_updated = 0
+    n_not_created_or_updated = 0
+    for line in test_categories_list_reader:
+        (test_category_name) = (line['test_category_name'])
+        if TestCategory.create_test_category(test_category_name=test_category_name):
+            n_created += 1
+        elif TestCategory.update_test_category(test_category_name=test_category_name):
             n_updated += 1
         else:
             n_not_created_or_updated += 1
