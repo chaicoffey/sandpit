@@ -61,15 +61,15 @@ def login_user(request):
         request.session['user_type'] = user_type   
         request.session['username'] = username
         if user_type == 'SuperUser':
-            return redirect('fitness_scoring.views.superuser')
+            return redirect('fitness_scoring.views.superuser_view')
         elif user_type == 'Administrator':
             request.session['school_name'] = \
                 Administrator.objects.get(user=User.objects.get(username=username)).school_id.name
-            return redirect('fitness_scoring.views.administrator')
+            return redirect('fitness_scoring.views.administrator_view')
         elif user_type == 'Teacher':
             request.session['school_name'] = \
                 Teacher.objects.get(user=User.objects.get(username=username)).school_id.name
-            return redirect('fitness_scoring.views.teacher')
+            return redirect('fitness_scoring.views.teacher_view')
         elif user_type == 'Unpaid':
             state = "Subscription fee has not been paid for your school."
             return render(request, 'authentication.html', RequestContext(request, {'state': state, 'username': username}))
@@ -80,7 +80,7 @@ def login_user(request):
         return render(request, 'authentication.html', RequestContext(request, {'state': '', 'username': ''}))
 
 
-def teacher(request):
+def teacher_view(request):
     if request.session.get('user_type', None) == 'Teacher':
 
         last_active_tab1 = 'student_list'
@@ -101,7 +101,7 @@ def teacher(request):
         return redirect('fitness_scoring.views.login_user')
 
 
-def administrator(request):
+def administrator_view(request):
     if request.session.get('user_type', None) == 'Administrator':
 
         administrator = Administrator.objects.get(user=User.objects.get(username=request.session.get('username')))
@@ -125,7 +125,7 @@ def administrator(request):
         return redirect('fitness_scoring.views.login_user')
 
 
-def superuser(request):
+def superuser_view(request):
     if request.session.get('user_type', None) == 'SuperUser':
 
         context = {
