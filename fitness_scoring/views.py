@@ -133,8 +133,8 @@ def superuser(request):
             'user_name': request.session.get('username'),
             'user_tab_page_title': 'Super User',
             'user_tabs': [
-                ['Add/Update School List', '/school/list/main_view'],
-                ['Add/Update Test Category List', '/test_category/list/main_view']
+                ['Add/Update School List', '/school/list/'],
+                ['Add/Update Test Category List', '/test_category/list/']
             ]
         }
 
@@ -143,7 +143,7 @@ def superuser(request):
         return redirect('fitness_scoring.views.login_user')
 
 
-def school_list(request, parent_container_id):
+def school_list(request):
     if request.session.get('user_type', None) == 'SuperUser':
         context = {
             'item_list': [(school, school.get_display_items()) for school in School.objects.all()],
@@ -246,7 +246,7 @@ def school_delete(request, school_pk):
         return HttpResponseForbidden("You are not authorised to delete a school")
 
 
-def test_category_list(request, parent_container_id):
+def test_category_list(request):
     if request.session.get('user_type', None) == 'SuperUser':
         context = {
             'item_list': [(test_category, test_category.get_display_items()) for test_category in TestCategory.objects.all()],
