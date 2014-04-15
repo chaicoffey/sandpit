@@ -133,7 +133,8 @@ def superuser(request):
             'user_name': request.session.get('username'),
             'user_tab_page_title': 'Super User',
             'user_tabs': [
-                ['school_list_tab', 'School List', '/school/list/school_list_tab', 2, True]
+                ['Add/Update School List', '/school/list/main_view'],
+                ['Add/Update Test Category List', '/test_category/list/main_view']
             ]
         }
 
@@ -142,14 +143,12 @@ def superuser(request):
         return redirect('fitness_scoring.views.login_user')
 
 
-def school_list(request, school_list_tab_id):
+def school_list(request, parent_container_id):
     if request.session.get('user_type', None) == 'SuperUser':
         context = {
             'item_list': [(school, school.get_display_items()) for school in School.objects.all()],
             'item_list_title': 'School List',
             'item_list_table_headings': School.get_display_list_headings(),
-            'item_list_tab_id': school_list_tab_id,
-            'item_list_url': '/school/list/' + school_list_tab_id,
             'item_list_buttons': [
                 ['+', [['/school/add/', 'Add School'],
                        ['/school/adds/', 'Add/Edit Schools From .CSV']]]
@@ -247,14 +246,12 @@ def school_delete(request, school_pk):
         return HttpResponseForbidden("You are not authorised to delete a school")
 
 
-def test_category_list(request, test_category_list_tab_id):
+def test_category_list(request, parent_container_id):
     if request.session.get('user_type', None) == 'SuperUser':
         context = {
             'item_list': [(test_category, test_category.get_display_items()) for test_category in TestCategory.objects.all()],
             'item_list_title': 'Test Category List',
             'item_list_table_headings': TestCategory.get_display_list_headings(),
-            'item_list_tab_id': test_category_list_tab_id,
-            'item_list_url': '/test_category/list/' + test_category_list_tab_id,
             'item_list_buttons': [
                 ['+', [['/test_category/add/', 'Add Test Category'],
                        ['/test_category/adds/', 'Add/Edit Test Categories From .CSV']]]
