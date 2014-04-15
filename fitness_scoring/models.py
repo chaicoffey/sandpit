@@ -345,7 +345,7 @@ class TestCategory(models.Model):
         return [self.test_category_name]
 
     def delete_test_category_safe(self):
-        test_category_not_used = not TestCategory.objects.filter(test_category=self).exists()
+        test_category_not_used = not Test.objects.filter(test_category=self).exists()
         if test_category_not_used:
             self.delete()
         return test_category_not_used
