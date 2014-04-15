@@ -345,7 +345,7 @@ class TestCategory(models.Model):
         return [self.test_category_name]
 
     def delete_test_category_safe(self):
-        test_category_not_used = not Test.objects.filter(test_category=self).exists()
+        test_category_not_used = not TestCategory.objects.filter(test_category=self).exists()
         if test_category_not_used:
             self.delete()
         return test_category_not_used
@@ -365,7 +365,7 @@ class TestCategory(models.Model):
     def create_test_category(test_category_name):
         test_category_name_unique = not TestCategory.objects.filter(test_category_name=test_category_name).exists()
         if test_category_name_unique:
-            School.objects.create(test_category_name=test_category_name)
+            TestCategory.objects.create(test_category_name=test_category_name)
         return test_category_name_unique
 
     @staticmethod

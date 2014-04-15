@@ -9,6 +9,10 @@ select {
     font-family:'Courier New','Courier','monospace';
 }
 
+.sidebar {
+    background-color: rgb(245, 245, 245);
+}
+
 /*
 #table-wrapper {
     height: 200px;
