@@ -14,50 +14,50 @@ def logout_user(request):
 
 def login_user(request):
 
-    def authenticate(username, password):
+    def authenticate(username_local, password_local):
 
-        def check_password(password, encrypted_password):
-            return password == encrypted_password
+        def check_password(password_local2, encrypted_password):
+            return password_local2 == encrypted_password
 
-        users = User.objects.filter(username=username)
+        users = User.objects.filter(username=username_local)
         if users.exists():
             superusers = SuperUser.objects.filter(user=users[0])
             administrators = Administrator.objects.filter(user=users[0])
             teachers = Teacher.objects.filter(user=users[0])
             if superusers.exists():
-                if check_password(password=password, encrypted_password=superusers[0].user.password):
-                    user_type = 'SuperUser'
+                if check_password(password_local2=password_local, encrypted_password=superusers[0].user.password):
+                    user_type_local = 'SuperUser'
                 else:
-                    user_type = 'SuperUser Failed'
+                    user_type_local = 'SuperUser Failed'
             elif administrators.exists():
-                if check_password(password=password, encrypted_password=administrators[0].user.password):
+                if check_password(password_local2=password_local, encrypted_password=administrators[0].user.password):
                     if administrators[0].school_id.subscription_paid:
-                        user_type = 'Administrator'
+                        user_type_local = 'Administrator'
                     else:
-                        user_type = 'Unpaid'
+                        user_type_local = 'Unpaid'
                 else:
-                    user_type = 'Administrator Failed'
+                    user_type_local = 'Administrator Failed'
             elif teachers.exists():
-                if check_password(password=password, encrypted_password=teachers[0].user.password):
+                if check_password(password_local2=password_local, encrypted_password=teachers[0].user.password):
                     if teachers[0].school_id.subscription_paid:
-                        user_type = 'Teacher'
+                        user_type_local = 'Teacher'
                     else:
-                        user_type = 'Unpaid'
+                        user_type_local = 'Unpaid'
                 else:
-                    user_type = 'Teacher Failed'
+                    user_type_local = 'Teacher Failed'
 
             else:
-                user_type = 'Failed'
+                user_type_local = 'Failed'
         else:
-            user_type = 'Failed'
+            user_type_local = 'Failed'
 
-        return user_type
+        return user_type_local
 
     if request.POST:
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        user_type = authenticate(username=username, password=password)
+        user_type = authenticate(username_local=username, password_local=password)
         request.session['user_type'] = user_type   
         request.session['username'] = username
         if user_type == 'SuperUser':
@@ -72,10 +72,12 @@ def login_user(request):
             return redirect('fitness_scoring.views.teacher_view')
         elif user_type == 'Unpaid':
             state = "Subscription fee has not been paid for your school."
-            return render(request, 'authentication.html', RequestContext(request, {'state': state, 'username': username}))
+            return render(request, 'authentication.html', RequestContext(request, {'state': state,
+                                                                                   'username': username}))
         else:
             state = "Incorrect username and/or password."
-            return render(request, 'authentication.html', RequestContext(request, {'state': state, 'username': username}))
+            return render(request, 'authentication.html', RequestContext(request, {'state': state,
+                                                                                   'username': username}))
     else:
         return render(request, 'authentication.html', RequestContext(request, {'state': '', 'username': ''}))
 
@@ -168,7 +170,8 @@ def school_add(request):
         if request.POST:
             school_add_form = AddSchoolForm(request.POST)
             if school_add_form.add_school():
-                context = {'finish_title': 'School Added', 'finish_message': 'School Added Successfully: ' + school_add_form.cleaned_data['name']}
+                context = {'finish_title': 'School Added', 'finish_message': 'School Added Successfully: '
+                                                                             + school_add_form.cleaned_data['name']}
                 return render(request, 'modal_finished_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/school/add/', 'functionality_name': 'Add School', 'form': school_add_form}
@@ -194,7 +197,9 @@ def school_adds(request):
                 context = {'finish_title': 'Schools Added/Updated', 'finish_message': result_message}
                 return render(request, 'modal_finished_message.html', RequestContext(request, context))
             else:
-                context = {'post_to_url': '/school/adds/', 'functionality_name': 'Add Schools', 'form': school_adds_form}
+                context = {'post_to_url': '/school/adds/',
+                           'functionality_name': 'Add Schools',
+                           'form': school_adds_form}
                 return render(request, 'modal_form.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/school/adds/', 'functionality_name': 'Add Schools', 'form': AddSchoolsForm()}
@@ -249,7 +254,8 @@ def school_delete(request, school_pk):
 def test_category_list(request):
     if request.session.get('user_type', None) == 'SuperUser':
         context = {
-            'item_list': [(test_category, test_category.get_display_items()) for test_category in TestCategory.objects.all()],
+            'item_list': [(test_category, test_category.get_display_items())
+                          for test_category in TestCategory.objects.all()],
             'item_list_title': 'Test Category List',
             'item_list_table_headings': TestCategory.get_display_list_headings(),
             'item_list_buttons': [
@@ -271,13 +277,19 @@ def test_category_add(request):
         if request.POST:
             test_category_add_form = AddTestCategoryForm(request.POST)
             if test_category_add_form.add_test_category():
-                context = {'finish_title': 'Test Category Added', 'finish_message': 'Test Category Added Successfully: ' + test_category_add_form.cleaned_data['test_category_name']}
+                context = {'finish_title': 'Test Category Added',
+                           'finish_message': 'Test Category Added Successfully: '
+                                             + test_category_add_form.cleaned_data['test_category_name']}
                 return render(request, 'modal_finished_message.html', RequestContext(request, context))
             else:
-                context = {'post_to_url': '/test_category/add/', 'functionality_name': 'Add Test Category', 'form': test_category_add_form}
+                context = {'post_to_url': '/test_category/add/',
+                           'functionality_name': 'Add Test Category',
+                           'form': test_category_add_form}
                 return render(request, 'modal_form.html', RequestContext(request, context))
         else:
-            context = {'post_to_url': '/test_category/add/', 'functionality_name': 'Add Test Category', 'form': AddTestCategoryForm()}
+            context = {'post_to_url': '/test_category/add/',
+                       'functionality_name': 'Add Test Category',
+                       'form': AddTestCategoryForm()}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to add a test category")
@@ -297,10 +309,14 @@ def test_category_adds(request):
                 context = {'finish_title': 'Test Categories Added/Updated', 'finish_message': result_message}
                 return render(request, 'modal_finished_message.html', RequestContext(request, context))
             else:
-                context = {'post_to_url': '/test_category/adds/', 'functionality_name': 'Add Test Categories', 'form': test_category_adds_form}
+                context = {'post_to_url': '/test_category/adds/',
+                           'functionality_name': 'Add Test Categories',
+                           'form': test_category_adds_form}
                 return render(request, 'modal_form.html', RequestContext(request, context))
         else:
-            context = {'post_to_url': '/test_category/adds/', 'functionality_name': 'Add Test Categories', 'form': AddTestCategoriesForm()}
+            context = {'post_to_url': '/test_category/adds/',
+                       'functionality_name': 'Add Test Categories',
+                       'form': AddTestCategoriesForm()}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to add test categories")
@@ -312,7 +328,8 @@ def test_category_edit(request, test_category_pk):
             test_category_edit_form = EditTestCategoryForm(data=request.POST)
             if test_category_edit_form.edit_test_category():
                 context = {'finish_title': 'Test Category Edited',
-                           'finish_message': 'Test Category Edited Successfully: ' + test_category_edit_form.cleaned_data['test_category_name']}
+                           'finish_message': 'Test Category Edited Successfully: '
+                                             + test_category_edit_form.cleaned_data['test_category_name']}
                 return render(request, 'modal_finished_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/test_category/edit/' + str(test_category_pk),
@@ -338,7 +355,8 @@ def test_category_delete(request, test_category_pk):
                            'finish_message': 'Test Category Deleted Successfully: ' + test_category_name}
             else:
                 context = {'finish_title': 'Test Category Not Deleted',
-                           'finish_error_message': 'Could Not Delete ' + test_category_name + ' (Test Category Being Used)'}
+                           'finish_error_message': 'Could Not Delete ' + test_category_name
+                                                   + ' (Test Category Being Used)'}
             return render(request, 'modal_finished_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/test_category/delete/' + str(test_category_pk),
@@ -347,4 +365,3 @@ def test_category_delete(request, test_category_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to delete a test category")
-
