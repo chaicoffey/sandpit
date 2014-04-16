@@ -15,7 +15,9 @@ class School(models.Model):
                 Administrator.objects.get(school_id=self).user.username]
 
     def delete_school_safe(self):
-        school_not_used = (len(Teacher.objects.filter(school_id=self)) == 0) and (len(Class.objects.filter(school_id=self)) == 0) and (len(Student.objects.filter(school_id=self)) == 0)
+        school_not_used = (len(Teacher.objects.filter(school_id=self)) == 0) and\
+                          (len(Class.objects.filter(school_id=self)) == 0) and\
+                          (len(Student.objects.filter(school_id=self)) == 0)
         if school_not_used:
             administrator_to_delete = Administrator.objects.get(school_id=self)
             administrator_to_delete.user.delete()
@@ -47,7 +49,9 @@ class School(models.Model):
             username_base = 'admin_' + name[0:3]
             if not Administrator.create_administrator(username=username_base, password='admin', school_id=school):
                 incremental = 1
-                while not Administrator.create_administrator(username=(username_base + str(incremental)), password='admin', school_id=school):
+                while not Administrator.create_administrator(username=(username_base + str(incremental)),
+                                                             password='admin',
+                                                             school_id=school):
                     incremental += 1
 
         return school_created
@@ -126,7 +130,9 @@ class Teacher(models.Model):
 
         username_unique = (len(User.objects.filter(username=username)) == 0)
         if check_name:
-            username_unique = username_unique and (len(Teacher.objects.filter(school_id=school_id, first_name=first_name, surname=surname)) == 0)
+            username_unique = username_unique and (len(Teacher.objects.filter(school_id=school_id,
+                                                                              first_name=first_name,
+                                                                              surname=surname)) == 0)
 
         if username_unique:
             user = User.objects.create(username=username, password=password)
@@ -143,14 +149,21 @@ class Teacher(models.Model):
         if user_exists:
             user = User.objects.get(username=username)
             if check_name:
-                teacher_exists = (len(Teacher.objects.filter(school_id=school_id, first_name=first_name, surname=surname, user=user)) == 1)
+                teacher_exists = (len(Teacher.objects.filter(school_id=school_id,
+                                                             first_name=first_name,
+                                                             surname=surname, user=user)) == 1)
             else:
                 teacher_exists = (len(Teacher.objects.filter(school_id=school_id, user=user)) == 1)
+        else:
+            user = None  # just for removing a warning
 
         teacher_updated = False
         if teacher_exists:
             teacher = Teacher.objects.get(user=user)
-            teacher_updated = not ((teacher.first_name == first_name) and (teacher.surname == surname) and (teacher.school_id == school_id) and (user.password == password))
+            teacher_updated = not ((teacher.first_name == first_name) and (teacher.surname == surname) and
+                                   (teacher.school_id == school_id) and (user.password == password))
+        else:
+            teacher = None  # just for removing a warning
 
         if teacher_updated:
             teacher.first_name = first_name
@@ -204,7 +217,8 @@ class Student(models.Model):
         return student_not_used
 
     def edit_student_safe(self, student_id, school_id, first_name, surname, gender, dob):
-        is_edit_safe = ((self.student_id == student_id) and (self.school_id == school_id)) or (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 0)
+        is_edit_safe = ((self.student_id == student_id) and (self.school_id == school_id)) or\
+                       (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 0)
         if is_edit_safe:
             self.student_id = student_id
             self.school_id = school_id
@@ -225,7 +239,8 @@ class Student(models.Model):
                                                                             surname=surname)) == 0)
 
         if student_unique:
-            Student.objects.create(student_id=student_id, school_id=school_id, first_name=first_name, surname=surname, gender=gender, dob=dob)
+            Student.objects.create(student_id=student_id, school_id=school_id, first_name=first_name,
+                                   surname=surname, gender=gender, dob=dob)
 
         return student_unique
 
@@ -233,14 +248,17 @@ class Student(models.Model):
     def update_student(check_name, student_id, school_id, first_name, surname, gender, dob):
 
         if check_name:
-            student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id, first_name=first_name, surname=surname)) == 1)
+            student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id,
+                                                         first_name=first_name, surname=surname)) == 1)
         else:
             student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 1)
 
         student_updated = student_exists
         if student_exists:
             student = Student.objects.get(school_id=school_id, student_id=student_id)
-            student_updated = not ((student.school_id == school_id) and (student.first_name == first_name) and (student.surname == surname) and (student.gender == gender) and (student.dob == datetime.datetime.strptime(dob, "%Y-%m-%d").date()))
+            student_updated = not ((student.school_id == school_id) and (student.first_name == first_name) and
+                                   (student.surname == surname) and (student.gender == gender) and
+                                   (student.dob == datetime.datetime.strptime(dob, "%Y-%m-%d").date()))
             if student_updated:
                 student.school_id = school_id
                 student.first_name = first_name
@@ -261,7 +279,8 @@ class Class(models.Model):
         return self.class_name + " (" + str(self.year) + ") - " + self.school_id.name
 
     def delete_class_safe(self):
-        class_not_used = (len(StudentClassEnrolment.objects.filter(class_id=self)) == 0) and (len(ClassTestSet.objects.filter(class_id=self)) == 0)
+        class_not_used = (len(StudentClassEnrolment.objects.filter(class_id=self)) == 0) and\
+                         (len(ClassTestSet.objects.filter(class_id=self)) == 0)
         if class_not_used:
             if len(TeacherClassAllocation.objects.filter(class_id=self)) == 1:
                 allocation = TeacherClassAllocation.objects.get(class_id=self)
@@ -270,7 +289,9 @@ class Class(models.Model):
         return class_not_used
 
     def edit_class_safe(self, year, class_name, school_id, teacher_id):
-        is_edit_safe = ((str(self.year) == str(year)) and (self.class_name == class_name) and (self.school_id == school_id)) or (len(Class.objects.filter(year=year, class_name=class_name, school_id=school_id)) == 0)
+        is_edit_safe = ((str(self.year) == str(year)) and (self.class_name == class_name)
+                        and (self.school_id == school_id))\
+            or (len(Class.objects.filter(year=year, class_name=class_name, school_id=school_id)) == 0)
         is_edit_safe = is_edit_safe and ((teacher_id is None) or (teacher_id.school_id == school_id))
         if is_edit_safe:
             if len(TeacherClassAllocation.objects.filter(class_id=self)) == 1:
@@ -315,9 +336,16 @@ class Class(models.Model):
             teacher_is_to_be_allocated = teacher_id is not None
             if teacher_is_allocated:
                 allocation = TeacherClassAllocation.objects.get(class_id=class_instance)
-                class_updated = not ((str(class_instance.year) == str(year)) and (class_instance.class_name == class_name) and (class_instance.school_id == school_id) and (allocation.teacher_id == teacher_id))
+                class_updated = not ((str(class_instance.year) == str(year)) and
+                                     (class_instance.class_name == class_name) and
+                                     (class_instance.school_id == school_id) and
+                                     (allocation.teacher_id == teacher_id))
             else:
-                class_updated = not ((str(class_instance.year) == str(year)) and (class_instance.class_name == class_name) and (class_instance.school_id == school_id) and (not teacher_is_to_be_allocated))
+                allocation = None  # just for removing a warning
+                class_updated = not ((str(class_instance.year) == str(year)) and
+                                     (class_instance.class_name == class_name) and
+                                     (class_instance.school_id == school_id) and
+                                     (not teacher_is_to_be_allocated))
             if class_updated:
                 if teacher_is_allocated:
                     if teacher_is_to_be_allocated:
@@ -351,7 +379,8 @@ class TestCategory(models.Model):
         return test_category_not_used
 
     def edit_test_category_safe(self, test_category_name):
-        is_edit_safe = (self.test_category_name == test_category_name) or not TestCategory.objects.filter(test_category_name=test_category_name).exists()
+        is_edit_safe = (self.test_category_name == test_category_name)\
+            or not TestCategory.objects.filter(test_category_name=test_category_name).exists()
         if is_edit_safe:
             self.test_category_name = test_category_name
             self.save()
