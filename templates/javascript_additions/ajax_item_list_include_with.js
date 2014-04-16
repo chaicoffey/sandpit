@@ -1,4 +1,17 @@
 
+//must define the items_in_list_updated_event() in another .js to go with this.
+//it can use the helper function below.
+
+//helper function for loading the item list table and applying search and sort functionality
+function load_data_table(parent_id, item_list_url, n_headings_to_exclude) {
+    var exclude_headings = new Array();
+    for (var back_index = 0; back_index < n_headings_to_exclude; back_index++)
+        exclude_headings[back_index] = -n_headings_to_exclude + back_index;
+    $('#' + parent_id).load(item_list_url, function(){
+        $('#item_list_table').dataTable({"aoColumnDefs": [{ 'bSortable': false, 'aTargets': exclude_headings }]});
+    });
+};
+
 //for loading modal links on item_list page into remote modal
 $(document).on('click', '.modal_load_link a', function(event){
     event.preventDefault();
@@ -35,3 +48,4 @@ $(document).on('click', '#modal_close_button', function() {
     $('.modal-backdrop').remove();
     items_in_list_updated_event();
 });
+

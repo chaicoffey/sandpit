@@ -10,8 +10,10 @@
         <div class="row">
             <div class="col-sm-4 col-md-3 sidebar">
                 <ul class="nav nav-sidebar" id="main_view_links">
-                    {% for link_label, link_url in user_tabs %}
-                        <li><a href="{{ link_url }}">{{ link_label }}</a></li>
+                    {% for link_label, link_url, n_headings_to_exclude in user_tabs %}
+                        <li exclude_headings="{{ n_headings_to_exclude }}">
+                            <a href="{{ link_url }}">{{ link_label }}</a>
+                        </li>
                     {% endfor %}
                 </ul>
             </div>
@@ -22,8 +24,8 @@
 
     <script>
         {% include 'javascript_additions/ajax_user_tab_page.js' %}
-        {% include 'javascript_additions/ajax_item_list_include_with_user_tab_page.js' %}
         {% include 'javascript_additions/ajax_item_list_include_with.js' %}
+        {% include 'javascript_additions/ajax_item_list_include_with_user_tab_page.js' %}
     </script>
 
 {% endblock %}

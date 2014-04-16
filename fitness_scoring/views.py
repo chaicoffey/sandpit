@@ -133,8 +133,8 @@ def superuser_view(request):
             'user_name': request.session.get('username'),
             'user_tab_page_title': 'Super User',
             'user_tabs': [
-                ['Add/Update School List', '/school/list/'],
-                ['Add/Update Test Category List', '/test_category/list/']
+                ['Add/Update School List', '/school/list/', 2],
+                ['Add/Update Test Category List', '/test_category/list/', 2]
             ]
         }
 
