@@ -170,9 +170,9 @@ def school_add(request):
         if request.POST:
             school_add_form = AddSchoolForm(request.POST)
             if school_add_form.add_school():
-                context = {'finish_title': 'School Added', 'finish_message': 'School Added Successfully: '
-                                                                             + school_add_form.cleaned_data['name']}
-                return render(request, 'modal_finished_message.html', RequestContext(request, context))
+                context = {'finish_title': 'School Added', 'user_message': 'School Added Successfully: '
+                                                                           + school_add_form.cleaned_data['name']}
+                return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/school/add/', 'functionality_name': 'Add School', 'form': school_add_form}
                 return render(request, 'modal_form.html', RequestContext(request, context))
@@ -194,8 +194,8 @@ def school_adds(request):
                     'Schools Created: '+str(n_created) + '\n' + \
                     'Schools Updated: '+str(n_updated) + '\n' + \
                     'No Changes From Data Lines: '+str(n_not_created_or_updated)
-                context = {'finish_title': 'Schools Added/Updated', 'finish_message': result_message}
-                return render(request, 'modal_finished_message.html', RequestContext(request, context))
+                context = {'finish_title': 'Schools Added/Updated', 'user_message': result_message}
+                return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/school/adds/',
                            'functionality_name': 'Add Schools',
@@ -214,8 +214,8 @@ def school_edit(request, school_pk):
             school_edit_form = EditSchoolForm(data=request.POST)
             if school_edit_form.edit_school():
                 context = {'finish_title': 'School Edited',
-                           'finish_message': 'School Edited Successfully: ' + school_edit_form.cleaned_data['name']}
-                return render(request, 'modal_finished_message.html', RequestContext(request, context))
+                           'user_message': 'School Edited Successfully: ' + school_edit_form.cleaned_data['name']}
+                return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/school/edit/' + str(school_pk),
                            'functionality_name': 'Edit School',
@@ -237,11 +237,11 @@ def school_delete(request, school_pk):
         if request.POST:
             if school_to_delete.delete_school_safe():
                 context = {'finish_title': 'School Deleted',
-                           'finish_message': 'School Deleted Successfully: ' + school_name}
+                           'user_message': 'School Deleted Successfully: ' + school_name}
             else:
                 context = {'finish_title': 'School Not Deleted',
-                           'finish_error_message': 'Could Not Delete ' + school_name + ' (School Being Used)'}
-            return render(request, 'modal_finished_message.html', RequestContext(request, context))
+                           'user_error_message': 'Could Not Delete ' + school_name + ' (School Being Used)'}
+            return render(request, 'user_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/school/delete/' + str(school_pk),
                        'functionality_name': 'Delete School',
@@ -278,9 +278,9 @@ def test_category_add(request):
             test_category_add_form = AddTestCategoryForm(request.POST)
             if test_category_add_form.add_test_category():
                 context = {'finish_title': 'Test Category Added',
-                           'finish_message': 'Test Category Added Successfully: '
-                                             + test_category_add_form.cleaned_data['test_category_name']}
-                return render(request, 'modal_finished_message.html', RequestContext(request, context))
+                           'user_message': 'Test Category Added Successfully: '
+                                           + test_category_add_form.cleaned_data['test_category_name']}
+                return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/test_category/add/',
                            'functionality_name': 'Add Test Category',
@@ -306,8 +306,8 @@ def test_category_adds(request):
                     'Test Categories Created: '+str(n_created) + '\n' + \
                     'Test Categories Updated: '+str(n_updated) + '\n' + \
                     'No Changes From Data Lines: '+str(n_not_created_or_updated)
-                context = {'finish_title': 'Test Categories Added/Updated', 'finish_message': result_message}
-                return render(request, 'modal_finished_message.html', RequestContext(request, context))
+                context = {'finish_title': 'Test Categories Added/Updated', 'user_message': result_message}
+                return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/test_category/adds/',
                            'functionality_name': 'Add Test Categories',
@@ -328,9 +328,9 @@ def test_category_edit(request, test_category_pk):
             test_category_edit_form = EditTestCategoryForm(data=request.POST)
             if test_category_edit_form.edit_test_category():
                 context = {'finish_title': 'Test Category Edited',
-                           'finish_message': 'Test Category Edited Successfully: '
-                                             + test_category_edit_form.cleaned_data['test_category_name']}
-                return render(request, 'modal_finished_message.html', RequestContext(request, context))
+                           'user_message': 'Test Category Edited Successfully: '
+                                           + test_category_edit_form.cleaned_data['test_category_name']}
+                return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/test_category/edit/' + str(test_category_pk),
                            'functionality_name': 'Edit Test Category',
@@ -352,12 +352,12 @@ def test_category_delete(request, test_category_pk):
         if request.POST:
             if test_category_to_delete.delete_test_category_safe():
                 context = {'finish_title': 'Test Category Deleted',
-                           'finish_message': 'Test Category Deleted Successfully: ' + test_category_name}
+                           'user_message': 'Test Category Deleted Successfully: ' + test_category_name}
             else:
                 context = {'finish_title': 'Test Category Not Deleted',
-                           'finish_error_message': 'Could Not Delete ' + test_category_name
-                                                   + ' (Test Category Being Used)'}
-            return render(request, 'modal_finished_message.html', RequestContext(request, context))
+                           'user_error_message': 'Could Not Delete ' + test_category_name
+                                                 + ' (Test Category Being Used)'}
+            return render(request, 'user_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/test_category/delete/' + str(test_category_pk),
                        'functionality_name': 'Delete Test Category',

@@ -1,0 +1,8 @@
+
+<div>
+    {% if user_message %}
+        <div class="user_message">{{ user_message }}</div>
+    {% elif user_error_message %}
+        <div class="user_error_message">{{ user_error_message }}</div>
+    {% endif %}
+</div>
