@@ -135,8 +135,9 @@ def superuser_view(request):
             'user_name': request.session.get('username'),
             'user_tab_page_title': 'Super User',
             'user_tabs': [
-                ['Add/Update School List', '/school/list/', 2],
-                ['Add/Update Test Category List', '/test_category/list/', 2]
+                ['Home', '/superuser_home/', 'user_home_page'],
+                ['Add/Update School List', '/school/list/', 'item_list:2'],
+                ['Add/Update Test Category List', '/test_category/list/', 'item_list:2']
             ]
         }
 
@@ -144,6 +145,9 @@ def superuser_view(request):
     else:
         return redirect('fitness_scoring.views.login_user')
 
+
+def superuser_home(request):
+    return render(request, 'user_home_page.html', RequestContext(request, {'user_home_page_text': 'Some Text Here!'}))
 
 def school_list(request):
     if request.session.get('user_type', None) == 'SuperUser':

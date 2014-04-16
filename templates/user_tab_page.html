@@ -10,8 +10,8 @@
         <div class="row">
             <div class="col-sm-4 col-md-3 sidebar">
                 <ul class="nav nav-sidebar" id="main_view_links">
-                    {% for link_label, link_url, n_headings_to_exclude in user_tabs %}
-                        <li exclude_headings="{{ n_headings_to_exclude }}">
+                    {% for link_label, link_url, load_type in user_tabs %}
+                        <li load_type="{{ load_type }}">
                             <a href="{{ link_url }}">{{ link_label }}</a>
                         </li>
                     {% endfor %}
