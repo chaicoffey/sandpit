@@ -1,8 +1,24 @@
 
 <div>
     {% if user_message %}
-        <div class="user_message">{{ user_message }}</div>
+        <div class="user_message">
+            {{ user_message }}
+        </div>
     {% elif user_error_message %}
-        <div class="user_error_message">{{ user_error_message }}</div>
+        <div class="user_error_message">
+            {{ user_error_message }}
+        </div>
+    {% elif user_messages %}
+        <div class="user_message">
+            {% for user_message in user_messages %}
+                {{ user_message }} <br>
+            {% endfor %}
+        </div>
+    {% elif user_error_messages %}
+        <div class="user_error_message">
+            {% for user_error_message in user_error_messages %}
+                {{ user_error_message }} <br>
+            {% endfor %}
+        </div>
     {% endif %}
 </div>

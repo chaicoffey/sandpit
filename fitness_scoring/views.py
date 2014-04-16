@@ -190,11 +190,10 @@ def school_adds(request):
             result = school_adds_form.add_schools(request)
             if result:
                 (n_created, n_updated, n_not_created_or_updated) = result
-                result_message = \
-                    'Schools Created: '+str(n_created) + '\n' + \
-                    'Schools Updated: '+str(n_updated) + '\n' + \
-                    'No Changes From Data Lines: '+str(n_not_created_or_updated)
-                context = {'finish_title': 'Schools Added/Updated', 'user_message': result_message}
+                result_message = ['Schools Created: '+str(n_created),
+                                  'Schools Updated: '+str(n_updated),
+                                  'No Changes From Data Lines: '+str(n_not_created_or_updated)]
+                context = {'finish_title': 'Schools Added/Updated', 'user_messages': result_message}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/school/adds/',
@@ -302,11 +301,10 @@ def test_category_adds(request):
             result = test_category_adds_form.add_test_categories(request)
             if result:
                 (n_created, n_updated, n_not_created_or_updated) = result
-                result_message = \
-                    'Test Categories Created: '+str(n_created) + '\n' + \
-                    'Test Categories Updated: '+str(n_updated) + '\n' + \
-                    'No Changes From Data Lines: '+str(n_not_created_or_updated)
-                context = {'finish_title': 'Test Categories Added/Updated', 'user_message': result_message}
+                result_message = ['Test Categories Created: '+str(n_created),
+                                  'Test Categories Updated: '+str(n_updated),
+                                  'No Changes From Data Lines: '+str(n_not_created_or_updated)]
+                context = {'finish_title': 'Test Categories Added/Updated', 'user_messages': result_message}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/test_category/adds/',
