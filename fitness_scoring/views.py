@@ -147,7 +147,13 @@ def superuser_view(request):
 
 
 def superuser_home(request):
-    return render(request, 'user_home_page.html', RequestContext(request, {'user_home_page_text': 'Some Text Here!'}))
+    if request.session.get('user_type', None) == 'SuperUser':
+        context = {'user_home_page_title': 'Super User',
+                   'user_home_page_text': 'Select the view via the navigation side bar to the left'}
+        return render(request, 'user_home_page.html', RequestContext(request, context))
+    else:
+        return redirect('fitness_scoring.views.login_user')
+
 
 def school_list(request):
     if request.session.get('user_type', None) == 'SuperUser':
