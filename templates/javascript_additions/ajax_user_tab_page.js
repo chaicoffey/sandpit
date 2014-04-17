@@ -19,6 +19,7 @@ $('#main_view_links li a').click(function(event){
         $(this).removeClass('active');
     });
     $(this).parent('li').addClass('active');
+    $(this).blur();
 
     event.preventDefault();
 
