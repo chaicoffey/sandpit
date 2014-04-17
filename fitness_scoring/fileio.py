@@ -47,7 +47,7 @@ def add_students_from_file(file_path_on_server, school_id):
         if Student.create_student(check_name=False, student_id=student_id, school_id=school_id,
                                   first_name=first_name, surname=surname, gender=gender, dob=dob):
             n_created += 1
-        elif Student.update_student(check_name=False,student_id=student_id, school_id=school_id,
+        elif Student.update_student(check_name=False, student_id=student_id, school_id=school_id,
                                     first_name=first_name, surname=surname, gender=gender, dob=dob):
             n_updated += 1
         else:
@@ -113,10 +113,11 @@ def add_classes_from_file(file_path_on_server, school_id):
     n_not_created_or_updated = 0
     for line in classes_list_reader:
         (year, class_name, teacher_username) = (line['year'], line['class_name'], line['teacher_username'])
-        teacher_id = Teacher.objects.get(user=User.objects.get(username=teacher_username))\
-            if User.objects.filter(username=teacher_username).exists() and\
-               Teacher.objects.filter(user=User.objects.get(username=teacher_username), school_id=school_id).exists()\
-            else None
+        teacher_id = (Teacher.objects.get(user=User.objects.get(username=teacher_username))
+                      if User.objects.filter(username=teacher_username).exists() and
+                         Teacher.objects.filter(user=User.objects.get(username=teacher_username),
+                                                school_id=school_id).exists()
+                      else None)
 
         if Class.create_class(year=year, class_name=class_name, school_id=school_id, teacher_id=teacher_id):
             n_created += 1
@@ -220,7 +221,11 @@ def add_tests_from_file(file_path_on_server):
             (line['test_name'], line['test_category_name'], line['description'], line['result_type'],
              (line['is_upward_percentile_brackets'] == 'Yes'), line['percentile_score_conversion_type'])
 
-        try:
+        if TestCategory.objects.filter(test_category_name=test_category_name).exists() and\
+                (result_type in [result_type_choice for result_type_choice, text in Test.RESULT_TYPE_CHOICES]) and\
+                (percentile_score_conversion_type in [percentile_score_conversion_type_choice
+                                                      for percentile_score_conversion_type_choice, text
+                                                      in Test.PERCENTILE_SCORE_CONVERSION_TYPE_CHOICES]):
             test_category = TestCategory.objects.get(test_category_name=test_category_name)
 
             if Test.create_test(test_name=test_name, test_category=test_category, description=description,
@@ -233,7 +238,7 @@ def add_tests_from_file(file_path_on_server):
                 n_updated += 1
             else:
                 n_not_created_or_updated += 1
-        except Exception:
+        else:
             n_not_created_or_updated += 1
 
     return n_created, n_updated, n_not_created_or_updated
