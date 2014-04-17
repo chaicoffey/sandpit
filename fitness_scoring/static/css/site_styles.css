@@ -10,12 +10,9 @@ select {
 }
 
 .sidebar {
-    background-color: rgb(245, 245, 245);
+    background-color: rgb(200, 200, 200);
 }
 
-/*
-#table-wrapper {
-    height: 200px;
-    overflow: auto;
+.nav-sidebar .active {
+    background-color: rgb(238, 238, 238);
 }
-*/

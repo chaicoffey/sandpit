@@ -3,8 +3,9 @@
 $(document).ready(function(){
     var children = $('#main_view_links').children('li');
     children.each(function(index){
-        if($(this).attr('load_type') == 'user_home_page')
+        if($(this).attr('load_type') == 'user_home_page') {
             $(this).addClass('active');
+        }
     });
     load_main_view()
 });
@@ -14,7 +15,9 @@ $(document).ready(function(){
 $('#main_view_links li a').click(function(event){
 
     var children = $('#main_view_links').children('li');
-    children.each(function(index){$(this).removeClass('active');});
+    children.each(function(index){
+        $(this).removeClass('active');
+    });
     $(this).parent('li').addClass('active');
 
     event.preventDefault();
