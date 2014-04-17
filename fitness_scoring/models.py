@@ -434,6 +434,67 @@ class Test(models.Model):
     def __unicode__(self):
         return self.test_name
 
+    def get_display_items(self):
+        return [self.test_name, self.test_category.test_category_name]
+
+    def delete_test_safe(self):
+        test_not_used = (not ClassTestSet.objects.filter(test_name=self).exists()) and\
+                        (not StudentClassTestResult.objects.filter(test_name=self).exists()) and\
+                        (not PercentileBracket.objects.filter(test_name=self).exists())
+        if test_not_used:
+            self.delete()
+        return test_not_used
+
+    def edit_test_safe(self, test_name, test_category, description, result_type,
+                       is_upward_percentile_brackets, percentile_score_conversion_type):
+        is_edit_safe = (self.test_name == test_name) or not Test.objects.filter(test_name=test_name).exists()
+        if is_edit_safe:
+            self.test_name = test_name
+            self.test_category = test_category
+            self.description = description
+            self.result_type = result_type
+            self.is_upward_percentile_brackets = is_upward_percentile_brackets
+            self.percentile_score_conversion_type = percentile_score_conversion_type
+            self.save()
+        return is_edit_safe
+
+    @staticmethod
+    def get_display_list_headings():
+        return ['Test', 'Test Category']
+
+    @staticmethod
+    def create_test(test_name, test_category, description, result_type,
+                    is_upward_percentile_brackets, percentile_score_conversion_type):
+        test_name_unique = not Test.objects.filter(test_name=test_name).exists()
+        if test_name_unique:
+            Test.objects.create(test_name=test_name, test_category=test_category, description=description,
+                                result_type=result_type, is_upward_percentile_brackets=is_upward_percentile_brackets,
+                                percentile_score_conversion_type=percentile_score_conversion_type)
+        return test_name_unique
+
+    @staticmethod
+    def update_test(test_name, test_category, description, result_type,
+                    is_upward_percentile_brackets, percentile_score_conversion_type):
+
+        test_updated = False
+
+        test_exists = Test.objects.filter(test_name=test_name).exists()
+        if test_exists:
+            test = Test.objects.get(test_name=test_name)
+            test_updated = not ((test.test_name == test_name) and (test.test_category == test_category) and
+                                (test.description == description) and (test.result_type == result_type) and
+                                (test.is_upward_percentile_brackets == is_upward_percentile_brackets) and
+                                (test.percentile_score_conversion_type == percentile_score_conversion_type))
+            if test_updated:
+                test.test_category = test_category
+                test.description = description
+                test.result_type = result_type
+                test.is_upward_percentile_brackets = is_upward_percentile_brackets
+                test.percentile_score_conversion_type = percentile_score_conversion_type
+                test.save()
+
+        return test_updated
+
 
 class TeacherClassAllocation(models.Model):
     teacher_id = models.ForeignKey(Teacher)

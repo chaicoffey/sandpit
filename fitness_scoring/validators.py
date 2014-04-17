@@ -1,5 +1,5 @@
 
-from fitness_scoring.models import School, TestCategory
+from fitness_scoring.models import School, TestCategory, Test
 from django.core.exceptions import ValidationError
 
 
@@ -11,6 +11,11 @@ def validate_school_unique(name):
 def validate_test_category_unique(test_category_name):
     if TestCategory.objects.filter(test_category_name=test_category_name).exists():
         raise ValidationError('Test Category Already Exists: ' + test_category_name)
+
+
+def validate_test_unique(test_name):
+    if Test.objects.filter(test_name=test_name).exists():
+        raise ValidationError('Test Already Exists: ' + test_name)
 
 
 def validate_no_space(n_characters):

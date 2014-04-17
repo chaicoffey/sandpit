@@ -1,9 +1,10 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.template import RequestContext
-from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, TestCategory
+from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, TestCategory, Test
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
+from fitness_scoring.forms import AddTestForm, AddTestsForm, EditTestForm
 from view_handlers import handle_teacher_list, handle_student_list, handle_class_list
 
 
@@ -137,7 +138,8 @@ def superuser_view(request):
             'user_tabs': [
                 ['Home', '/superuser_home/', 'user_home_page'],
                 ['Add/Update School List', '/school/list/', 'item_list:2'],
-                ['Add/Update Test Category List', '/test_category/list/', 'item_list:2']
+                ['Add/Update Test Category List', '/test_category/list/', 'item_list:2'],
+                ['Add/Update Test List', '/test/list/', 'item_list:2']
             ]
         }
 
@@ -373,3 +375,118 @@ def test_category_delete(request, test_category_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to delete a test category")
+
+
+def test_list(request):
+    if request.session.get('user_type', None) == 'SuperUser':
+        context = {
+            'item_list': [(test, test.get_display_items())
+                          for test in Test.objects.all()],
+            'item_list_title': 'Test List',
+            'item_list_table_headings': Test.get_display_list_headings(),
+            'item_list_buttons': [
+                ['+', [['/test/add/', 'Add Test'],
+                       ['/test/adds/', 'Add/Edit Tests From .CSV']]]
+            ],
+            'item_list_options': [
+                ['/test/edit/', 'pencil'],
+                ['/test/delete/', 'remove']
+            ]
+        }
+        return render(request, 'item_list.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to view test list")
+
+
+def test_add(request):
+    if request.session.get('user_type', None) == 'SuperUser':
+        if request.POST:
+            test_add_form = AddTestForm(request.POST)
+            if test_add_form.add_test():
+                context = {'finish_title': 'Test Added',
+                           'user_message': 'Test Added Successfully: '
+                                           + test_add_form.cleaned_data['test_name']}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/test/add/',
+                           'functionality_name': 'Add Test',
+                           'form': test_add_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/test/add/',
+                       'functionality_name': 'Add Test',
+                       'form': AddTestForm()}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to add a test")
+
+
+def test_adds(request):
+    if request.session.get('user_type', None) == 'SuperUser':
+        if request.POST:
+            test_adds_form = AddTestsForm(request.POST, request.FILES)
+            result = test_adds_form.add_tests(request)
+            if result:
+                (n_created, n_updated, n_not_created_or_updated) = result
+                result_message = ['Tests Created: '+str(n_created),
+                                  'Tests Updated: '+str(n_updated),
+                                  'No Changes From Data Lines: '+str(n_not_created_or_updated)]
+                context = {'finish_title': 'Tests Added/Updated', 'user_messages': result_message}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/test/adds/',
+                           'functionality_name': 'Add Tests',
+                           'form': test_adds_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/test/adds/',
+                       'functionality_name': 'Add Tests',
+                       'form': AddTestsForm()}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to add tests")
+
+
+def test_edit(request, test_pk):
+    if request.session.get('user_type', None) == 'SuperUser':
+        if request.POST:
+            test_edit_form = EditTestForm(data=request.POST)
+            if test_edit_form.edit_test():
+                context = {'finish_title': 'Test Edited',
+                           'user_message': 'Test Edited Successfully: '
+                                           + test_edit_form.cleaned_data['test_name']}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/test/edit/' + str(test_pk),
+                           'functionality_name': 'Edit Test',
+                           'form': test_edit_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/test/edit/' + str(test_pk),
+                       'functionality_name': 'Edit Test',
+                       'form': EditTestForm(test_pk=test_pk)}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to edit a test")
+
+
+def test_delete(request, test_pk):
+    if request.session.get('user_type', None) == 'SuperUser':
+        test_to_delete = Test.objects.get(pk=test_pk)
+        test_name = test_to_delete.test_name
+        if request.POST:
+            if test_to_delete.delete_test_safe():
+                context = {'finish_title': 'Test Deleted',
+                           'user_message': 'Test Deleted Successfully: ' + test_name}
+            else:
+                context = {'finish_title': 'Test Not Deleted',
+                           'user_error_message': 'Could Not Delete ' + test_name
+                                                 + ' (Test Being Used)'}
+            return render(request, 'user_message.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/test/delete/' + str(test_pk),
+                       'functionality_name': 'Delete Test',
+                       'prompt_message': 'Are You Sure You Wish To Delete ' + test_name + "?"}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to delete a test")
