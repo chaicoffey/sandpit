@@ -42,10 +42,13 @@ def add_students_from_file(file_path_on_server, school_id):
     n_updated = 0
     n_not_created_or_updated = 0
     for line in students_list_reader:
-        (student_id, first_name, surname, gender, dob) = (line['student_id'], line['first_name'], line['surname'], line['gender'], line['dob'])
-        if Student.create_student(check_name=False, student_id=student_id, school_id=school_id, first_name=first_name, surname=surname, gender=gender, dob=dob):
+        (student_id, first_name, surname, gender, dob) = (line['student_id'], line['first_name'], line['surname'],
+                                                          line['gender'], line['dob'])
+        if Student.create_student(check_name=False, student_id=student_id, school_id=school_id,
+                                  first_name=first_name, surname=surname, gender=gender, dob=dob):
             n_created += 1
-        elif Student.update_student(check_name=False,student_id=student_id, school_id=school_id, first_name=first_name, surname=surname, gender=gender, dob=dob):
+        elif Student.update_student(check_name=False,student_id=student_id, school_id=school_id,
+                                    first_name=first_name, surname=surname, gender=gender, dob=dob):
             n_updated += 1
         else:
             n_not_created_or_updated += 1
@@ -74,10 +77,13 @@ def add_teachers_from_file(file_path_on_server, school_id):
     n_updated = 0
     n_not_created_or_updated = 0
     for line in teachers_list_reader:
-        (first_name, surname, username, password) = (line['first_name'], line['surname'], line['username'], line['password'])
-        if Teacher.create_teacher(check_name=False, first_name=first_name, surname=surname, school_id=school_id, username=username, password=password):
+        (first_name, surname, username, password) = (line['first_name'], line['surname'],
+                                                     line['username'], line['password'])
+        if Teacher.create_teacher(check_name=False, first_name=first_name, surname=surname,
+                                  school_id=school_id, username=username, password=password):
             n_created += 1
-        elif Teacher.update_teacher(check_name=False, first_name=first_name, surname=surname, school_id=school_id, username=username, password=password):
+        elif Teacher.update_teacher(check_name=False, first_name=first_name, surname=surname,
+                                    school_id=school_id, username=username, password=password):
             n_updated += 1
         else:
             n_not_created_or_updated += 1
@@ -108,8 +114,8 @@ def add_classes_from_file(file_path_on_server, school_id):
     for line in classes_list_reader:
         (year, class_name, teacher_username) = (line['year'], line['class_name'], line['teacher_username'])
         teacher_id = Teacher.objects.get(user=User.objects.get(username=teacher_username))\
-            if (len(User.objects.filter(username=teacher_username)) == 1) and\
-               (len(Teacher.objects.filter(user=User.objects.get(username=teacher_username), school_id=school_id)) == 1)\
+            if User.objects.filter(username=teacher_username).exists() and\
+               Teacher.objects.filter(user=User.objects.get(username=teacher_username), school_id=school_id).exists()\
             else None
 
         if Class.create_class(year=year, class_name=class_name, school_id=school_id, teacher_id=teacher_id):
