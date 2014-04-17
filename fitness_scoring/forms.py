@@ -934,7 +934,7 @@ class EditTestCategoryForm(forms.Form):
 class AddTestForm(forms.Form):
     test_name = forms.CharField(max_length=200, required=True, validators=[validate_test_unique])
     test_category = forms.ChoiceField(required=True)
-    description = forms.CharField(max_length=400, required=True)
+    description = forms.CharField(widget=forms.Textarea(), max_length=400, required=True)
     result_type = forms.ChoiceField(required=True, choices=Test.RESULT_TYPE_CHOICES)
     is_upward_percentile_brackets = forms.BooleanField(required=False, initial=True)
     percentile_score_conversion_type = forms.ChoiceField(required=True,
@@ -987,7 +987,7 @@ class EditTestForm(forms.Form):
     test_pk = forms.CharField(widget=forms.HiddenInput())
     test_name = forms.CharField(max_length=200, required=True)
     test_category = forms.ChoiceField(required=True)
-    description = forms.CharField(max_length=400, required=True)
+    description = forms.CharField(widget=forms.Textarea(), max_length=400, required=True)
     result_type = forms.ChoiceField(required=True, choices=Test.RESULT_TYPE_CHOICES)
     is_upward_percentile_brackets = forms.BooleanField(required=False)
     percentile_score_conversion_type = forms.ChoiceField(required=True,
