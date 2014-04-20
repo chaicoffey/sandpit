@@ -39,32 +39,20 @@ class School(models.Model):
 
     @staticmethod
     def create_school_and_administrator(name, subscription_paid):
-
-        school_created = School.create_school(name, subscription_paid)
-
-        if school_created:
-
-            school = School.objects.get(name=name)
-
-            username_base = 'admin_' + name[0:3]
-            if not Administrator.create_administrator(username=username_base, password='admin', school_id=school):
-                incremental = 1
-                while not Administrator.create_administrator(username=(username_base + str(incremental)),
-                                                             password='admin',
-                                                             school_id=school):
-                    incremental += 1
-
-        return school_created
+        school = School.create_school(name, subscription_paid) if len(name) >= 3 else None
+        if school:
+            Administrator.create_administrator(base_username=('admin_' + name[0:3]), school_id=school)
+        return school
 
     @staticmethod
     def create_school(name, subscription_paid):
 
-        school_name_unique = (len(School.objects.filter(name=name)) == 0)
+        if not School.objects.filter(name=name).exists():
+            school = School.objects.create(name=name, subscription_paid=subscription_paid)
+        else:
+            school = None
 
-        if school_name_unique:
-            School.objects.create(name=name, subscription_paid=subscription_paid)
-
-        return school_name_unique
+        return school
 
     @staticmethod
     def update_school(name, subscription_paid):
@@ -205,16 +193,14 @@ class Administrator(models.Model):
     def __unicode__(self):
         return self.user.username
 
+    def change_password(self, password):
+        self.user.change_password(password)
+
     @staticmethod
-    def create_administrator(username, password, school_id):
+    def create_administrator(base_username, school_id):
 
-        username_unique = (len(User.objects.filter(username=username)) == 0)
-
-        if username_unique:
-            user = User.objects.create(username=username, password=password)
-            Administrator.objects.create(school_id=school_id, user=user)
-
-        return username_unique
+        user = User.create_user(base_username=base_username)
+        return Administrator.objects.create(school_id=school_id, user=user)
 
 
 class Student(models.Model):
