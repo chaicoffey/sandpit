@@ -237,7 +237,7 @@ def school_adds(request):
 def school_edit(request, school_pk):
     if request.session.get('user_type', None) == 'SuperUser':
         if request.POST:
-            school_edit_form = EditSchoolForm(data=request.POST)
+            school_edit_form = EditSchoolForm(school_pk=school_pk, data=request.POST)
             if school_edit_form.edit_school():
                 context = {'finish_title': 'School Edited',
                            'user_message': 'School Edited Successfully: ' + school_edit_form.cleaned_data['name']}
@@ -350,7 +350,7 @@ def test_category_adds(request):
 def test_category_edit(request, test_category_pk):
     if request.session.get('user_type', None) == 'SuperUser':
         if request.POST:
-            test_category_edit_form = EditTestCategoryForm(data=request.POST)
+            test_category_edit_form = EditTestCategoryForm(test_category_pk=test_category_pk, data=request.POST)
             if test_category_edit_form.edit_test_category():
                 context = {'finish_title': 'Test Category Edited',
                            'user_message': 'Test Category Edited Successfully: '
@@ -465,7 +465,7 @@ def test_adds(request):
 def test_edit(request, test_pk):
     if request.session.get('user_type', None) == 'SuperUser':
         if request.POST:
-            test_edit_form = EditTestForm(data=request.POST)
+            test_edit_form = EditTestForm(test_pk=test_pk, data=request.POST)
             if test_edit_form.edit_test():
                 context = {'finish_title': 'Test Edited',
                            'user_message': 'Test Edited Successfully: '

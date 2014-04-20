@@ -9,14 +9,46 @@ def validate_school_unique(name):
         raise ValidationError('School Already Exists: ' + name)
 
 
+def validate_new_school_name_unique(school_pk):
+
+    def new_school_name_unique(name):
+        school = School.objects.get(pk=school_pk)
+        if (school.name != name) and (School.objects.filter(name=name).exists()):
+            raise ValidationError('School Name Already Exists: ' + name)
+
+    return new_school_name_unique
+
+
 def validate_test_category_unique(test_category_name):
     if TestCategory.objects.filter(test_category_name=test_category_name).exists():
         raise ValidationError('Test Category Already Exists: ' + test_category_name)
 
 
+def validate_new_test_category_name_unique(test_category_pk):
+
+    def new_test_category_name_unique(test_category_name):
+        test_category = TestCategory.objects.get(pk=test_category_pk)
+        if (test_category.test_category_name != test_category_name) and\
+                (TestCategory.objects.filter(test_category_name=test_category_name).exists()):
+            raise ValidationError('Test Category Name Already Exists: ' + test_category_name)
+
+    return new_test_category_name_unique
+
+
 def validate_test_unique(test_name):
     if Test.objects.filter(test_name=test_name).exists():
         raise ValidationError('Test Already Exists: ' + test_name)
+
+
+def validate_new_test_name_unique(test_pk):
+
+    def new_test_name_unique(test_name):
+        test = Test.objects.get(pk=test_pk)
+        if (test.test_name != test_name) and\
+                (Test.objects.filter(test_name=test_name).exists()):
+            raise ValidationError('Test Category Name Already Exists: ' + test_name)
+
+    return new_test_name_unique
 
 
 def validate_student_unique(school_pk):

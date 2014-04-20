@@ -1,6 +1,8 @@
 from django import forms
 from fitness_scoring.models import Student, School, Class, Teacher, TestCategory, Test, TeacherClassAllocation
-from fitness_scoring.validators import validate_school_unique, validate_test_category_unique, validate_test_unique
+from fitness_scoring.validators import validate_school_unique, validate_new_school_name_unique
+from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
+from fitness_scoring.validators import validate_test_unique, validate_new_test_name_unique
 from fitness_scoring.validators import validate_student_unique, validate_new_student_id_unique
 from fitness_scoring.validators import validate_no_space, validate_date_field
 from fitness_scoring.fileio import add_schools_from_file_upload, add_test_categories_from_file_upload
@@ -359,31 +361,18 @@ class EditSchoolForm(forms.Form):
     name = forms.CharField(max_length=300, required=True, validators=[MinLengthValidator(3), validate_no_space(3)])
     subscription_paid = forms.BooleanField(initial=False, required=False)
 
-    def __init__(self, school_pk=None, *args, **kwargs):
+    def __init__(self, school_pk, *args, **kwargs):
         super(EditSchoolForm, self).__init__(*args, **kwargs)
         self.fields['name'].error_messages = {'required': 'Please Enter School Name',
                                               'min_length': 'School Name Must be at Least 3 Characters',
                                               'no_space': 'School Name Must not Have Spaces in First 3 Characters'}
-        if school_pk:
-            school = School.objects.get(pk=school_pk)
-            self.fields['school_pk'].initial = school_pk
-            self.fields['name'].initial = school.name
-            self.fields['subscription_paid'].initial = school.subscription_paid
 
-    def clean(self):
-        cleaned_data = super(EditSchoolForm, self).clean()
-        school_pk = cleaned_data.get("school_pk")
-        name = cleaned_data.get("name")
+        school = School.objects.get(pk=school_pk)
+        self.fields['school_pk'].initial = school_pk
+        self.fields['name'].initial = school.name
+        self.fields['subscription_paid'].initial = school.subscription_paid
 
-        if school_pk and name:
-            school = School.objects.get(pk=school_pk)
-            if (school.name != name) and School.objects.filter(name=name).exists():
-                self._errors["name"] = self.error_class(['School Name Already Exists: ' + name])
-                del cleaned_data["school_pk"]
-                del cleaned_data["name"]
-                del cleaned_data["subscription_paid"]
-
-        return cleaned_data
+        self.fields['name'].validators = [validate_new_school_name_unique(school_pk=school_pk)]
 
     def edit_school(self):
         school_edited = self.is_valid()
@@ -429,29 +418,17 @@ class EditTestCategoryForm(forms.Form):
     test_category_pk = forms.CharField(widget=forms.HiddenInput())
     test_category_name = forms.CharField(max_length=200, required=True)
 
-    def __init__(self, test_category_pk=None, *args, **kwargs):
+    def __init__(self, test_category_pk, *args, **kwargs):
         super(EditTestCategoryForm, self).__init__(*args, **kwargs)
         self.fields['test_category_name'].error_messages = {'required': 'Please Enter Test Category Name'}
-        if test_category_pk:
-            test_category = TestCategory.objects.get(pk=test_category_pk)
-            self.fields['test_category_pk'].initial = test_category_pk
-            self.fields['test_category_name'].initial = test_category.test_category_name
 
-    def clean(self):
-        cleaned_data = super(EditTestCategoryForm, self).clean()
-        test_category_pk = cleaned_data.get("test_category_pk")
-        test_category_name = cleaned_data.get("test_category_name")
+        test_category = TestCategory.objects.get(pk=test_category_pk)
+        self.fields['test_category_pk'].initial = test_category_pk
+        self.fields['test_category_name'].initial = test_category.test_category_name
 
-        if test_category_pk and test_category_name:
-            test_category = TestCategory.objects.get(pk=test_category_pk)
-            if (test_category.test_category_name != test_category_name) and\
-                    TestCategory.objects.filter(test_category_name=test_category_name).exists():
-                self._errors["test_category_name"] = self.error_class(['Test Category Name Already Exists: ' +
-                                                                       test_category_name])
-                del cleaned_data["test_category_pk"]
-                del cleaned_data["test_category_name"]
-
-        return cleaned_data
+        self.fields['test_category_name'].validators = [
+            validate_new_test_category_name_unique(test_category_pk=test_category_pk)
+        ]
 
     def edit_test_category(self):
         test_category_edited = self.is_valid()
@@ -526,7 +503,7 @@ class EditTestForm(forms.Form):
     percentile_score_conversion_type = forms.ChoiceField(required=True,
                                                          choices=Test.PERCENTILE_SCORE_CONVERSION_TYPE_CHOICES)
 
-    def __init__(self, test_pk=None, *args, **kwargs):
+    def __init__(self, test_pk, *args, **kwargs):
         super(EditTestForm, self).__init__(*args, **kwargs)
 
         self.fields['test_name'].error_messages = {'required': 'Please Enter Test Name'}
@@ -540,34 +517,16 @@ class EditTestForm(forms.Form):
         for test_category in TestCategory.objects.all():
             self.fields['test_category'].choices.append((test_category.pk, test_category.test_category_name))
 
-        if test_pk:
-            test = Test.objects.get(pk=test_pk)
-            self.fields['test_pk'].initial = test_pk
-            self.fields['test_name'].initial = test.test_name
-            self.fields['test_category'].initial = test.test_category.pk
-            self.fields['description'].initial = test.description
-            self.fields['result_type'].initial = test.result_type
-            self.fields['is_upward_percentile_brackets'].initial = test.is_upward_percentile_brackets
-            self.fields['percentile_score_conversion_type'].initial = test.percentile_score_conversion_type
+        test = Test.objects.get(pk=test_pk)
+        self.fields['test_pk'].initial = test_pk
+        self.fields['test_name'].initial = test.test_name
+        self.fields['test_category'].initial = test.test_category.pk
+        self.fields['description'].initial = test.description
+        self.fields['result_type'].initial = test.result_type
+        self.fields['is_upward_percentile_brackets'].initial = test.is_upward_percentile_brackets
+        self.fields['percentile_score_conversion_type'].initial = test.percentile_score_conversion_type
 
-    def clean(self):
-        cleaned_data = super(EditTestForm, self).clean()
-        test_pk = cleaned_data.get("test_pk")
-        test_name = cleaned_data.get("test_name")
-
-        if test_pk and test_name:
-            test = Test.objects.get(pk=test_pk)
-            if (test.test_name != test_name) and Test.objects.filter(test_name=test_name).exists():
-                self._errors["test_name"] = self.error_class(['Test Name Already Exists: ' + test_name])
-                del cleaned_data["test_pk"]
-                del cleaned_data["test_name"]
-                del cleaned_data["test_category"]
-                del cleaned_data["description"]
-                del cleaned_data["result_type"]
-                del cleaned_data["is_upward_percentile_brackets"]
-                del cleaned_data["percentile_score_conversion_type"]
-
-        return cleaned_data
+        self.fields['test_name'].validators = [validate_new_test_name_unique(test_pk=test_pk)]
 
     def edit_test(self):
         test_edited = self.is_valid()
