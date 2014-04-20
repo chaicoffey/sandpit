@@ -1,793 +1,323 @@
 from django import forms
-from django.contrib import messages
-from fitness_scoring.models import Student, School, Class, Teacher, TestCategory, Test
+from fitness_scoring.models import Student, School, Class, Teacher, TestCategory, Test, TeacherClassAllocation
 from fitness_scoring.validators import validate_school_unique, validate_test_category_unique, validate_test_unique
-from fitness_scoring.validators import validate_no_space
+from fitness_scoring.validators import validate_student_unique, validate_new_student_id_unique
+from fitness_scoring.validators import validate_no_space, validate_date_field
 from fitness_scoring.fileio import add_schools_from_file_upload, add_test_categories_from_file_upload
-from fitness_scoring.fileio import add_tests_from_file_upload
+from fitness_scoring.fileio import add_tests_from_file_upload, add_students_from_file_upload
+from fitness_scoring.fileio import add_teachers_from_file_upload, add_classes_from_file_upload
 from django.core.validators import MinLengthValidator
 import datetime
 
 
 class AddStudentForm(forms.Form):
-    student_id = forms.CharField(max_length=30)
-    first_name = forms.CharField(max_length=100)
-    surname = forms.CharField(max_length=100)
-    gender = forms.ChoiceField(choices=[('M', 'Male'), ('F', 'Female')])
-    dob = forms.DateField(input_formats=['%d/%m/%Y'], help_text='(dd/mm/yyyy)')
+    student_id = forms.CharField(max_length=30, required=True)
+    school_pk = forms.CharField(widget=forms.HiddenInput())
+    first_name = forms.CharField(max_length=100, required=True)
+    surname = forms.CharField(max_length=100, required=True)
+    gender = forms.ChoiceField(choices=Student.GENDER_CHOICES, required=True)
+    dob = forms.CharField(required=True, help_text='(dd/mm/yyyy)', validators=[validate_date_field('%d/%m/%Y')])
 
-    def handle_posted_form(self, request, messages_tag):
-        form_posted_from = (request.POST.get(self.get_add_student_button_name()) == self.get_add_student_button_value())
-        if form_posted_from:
-            if self.is_valid():
-                student_string = self.get_first_name() + " " + self.get_surname() + " (" + self.get_student_id() + ")"
-                if self.add_student_safe(School.objects.get(name=request.session.get('school_name', None))):
-                    messages.success(request, "Student Added: " + student_string, extra_tags=messages_tag)
-                else:
-                    messages.success(request, "Error Adding Student: " + student_string + " (Student ID Already Exists)", extra_tags=messages_tag)
-            else:
-                messages.success(request, "Add Student Validation Error", extra_tags=messages_tag)
-        return form_posted_from
+    def __init__(self, school_pk, *args, **kwargs):
+        super(AddStudentForm, self).__init__(*args, **kwargs)
 
-    def add_student_safe(self, school_id):
-        return Student.create_student(check_name=False, student_id=self.get_student_id(), school_id=school_id, first_name=self.get_first_name(), surname=self.get_surname(), gender=self.get_gender(), dob=self.get_dob())
+        self.fields['student_id'].error_messages = {'required': 'Please Enter Student ID'}
+        self.fields['first_name'].error_messages = {'required': 'Please Enter First Name'}
+        self.fields['surname'].error_messages = {'required': 'Please Enter Surname'}
+        self.fields['gender'].error_messages = {'required': 'Please Select A Gender'}
+        self.fields['dob'].error_messages = {'required': 'Please Enter Date Of Birth',
+                                             'date_format': 'Date Of Birth Should Be Of Form dd/mm/yyyy'}
 
-    def get_student_id(self):
-        return self.cleaned_data['student_id']
+        self.fields['school_pk'].initial = school_pk
 
-    def get_first_name(self):
-        return self.cleaned_data['first_name']
+        self.fields['student_id'].validators = [validate_student_unique(school_pk)]
 
-    def get_surname(self):
-        return self.cleaned_data['surname']
+    def add_student(self):
+        student_saved = self.is_valid()
+        if student_saved:
+            student_id = self.cleaned_data['student_id']
+            school = School.objects.get(pk=self.cleaned_data['school_pk'])
+            first_name = self.cleaned_data['first_name']
+            surname = self.cleaned_data['surname']
+            gender = self.cleaned_data['gender']
+            dob = datetime.datetime.strptime(self.cleaned_data['dob'], '%d/%m/%Y')
+            student_saved = Student.create_student(check_name=False, student_id=student_id, school_id=school,
+                                                   first_name=first_name, surname=surname, gender=gender, dob=dob)
+        return student_saved
 
-    def get_gender(self):
-        return self.cleaned_data['gender']
 
-    def get_dob(self):
-        return self.cleaned_data['dob']
+class AddStudentsForm(forms.Form):
+    school_pk = forms.CharField(widget=forms.HiddenInput())
+    add_students_file = forms.FileField(required=True)
 
-    @staticmethod
-    def get_add_student_button_name():
-        return "AddStudentIdentifier"
+    def __init__(self, school_pk, *args, **kwargs):
+        super(AddStudentsForm, self).__init__(*args, **kwargs)
+        self.fields['add_students_file'].error_messages = {'required': 'Please Choose Add Students File'}
 
-    @staticmethod
-    def get_add_student_button_value():
-        return "AddStudent"
+        self.fields['school_pk'].initial = school_pk
 
-    @staticmethod
-    def get_form_name():
-        return "addStudentForm"
-
-    @staticmethod
-    def get_error_message_label_id_prefix():
-        return "addStudentErrorMessageLabel_"
-
-    @staticmethod
-    def get_javascript_validation_call():
-        return "validateAddStudentFields()"
-
-    @staticmethod
-    def get_javascript_validation_function():
-        return \
-            "function validateAddStudentFields()\n\
-            {\n\
-            \n\
-                function isDate(dateString)\n\
-                {\n\
-                    var correctFormat = (dob.length == 10) && (dob.charAt(2) == '\/') && (dob.charAt(5) == '\/')\n\
-                    if(correctFormat) {\n\
-                        var dayString = dob.substring(0,2);\n\
-                        var monthString = dob.substring(3,5);\n\
-                        var yearString = dob.substring(6,10);\n\
-                        correctFormat = (/^[0-9]+$/.test(dayString)) && (/^[0-9]+$/.test(monthString)) && (/^[0-9]+$/.test(yearString));\n\
-                        if(correctFormat) {\n\
-                            date = new Date(yearString, monthString - 1, dayString);\n\
-                            correctFormat = (date.getDate() == dayString) && ((date.getMonth() + 1) == monthString) && (date.getFullYear() == yearString)\n\
-                        }\n\
-                    }\n\
-                    return correctFormat;\n\
-                }\n\
-                var form = document.forms['addStudentForm'];\n\
-            \n\
-                var studentIdErrorMessage = document.getElementById('addStudentErrorMessageLabel_student_id');\n\
-                var firstNameErrorMessage = document.getElementById('addStudentErrorMessageLabel_first_name');\n\
-                var surnameErrorMessage = document.getElementById('addStudentErrorMessageLabel_surname');\n\
-                var genderErrorMessage = document.getElementById('addStudentErrorMessageLabel_gender');\n\
-                var dobErrorMessage = document.getElementById('addStudentErrorMessageLabel_dob');\n\
-                \n\
-                studentIdErrorMessage.style.display = 'none';\n\
-                firstNameErrorMessage.style.display = 'none';\n\
-                surnameErrorMessage.style.display = 'none';\n\
-                genderErrorMessage.style.display = 'none';\n\
-                dobErrorMessage.style.display = 'none';\n\
-                \n\
-                var studentId = form.elements['student_id'].value;\n\
-                var studentIdEntered = (studentId != '')\n\
-                if(!studentIdEntered) {\n\
-                    studentIdErrorMessage.style.display = 'inherit';\n\
-                    studentIdErrorMessage.innerHTML = '- Please enter Student Id';\n\
-                }\n\
-            \n\
-                var firstName = form.elements['first_name'].value;\n\
-                var firstNameEntered = (firstName != '')\n\
-                if(!firstNameEntered) {\n\
-                    firstNameErrorMessage.style.display = 'inherit';\n\
-                    firstNameErrorMessage.innerHTML = '- Please enter First Name';\n\
-                }\n\
-            \n\
-                var surname = form.elements['surname'].value;\n\
-                var surnameEntered = (surname != '')\n\
-                if(!surnameEntered) {\n\
-                    surnameErrorMessage.style.display = 'inherit';\n\
-                    surnameErrorMessage.innerHTML = '- Please enter Surname';\n\
-                }\n\
-            \n\
-                var gender = form.elements['gender'].value;\n\
-                var genderEntered = (gender != '')\n\
-                if(!genderEntered) {\n\
-                    genderErrorMessage.style.display = 'inherit';\n\
-                    genderErrorMessage.innerHTML = '- Please enter Gender';\n\
-                }\n\
-            \n\
-                var dob = form.elements['dob'].value;\n\
-                var dobEntered = (dob != '')\n\
-                var dobCorrectFormat = isDate(dob);\n\
-                var dobValid = dobEntered && dobCorrectFormat\n\
-                if(!dobValid) {\n\
-                    dobErrorMessage.style.display = 'inherit';\n\
-                    if(!dobEntered)\n\
-                        dobErrorMessage.innerHTML = '- Please enter DOB';\n\
-                    else if(!dobCorrectFormat)\n\
-                        dobErrorMessage.innerHTML = '- Invalid date (make sure date is in form dd/mm/yyyy)';\n\
-                }\n\
-            \n\
-                return studentIdEntered && firstNameEntered && surnameEntered && genderEntered && dobValid;\n\
-            \n\
-            }\n"
+    def add_students(self, request):
+        if self.is_valid():
+            school = School.objects.get(pk=self.cleaned_data['school_pk'])
+            return add_students_from_file_upload(uploaded_file=request.FILES['add_students_file'], school_id=school)
+        else:
+            return False
 
 
 class EditStudentForm(forms.Form):
     student_pk = forms.CharField(widget=forms.HiddenInput())
-    student_id = forms.CharField(max_length=30)
-    first_name = forms.CharField(max_length=100)
-    surname = forms.CharField(max_length=100)
-    gender = forms.ChoiceField(choices=[('M', 'Male'), ('F', 'Female')])
-    dob = forms.DateField(input_formats=['%d/%m/%Y'], help_text='(dd/mm/yyyy)')
+    school_pk = forms.CharField(widget=forms.HiddenInput())
+    student_id = forms.CharField(max_length=30, required=True)
+    first_name = forms.CharField(max_length=100, required=True)
+    surname = forms.CharField(max_length=100, required=True)
+    gender = forms.ChoiceField(choices=Student.GENDER_CHOICES, required=True)
+    dob = forms.CharField(required=True, help_text='(dd/mm/yyyy)', validators=[validate_date_field('%d/%m/%Y')])
 
-    def handle_posted_form(self, request, messages_tag):
-        form_posted_from = (request.POST.get(self.get_edit_student_button_name()) == self.get_edit_student_button_value())
-        if form_posted_from:
-            if self.is_valid():
-                student_string = self.get_first_name() + " " + self.get_surname() + " (" + self.get_student_id() + ")"
-                if self.edit_student_safe(School.objects.get(name=request.session.get('school_name', None))):
-                    messages.success(request, "Student Edited: " + student_string, extra_tags=messages_tag)
-                else:
-                    messages.success(request, "Error Editing Student: " + student_string + " (Student ID Already Exists)", extra_tags=messages_tag)
-            else:
-                messages.success(request, "Edit Student Validation Error", extra_tags=messages_tag)
-        return form_posted_from
+    def __init__(self, school_pk, student_pk, *args, **kwargs):
+        super(EditStudentForm, self).__init__(*args, **kwargs)
 
-    def edit_student_safe(self, school_id):
-        return Student.objects.get(pk=self.get_student_pk()).edit_student_safe(student_id=self.get_student_id(), school_id=school_id, first_name=self.get_first_name(), surname=self.get_surname(), gender=self.get_gender(), dob=self.get_dob())
+        self.fields['student_id'].error_messages = {'required': 'Please Enter Student ID'}
+        self.fields['first_name'].error_messages = {'required': 'Please Enter First Name'}
+        self.fields['surname'].error_messages = {'required': 'Please Enter Surname'}
+        self.fields['gender'].error_messages = {'required': 'Please Select A Gender'}
+        self.fields['dob'].error_messages = {'required': 'Please Enter Date Of Birth',
+                                             'date_format': 'Date Of Birth Should Be Of Form dd/mm/yyyy'}
 
-    def get_student_pk(self):
-        return self.cleaned_data['student_pk']
+        student = Student.objects.get(pk=student_pk)
+        self.fields['student_pk'].initial = student_pk
+        self.fields['school_pk'].initial = school_pk
+        self.fields['student_pk'].initial = student_pk
+        self.fields['student_id'].initial = student.student_id
+        self.fields['first_name'].initial = student.first_name
+        self.fields['surname'].initial = student.surname
+        self.fields['gender'].initial = student.gender
+        self.fields['dob'].initial = student.dob.strftime('%d/%m/%Y')
 
-    def get_student_id(self):
-        return self.cleaned_data['student_id']
+        self.fields['student_id'].validators = [validate_new_student_id_unique(student_pk=student_pk,
+                                                                               school_pk=school_pk)]
 
-    def get_first_name(self):
-        return self.cleaned_data['first_name']
-
-    def get_surname(self):
-        return self.cleaned_data['surname']
-
-    def get_gender(self):
-        return self.cleaned_data['gender']
-
-    def get_dob(self):
-        return self.cleaned_data['dob']
-
-    @staticmethod
-    def get_edit_student_button_name():
-        return "EditStudentIdentifier"
-
-    @staticmethod
-    def get_edit_student_button_value():
-        return "EditStudent"
-
-    @staticmethod
-    def get_form_name():
-        return "editStudentForm"
-
-    @staticmethod
-    def get_modal_id():
-        return "editStudentModal"
-
-    @staticmethod
-    def get_error_message_label_id_prefix():
-        return "editStudentErrorMessageLabel_"
-
-    @staticmethod
-    def get_javascript_validation_call():
-        return "validateEditStudentFields()"
-
-    @staticmethod
-    def get_javascript_show_modal_call():
-        return "showEditStudentModal"
-
-    @staticmethod
-    def get_javascript_validation_function():
-        return \
-            "function validateEditStudentFields()\n\
-            {\n\
-            \n\
-                function isDate(dateString)\n\
-                {\n\
-                    var correctFormat = (dob.length == 10) && (dob.charAt(2) == '\/') && (dob.charAt(5) == '\/')\n\
-                    if(correctFormat) {\n\
-                        var dayString = dob.substring(0,2);\n\
-                        var monthString = dob.substring(3,5);\n\
-                        var yearString = dob.substring(6,10);\n\
-                        correctFormat = (/^[0-9]+$/.test(dayString)) && (/^[0-9]+$/.test(monthString)) && (/^[0-9]+$/.test(yearString));\n\
-                        if(correctFormat) {\n\
-                            date = new Date(yearString, monthString - 1, dayString);\n\
-                            correctFormat = (date.getDate() == dayString) && ((date.getMonth() + 1) == monthString) && (date.getFullYear() == yearString)\n\
-                        }\n\
-                    }\n\
-                    return correctFormat;\n\
-                }\n\
-                var form = document.forms['editStudentForm'];\n\
-            \n\
-                var studentIdErrorMessage = document.getElementById('editStudentErrorMessageLabel_student_id');\n\
-                var firstNameErrorMessage = document.getElementById('editStudentErrorMessageLabel_first_name');\n\
-                var surnameErrorMessage = document.getElementById('editStudentErrorMessageLabel_surname');\n\
-                var genderErrorMessage = document.getElementById('editStudentErrorMessageLabel_gender');\n\
-                var dobErrorMessage = document.getElementById('editStudentErrorMessageLabel_dob');\n\
-                \n\
-                studentIdErrorMessage.style.display = 'none';\n\
-                firstNameErrorMessage.style.display = 'none';\n\
-                surnameErrorMessage.style.display = 'none';\n\
-                genderErrorMessage.style.display = 'none';\n\
-                dobErrorMessage.style.display = 'none';\n\
-                \n\
-                var studentId = form.elements['student_id'].value;\n\
-                var studentIdEntered = (studentId != '')\n\
-                if(!studentIdEntered) {\n\
-                    studentIdErrorMessage.style.display = 'inherit';\n\
-                    studentIdErrorMessage.innerHTML = '- Please enter Student Id';\n\
-                }\n\
-            \n\
-                var firstName = form.elements['first_name'].value;\n\
-                var firstNameEntered = (firstName != '')\n\
-                if(!firstNameEntered) {\n\
-                    firstNameErrorMessage.style.display = 'inherit';\n\
-                    firstNameErrorMessage.innerHTML = '- Please enter First Name';\n\
-                }\n\
-            \n\
-                var surname = form.elements['surname'].value;\n\
-                var surnameEntered = (surname != '')\n\
-                if(!surnameEntered) {\n\
-                    surnameErrorMessage.style.display = 'inherit';\n\
-                    surnameErrorMessage.innerHTML = '- Please enter Surname';\n\
-                }\n\
-            \n\
-                var gender = form.elements['gender'].value;\n\
-                var genderEntered = (gender != '')\n\
-                if(!genderEntered) {\n\
-                    genderErrorMessage.style.display = 'inherit';\n\
-                    genderErrorMessage.innerHTML = '- Please enter Gender';\n\
-                }\n\
-            \n\
-                var dob = form.elements['dob'].value;\n\
-                var dobEntered = (dob != '')\n\
-                var dobCorrectFormat = isDate(dob);\n\
-                var dobValid = dobEntered && dobCorrectFormat\n\
-                if(!dobValid) {\n\
-                    dobErrorMessage.style.display = 'inherit';\n\
-                    if(!dobEntered)\n\
-                        dobErrorMessage.innerHTML = '- Please enter DOB';\n\
-                    else if(!dobCorrectFormat)\n\
-                        dobErrorMessage.innerHTML = '- Invalid date (make sure date is in form dd/mm/yyyy)';\n\
-                }\n\
-            \n\
-                return studentIdEntered && firstNameEntered && surnameEntered && genderEntered && dobValid;\n\
-            \n\
-            }\n"
-
-    @staticmethod
-    def get_javascript_show_modal_function():
-        return \
-            "function showEditStudentModal(student_pk, student_id, first_name, surname, gender, dob)\n\
-            {\n\
-            \n\
-                var modalForm = document.forms['editStudentForm'];\n\
-            \n\
-                modalForm.elements['student_pk'].value = student_pk;\n\
-                modalForm.elements['student_id'].value = student_id;\n\
-                modalForm.elements['first_name'].value = first_name;\n\
-                modalForm.elements['surname'].value = surname;\n\
-                modalForm.elements['gender'].value = gender;\n\
-                modalForm.elements['dob'].value = dob;\n\
-                validateEditStudentFields()\n\
-            \n\
-                $('#editStudentModal').modal('show');\n\
-            \n\
-            }\n"
+    def edit_student(self):
+        student_edited = self.is_valid()
+        if student_edited:
+            student_id = self.cleaned_data['student_id']
+            school = School.objects.get(pk=self.cleaned_data['school_pk'])
+            first_name = self.cleaned_data['first_name']
+            surname = self.cleaned_data['surname']
+            gender = self.cleaned_data['gender']
+            dob = datetime.datetime.strptime(self.cleaned_data['dob'], '%d/%m/%Y')
+            student_editing = Student.objects.get(pk=self.cleaned_data['student_pk'])
+            student_edited = student_editing.edit_student_safe(student_id=student_id, school_id=school,
+                                                               first_name=first_name, surname=surname,
+                                                               gender=gender, dob=dob)
+        return student_edited
 
 
 class AddTeacherForm(forms.Form):
-    first_name = forms.CharField(max_length=100)
-    surname = forms.CharField(max_length=100)
-    username = forms.CharField(max_length=100)
-    password = forms.CharField(max_length=128)
+    school_pk = forms.CharField(widget=forms.HiddenInput())
+    first_name = forms.CharField(max_length=100, required=True)
+    surname = forms.CharField(max_length=100, required=True)
 
-    def handle_posted_form(self, request, messages_tag):
-        form_posted_from = (request.POST.get(self.get_add_teacher_button_name()) == self.get_add_teacher_button_value())
-        if form_posted_from:
-            if self.is_valid():
-                teacher_string = self.get_first_name() + " " + self.get_surname() + " (" + self.get_username() + ")"
-                if self.add_teacher_safe(School.objects.get(name=request.session.get('school_name', None))):
-                    messages.success(request, "Teacher Added: " + teacher_string, extra_tags=messages_tag)
-                else:
-                    messages.success(request, "Error Adding Teacher: " + teacher_string + " (Username Already Exists)", extra_tags=messages_tag)
-            else:
-                messages.success(request, "Add Teacher Validation Error", extra_tags=messages_tag)
-        return form_posted_from
+    def __init__(self, school_pk, *args, **kwargs):
+        super(AddTeacherForm, self).__init__(*args, **kwargs)
 
-    def add_teacher_safe(self, school_id):
-        return Teacher.create_teacher(check_name=False, first_name=self.get_first_name(), surname=self.get_surname(), school_id=school_id, username=self.get_username(), password=self.get_password())
+        self.fields['first_name'].error_messages = {'required': 'Please Enter First Name'}
+        self.fields['surname'].error_messages = {'required': 'Please Enter Surname'}
 
-    def get_first_name(self):
-        return self.cleaned_data['first_name']
+        self.fields['school_pk'].initial = school_pk
 
-    def get_surname(self):
-        return self.cleaned_data['surname']
+    def add_teacher(self):
+        if self.is_valid():
+            school = School.objects.get(pk=self.cleaned_data['school_pk'])
+            first_name = self.cleaned_data['first_name']
+            surname = self.cleaned_data['surname']
+            teacher = Teacher.create_teacher(check_name=False, first_name=first_name, surname=surname, school_id=school)
+        else:
+            teacher = None
+        return teacher
 
-    def get_username(self):
-        return self.cleaned_data['username']
 
-    def get_password(self):
-        return self.cleaned_data['password']
+class AddTeachersForm(forms.Form):
+    school_pk = forms.CharField(widget=forms.HiddenInput())
+    add_teachers_file = forms.FileField(required=True)
 
-    @staticmethod
-    def get_add_teacher_button_name():
-        return "AddTeacherIdentifier"
+    def __init__(self, school_pk, *args, **kwargs):
+        super(AddTeachersForm, self).__init__(*args, **kwargs)
+        self.fields['add_teachers_file'].error_messages = {'required': 'Please Choose Add Teachers File'}
 
-    @staticmethod
-    def get_add_teacher_button_value():
-        return "AddTeacher"
+        self.fields['school_pk'].initial = school_pk
 
-    @staticmethod
-    def get_form_name():
-        return "addTeacherForm"
-
-    @staticmethod
-    def get_error_message_label_id_prefix():
-        return "addTeacherErrorMessageLabel_"
-
-    @staticmethod
-    def get_javascript_validation_call():
-        return "validateAddTeacherFields()"
-
-    @staticmethod
-    def get_javascript_validation_function():
-        return \
-            "function validateAddTeacherFields()\n\
-            {\n\
-            \n\
-                var form = document.forms['addTeacherForm'];\n\
-            \n\
-                var firstNameErrorMessage = document.getElementById('addTeacherErrorMessageLabel_first_name');\n\
-                var surnameErrorMessage = document.getElementById('addTeacherErrorMessageLabel_surname');\n\
-                var usernameErrorMessage = document.getElementById('addTeacherErrorMessageLabel_username');\n\
-                var passwordErrorMessage = document.getElementById('addTeacherErrorMessageLabel_password');\n\
-                \n\
-                firstNameErrorMessage.style.display = 'none';\n\
-                surnameErrorMessage.style.display = 'none';\n\
-                usernameErrorMessage.style.display = 'none';\n\
-                passwordErrorMessage.style.display = 'none';\n\
-                \n\
-                var firstName = form.elements['first_name'].value;\n\
-                var firstNameEntered = (firstName != '')\n\
-                if(!firstNameEntered) {\n\
-                    firstNameErrorMessage.style.display = 'inherit';\n\
-                    firstNameErrorMessage.innerHTML = '- Please enter First Name';\n\
-                }\n\
-                \n\
-                var surname = form.elements['surname'].value;\n\
-                var surnameEntered = (surname != '')\n\
-                if(!surnameEntered) {\n\
-                    surnameErrorMessage.style.display = 'inherit';\n\
-                    surnameErrorMessage.innerHTML = '- Please enter Surname';\n\
-                }\n\
-                \n\
-                var username = form.elements['username'].value;\n\
-                var usernameEntered = (username != '')\n\
-                if(!usernameEntered) {\n\
-                    usernameErrorMessage.style.display = 'inherit';\n\
-                    usernameErrorMessage.innerHTML = '- Please enter Username';\n\
-                }\n\
-                \n\
-                var password = form.elements['password'].value;\n\
-                var passwordEntered = (password != '')\n\
-                if(!passwordEntered) {\n\
-                    passwordErrorMessage.style.display = 'inherit';\n\
-                    passwordErrorMessage.innerHTML = '- Please enter Password';\n\
-                }\n\
-            \n\
-                return firstNameEntered && surnameEntered && usernameEntered && passwordEntered;\n\
-            \n\
-            }\n"
+    def add_teachers(self, request):
+        if self.is_valid():
+            school = School.objects.get(pk=self.cleaned_data['school_pk'])
+            return add_teachers_from_file_upload(uploaded_file=request.FILES['add_teachers_file'], school_id=school)
+        else:
+            return False
 
 
 class EditTeacherForm(forms.Form):
     teacher_pk = forms.CharField(widget=forms.HiddenInput())
-    first_name = forms.CharField(max_length=100)
-    surname = forms.CharField(max_length=100)
-    username = forms.CharField(max_length=100)
-    password = forms.CharField(max_length=128)
+    school_pk = forms.CharField(widget=forms.HiddenInput())
+    first_name = forms.CharField(max_length=100, required=True)
+    surname = forms.CharField(max_length=100, required=True)
 
-    def handle_posted_form(self, request, messages_tag):
-        form_posted_from = (request.POST.get(self.get_edit_teacher_button_name()) == self.get_edit_teacher_button_value())
-        if form_posted_from:
-            if self.is_valid():
-                teacher_string = self.get_first_name() + " " + self.get_surname() + " (" + self.get_username() + ")"
-                if self.edit_teacher_safe(School.objects.get(name=request.session.get('school_name', None))):
-                    messages.success(request, "Teacher Edited: " + teacher_string, extra_tags=messages_tag)
-                else:
-                    messages.success(request, "Error Editing Teacher: " + teacher_string + " (Username Already Exists)", extra_tags=messages_tag)
-            else:
-                messages.success(request, "Edit Teacher Validation Error", extra_tags=messages_tag)
-        return form_posted_from
+    def __init__(self, school_pk, teacher_pk, *args, **kwargs):
+        super(EditTeacherForm, self).__init__(*args, **kwargs)
 
-    def edit_teacher_safe(self, school_id):
-        return Teacher.objects.get(pk=self.get_teacher_pk()).edit_teacher_safe(first_name=self.get_first_name(), surname=self.get_surname(), school_id=school_id, username=self.get_username(), password=self.get_password())
+        self.fields['first_name'].error_messages = {'required': 'Please Enter First Name'}
+        self.fields['surname'].error_messages = {'required': 'Please Enter Surname'}
 
-    def get_teacher_pk(self):
-        return self.cleaned_data['teacher_pk']
+        teacher = Teacher.objects.get(pk=teacher_pk)
+        self.fields['teacher_pk'].initial = teacher_pk
+        self.fields['school_pk'].initial = school_pk
+        self.fields['first_name'].initial = teacher.first_name
+        self.fields['surname'].initial = teacher.surname
 
-    def get_first_name(self):
-        return self.cleaned_data['first_name']
-
-    def get_surname(self):
-        return self.cleaned_data['surname']
-
-    def get_username(self):
-        return self.cleaned_data['username']
-
-    def get_password(self):
-        return self.cleaned_data['password']
-
-    @staticmethod
-    def get_edit_teacher_button_name():
-        return "EditTeacherIdentifier"
-
-    @staticmethod
-    def get_edit_teacher_button_value():
-        return "EditTeacher"
-
-    @staticmethod
-    def get_form_name():
-        return "editTeacherForm"
-
-    @staticmethod
-    def get_modal_id():
-        return "editTeacherModal"
-
-    @staticmethod
-    def get_error_message_label_id_prefix():
-        return "editTeacherErrorMessageLabel_"
-
-    @staticmethod
-    def get_javascript_validation_call():
-        return "validateEditTeacherFields()"
-
-    @staticmethod
-    def get_javascript_show_modal_call():
-        return "showEditTeacherModal"
-
-    @staticmethod
-    def get_javascript_validation_function():
-        return \
-            "function validateEditTeacherFields()\n\
-            {\n\
-            \n\
-                var form = document.forms['editTeacherForm'];\n\
-            \n\
-                var firstNameErrorMessage = document.getElementById('editTeacherErrorMessageLabel_first_name');\n\
-                var surnameErrorMessage = document.getElementById('editTeacherErrorMessageLabel_surname');\n\
-                var usernameErrorMessage = document.getElementById('editTeacherErrorMessageLabel_username');\n\
-                var passwordErrorMessage = document.getElementById('editTeacherErrorMessageLabel_password');\n\
-                \n\
-                firstNameErrorMessage.style.display = 'none';\n\
-                surnameErrorMessage.style.display = 'none';\n\
-                usernameErrorMessage.style.display = 'none';\n\
-                passwordErrorMessage.style.display = 'none';\n\
-                \n\
-                var firstName = form.elements['first_name'].value;\n\
-                var firstNameEntered = (firstName != '')\n\
-                if(!firstNameEntered) {\n\
-                    firstNameErrorMessage.style.display = 'inherit';\n\
-                    firstNameErrorMessage.innerHTML = '- Please enter First Name';\n\
-                }\n\
-                \n\
-                var surname = form.elements['surname'].value;\n\
-                var surnameEntered = (surname != '')\n\
-                if(!surnameEntered) {\n\
-                    surnameErrorMessage.style.display = 'inherit';\n\
-                    surnameErrorMessage.innerHTML = '- Please enter Surname';\n\
-                }\n\
-                \n\
-                var username = form.elements['username'].value;\n\
-                var usernameEntered = (username != '')\n\
-                if(!usernameEntered) {\n\
-                    usernameErrorMessage.style.display = 'inherit';\n\
-                    usernameErrorMessage.innerHTML = '- Please enter Username';\n\
-                }\n\
-                \n\
-                var password = form.elements['password'].value;\n\
-                var passwordEntered = (password != '')\n\
-                if(!passwordEntered) {\n\
-                    passwordErrorMessage.style.display = 'inherit';\n\
-                    passwordErrorMessage.innerHTML = '- Please enter Password';\n\
-                }\n\
-            \n\
-                return firstNameEntered && surnameEntered && usernameEntered && passwordEntered;\n\
-            \n\
-            }\n"
-
-    @staticmethod
-    def get_javascript_show_modal_function():
-        return \
-            "function showEditTeacherModal(teacher_pk, first_name, surname, username, password)\n\
-            {\n\
-            \n\
-                var modalForm = document.forms['editTeacherForm'];\n\
-            \n\
-                modalForm.elements['teacher_pk'].value = teacher_pk;\n\
-                modalForm.elements['first_name'].value = first_name;\n\
-                modalForm.elements['surname'].value = surname;\n\
-                modalForm.elements['username'].value = username;\n\
-                modalForm.elements['password'].value = password;\n\
-                validateEditTeacherFields()\n\
-            \n\
-                $('#editTeacherModal').modal('show');\n\
-            \n\
-            }\n"
+    def edit_teacher(self):
+        if self.is_valid():
+            first_name = self.cleaned_data['first_name']
+            surname = self.cleaned_data['surname']
+            school = School.objects.get(pk=self.cleaned_data['school_pk'])
+            teacher = Teacher.objects.get(pk=self.cleaned_data['teacher_pk'])
+            if not teacher.edit_teacher_safe(first_name=first_name, surname=surname, school_id=school):
+                teacher = None
+        else:
+            teacher = None
+        return teacher
 
 
 class AddClassForm(forms.Form):
+    school_pk = forms.CharField(widget=forms.HiddenInput())
     year = forms.ChoiceField()
     class_name = forms.CharField(max_length=200)
     teacher = forms.ChoiceField(required=False)
 
-    def __init__(self, school_id, *args, **kwargs):
+    def __init__(self, school_pk, *args, **kwargs):
         super(AddClassForm, self).__init__(*args, **kwargs)
+
         current_year = datetime.datetime.now().year
-        YEAR_CHOICES = []
+        self.fields['year'].choices = []
         for year in range(2000, (current_year+2)):
-            YEAR_CHOICES.append((str(year), str(year)))
-        self.fields['year'].choices = YEAR_CHOICES
+            self.fields['year'].choices.append((str(year), str(year)))
         self.fields['year'].initial = str(current_year)
-        TEACHER_CHOICES = [('', '')]
-        for teacher in Teacher.objects.filter(school_id=school_id):
-            TEACHER_CHOICES.append((teacher.pk, teacher.first_name + " " + teacher.surname + " (" + teacher.user.username + ")"))
-        self.fields['teacher'].choices = TEACHER_CHOICES
+
+        self.fields['teacher'].choices = [('', '')]
+        for teacher in Teacher.objects.filter(school_id=School.objects.get(pk=school_pk)):
+            self.fields['teacher'].choices.append((teacher.pk,
+                                                   teacher.first_name + " " + teacher.surname +
+                                                   " (" + teacher.user.username + ")"))
         self.fields['teacher'].initial = ''
 
-    def handle_posted_form(self, request, messages_tag):
-        form_posted_from = (request.POST.get(self.get_add_class_button_name()) == self.get_add_class_button_value())
-        if form_posted_from:
-            if self.is_valid():
-                class_string = self.get_class_name() + " (" + self.get_year() + ")"
-                if self.add_class_safe(School.objects.get(name=request.session.get('school_name', None))):
-                    messages.success(request, "Class Added: " + class_string, extra_tags=messages_tag)
-                else:
-                    messages.success(request, "Error Adding Class: " + class_string + " Already Exists", extra_tags=messages_tag)
-            else:
-                messages.success(request, "Add Class Validation Error", extra_tags=messages_tag)
-        return form_posted_from
+        self.fields['school_pk'].initial = school_pk
 
-    def add_class_safe(self, school_id):
-        return Class.create_class(year=self.get_year(), class_name=self.get_class_name(), school_id=school_id, teacher_id=self.get_teacher())
+    def clean(self):
+        cleaned_data = super(AddClassForm, self).clean()
+        year = cleaned_data.get("year")
+        class_name = cleaned_data.get("class_name")
+        school = School.objects.get(pk=cleaned_data.get("school_pk"))
 
-    def get_year(self):
-        return self.cleaned_data['year']
+        if year and class_name:
+            if Class.objects.filter(year=year, class_name=class_name, school_id=school).exists():
+                self._errors["class_name"] = self.error_class(['Class Already Exists: ' + class_name +
+                                                               '(' + year + ')'])
+                del cleaned_data["school_pk"]
+                del cleaned_data["year"]
+                del cleaned_data["class_name"]
+                del cleaned_data["teacher"]
 
-    def get_class_name(self):
-        return self.cleaned_data['class_name']
+        return cleaned_data
 
-    def get_teacher(self):
-        teacher_pk = self.cleaned_data['teacher']
-        return None if (teacher_pk == '') else Teacher.objects.get(pk=teacher_pk)
+    def add_class(self):
+        class_saved = self.is_valid()
+        if class_saved:
+            school = School.objects.get(pk=self.cleaned_data['school_pk'])
+            year = self.cleaned_data['year']
+            class_name = self.cleaned_data['class_name']
+            teacher_pk = self.cleaned_data['teacher']
+            teacher = None if teacher_pk == '' else Teacher.objects.get(pk=teacher_pk)
+            class_saved = Class.create_class(year=year, class_name=class_name, school_id=school, teacher_id=teacher)
+        return class_saved
 
-    @staticmethod
-    def get_add_class_button_name():
-        return "AddClassIdentifier"
 
-    @staticmethod
-    def get_add_class_button_value():
-        return "AddClass"
+class AddClassesForm(forms.Form):
+    school_pk = forms.CharField(widget=forms.HiddenInput())
+    add_classes_file = forms.FileField(required=True)
 
-    @staticmethod
-    def get_form_name():
-        return "addClassForm"
+    def __init__(self, school_pk, *args, **kwargs):
+        super(AddClassesForm, self).__init__(*args, **kwargs)
+        self.fields['add_classes_file'].error_messages = {'required': 'Please Choose Add Classes File'}
 
-    @staticmethod
-    def get_error_message_label_id_prefix():
-        return "addClassErrorMessageLabel_"
+        self.fields['school_pk'].initial = school_pk
 
-    @staticmethod
-    def get_javascript_validation_call():
-        return "validateAddClassFields()"
-
-    @staticmethod
-    def get_javascript_validation_function():
-        return \
-            "function validateAddClassFields()\n\
-            {\n\
-                \n\
-                var form = document.forms['addClassForm'];\n\
-                \n\
-                var yearErrorMessage = document.getElementById('addClassErrorMessageLabel_year');\n\
-                var classNameErrorMessage = document.getElementById('addClassErrorMessageLabel_class_name');\n\
-                var teacherErrorMessage = document.getElementById('addClassErrorMessageLabel_teacher');\n\
-                \n\
-                yearErrorMessage.style.display = 'none';\n\
-                classNameErrorMessage.style.display = 'none';\n\
-                teacherErrorMessage.style.display = 'none';\n\
-                \n\
-                var yearSelect = form.elements['year']\n\
-                var year =  yearSelect.options[yearSelect.selectedIndex].value;\n\
-                var yearEntered = (year != '')\n\
-                if(!yearEntered) {\n\
-                    yearErrorMessage.style.display = 'inherit';\n\
-                    yearErrorMessage.innerHTML = '- Please enter Year';\n\
-                }\n\
-                \n\
-                var className = form.elements['class_name'].value;\n\
-                var classNameEntered = (className != '')\n\
-                if(!classNameEntered) {\n\
-                    classNameErrorMessage.style.display = 'inherit';\n\
-                    classNameErrorMessage.innerHTML = '- Please enter Class Name';\n\
-                }\n\
-                \n\
-                return yearEntered && classNameEntered;\n\
-                \n\
-            }\n"
+    def add_classes(self, request):
+        if self.is_valid():
+            school = School.objects.get(pk=self.cleaned_data['school_pk'])
+            return add_classes_from_file_upload(uploaded_file=request.FILES['add_classes_file'], school_id=school)
+        else:
+            return False
 
 
 class EditClassForm(forms.Form):
     class_pk = forms.CharField(widget=forms.HiddenInput())
+    school_pk = forms.CharField(widget=forms.HiddenInput())
     year = forms.ChoiceField()
     class_name = forms.CharField(max_length=200)
     teacher = forms.ChoiceField(required=False)
 
-    def __init__(self, school_id, *args, **kwargs):
+    def __init__(self, school_pk, class_pk, *args, **kwargs):
         super(EditClassForm, self).__init__(*args, **kwargs)
+
         current_year = datetime.datetime.now().year
-        YEAR_CHOICES = []
+        self.fields['year'].choices = []
         for year in range(2000, (current_year+2)):
-            YEAR_CHOICES.append((str(year), str(year)))
-        self.fields['year'].choices = YEAR_CHOICES
-        self.fields['year'].initial = str(current_year)
-        TEACHER_CHOICES = [('', '')]
-        for teacher in Teacher.objects.filter(school_id=school_id):
-            TEACHER_CHOICES.append((teacher.pk, teacher.first_name + " " + teacher.surname + " (" + teacher.user.username + ")"))
-        self.fields['teacher'].choices = TEACHER_CHOICES
-        self.fields['teacher'].initial = ''
+            self.fields['year'].choices.append((str(year), str(year)))
 
-    def handle_posted_form(self, request, messages_tag):
-        form_posted_from = (request.POST.get(self.get_edit_class_button_name()) == self.get_edit_class_button_value())
-        if form_posted_from:
-            if self.is_valid():
-                class_string = self.get_class_name() + " (" + self.get_year() + ")"
-                if self.edit_class_safe(School.objects.get(name=request.session.get('school_name', None))):
-                    messages.success(request, "Class Edited: " + class_string, extra_tags=messages_tag)
-                else:
-                    messages.success(request, "Error Editing Class: " + class_string + " Already Exists", extra_tags=messages_tag)
-            else:
-                messages.success(request, "Edit Class Validation Error", extra_tags=messages_tag)
-        return form_posted_from
+        self.fields['teacher'].choices = [('', '')]
+        for teacher in Teacher.objects.filter(school_id=School.objects.get(pk=school_pk)):
+            self.fields['teacher'].choices.append((teacher.pk,
+                                                   teacher.first_name + " " + teacher.surname +
+                                                   " (" + teacher.user.username + ")"))
 
-    def edit_class_safe(self, school_id):
-        return Class.objects.get(pk=self.get_class_pk()).edit_class_safe(year=self.get_year(), class_name=self.get_class_name(), school_id=school_id, teacher_id=self.get_teacher())
+        class_instance = Class.objects.get(pk=class_pk)
+        self.fields['class_pk'].initial = class_pk
+        self.fields['school_pk'].initial = school_pk
+        self.fields['year'].initial = str(class_instance.year)
+        self.fields['class_name'].initial = class_instance.class_name
+        if TeacherClassAllocation.objects.filter(class_id=class_instance).exists():
+            self.fields['teacher'].initial = TeacherClassAllocation.objects.get(class_id=class_instance).teacher_id.pk
+        else:
+            self.fields['teacher'].initial = ''
 
-    def get_class_pk(self):
-        return self.cleaned_data['class_pk']
+    def clean(self):
+        cleaned_data = super(EditClassForm, self).clean()
+        year = cleaned_data.get("year")
+        class_name = cleaned_data.get("class_name")
+        class_instance = Class.objects.get(pk=cleaned_data.get("class_pk"))
+        school = School.objects.get(pk=cleaned_data.get("school_pk"))
 
-    def get_year(self):
-        return self.cleaned_data['year']
+        if year and class_name:
+            if ((class_instance.class_name != class_name) or (str(class_instance.year) != year)) and\
+                    Class.objects.filter(year=year, class_name=class_name, school_id=school).exists():
+                self._errors["class_name"] = self.error_class(['Class Already Exists: ' + class_name +
+                                                               ' (' + year + ')'])
+                del cleaned_data["school_pk"]
+                del cleaned_data["year"]
+                del cleaned_data["class_name"]
+                del cleaned_data["teacher"]
 
-    def get_class_name(self):
-        return self.cleaned_data['class_name']
+        return cleaned_data
 
-    def get_teacher(self):
-        teacher_pk = self.cleaned_data['teacher']
-        return None if (teacher_pk == '') else Teacher.objects.get(pk=teacher_pk)
-
-    @staticmethod
-    def get_edit_class_button_name():
-        return "EditClassIdentifier"
-
-    @staticmethod
-    def get_edit_class_button_value():
-        return "EditClass"
-
-    @staticmethod
-    def get_form_name():
-        return "editClassForm"
-
-    @staticmethod
-    def get_modal_id():
-        return "editClassModal"
-
-    @staticmethod
-    def get_error_message_label_id_prefix():
-        return "editClassErrorMessageLabel_"
-
-    @staticmethod
-    def get_javascript_validation_call():
-        return "validateEditClassFields()"
-
-    @staticmethod
-    def get_javascript_show_modal_call():
-        return "showEditClassModal"
-
-    @staticmethod
-    def get_javascript_validation_function():
-        return \
-            "function validateEditClassFields()\n\
-            {\n\
-                \n\
-                var form = document.forms['editClassForm'];\n\
-                \n\
-                var yearErrorMessage = document.getElementById('editClassErrorMessageLabel_year');\n\
-                var classNameErrorMessage = document.getElementById('editClassErrorMessageLabel_class_name');\n\
-                var teacherErrorMessage = document.getElementById('editClassErrorMessageLabel_teacher');\n\
-                \n\
-                yearErrorMessage.style.display = 'none';\n\
-                classNameErrorMessage.style.display = 'none';\n\
-                teacherErrorMessage.style.display = 'none';\n\
-                \n\
-                var yearSelect = form.elements['year']\n\
-                var year =  yearSelect.options[yearSelect.selectedIndex].value;\n\
-                var yearEntered = (year != '')\n\
-                if(!yearEntered) {\n\
-                    yearErrorMessage.style.display = 'inherit';\n\
-                    yearErrorMessage.innerHTML = '- Please enter Year';\n\
-                }\n\
-                \n\
-                var className = form.elements['class_name'].value;\n\
-                var classNameEntered = (className != '')\n\
-                if(!classNameEntered) {\n\
-                    classNameErrorMessage.style.display = 'inherit';\n\
-                    classNameErrorMessage.innerHTML = '- Please enter Class Name';\n\
-                }\n\
-                \n\
-                return yearEntered && classNameEntered;\n\
-                \n\
-            }\n"
-
-    @staticmethod
-    def get_javascript_show_modal_function():
-        return \
-            "function showEditClassModal(class_pk, year, class_name, teacher_pk)\n\
-            {\n\
-            \n\
-                var modalForm = document.forms['editClassForm'];\n\
-            \n\
-                modalForm.elements['class_pk'].value = class_pk;\n\
-                modalForm.elements['year'].value = year;\n\
-                modalForm.elements['class_name'].value = class_name;\n\
-                modalForm.elements['teacher'].value = teacher_pk;\n\
-                validateEditClassFields()\n\
-            \n\
-                $('#editClassModal').modal('show');\n\
-            \n\
-            }\n"
+    def edit_class(self):
+        class_edited = self.is_valid()
+        if class_edited:
+            school = School.objects.get(pk=self.cleaned_data['school_pk'])
+            year = self.cleaned_data['year']
+            class_name = self.cleaned_data['class_name']
+            teacher_pk = self.cleaned_data['teacher']
+            teacher = None if teacher_pk == '' else Teacher.objects.get(pk=teacher_pk)
+            class_instance = Class.objects.get(pk=self.cleaned_data['class_pk'])
+            class_edited = class_instance.edit_class_safe(year=year, class_name=class_name,
+                                                          school_id=school, teacher_id=teacher)
+        return class_edited
 
 
 class AddSchoolForm(forms.Form):
@@ -914,8 +444,10 @@ class EditTestCategoryForm(forms.Form):
 
         if test_category_pk and test_category_name:
             test_category = TestCategory.objects.get(pk=test_category_pk)
-            if (test_category.test_category_name != test_category_name) and TestCategory.objects.filter(test_category_name=test_category_name).exists():
-                self._errors["test_category_name"] = self.error_class(['Test Category Name Already Exists: ' + test_category_name])
+            if (test_category.test_category_name != test_category_name) and\
+                    TestCategory.objects.filter(test_category_name=test_category_name).exists():
+                self._errors["test_category_name"] = self.error_class(['Test Category Name Already Exists: ' +
+                                                                       test_category_name])
                 del cleaned_data["test_category_pk"]
                 del cleaned_data["test_category_name"]
 
@@ -964,7 +496,8 @@ class AddTestForm(forms.Form):
             is_upward_percentile_brackets = self.cleaned_data['is_upward_percentile_brackets']
             percentile_score_conversion_type = self.cleaned_data['percentile_score_conversion_type']
             test_saved = Test.create_test(test_name=test_name, test_category=test_category, description=description,
-                                          result_type=result_type, is_upward_percentile_brackets=is_upward_percentile_brackets,
+                                          result_type=result_type,
+                                          is_upward_percentile_brackets=is_upward_percentile_brackets,
                                           percentile_score_conversion_type=percentile_score_conversion_type)
         return test_saved
 
@@ -1050,4 +583,3 @@ class EditTestForm(forms.Form):
             test_edited = test_editing.edit_test_safe(test_name, test_category, description, result_type,
                                                       is_upward_percentile_brackets, percentile_score_conversion_type)
         return test_edited
-

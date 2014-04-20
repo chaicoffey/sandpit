@@ -77,13 +77,12 @@ def add_teachers_from_file(file_path_on_server, school_id):
     n_updated = 0
     n_not_created_or_updated = 0
     for line in teachers_list_reader:
-        (first_name, surname, username, password) = (line['first_name'], line['surname'],
-                                                     line['username'], line['password'])
-        if Teacher.create_teacher(check_name=False, first_name=first_name, surname=surname,
-                                  school_id=school_id, username=username, password=password):
+        (first_name, surname) = (line['first_name'], line['surname'])
+        if Teacher.create_teacher(check_name=True, first_name=first_name, surname=surname,
+                                  school_id=school_id):
             n_created += 1
         elif Teacher.update_teacher(check_name=False, first_name=first_name, surname=surname,
-                                    school_id=school_id, username=username, password=password):
+                                    school_id=school_id):
             n_updated += 1
         else:
             n_not_created_or_updated += 1
@@ -113,11 +112,12 @@ def add_classes_from_file(file_path_on_server, school_id):
     n_not_created_or_updated = 0
     for line in classes_list_reader:
         (year, class_name, teacher_username) = (line['year'], line['class_name'], line['teacher_username'])
-        teacher_id = (Teacher.objects.get(user=User.objects.get(username=teacher_username))
-                      if User.objects.filter(username=teacher_username).exists() and
-                         Teacher.objects.filter(user=User.objects.get(username=teacher_username),
-                                                school_id=school_id).exists()
-                      else None)
+        teacher_id = (
+            Teacher.objects.get(user=User.objects.get(username=teacher_username))
+            if User.objects.filter(username=teacher_username).exists() and
+               Teacher.objects.filter(user=User.objects.get(username=teacher_username), school_id=school_id).exists()
+            else None
+        )
 
         if Class.create_class(year=year, class_name=class_name, school_id=school_id, teacher_id=teacher_id):
             n_created += 1

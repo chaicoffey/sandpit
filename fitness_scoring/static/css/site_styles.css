@@ -17,3 +17,7 @@ select {
     background-color: #428bca;
     color: #ffffff;
 }
+
+.form-field-help {
+    color: #888888
+}

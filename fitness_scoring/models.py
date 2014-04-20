@@ -89,6 +89,27 @@ class User(models.Model):
     def __unicode__(self):
         return self.username
 
+    def change_password(self, password):
+        self.password = password
+        self.save()
+
+    @staticmethod
+    def create_user(base_username):
+        username = User.get_valid_username(base_username)
+        password = username
+        return User.objects.create(username=username, password=password)
+
+    @staticmethod
+    def get_valid_username(base_username):
+        username = base_username
+        if User.objects.filter(username=username).exists():
+            incremental = 1
+            username = base_username + str(incremental)
+            while User.objects.filter(username=username).exists():
+                incremental += 1
+                username = base_username + str(incremental)
+        return username
+
 
 class SuperUser(models.Model):
     user = models.ForeignKey(User)
@@ -104,64 +125,66 @@ class Teacher(models.Model):
     user = models.ForeignKey(User)
 
     def __unicode__(self):
-        return self.first_name + " " + self.surname
+        return self.first_name + " " + self.surname + " (" + self.user.username + ")"
+
+    def get_display_items(self):
+        return [self.user.username, self.first_name, self.surname]
 
     def delete_teacher_safe(self):
-        teacher_not_used = (len(TeacherClassAllocation.objects.filter(teacher_id=self)) == 0)
+        teacher_not_used = not TeacherClassAllocation.objects.filter(teacher_id=self).exists()
         if teacher_not_used:
             self.user.delete()
             self.delete()
         return teacher_not_used
 
-    def edit_teacher_safe(self, first_name, surname, school_id, username, password):
-        is_edit_safe = (self.user.username == username) or (len(User.objects.filter(username=username)) == 0)
-        if is_edit_safe:
-            self.first_name = first_name
-            self.surname = surname
-            self.school_id = school_id
-            self.user.username = username
-            self.user.password = password
-            self.user.save()
-            self.save()
-        return is_edit_safe
+    def edit_teacher_safe(self, first_name, surname, school_id):
+        self.first_name = first_name
+        self.surname = surname
+        self.school_id = school_id
+        self.save()
+        return True
+
+    def change_password(self, password):
+        self.user.change_password(password)
 
     @staticmethod
-    def create_teacher(check_name, first_name, surname, school_id, username, password):
+    def get_display_list_headings():
+        return ['Username', 'First Name', 'Surname']
 
-        username_unique = (len(User.objects.filter(username=username)) == 0)
+    @staticmethod
+    def create_teacher(check_name, first_name, surname, school_id):
+
         if check_name:
-            username_unique = username_unique and (len(Teacher.objects.filter(school_id=school_id,
-                                                                              first_name=first_name,
-                                                                              surname=surname)) == 0)
+            teacher_created = not Teacher.objects.filter(first_name=first_name, surname=surname,
+                                                         school_id=school_id).exists()
+        else:
+            teacher_created = True
 
-        if username_unique:
-            user = User.objects.create(username=username, password=password)
-            Teacher.objects.create(first_name=first_name, surname=surname, school_id=school_id, user=user)
+        teacher_created = teacher_created and (len(first_name) >= 1)
 
-        return username_unique
+        if teacher_created:
+            base_username = first_name[0:1] + '_' + surname
+            user = User.create_user(base_username=base_username)
+            teacher = Teacher.objects.create(first_name=first_name, surname=surname, school_id=school_id, user=user)
+        else:
+            teacher = None
+
+        return teacher
 
     @staticmethod
-    def update_teacher(check_name, first_name, surname, school_id, username, password):
+    def update_teacher(check_name, first_name, surname, school_id):
 
-        user_exists = (len(User.objects.filter(username=username)) == 1)
-
-        teacher_exists = False
-        if user_exists:
-            user = User.objects.get(username=username)
-            if check_name:
-                teacher_exists = (len(Teacher.objects.filter(school_id=school_id,
-                                                             first_name=first_name,
-                                                             surname=surname, user=user)) == 1)
-            else:
-                teacher_exists = (len(Teacher.objects.filter(school_id=school_id, user=user)) == 1)
+        if check_name:
+            teacher_exists = Teacher.objects.filter(first_name=first_name, surname=surname,
+                                                    school_id=school_id).exists()
         else:
-            user = None  # just for removing a warning
+            teacher_exists = False
 
         teacher_updated = False
         if teacher_exists:
-            teacher = Teacher.objects.get(user=user)
+            teacher = Teacher.objects.get(first_name=first_name, surname=surname, school_id=school_id)
             teacher_updated = not ((teacher.first_name == first_name) and (teacher.surname == surname) and
-                                   (teacher.school_id == school_id) and (user.password == password))
+                                   (teacher.school_id == school_id))
         else:
             teacher = None  # just for removing a warning
 
@@ -170,10 +193,9 @@ class Teacher(models.Model):
             teacher.surname = surname
             teacher.school_id = school_id
             teacher.save()
-            user.password = password
-            user.save()
-
-        return teacher_updated
+            return teacher
+        else:
+            return None
 
 
 class Administrator(models.Model):
@@ -208,7 +230,10 @@ class Student(models.Model):
     dob = models.DateField()
 
     def __unicode__(self):
-        return self.first_name + " " + self.surname
+        return self.first_name + " " + self.surname + " (" + self.student_id + ")"
+
+    def get_display_items(self):
+        return [self.student_id, self.first_name, self.surname]
 
     def delete_student_safe(self):
         student_not_used = (len(StudentClassEnrolment.objects.filter(student_id=self)) == 0)
@@ -228,6 +253,10 @@ class Student(models.Model):
             self.dob = dob
             self.save()
         return is_edit_safe
+
+    @staticmethod
+    def get_display_list_headings():
+        return ['Student ID', 'First Name', 'Surname']
 
     @staticmethod
     def create_student(check_name, student_id, school_id, first_name, surname, gender, dob):
@@ -278,6 +307,14 @@ class Class(models.Model):
     def __unicode__(self):
         return self.class_name + " (" + str(self.year) + ") - " + self.school_id.name
 
+    def get_display_items(self):
+        if TeacherClassAllocation.objects.filter(class_id=self).exists():
+            allocation = TeacherClassAllocation.objects.get(class_id=self)
+            teacher_display = allocation.teacher_id
+        else:
+            teacher_display = 'No Teacher Assigned'
+        return [self.year, self.class_name, teacher_display]
+
     def delete_class_safe(self):
         class_not_used = (len(StudentClassEnrolment.objects.filter(class_id=self)) == 0) and\
                          (len(ClassTestSet.objects.filter(class_id=self)) == 0)
@@ -308,6 +345,10 @@ class Class(models.Model):
             self.school_id = school_id
             self.save()
         return is_edit_safe
+
+    @staticmethod
+    def get_display_list_headings():
+        return ['Year', 'Class', 'Teacher']
 
     @staticmethod
     def create_class(year, class_name, school_id, teacher_id):

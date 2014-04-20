@@ -1,6 +1,7 @@
 
-from fitness_scoring.models import School, TestCategory, Test
+from fitness_scoring.models import School, TestCategory, Test, Student
 from django.core.exceptions import ValidationError
+import datetime
 
 
 def validate_school_unique(name):
@@ -18,6 +19,28 @@ def validate_test_unique(test_name):
         raise ValidationError('Test Already Exists: ' + test_name)
 
 
+def validate_student_unique(school_pk):
+
+    def student_unique(student_id):
+        school = School.objects.get(pk=school_pk)
+        if Student.objects.filter(student_id=student_id, school_id=school).exists():
+            raise ValidationError('Student ID Already Exists: ' + student_id)
+
+    return student_unique
+
+
+def validate_new_student_id_unique(student_pk, school_pk):
+
+    def new_student_id_unique(student_id):
+        student = Student.objects.get(pk=student_pk)
+        school = School.objects.get(pk=school_pk)
+        if (student.student_id != student_id) and (Student.objects.filter(student_id=student_id,
+                                                                          school_id=school).exists()):
+            raise ValidationError('Student ID Already Exists: ' + student_id)
+
+    return new_student_id_unique
+
+
 def validate_no_space(n_characters):
 
     def space_test(value):
@@ -25,3 +48,14 @@ def validate_no_space(n_characters):
             raise ValidationError('Spaces Found', code='no_space')
 
     return space_test
+
+
+def validate_date_field(date_format):
+
+    def test_date_field(date_text):
+        try:
+            datetime.datetime.strptime(date_text, date_format)
+        except ValueError:
+            raise ValidationError("Date should be of form " + date_format, code='date_format')
+
+    return test_date_field
