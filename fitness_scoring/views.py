@@ -938,11 +938,13 @@ def students_in_class_list(request, class_pk):
             'item_list_title': 'Students In Class',
             'item_list_table_headings': Student.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['modal_load_link', '/class/student/add/' + str(class_pk) + '/', 'Add Student To Class'],
-                       ['modal_load_link', '/class/student/adds/' + str(class_pk) + '/', 'Add Students To Class From .CSV']]]
+                ['+', [['class_student_modal_load_link', '/class/student/add/' + str(class_pk) + '/',
+                        'Add Student To Class'],
+                       ['class_student_modal_load_link', '/class/student/adds/' + str(class_pk) + '/',
+                        'Add Students To Class From .CSV']]]
             ],
             'item_list_options': [
-                ['modal_load_link', '/class/student/delete/' + str(class_pk) + '/', 'remove']
+                ['class_student_modal_load_link', '/class/student/delete/' + str(class_pk) + '/', 'remove']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
