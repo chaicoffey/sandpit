@@ -16,8 +16,8 @@
                         {{ button_label }}
                     </button>
                     <ul class="dropdown-menu" role="menu">
-                        {% for link_url, label in button_options %}
-                            <li class="modal_load_link"><a href="{{ link_url }}">{{ label }}</a></li>
+                        {% for link_type, link_url, label in button_options %}
+                            <li class="{{ link_type }}"><a href="{{ link_url }}">{{ label }}</a></li>
                         {% endfor %}
                     </ul>
                 </div>
@@ -41,8 +41,8 @@
                         {% for display_item in display_items %}
                             <td>{{ display_item }}</td>
                         {% endfor %}
-                        {% for option_link, option_glyph_icon in item_list_options %}
-                            <td class="modal_load_link">
+                        {% for link_type, option_link, option_glyph_icon in item_list_options %}
+                            <td class="{{ link_type }}">
                                 <a href="{{ option_link }}{{ item.pk }}">
                                     <span class="glyphicon glyphicon-{{ option_glyph_icon }}"></span>
                                 </a>

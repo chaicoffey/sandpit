@@ -179,12 +179,12 @@ def school_list(request):
             'item_list_title': 'School List',
             'item_list_table_headings': School.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['/school/add/', 'Add School'],
-                       ['/school/adds/', 'Add/Edit Schools From .CSV']]]
+                ['+', [['modal_load_link', '/school/add/', 'Add School'],
+                       ['modal_load_link', '/school/adds/', 'Add/Edit Schools From .CSV']]]
             ],
             'item_list_options': [
-                ['/school/edit/', 'pencil'],
-                ['/school/delete/', 'remove']
+                ['modal_load_link', '/school/edit/', 'pencil'],
+                ['modal_load_link', '/school/delete/', 'remove']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -285,12 +285,12 @@ def test_category_list(request):
             'item_list_title': 'Test Category List',
             'item_list_table_headings': TestCategory.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['/test_category/add/', 'Add Test Category'],
-                       ['/test_category/adds/', 'Add/Edit Test Categories From .CSV']]]
+                ['+', [['modal_load_link', '/test_category/add/', 'Add Test Category'],
+                       ['modal_load_link', '/test_category/adds/', 'Add/Edit Test Categories From .CSV']]]
             ],
             'item_list_options': [
-                ['/test_category/edit/', 'pencil'],
-                ['/test_category/delete/', 'remove']
+                ['modal_load_link', '/test_category/edit/', 'pencil'],
+                ['modal_load_link', '/test_category/delete/', 'remove']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -400,12 +400,12 @@ def test_list(request):
             'item_list_title': 'Test List',
             'item_list_table_headings': Test.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['/test/add/', 'Add Test'],
-                       ['/test/adds/', 'Add/Edit Tests From .CSV']]]
+                ['+', [['modal_load_link', '/test/add/', 'Add Test'],
+                       ['modal_load_link', '/test/adds/', 'Add/Edit Tests From .CSV']]]
             ],
             'item_list_options': [
-                ['/test/edit/', 'pencil'],
-                ['/test/delete/', 'remove']
+                ['modal_load_link', '/test/edit/', 'pencil'],
+                ['modal_load_link', '/test/delete/', 'remove']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -517,12 +517,12 @@ def student_list(request):
             'item_list_title': 'Student List',
             'item_list_table_headings': Student.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['/student/add/', 'Add Student'],
-                       ['/student/adds/', 'Add/Edit Students From .CSV']]]
+                ['+', [['modal_load_link', '/student/add/', 'Add Student'],
+                       ['modal_load_link', '/student/adds/', 'Add/Edit Students From .CSV']]]
             ],
             'item_list_options': [
-                ['/student/edit/', 'pencil'],
-                ['/student/delete/', 'remove']
+                ['modal_load_link', '/student/edit/', 'pencil'],
+                ['modal_load_link', '/student/delete/', 'remove']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -540,11 +540,11 @@ def student_list2(request):
             'item_list_title': 'Student List',
             'item_list_table_headings': Student.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['/student/add/', 'Add Student']]]
+                ['+', [['modal_load_link', '/student/add/', 'Add Student']]]
             ],
             'item_list_options': [
-                ['/student/edit/', 'pencil'],
-                ['/student/delete/', 'remove']
+                ['modal_load_link', '/student/edit/', 'pencil'],
+                ['modal_load_link', '/student/delete/', 'remove']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -672,12 +672,12 @@ def teacher_list(request):
             'item_list_title': 'Teacher List',
             'item_list_table_headings': Teacher.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['/teacher/add/', 'Add Teacher'],
-                       ['/teacher/adds/', 'Add/Edit Teachers From .CSV']]]
+                ['+', [['modal_load_link', '/teacher/add/', 'Add Teacher'],
+                       ['modal_load_link', '/teacher/adds/', 'Add/Edit Teachers From .CSV']]]
             ],
             'item_list_options': [
-                ['/teacher/edit/', 'pencil'],
-                ['/teacher/delete/', 'remove']
+                ['modal_load_link', '/teacher/edit/', 'pencil'],
+                ['modal_load_link', '/teacher/delete/', 'remove']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -799,12 +799,13 @@ def class_list(request):
             'item_list_title': 'Class List',
             'item_list_table_headings': Class.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['/class/add/', 'Add Class'],
-                       ['/class/adds/', 'Add/Edit Classes From .CSV']]]
+                ['+', [['modal_load_link', '/class/add/', 'Add Class'],
+                       ['modal_load_link', '/class/adds/', 'Add/Edit Classes From .CSV']]]
             ],
             'item_list_options': [
-                ['/class/edit/', 'pencil'],
-                ['/class/delete/', 'remove']
+                ['modal_load_link', '/class/edit/', 'pencil'],
+                ['modal_load_link', '/class/delete/', 'remove'],
+                ['load_link', '/class/class/', 'home']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -913,3 +914,14 @@ def class_delete(request, class_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to delete a class")
+
+
+def class_class(request, class_pk):
+    if request.session.get('user_type', None) == 'Administrator':
+        display_items = Class.objects.get(pk=class_pk).get_display_items()
+        context = {
+            'class_title': display_items[1] + ' (' + str(display_items[0]) + ') : ' + str(display_items[2])
+        }
+        return render(request, 'class.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to view class")

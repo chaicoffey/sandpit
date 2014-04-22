@@ -23,6 +23,12 @@ $(document).on('click', '.modal_load_link a', function(event){
     $('#item_list_user_message_alert').addClass('hidden');
 });
 
+//for loading load links on item_list page
+$(document).on('click', '.load_link a', function(event){
+    event.preventDefault();
+    load_link_clicked_event($(this).attr('href'))
+});
+
 //for loading from a modal form submit to modal window (if form in response) or update the list (if no form in response)
 $(document).on('submit', '#modalForm', function(formEvent) {
 

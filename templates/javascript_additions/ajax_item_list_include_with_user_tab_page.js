@@ -9,3 +9,9 @@ function items_in_list_updated_event(do_after_load_method)
     );
     load_data_table('main_view', base_url + list_url, n_headings_to_exclude, do_after_load_method);
 }
+
+function load_link_clicked_event(link_url)
+{
+     base_url = window.location.protocol + "//" + window.location.host;
+    $('#main_view').load(base_url + link_url)
+}
