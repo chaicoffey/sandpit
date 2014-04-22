@@ -27,7 +27,7 @@ $(document).on('click', '.modal_load_link a', function(event){
 $(document).on('click', '.class_load_link a', function(event){
     event.preventDefault();
     class_load_link_clicked_event($(this).attr('href'), function(){
-        $('#class_students').load(base_url + $('#class_students').attr('href'))
+        load_data_table('class_students', base_url + $('#class_students').attr('href'), 1)
     })
 });
 
