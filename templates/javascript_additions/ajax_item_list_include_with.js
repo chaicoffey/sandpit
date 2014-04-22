@@ -24,9 +24,11 @@ $(document).on('click', '.modal_load_link a', function(event){
 });
 
 //for loading load links on item_list page
-$(document).on('click', '.load_link a', function(event){
+$(document).on('click', '.class_load_link a', function(event){
     event.preventDefault();
-    load_link_clicked_event($(this).attr('href'))
+    class_load_link_clicked_event($(this).attr('href'), function(){
+        $('#class_students').load(base_url + $('#class_students').attr('href'))
+    })
 });
 
 //for loading from a modal form submit to modal window (if form in response) or update the list (if no form in response)

@@ -2,12 +2,13 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.template import RequestContext
 from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, TestCategory, Test, Student, Class
+from fitness_scoring.models import StudentClassEnrolment, TeacherClassAllocation
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
 from fitness_scoring.forms import AddTestForm, AddTestsForm, EditTestForm
 from fitness_scoring.forms import AddStudentForm, AddStudentsForm, EditStudentForm
 from fitness_scoring.forms import AddTeacherForm, AddTeachersForm, EditTeacherForm
-from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm
+from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, EnrolStudentInClassForm
 
 
 def logout_user(request):
@@ -805,7 +806,7 @@ def class_list(request):
             'item_list_options': [
                 ['modal_load_link', '/class/edit/', 'pencil'],
                 ['modal_load_link', '/class/delete/', 'remove'],
-                ['load_link', '/class/class/', 'home']
+                ['class_load_link', '/class/class/', 'home']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -917,11 +918,78 @@ def class_delete(request, class_pk):
 
 
 def class_class(request, class_pk):
-    if request.session.get('user_type', None) == 'Administrator':
+    if user_authorised_for_class(request, class_pk):
         display_items = Class.objects.get(pk=class_pk).get_display_items()
         context = {
-            'class_title': display_items[1] + ' (' + str(display_items[0]) + ') : ' + str(display_items[2])
+            'class_title': display_items[1] + ' (' + str(display_items[0]) + ') : ' + str(display_items[2]),
+            'class_pk': str(class_pk)
         }
         return render(request, 'class.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to view class")
+
+
+def students_in_class_list(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        student_enrolments = StudentClassEnrolment.objects.filter(class_id=Class.objects.get(pk=class_pk))
+        context = {
+            'item_list': [(enrolment.student_id, enrolment.student_id.get_display_items())
+                          for enrolment in student_enrolments],
+            'item_list_title': 'Students In Class',
+            'item_list_table_headings': Student.get_display_list_headings(),
+            'item_list_buttons': [
+                ['+', [['modal_load_link', '/class/student/add/' + str(class_pk) + '/', 'Add Student To Class'],
+                       ['modal_load_link', '/class/student/adds/' + str(class_pk) + '/', 'Add Students To Class From .CSV']]]
+            ],
+            'item_list_options': [
+                ['modal_load_link', '/class/student/delete/' + str(class_pk) + '/', 'remove']
+            ]
+        }
+        return render(request, 'item_list.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to view student list")
+
+
+def add_student_to_class(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        user_type = request.session.get('user_type', None)
+        user = User.objects.get(username=request.session.get('username', None))
+        school_pk = (Administrator.objects.get(user=user) if user_type == 'Administrator'
+                     else Teacher.objects.get(user=user)).school_id.pk
+        if request.POST:
+            add_student_to_class_form = EnrolStudentInClassForm(school_pk=school_pk, class_pk=class_pk,
+                                                                data=request.POST)
+            if add_student_to_class_form.enrol_student_in_class():
+                student_added = Student.objects.get(pk=add_student_to_class_form.cleaned_data['student'])
+                context = {'finish_title': 'Student Added To Class',
+                           'user_message': 'Student Added To Class Successfully: ' + str(student_added)}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/class/student/add/' + str(class_pk) + '/',
+                           'functionality_name': 'Add Student To Class',
+                           'form': add_student_to_class_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/class/student/add/' + str(class_pk) + '/',
+                       'functionality_name': 'Add Student To Class',
+                       'form': EnrolStudentInClassForm(school_pk=school_pk, class_pk=class_pk)}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to add a student")
+
+
+def user_authorised_for_class(request, class_pk):
+    user_type = request.session.get('user_type', None)
+    if (user_type == 'Administrator') or (user_type == 'Teacher'):
+        user = User.objects.get(username=request.session.get('username', None))
+        class_instance = Class.objects.get(pk=class_pk)
+        if user_type == 'Administrator':
+            administrator_school = Administrator.objects.get(user=user).school_id
+            authorised = class_instance.school_id == administrator_school
+        else:
+            teacher = Teacher.objects.get(user=user)
+            authorised = TeacherClassAllocation.objects.filter(class_id=class_instance, teacher_id=teacher).exists()
+    else:
+        authorised = False
+
+    return authorised

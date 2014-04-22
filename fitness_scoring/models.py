@@ -332,6 +332,12 @@ class Class(models.Model):
             self.save()
         return is_edit_safe
 
+    def enrol_student_safe(self, student):
+        enrolled = self.school_id == student.school_id
+        if enrolled:
+            StudentClassEnrolment.objects.create(class_id=self, student_id=student)
+        return enrolled
+
     @staticmethod
     def get_display_list_headings():
         return ['Year', 'Class', 'Teacher']
