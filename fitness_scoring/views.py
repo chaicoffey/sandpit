@@ -2,12 +2,13 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.template import RequestContext
 from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, TestCategory, Test, Student, Class
+from fitness_scoring.models import StudentClassEnrolment, TeacherClassAllocation
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
 from fitness_scoring.forms import AddTestForm, AddTestsForm, EditTestForm
 from fitness_scoring.forms import AddStudentForm, AddStudentsForm, EditStudentForm
 from fitness_scoring.forms import AddTeacherForm, AddTeachersForm, EditTeacherForm
-from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm
+from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, EnrolStudentInClassForm
 
 
 def logout_user(request):
@@ -179,12 +180,12 @@ def school_list(request):
             'item_list_title': 'School List',
             'item_list_table_headings': School.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['/school/add/', 'Add School'],
-                       ['/school/adds/', 'Add/Edit Schools From .CSV']]]
+                ['+', [['modal_load_link', '/school/add/', 'Add School'],
+                       ['modal_load_link', '/school/adds/', 'Add/Edit Schools From .CSV']]]
             ],
             'item_list_options': [
-                ['/school/edit/', 'pencil'],
-                ['/school/delete/', 'remove']
+                ['modal_load_link', '/school/edit/', 'pencil'],
+                ['modal_load_link', '/school/delete/', 'remove']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -285,12 +286,12 @@ def test_category_list(request):
             'item_list_title': 'Test Category List',
             'item_list_table_headings': TestCategory.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['/test_category/add/', 'Add Test Category'],
-                       ['/test_category/adds/', 'Add/Edit Test Categories From .CSV']]]
+                ['+', [['modal_load_link', '/test_category/add/', 'Add Test Category'],
+                       ['modal_load_link', '/test_category/adds/', 'Add/Edit Test Categories From .CSV']]]
             ],
             'item_list_options': [
-                ['/test_category/edit/', 'pencil'],
-                ['/test_category/delete/', 'remove']
+                ['modal_load_link', '/test_category/edit/', 'pencil'],
+                ['modal_load_link', '/test_category/delete/', 'remove']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -400,12 +401,12 @@ def test_list(request):
             'item_list_title': 'Test List',
             'item_list_table_headings': Test.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['/test/add/', 'Add Test'],
-                       ['/test/adds/', 'Add/Edit Tests From .CSV']]]
+                ['+', [['modal_load_link', '/test/add/', 'Add Test'],
+                       ['modal_load_link', '/test/adds/', 'Add/Edit Tests From .CSV']]]
             ],
             'item_list_options': [
-                ['/test/edit/', 'pencil'],
-                ['/test/delete/', 'remove']
+                ['modal_load_link', '/test/edit/', 'pencil'],
+                ['modal_load_link', '/test/delete/', 'remove']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -517,12 +518,12 @@ def student_list(request):
             'item_list_title': 'Student List',
             'item_list_table_headings': Student.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['/student/add/', 'Add Student'],
-                       ['/student/adds/', 'Add/Edit Students From .CSV']]]
+                ['+', [['modal_load_link', '/student/add/', 'Add Student'],
+                       ['modal_load_link', '/student/adds/', 'Add/Edit Students From .CSV']]]
             ],
             'item_list_options': [
-                ['/student/edit/', 'pencil'],
-                ['/student/delete/', 'remove']
+                ['modal_load_link', '/student/edit/', 'pencil'],
+                ['modal_load_link', '/student/delete/', 'remove']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -540,11 +541,11 @@ def student_list2(request):
             'item_list_title': 'Student List',
             'item_list_table_headings': Student.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['/student/add/', 'Add Student']]]
+                ['+', [['modal_load_link', '/student/add/', 'Add Student']]]
             ],
             'item_list_options': [
-                ['/student/edit/', 'pencil'],
-                ['/student/delete/', 'remove']
+                ['modal_load_link', '/student/edit/', 'pencil'],
+                ['modal_load_link', '/student/delete/', 'remove']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -611,7 +612,15 @@ def student_adds(request):
 
 def student_edit(request, student_pk):
     user_type = request.session.get('user_type', None)
-    if (user_type == 'Administrator') or (user_type == 'Teacher'):
+    authorised = (user_type == 'Administrator') or (user_type == 'Teacher')
+    if authorised:
+        user = User.objects.get(username=request.session.get('username', None))
+        school = (Administrator.objects.get(user=user) if (user_type == 'Administrator')
+                  else Teacher.objects.get(user=user)).school_id
+        student = Student.objects.get(pk=student_pk)
+        authorised = school == student.school_id
+
+    if authorised:
         user = User.objects.get(username=request.session.get('username', None))
         school_pk = (Administrator.objects.get(user=user) if (user_type == 'Administrator')
                      else Teacher.objects.get(user=user)).school_id.pk
@@ -640,10 +649,17 @@ def student_edit(request, student_pk):
 
 def student_delete(request, student_pk):
     user_type = request.session.get('user_type', None)
-    if (user_type == 'Administrator') or (user_type == 'Teacher'):
+    authorised = (user_type == 'Administrator') or (user_type == 'Teacher')
+    if authorised:
+        user = User.objects.get(username=request.session.get('username', None))
+        school = (Administrator.objects.get(user=user) if (user_type == 'Administrator')
+                  else Teacher.objects.get(user=user)).school_id
+        student = Student.objects.get(pk=student_pk)
+        authorised = school == student.school_id
+
+    if authorised:
         student_to_delete = Student.objects.get(pk=student_pk)
-        student_display_text = (student_to_delete.first_name + ' ' + student_to_delete.surname +
-                                ' (' + student_to_delete.student_id + ')')
+        student_display_text = str(student_to_delete)
         if request.POST:
             if student_to_delete.delete_student_safe():
                 context = {'finish_title': 'Student Deleted',
@@ -672,12 +688,12 @@ def teacher_list(request):
             'item_list_title': 'Teacher List',
             'item_list_table_headings': Teacher.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['/teacher/add/', 'Add Teacher'],
-                       ['/teacher/adds/', 'Add/Edit Teachers From .CSV']]]
+                ['+', [['modal_load_link', '/teacher/add/', 'Add Teacher'],
+                       ['modal_load_link', '/teacher/adds/', 'Add/Edit Teachers From .CSV']]]
             ],
             'item_list_options': [
-                ['/teacher/edit/', 'pencil'],
-                ['/teacher/delete/', 'remove']
+                ['modal_load_link', '/teacher/edit/', 'pencil'],
+                ['modal_load_link', '/teacher/delete/', 'remove']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -693,9 +709,8 @@ def teacher_add(request):
             teacher_add_form = AddTeacherForm(school_pk=school_pk, data=request.POST)
             teacher = teacher_add_form.add_teacher()
             if teacher:
-                teacher_display_text = (teacher.first_name + ' ' + teacher.surname + ' (' + teacher.user.username + ')')
                 context = {'finish_title': 'Teacher Added',
-                           'user_message': 'Teacher Added Successfully: ' + teacher_display_text}
+                           'user_message': 'Teacher Added Successfully: ' + str(teacher)}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/teacher/add/',
@@ -740,16 +755,21 @@ def teacher_adds(request):
 
 
 def teacher_edit(request, teacher_pk):
-    if request.session.get('user_type', None) == 'Administrator':
+    authorised = request.session.get('user_type', None) == 'Administrator'
+    if authorised:
+        administrator = Administrator.objects.get(user=User.objects.get(username=request.session.get('username', None)))
+        teacher = Teacher.objects.get(pk=teacher_pk)
+        authorised = administrator.school_id == teacher.school_id
+
+    if authorised:
         user = User.objects.get(username=request.session.get('username', None))
         school_pk = Administrator.objects.get(user=user).school_id.pk
         if request.POST:
             teacher_edit_form = EditTeacherForm(school_pk=school_pk, teacher_pk=teacher_pk, data=request.POST)
             teacher = teacher_edit_form.edit_teacher()
             if teacher:
-                teacher_display_text = (teacher.first_name + ' ' + teacher.surname + ' (' + teacher.user.username + ')')
                 context = {'finish_title': 'Teacher Edited',
-                           'user_message': 'Teacher Edited Successfully: ' + teacher_display_text}
+                           'user_message': 'Teacher Edited Successfully: ' + str(teacher)}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/teacher/edit/' + str(teacher_pk),
@@ -766,11 +786,15 @@ def teacher_edit(request, teacher_pk):
 
 
 def teacher_delete(request, teacher_pk):
-    user_type = request.session.get('user_type', None)
-    if (user_type == 'Administrator') or (user_type == 'Teacher'):
+    authorised = request.session.get('user_type', None) == 'Administrator'
+    if authorised:
+        administrator = Administrator.objects.get(user=User.objects.get(username=request.session.get('username', None)))
+        teacher = Teacher.objects.get(pk=teacher_pk)
+        authorised = administrator.school_id == teacher.school_id
+
+    if authorised:
         teacher_to_delete = Teacher.objects.get(pk=teacher_pk)
-        teacher_display_text = (teacher_to_delete.first_name + ' ' + teacher_to_delete.surname +
-                                ' (' + teacher_to_delete.user.username + ')')
+        teacher_display_text = str(teacher_to_delete)
         if request.POST:
             if teacher_to_delete.delete_teacher_safe():
                 context = {'finish_title': 'Teacher Deleted',
@@ -786,7 +810,7 @@ def teacher_delete(request, teacher_pk):
                        'prompt_message': 'Are You Sure You Wish To Delete ' + teacher_display_text + "?"}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to delete a teacher")
+        return HttpResponseForbidden("You are not authorised to delete a teacher from this school")
 
 
 def class_list(request):
@@ -799,12 +823,13 @@ def class_list(request):
             'item_list_title': 'Class List',
             'item_list_table_headings': Class.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['/class/add/', 'Add Class'],
-                       ['/class/adds/', 'Add/Edit Classes From .CSV']]]
+                ['+', [['modal_load_link', '/class/add/', 'Add Class'],
+                       ['modal_load_link', '/class/adds/', 'Add/Edit Classes From .CSV']]]
             ],
             'item_list_options': [
-                ['/class/edit/', 'pencil'],
-                ['/class/delete/', 'remove']
+                ['modal_load_link', '/class/edit/', 'pencil'],
+                ['modal_load_link', '/class/delete/', 'remove'],
+                ['class_load_link', '/class/class/', 'home']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -893,8 +918,7 @@ def class_edit(request, class_pk):
 
 
 def class_delete(request, class_pk):
-    user_type = request.session.get('user_type', None)
-    if (user_type == 'Administrator') or (user_type == 'Class'):
+    if request.session.get('user_type', None) == 'Administrator':
         class_to_delete = Class.objects.get(pk=class_pk)
         class_display_text = (class_to_delete.class_name + ' ' + ' (' + str(class_to_delete.year) + ')')
         if request.POST:
@@ -913,3 +937,99 @@ def class_delete(request, class_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to delete a class")
+
+
+def class_class(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        display_items = Class.objects.get(pk=class_pk).get_display_items()
+        context = {
+            'class_title': display_items[1] + ' (' + str(display_items[0]) + ') : ' + str(display_items[2]),
+            'class_pk': str(class_pk)
+        }
+        return render(request, 'class.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to view class")
+
+
+def students_in_class_list(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        student_enrolments = StudentClassEnrolment.objects.filter(class_id=Class.objects.get(pk=class_pk))
+        context = {
+            'item_list': [(enrolment.student_id, enrolment.student_id.get_display_items())
+                          for enrolment in student_enrolments],
+            'item_list_title': 'Students In Class',
+            'item_list_table_headings': Student.get_display_list_headings(),
+            'item_list_buttons': [
+                ['+', [['class_student_modal_load_link', '/class/student/add/' + str(class_pk) + '/',
+                        'Add Student To Class'],
+                       ['class_student_modal_load_link', '/class/student/adds/' + str(class_pk) + '/',
+                        'Add Students To Class From .CSV']]]
+            ],
+            'item_list_options': [
+                ['class_student_modal_load_link', '/class/student/delete/' + str(class_pk) + '/', 'remove']
+            ]
+        }
+        return render(request, 'item_list.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to view student list")
+
+
+def add_student_to_class(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        if request.POST:
+            add_student_to_class_form = EnrolStudentInClassForm(class_pk=class_pk, data=request.POST)
+            if add_student_to_class_form.enrol_student_in_class():
+                student_added = Student.objects.get(pk=add_student_to_class_form.cleaned_data['student'])
+                context = {'finish_title': 'Student Added To Class',
+                           'user_message': 'Student Added To Class Successfully: ' + str(student_added)}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/class/student/add/' + str(class_pk) + '/',
+                           'functionality_name': 'Add Student To Class',
+                           'form': add_student_to_class_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/class/student/add/' + str(class_pk) + '/',
+                       'functionality_name': 'Add Student To Class',
+                       'form': EnrolStudentInClassForm(class_pk=class_pk)}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to add a student to this class")
+
+
+def remove_student_from_class(request, class_pk, student_pk):
+    if user_authorised_for_class(request, class_pk):
+        class_instance = Class.objects.get(pk=class_pk)
+        student = Student.objects.get(pk=student_pk)
+        if request.POST:
+            if class_instance.withdraw_student_safe(student):
+                context = {'finish_title': 'Remove Student From Class',
+                           'user_message': 'Student Removed Successfully: ' + str(student)}
+            else:
+                context = {'finish_title': 'Student Not Removed From Class',
+                           'user_error_message': 'Could Not Remove ' + str(student) + ' (Student Has Results Entered)'}
+            return render(request, 'user_message.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/class/student/delete/' + str(class_pk) + '/' + str(student_pk),
+                       'functionality_name': 'Remove Student',
+                       'prompt_message': 'Are You Sure You Wish To Remove Student From Class ' + str(student) + "?"}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to remove a student from this class")
+
+
+def user_authorised_for_class(request, class_pk):
+    user_type = request.session.get('user_type', None)
+    if (user_type == 'Administrator') or (user_type == 'Teacher'):
+        user = User.objects.get(username=request.session.get('username', None))
+        class_instance = Class.objects.get(pk=class_pk)
+        if user_type == 'Administrator':
+            administrator_school = Administrator.objects.get(user=user).school_id
+            authorised = class_instance.school_id == administrator_school
+        else:
+            teacher = Teacher.objects.get(user=user)
+            authorised = TeacherClassAllocation.objects.filter(class_id=class_instance, teacher_id=teacher).exists()
+    else:
+        authorised = False
+
+    return authorised

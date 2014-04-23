@@ -1,5 +1,6 @@
 from django import forms
-from fitness_scoring.models import Student, School, Class, Teacher, TestCategory, Test, TeacherClassAllocation
+from fitness_scoring.models import Student, School, Class, Teacher, TestCategory, Test
+from fitness_scoring.models import TeacherClassAllocation, StudentClassEnrolment
 from fitness_scoring.validators import validate_school_unique, validate_new_school_name_unique
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
 from fitness_scoring.validators import validate_test_unique, validate_new_test_name_unique
@@ -320,6 +321,32 @@ class EditClassForm(forms.Form):
             class_edited = class_instance.edit_class_safe(year=year, class_name=class_name,
                                                           school_id=school, teacher_id=teacher)
         return class_edited
+
+
+class EnrolStudentInClassForm(forms.Form):
+    class_pk = forms.CharField(widget=forms.HiddenInput())
+    student = forms.ChoiceField(required=True)
+
+    def __init__(self, class_pk, *args, **kwargs):
+        super(EnrolStudentInClassForm, self).__init__(*args, **kwargs)
+
+        self.fields['student'].error_messages = {'required': 'Please Select Student'}
+
+        class_instance = Class.objects.get(pk=class_pk)
+        self.fields['student'].choices = []
+        for student in Student.objects.filter(school_id=class_instance.school_id):
+            if not StudentClassEnrolment.objects.filter(class_id=class_instance, student_id=student):
+                self.fields['student'].choices.append((student.pk, str(student)))
+
+        self.fields['class_pk'].initial = class_pk
+
+    def enrol_student_in_class(self):
+        enrol_student_in_class = self.is_valid()
+        if enrol_student_in_class:
+            class_instance = Class.objects.get(pk=self.cleaned_data['class_pk'])
+            student = Student.objects.get(pk=self.cleaned_data['student'])
+            enrol_student_in_class = class_instance.enrol_student_safe(student=student)
+        return enrol_student_in_class
 
 
 class AddSchoolForm(forms.Form):

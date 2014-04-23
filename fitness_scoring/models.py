@@ -332,6 +332,24 @@ class Class(models.Model):
             self.save()
         return is_edit_safe
 
+    def enrol_student_safe(self, student):
+        enrolled = ((self.school_id == student.school_id) and
+                    not StudentClassEnrolment.objects.filter(class_id=self, student_id=student).exists())
+        if enrolled:
+            StudentClassEnrolment.objects.create(class_id=self, student_id=student)
+        return enrolled
+
+    def withdraw_student_safe(self, student):
+        withdrawn = StudentClassEnrolment.objects.filter(class_id=self, student_id=student).exists()
+        if withdrawn:
+            enrolment = StudentClassEnrolment.objects.get(class_id=self, student_id=student)
+            withdrawn = not StudentClassTestResult.objects.filter(student_class_id=enrolment).exists()
+
+        if withdrawn:
+            StudentClassEnrolment.objects.get(class_id=self, student_id=student).delete()
+
+        return withdrawn
+
     @staticmethod
     def get_display_list_headings():
         return ['Year', 'Class', 'Teacher']

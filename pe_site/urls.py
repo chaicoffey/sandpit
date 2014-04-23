@@ -48,4 +48,11 @@ urlpatterns = patterns(
     url(r'^class/adds/', 'fitness_scoring.views.class_adds', name='class_adds'),
     url(r'^class/edit/(?P<class_pk>\d+)', 'fitness_scoring.views.class_edit', name='class_edit'),
     url(r'^class/delete/(?P<class_pk>\d+)', 'fitness_scoring.views.class_delete', name='class_delete'),
+    url(r'^class/class/(?P<class_pk>\d+)', 'fitness_scoring.views.class_class', name='class_class'),
+    url(r'^class/student/list/(?P<class_pk>\d+)', 'fitness_scoring.views.students_in_class_list',
+        name='students_in_class_list'),
+    url(r'^class/student/add/(?P<class_pk>\d+)', 'fitness_scoring.views.add_student_to_class',
+        name='add_student_to_class'),
+    url(r'^class/student/delete/(?P<class_pk>\d+)/(?P<student_pk>\d+)',
+        'fitness_scoring.views.remove_student_from_class', name='remove_student_from_class'),
 )
