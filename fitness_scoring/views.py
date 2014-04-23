@@ -612,7 +612,15 @@ def student_adds(request):
 
 def student_edit(request, student_pk):
     user_type = request.session.get('user_type', None)
-    if (user_type == 'Administrator') or (user_type == 'Teacher'):
+    authorised = (user_type == 'Administrator') or (user_type == 'Teacher')
+    if authorised:
+        user = User.objects.get(username=request.session.get('username', None))
+        school = (Administrator.objects.get(user=user) if (user_type == 'Administrator')
+                  else Teacher.objects.get(user=user)).school_id
+        student = Student.objects.get(pk=student_pk)
+        authorised = school == student.school_id
+
+    if authorised:
         user = User.objects.get(username=request.session.get('username', None))
         school_pk = (Administrator.objects.get(user=user) if (user_type == 'Administrator')
                      else Teacher.objects.get(user=user)).school_id.pk
@@ -748,7 +756,13 @@ def teacher_adds(request):
 
 
 def teacher_edit(request, teacher_pk):
-    if request.session.get('user_type', None) == 'Administrator':
+    authorised = request.session.get('user_type', None) == 'Administrator'
+    if authorised:
+        administrator = Administrator.objects.get(user=User.objects.get(username=request.session.get('username', None)))
+        teacher = Teacher.objects.get(pk=teacher_pk)
+        authorised = administrator.school_id == teacher.school_id
+
+    if authorised:
         user = User.objects.get(username=request.session.get('username', None))
         school_pk = Administrator.objects.get(user=user).school_id.pk
         if request.POST:
