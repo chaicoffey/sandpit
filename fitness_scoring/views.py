@@ -976,13 +976,8 @@ def students_in_class_list(request, class_pk):
 
 def add_student_to_class(request, class_pk):
     if user_authorised_for_class(request, class_pk):
-        user_type = request.session.get('user_type', None)
-        user = User.objects.get(username=request.session.get('username', None))
-        school_pk = (Administrator.objects.get(user=user) if user_type == 'Administrator'
-                     else Teacher.objects.get(user=user)).school_id.pk
         if request.POST:
-            add_student_to_class_form = EnrolStudentInClassForm(school_pk=school_pk, class_pk=class_pk,
-                                                                data=request.POST)
+            add_student_to_class_form = EnrolStudentInClassForm(class_pk=class_pk, data=request.POST)
             if add_student_to_class_form.enrol_student_in_class():
                 student_added = Student.objects.get(pk=add_student_to_class_form.cleaned_data['student'])
                 context = {'finish_title': 'Student Added To Class',
@@ -996,7 +991,7 @@ def add_student_to_class(request, class_pk):
         else:
             context = {'post_to_url': '/class/student/add/' + str(class_pk) + '/',
                        'functionality_name': 'Add Student To Class',
-                       'form': EnrolStudentInClassForm(school_pk=school_pk, class_pk=class_pk)}
+                       'form': EnrolStudentInClassForm(class_pk=class_pk)}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to add a student to this class")

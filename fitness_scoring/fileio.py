@@ -129,6 +129,41 @@ def add_classes_from_file(file_path_on_server, school_id):
     return n_created, n_updated, n_not_created_or_updated
 
 
+def enrol_students_in_class_from_file_upload(uploaded_file, class_instance):
+    file_path_on_server = save_file(uploaded_file)
+    (n_created, n_not_created) = enrol_students_in_class_from_file(file_path_on_server, class_instance)
+    delete_file(file_path_on_server)
+    return n_created, 0, n_not_created
+
+
+def enrol_students_in_class_from_file(file_path_on_server, class_instance):
+    file_handle = open(file_path_on_server, 'rb')
+
+    dialect = csv.Sniffer().sniff(file_handle.read(1024))
+    dialect.strict = True
+
+    file_handle.seek(0)
+    classes_list_reader = csv.DictReader(file_handle, dialect=dialect)
+    # check headings are correct else throw exception
+
+    school = class_instance.school_id
+
+    n_created = 0
+    n_not_created = 0
+    for line in classes_list_reader:
+        (student_id) = (line['student_id'])
+        student = (Student.objects.get(student_id=student_id, school_id=school)
+                   if Student.objects.filter(student_id=student_id, school_id=school).exists()
+                   else None)
+
+        if class_instance.enrol_student_safe(student):
+            n_created += 1
+        else:
+            n_not_created += 1
+
+    return n_created, n_not_created
+
+
 def add_schools_from_file_upload(uploaded_file):
     file_path_on_server = save_file(uploaded_file)
     (n_created, n_updated, n_not_created_or_updated) = add_schools_from_file(file_path_on_server)

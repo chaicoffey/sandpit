@@ -333,7 +333,8 @@ class Class(models.Model):
         return is_edit_safe
 
     def enrol_student_safe(self, student):
-        enrolled = self.school_id == student.school_id
+        enrolled = ((self.school_id == student.school_id) and
+                    not StudentClassEnrolment.objects.filter(class_id=self, student_id=student).exists())
         if enrolled:
             StudentClassEnrolment.objects.create(class_id=self, student_id=student)
         return enrolled

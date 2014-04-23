@@ -327,14 +327,14 @@ class EnrolStudentInClassForm(forms.Form):
     class_pk = forms.CharField(widget=forms.HiddenInput())
     student = forms.ChoiceField(required=True)
 
-    def __init__(self, school_pk, class_pk, *args, **kwargs):
+    def __init__(self, class_pk, *args, **kwargs):
         super(EnrolStudentInClassForm, self).__init__(*args, **kwargs)
 
         self.fields['student'].error_messages = {'required': 'Please Select Student'}
 
         class_instance = Class.objects.get(pk=class_pk)
         self.fields['student'].choices = []
-        for student in Student.objects.filter(school_id=School.objects.get(pk=school_pk)):
+        for student in Student.objects.filter(school_id=class_instance.school_id):
             if not StudentClassEnrolment.objects.filter(class_id=class_instance, student_id=student):
                 self.fields['student'].choices.append((student.pk, str(student)))
 
