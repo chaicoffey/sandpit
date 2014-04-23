@@ -641,7 +641,15 @@ def student_edit(request, student_pk):
 
 def student_delete(request, student_pk):
     user_type = request.session.get('user_type', None)
-    if (user_type == 'Administrator') or (user_type == 'Teacher'):
+    authorised = (user_type == 'Administrator') or (user_type == 'Teacher')
+    if authorised:
+        user = User.objects.get(username=request.session.get('username', None))
+        school = (Administrator.objects.get(user=user) if (user_type == 'Administrator')
+                  else Teacher.objects.get(user=user)).school_id
+        student = Student.objects.get(pk=student_pk)
+        authorised = school == student.school_id
+
+    if authorised:
         student_to_delete = Student.objects.get(pk=student_pk)
         student_display_text = str(student_to_delete)
         if request.POST:
