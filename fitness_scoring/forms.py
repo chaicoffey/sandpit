@@ -9,7 +9,7 @@ from fitness_scoring.validators import validate_no_space, validate_date_field
 from fitness_scoring.fileio import add_schools_from_file_upload, add_test_categories_from_file_upload
 from fitness_scoring.fileio import add_tests_from_file_upload, add_students_from_file_upload
 from fitness_scoring.fileio import add_teachers_from_file_upload, add_classes_from_file_upload
-from fitness_scoring.fileio import enrol_students_in_class_from_file_upload
+from fitness_scoring.fileio import enrol_students_in_class_from_file_upload, assign_tests_to_class_from_file_upload
 from django.core.validators import MinLengthValidator
 import datetime
 
@@ -358,7 +358,7 @@ class EnrolStudentsInClassForm(forms.Form):
         super(EnrolStudentsInClassForm, self).__init__(*args, **kwargs)
 
         self.fields['add_students_to_class_file'].error_messages = {'required': 'Please Select Add Students'
-                                                                                ' To Classes File'}
+                                                                                ' To Class File'}
 
         self.fields['class_pk'].initial = class_pk
 
@@ -395,6 +395,26 @@ class AssignTestToClassForm(forms.Form):
             test = Test.objects.get(pk=self.cleaned_data['test'])
             assign_test_to_class = class_instance.assign_test_safe(test=test)
         return assign_test_to_class
+
+
+class AssignTestsToClassForm(forms.Form):
+    class_pk = forms.CharField(widget=forms.HiddenInput())
+    add_tests_to_class_file = forms.FileField(required=True)
+
+    def __init__(self, class_pk, *args, **kwargs):
+        super(AssignTestsToClassForm, self).__init__(*args, **kwargs)
+
+        self.fields['add_tests_to_class_file'].error_messages = {'required': 'Please Select Add Tests To Class File'}
+
+        self.fields['class_pk'].initial = class_pk
+
+    def assign_tests_to_class(self, request):
+        if self.is_valid():
+            class_instance = Class.objects.get(pk=self.cleaned_data['class_pk'])
+            uploaded_file = request.FILES['add_tests_to_class_file']
+            return assign_tests_to_class_from_file_upload(uploaded_file=uploaded_file, class_instance=class_instance)
+        else:
+            return False
 
 
 class AddSchoolForm(forms.Form):
