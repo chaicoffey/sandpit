@@ -643,8 +643,7 @@ def student_delete(request, student_pk):
     user_type = request.session.get('user_type', None)
     if (user_type == 'Administrator') or (user_type == 'Teacher'):
         student_to_delete = Student.objects.get(pk=student_pk)
-        student_display_text = (student_to_delete.first_name + ' ' + student_to_delete.surname +
-                                ' (' + student_to_delete.student_id + ')')
+        student_display_text = str(student_to_delete)
         if request.POST:
             if student_to_delete.delete_student_safe():
                 context = {'finish_title': 'Student Deleted',
@@ -767,10 +766,15 @@ def teacher_edit(request, teacher_pk):
 
 
 def teacher_delete(request, teacher_pk):
-    if request.session.get('user_type', None) == 'Administrator':
+    authorised = request.session.get('user_type', None) == 'Administrator'
+    if authorised:
+        administrator = Administrator.objects.get(user=User.objects.get(username=request.session.get('username', None)))
+        teacher = Teacher.objects.get(pk=teacher_pk)
+        authorised = administrator.school_id == teacher.school_id
+
+    if authorised:
         teacher_to_delete = Teacher.objects.get(pk=teacher_pk)
-        teacher_display_text = (teacher_to_delete.first_name + ' ' + teacher_to_delete.surname +
-                                ' (' + teacher_to_delete.user.username + ')')
+        teacher_display_text = str(teacher_to_delete)
         if request.POST:
             if teacher_to_delete.delete_teacher_safe():
                 context = {'finish_title': 'Teacher Deleted',
@@ -786,7 +790,7 @@ def teacher_delete(request, teacher_pk):
                        'prompt_message': 'Are You Sure You Wish To Delete ' + teacher_display_text + "?"}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to delete a teacher")
+        return HttpResponseForbidden("You are not authorised to delete a teacher from this school")
 
 
 def class_list(request):
