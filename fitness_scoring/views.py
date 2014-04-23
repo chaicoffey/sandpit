@@ -1090,6 +1090,28 @@ def add_test_to_class(request, class_pk):
         return HttpResponseForbidden("You are not authorised to add a test to this class")
 
 
+def remove_test_from_class(request, class_pk, test_pk):
+    if user_authorised_for_class(request, class_pk):
+        class_instance = Class.objects.get(pk=class_pk)
+        test = Test.objects.get(pk=test_pk)
+        if request.POST:
+            if class_instance.deallocate_test_safe(test):
+                context = {'finish_title': 'Remove Test From Class',
+                           'user_message': 'Test Removed Successfully: ' + str(test)}
+            else:
+                context = {'finish_title': 'Test Not Removed From Class',
+                           'user_error_message': 'Could Not Remove ' + str(test) + ' (Results Entered Have Been Entered'
+                                                                                   ' For This Test)'}
+            return render(request, 'user_message.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/class/test/delete/' + str(class_pk) + '/' + str(test_pk),
+                       'functionality_name': 'Remove Test',
+                       'prompt_message': 'Are You Sure You Wish To Remove Test From Class ' + str(test) + "?"}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to remove a test from this class")
+
+
 def user_authorised_for_class(request, class_pk):
     user_type = request.session.get('user_type', None)
     if (user_type == 'Administrator') or (user_type == 'Teacher'):

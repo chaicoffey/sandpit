@@ -356,6 +356,19 @@ class Class(models.Model):
             ClassTestSet.objects.create(class_id=self, test_name=test)
         return assigned
 
+    def deallocate_test_safe(self, test):
+        deallocate = ClassTestSet.objects.filter(class_id=self, test_name=test).exists()
+        if deallocate:
+            enrolments = StudentClassEnrolment.objects.filter(class_id=self)
+            for enrolment in enrolments:
+                deallocate = deallocate and not StudentClassTestResult.objects.filter(student_class_id=enrolment,
+                                                                                      test_name=test).exists()
+
+        if deallocate:
+            ClassTestSet.objects.get(class_id=self, test_name=test).delete()
+
+        return deallocate
+
     @staticmethod
     def get_display_list_headings():
         return ['Year', 'Class', 'Teacher']
