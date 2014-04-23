@@ -8,7 +8,8 @@ from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, Ed
 from fitness_scoring.forms import AddTestForm, AddTestsForm, EditTestForm
 from fitness_scoring.forms import AddStudentForm, AddStudentsForm, EditStudentForm
 from fitness_scoring.forms import AddTeacherForm, AddTeachersForm, EditTeacherForm
-from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, EnrolStudentInClassForm
+from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm
+from fitness_scoring.forms import EnrolStudentInClassForm, EnrolStudentsInClassForm
 
 
 def logout_user(request):
@@ -995,6 +996,32 @@ def add_student_to_class(request, class_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to add a student to this class")
+
+
+def add_students_to_class(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        if request.POST:
+            add_students_to_class_form = EnrolStudentsInClassForm(class_pk=class_pk, data=request.POST,
+                                                                  files=request.FILES)
+            result = add_students_to_class_form.enrol_students_in_class(request)
+            if result:
+                (n_created, n_updated, n_not_created_or_updated) = result
+                result_message = ['Students Added To Class Created: '+str(n_created),
+                                  'No Changes From Data Lines: '+str(n_not_created_or_updated)]
+                context = {'finish_title': 'Students Added To Class', 'user_messages': result_message}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/class/student/adds/' + str(class_pk),
+                           'functionality_name': 'Add Students To Class',
+                           'form': add_students_to_class_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/class/student/adds/' + str(class_pk),
+                       'functionality_name': 'Add Students To Class',
+                       'form': EnrolStudentsInClassForm(class_pk=class_pk)}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to add students to this class")
 
 
 def remove_student_from_class(request, class_pk, student_pk):

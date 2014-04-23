@@ -156,7 +156,7 @@ def enrol_students_in_class_from_file(file_path_on_server, class_instance):
                    if Student.objects.filter(student_id=student_id, school_id=school).exists()
                    else None)
 
-        if class_instance.enrol_student_safe(student):
+        if student and class_instance.enrol_student_safe(student):
             n_created += 1
         else:
             n_not_created += 1

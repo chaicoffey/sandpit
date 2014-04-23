@@ -9,6 +9,7 @@ from fitness_scoring.validators import validate_no_space, validate_date_field
 from fitness_scoring.fileio import add_schools_from_file_upload, add_test_categories_from_file_upload
 from fitness_scoring.fileio import add_tests_from_file_upload, add_students_from_file_upload
 from fitness_scoring.fileio import add_teachers_from_file_upload, add_classes_from_file_upload
+from fitness_scoring.fileio import enrol_students_in_class_from_file_upload
 from django.core.validators import MinLengthValidator
 import datetime
 
@@ -347,6 +348,27 @@ class EnrolStudentInClassForm(forms.Form):
             student = Student.objects.get(pk=self.cleaned_data['student'])
             enrol_student_in_class = class_instance.enrol_student_safe(student=student)
         return enrol_student_in_class
+
+
+class EnrolStudentsInClassForm(forms.Form):
+    class_pk = forms.CharField(widget=forms.HiddenInput())
+    add_students_to_class_file = forms.FileField(required=True)
+
+    def __init__(self, class_pk, *args, **kwargs):
+        super(EnrolStudentsInClassForm, self).__init__(*args, **kwargs)
+
+        self.fields['add_students_to_class_file'].error_messages = {'required': 'Please Select Add Students'
+                                                                                ' To Classes File'}
+
+        self.fields['class_pk'].initial = class_pk
+
+    def enrol_students_in_class(self, request):
+        if self.is_valid():
+            class_instance = Class.objects.get(pk=self.cleaned_data['class_pk'])
+            uploaded_file = request.FILES['add_students_to_class_file']
+            return enrol_students_in_class_from_file_upload(uploaded_file=uploaded_file, class_instance=class_instance)
+        else:
+            return False
 
 
 class AddSchoolForm(forms.Form):
