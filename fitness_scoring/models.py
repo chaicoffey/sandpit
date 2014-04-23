@@ -350,6 +350,12 @@ class Class(models.Model):
 
         return withdrawn
 
+    def assign_test_safe(self, test):
+        assigned = not ClassTestSet.objects.filter(class_id=self, test_name=test).exists()
+        if assigned:
+            ClassTestSet.objects.create(class_id=self, test_name=test)
+        return assigned
+
     @staticmethod
     def get_display_list_headings():
         return ['Year', 'Class', 'Teacher']
@@ -477,7 +483,7 @@ class Test(models.Model):
                                                         default='DIRECT')
 
     def __unicode__(self):
-        return self.test_name
+        return self.test_name + ' (' + self.test_category.test_category_name + ')'
 
     def get_display_items(self):
         return [self.test_name, self.test_category.test_category_name]

@@ -1,6 +1,6 @@
 from django import forms
 from fitness_scoring.models import Student, School, Class, Teacher, TestCategory, Test
-from fitness_scoring.models import TeacherClassAllocation, StudentClassEnrolment
+from fitness_scoring.models import TeacherClassAllocation, StudentClassEnrolment, ClassTestSet
 from fitness_scoring.validators import validate_school_unique, validate_new_school_name_unique
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
 from fitness_scoring.validators import validate_test_unique, validate_new_test_name_unique
@@ -369,6 +369,32 @@ class EnrolStudentsInClassForm(forms.Form):
             return enrol_students_in_class_from_file_upload(uploaded_file=uploaded_file, class_instance=class_instance)
         else:
             return False
+
+
+class AssignTestToClassForm(forms.Form):
+    class_pk = forms.CharField(widget=forms.HiddenInput())
+    test = forms.ChoiceField(required=True)
+
+    def __init__(self, class_pk, *args, **kwargs):
+        super(AssignTestToClassForm, self).__init__(*args, **kwargs)
+
+        self.fields['test'].error_messages = {'required': 'Please Select Test'}
+
+        class_instance = Class.objects.get(pk=class_pk)
+        self.fields['test'].choices = []
+        for test in Test.objects.all():
+            if not ClassTestSet.objects.filter(class_id=class_instance, test_name=test):
+                self.fields['test'].choices.append((test.pk, str(test)))
+
+        self.fields['class_pk'].initial = class_pk
+
+    def assign_test_to_class(self):
+        assign_test_to_class = self.is_valid()
+        if assign_test_to_class:
+            class_instance = Class.objects.get(pk=self.cleaned_data['class_pk'])
+            test = Test.objects.get(pk=self.cleaned_data['test'])
+            assign_test_to_class = class_instance.assign_test_safe(test=test)
+        return assign_test_to_class
 
 
 class AddSchoolForm(forms.Form):

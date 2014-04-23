@@ -2,14 +2,14 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.template import RequestContext
 from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, TestCategory, Test, Student, Class
-from fitness_scoring.models import StudentClassEnrolment, TeacherClassAllocation
+from fitness_scoring.models import TeacherClassAllocation, StudentClassEnrolment, ClassTestSet
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
 from fitness_scoring.forms import AddTestForm, AddTestsForm, EditTestForm
 from fitness_scoring.forms import AddStudentForm, AddStudentsForm, EditStudentForm
 from fitness_scoring.forms import AddTeacherForm, AddTeachersForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm
-from fitness_scoring.forms import EnrolStudentInClassForm, EnrolStudentsInClassForm
+from fitness_scoring.forms import EnrolStudentInClassForm, EnrolStudentsInClassForm, AssignTestToClassForm
 
 
 def logout_user(request):
@@ -1043,6 +1043,51 @@ def remove_student_from_class(request, class_pk, student_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to remove a student from this class")
+
+
+def tests_for_class_list(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        tests_assigned = ClassTestSet.objects.filter(class_id=Class.objects.get(pk=class_pk))
+        context = {
+            'item_list': [(assignment.test_name, assignment.test_name.get_display_items())
+                          for assignment in tests_assigned],
+            'item_list_title': 'Tests For Class',
+            'item_list_table_headings': Test.get_display_list_headings(),
+            'item_list_buttons': [
+                ['+', [['class_test_modal_load_link', '/class/test/add/' + str(class_pk) + '/', 'Add Test To Class'],
+                       ['class_test_modal_load_link', '/class/test/adds/' + str(class_pk) + '/',
+                        'Add Tests To Class From .CSV']]]
+            ],
+            'item_list_options': [
+                ['class_test_modal_load_link', '/class/test/delete/' + str(class_pk) + '/', 'remove']
+            ]
+        }
+        return render(request, 'item_list.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to view test list")
+
+
+def add_test_to_class(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        if request.POST:
+            add_test_to_class_form = AssignTestToClassForm(class_pk=class_pk, data=request.POST)
+            if add_test_to_class_form.assign_test_to_class():
+                test_added = Test.objects.get(pk=add_test_to_class_form.cleaned_data['test'])
+                context = {'finish_title': 'Test Added To Class',
+                           'user_message': 'Test Added To Class Successfully: ' + str(test_added)}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/class/test/add/' + str(class_pk) + '/',
+                           'functionality_name': 'Add Test To Class',
+                           'form': add_test_to_class_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/class/test/add/' + str(class_pk) + '/',
+                       'functionality_name': 'Add Test To Class',
+                       'form': AssignTestToClassForm(class_pk=class_pk)}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to add a test to this class")
 
 
 def user_authorised_for_class(request, class_pk):
