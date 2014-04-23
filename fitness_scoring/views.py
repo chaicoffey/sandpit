@@ -709,9 +709,8 @@ def teacher_add(request):
             teacher_add_form = AddTeacherForm(school_pk=school_pk, data=request.POST)
             teacher = teacher_add_form.add_teacher()
             if teacher:
-                teacher_display_text = (teacher.first_name + ' ' + teacher.surname + ' (' + teacher.user.username + ')')
                 context = {'finish_title': 'Teacher Added',
-                           'user_message': 'Teacher Added Successfully: ' + teacher_display_text}
+                           'user_message': 'Teacher Added Successfully: ' + str(teacher)}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/teacher/add/',
@@ -769,9 +768,8 @@ def teacher_edit(request, teacher_pk):
             teacher_edit_form = EditTeacherForm(school_pk=school_pk, teacher_pk=teacher_pk, data=request.POST)
             teacher = teacher_edit_form.edit_teacher()
             if teacher:
-                teacher_display_text = (teacher.first_name + ' ' + teacher.surname + ' (' + teacher.user.username + ')')
                 context = {'finish_title': 'Teacher Edited',
-                           'user_message': 'Teacher Edited Successfully: ' + teacher_display_text}
+                           'user_message': 'Teacher Edited Successfully: ' + str(teacher)}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/teacher/edit/' + str(teacher_pk),
