@@ -35,11 +35,6 @@ def validate_new_test_category_name_unique(test_category_pk):
     return new_test_category_name_unique
 
 
-def validate_test_unique(test_name):
-    if Test.objects.filter(test_name=test_name).exists():
-        raise ValidationError('Test Already Exists: ' + test_name)
-
-
 def validate_new_test_name_unique(test_pk):
 
     def new_test_name_unique(test_name):

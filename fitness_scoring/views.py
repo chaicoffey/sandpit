@@ -5,7 +5,7 @@ from fitness_scoring.models import User, Teacher, Administrator, SuperUser, Scho
 from fitness_scoring.models import TeacherClassAllocation, StudentClassEnrolment, ClassTestSet
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
-from fitness_scoring.forms import AddTestForm, AddTestsForm, EditTestForm
+from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFileForm
 from fitness_scoring.forms import AddStudentForm, AddStudentsForm, EditStudentForm
 from fitness_scoring.forms import AddTeacherForm, AddTeachersForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm
@@ -403,11 +403,11 @@ def test_list(request):
             'item_list_title': 'Test List',
             'item_list_table_headings': Test.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['modal_load_link', '/test/add/', 'Add Test'],
-                       ['modal_load_link', '/test/adds/', 'Add/Edit Tests From .CSV']]]
+                ['+', [['modal_load_link', '/test/adds/', 'Add Tests From .CSVs']]]
             ],
             'item_list_options': [
                 ['modal_load_link', '/test/edit/', 'pencil'],
+                ['modal_load_link', '/test/update/', 'pencil'],
                 ['modal_load_link', '/test/delete/', 'remove']
             ]
         }
@@ -416,39 +416,15 @@ def test_list(request):
         return HttpResponseForbidden("You are not authorised to view test list")
 
 
-def test_add(request):
-    if request.session.get('user_type', None) == 'SuperUser':
-        if request.POST:
-            test_add_form = AddTestForm(request.POST)
-            if test_add_form.add_test():
-                context = {'finish_title': 'Test Added',
-                           'user_message': 'Test Added Successfully: '
-                                           + test_add_form.cleaned_data['test_name']}
-                return render(request, 'user_message.html', RequestContext(request, context))
-            else:
-                context = {'post_to_url': '/test/add/',
-                           'functionality_name': 'Add Test',
-                           'form': test_add_form}
-                return render(request, 'modal_form.html', RequestContext(request, context))
-        else:
-            context = {'post_to_url': '/test/add/',
-                       'functionality_name': 'Add Test',
-                       'form': AddTestForm()}
-            return render(request, 'modal_form.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to add a test")
-
-
 def test_adds(request):
     if request.session.get('user_type', None) == 'SuperUser':
         if request.POST:
-            test_adds_form = AddTestsForm(request.POST, request.FILES)
+            test_adds_form = AddTestsForm(data=request.POST, files=request.FILES)
             result = test_adds_form.add_tests(request)
             if result:
-                (n_created, n_updated, n_not_created_or_updated) = result
+                (n_created, n_not_created) = result
                 result_message = ['Tests Created: '+str(n_created),
-                                  'Tests Updated: '+str(n_updated),
-                                  'No Changes From Data Lines: '+str(n_not_created_or_updated)]
+                                  'No Changes From Data Lines: '+str(n_not_created)]
                 context = {'finish_title': 'Tests Added/Updated', 'user_messages': result_message}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
@@ -483,6 +459,27 @@ def test_edit(request, test_pk):
             context = {'post_to_url': '/test/edit/' + str(test_pk),
                        'functionality_name': 'Edit Test',
                        'form': EditTestForm(test_pk=test_pk)}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to edit a test")
+
+
+def test_update(request, test_pk):
+    if request.session.get('user_type', None) == 'SuperUser':
+        if request.POST:
+            test_update_form = UpdateTestFromFileForm(test_pk=test_pk, data=request.POST, files=request.FILES)
+            if test_update_form.update_test(request):
+                context = {'finish_title': 'Test Updated',
+                           'user_message': 'Test Updated Successfully'}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'finish_title': 'Test Not Updated',
+                           'user_message': 'Test Not Updated (Different Test Name Or Error in File)'}
+                return render(request, 'user_message.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/test/update/' + str(test_pk),
+                       'functionality_name': 'Update Test',
+                       'form': UpdateTestFromFileForm(test_pk=test_pk)}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to edit a test")

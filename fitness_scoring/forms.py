@@ -3,12 +3,14 @@ from fitness_scoring.models import Student, School, Class, Teacher, TestCategory
 from fitness_scoring.models import TeacherClassAllocation, StudentClassEnrolment, ClassTestSet
 from fitness_scoring.validators import validate_school_unique, validate_new_school_name_unique
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
-from fitness_scoring.validators import validate_test_unique, validate_new_test_name_unique
+from fitness_scoring.validators import validate_new_test_name_unique
 from fitness_scoring.validators import validate_student_unique, validate_new_student_id_unique
 from fitness_scoring.validators import validate_no_space, validate_date_field
+from fitness_scoring.fields import MultiFileField
 from fitness_scoring.fileio import add_schools_from_file_upload, add_test_categories_from_file_upload
-from fitness_scoring.fileio import add_tests_from_file_upload, add_students_from_file_upload
-from fitness_scoring.fileio import add_teachers_from_file_upload, add_classes_from_file_upload
+from fitness_scoring.fileio import add_test_from_file_upload, update_test_from_file_upload
+from fitness_scoring.fileio import add_students_from_file_upload, add_teachers_from_file_upload
+from fitness_scoring.fileio import add_classes_from_file_upload
 from fitness_scoring.fileio import enrol_students_in_class_from_file_upload, assign_tests_to_class_from_file_upload
 from django.core.validators import MinLengthValidator
 import datetime
@@ -535,91 +537,61 @@ class EditTestCategoryForm(forms.Form):
         return test_category_edited
 
 
-class AddTestForm(forms.Form):
-    test_name = forms.CharField(max_length=200, required=True, validators=[validate_test_unique])
-    test_category = forms.ChoiceField(required=True)
-    description = forms.CharField(widget=forms.Textarea(), max_length=400, required=True)
-    result_type = forms.ChoiceField(required=True, choices=Test.RESULT_TYPE_CHOICES)
-    is_upward_percentile_brackets = forms.BooleanField(required=False, initial=True)
-    percentile_score_conversion_type = forms.ChoiceField(required=True,
-                                                         choices=Test.PERCENTILE_SCORE_CONVERSION_TYPE_CHOICES)
-
-    def __init__(self, *args, **kwargs):
-        super(AddTestForm, self).__init__(*args, **kwargs)
-
-        self.fields['test_name'].error_messages = {'required': 'Please Enter Test Name'}
-        self.fields['test_category'].error_messages = {'required': 'Please Select A Test Category'}
-        self.fields['description'].error_messages = {'required': 'Please Enter Description'}
-        self.fields['result_type'].error_messages = {'required': 'Please Select A Result Type'}
-        self.fields['percentile_score_conversion_type'].error_messages = {'required': 'Please Select A Percentile'
-                                                                                      ' Score Conversion Type'}
-
-        self.fields['test_category'].choices = []
-        for test_category in TestCategory.objects.all():
-            self.fields['test_category'].choices.append((test_category.pk, test_category.test_category_name))
-
-    def add_test(self):
-        test_saved = self.is_valid()
-        if test_saved:
-            test_name = self.cleaned_data['test_name']
-            test_category = TestCategory.objects.get(pk=self.cleaned_data['test_category'])
-            description = self.cleaned_data['description']
-            result_type = self.cleaned_data['result_type']
-            is_upward_percentile_brackets = self.cleaned_data['is_upward_percentile_brackets']
-            percentile_score_conversion_type = self.cleaned_data['percentile_score_conversion_type']
-            test_saved = Test.create_test(test_name=test_name, test_category=test_category, description=description,
-                                          result_type=result_type,
-                                          is_upward_percentile_brackets=is_upward_percentile_brackets,
-                                          percentile_score_conversion_type=percentile_score_conversion_type)
-        return test_saved
-
-
 class AddTestsForm(forms.Form):
-    add_tests_file = forms.FileField(required=True)
+    add_tests_files = MultiFileField(required=True)
 
     def __init__(self, *args, **kwargs):
         super(AddTestsForm, self).__init__(*args, **kwargs)
-        self.fields['add_tests_file'].error_messages = {'required': 'Please Choose Add Tests File'}
+        self.fields['add_tests_files'].error_messages = {'required': 'Please Choose One Or More Add Test Files'}
 
     def add_tests(self, request):
         if self.is_valid():
-            return add_tests_from_file_upload(request.FILES['add_tests_file'])
+            n_created = 0
+            n_not_created = 0
+            file_list = request.FILES.getlist('add_tests_files')
+            for add_test_file in file_list:
+                if add_test_from_file_upload(add_test_file):
+                    n_created += 1
+                else:
+                    n_not_created += 1
+            result = (n_created, n_not_created)
         else:
-            return False
+            result = None
+        return result
+
+
+class UpdateTestFromFileForm(forms.Form):
+    test_pk = forms.CharField(widget=forms.HiddenInput())
+    update_test_file = forms.FileField(required=True)
+
+    def __init__(self, test_pk, *args, **kwargs):
+        super(UpdateTestFromFileForm, self).__init__(*args, **kwargs)
+        self.fields['update_test_file'].error_messages = {'required': 'Please Choose Update Test File'}
+        self.fields['test_pk'].initial = test_pk
+
+    def update_test(self, request):
+        if self.is_valid():
+            test = Test.objects.get(pk=self.cleaned_data['test_pk'])
+            return update_test_from_file_upload(request.FILES['update_test_file'], test)
+        else:
+            return None
 
 
 class EditTestForm(forms.Form):
     test_pk = forms.CharField(widget=forms.HiddenInput())
     test_name = forms.CharField(max_length=200, required=True)
-    test_category = forms.ChoiceField(required=True)
     description = forms.CharField(widget=forms.Textarea(), max_length=400, required=True)
-    result_type = forms.ChoiceField(required=True, choices=Test.RESULT_TYPE_CHOICES)
-    is_upward_percentile_brackets = forms.BooleanField(required=False)
-    percentile_score_conversion_type = forms.ChoiceField(required=True,
-                                                         choices=Test.PERCENTILE_SCORE_CONVERSION_TYPE_CHOICES)
 
     def __init__(self, test_pk, *args, **kwargs):
         super(EditTestForm, self).__init__(*args, **kwargs)
 
         self.fields['test_name'].error_messages = {'required': 'Please Enter Test Name'}
-        self.fields['test_category'].error_messages = {'required': 'Please Select A Test Category'}
         self.fields['description'].error_messages = {'required': 'Please Enter Description'}
-        self.fields['result_type'].error_messages = {'required': 'Please Select A Result Type'}
-        self.fields['percentile_score_conversion_type'].error_messages = {'required': 'Please Select A Percentile'
-                                                                                      ' Score Conversion Type'}
-
-        self.fields['test_category'].choices = []
-        for test_category in TestCategory.objects.all():
-            self.fields['test_category'].choices.append((test_category.pk, test_category.test_category_name))
 
         test = Test.objects.get(pk=test_pk)
         self.fields['test_pk'].initial = test_pk
         self.fields['test_name'].initial = test.test_name
-        self.fields['test_category'].initial = test.test_category.pk
         self.fields['description'].initial = test.description
-        self.fields['result_type'].initial = test.result_type
-        self.fields['is_upward_percentile_brackets'].initial = test.is_upward_percentile_brackets
-        self.fields['percentile_score_conversion_type'].initial = test.percentile_score_conversion_type
 
         self.fields['test_name'].validators = [validate_new_test_name_unique(test_pk=test_pk)]
 
@@ -628,12 +600,6 @@ class EditTestForm(forms.Form):
         if test_edited:
             test_pk = self.cleaned_data['test_pk']
             test_name = self.cleaned_data['test_name']
-            test_category = TestCategory.objects.get(pk=self.cleaned_data['test_category'])
             description = self.cleaned_data['description']
-            result_type = self.cleaned_data['result_type']
-            is_upward_percentile_brackets = self.cleaned_data['is_upward_percentile_brackets']
-            percentile_score_conversion_type = self.cleaned_data['percentile_score_conversion_type']
-            test_editing = Test.objects.get(pk=test_pk)
-            test_edited = test_editing.edit_test_safe(test_name, test_category, description, result_type,
-                                                      is_upward_percentile_brackets, percentile_score_conversion_type)
+            test_edited = Test.objects.get(pk=test_pk).edit_test_safe(test_name, description)
         return test_edited
