@@ -562,7 +562,8 @@ class AddTestsForm(forms.Form):
 
 class UpdateTestFromFileForm(forms.Form):
     test_pk = forms.CharField(widget=forms.HiddenInput())
-    update_test_file = forms.FileField(required=True)
+    update_test_file = forms.FileField(required=True, help_text='can only add to percentile lists cannot overwrite what'
+                                                                ' is already there for an age/gender')
 
     def __init__(self, test_pk, *args, **kwargs):
         super(UpdateTestFromFileForm, self).__init__(*args, **kwargs)

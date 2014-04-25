@@ -1,7 +1,7 @@
 import csv
 import tempfile
 import os
-from fitness_scoring.models import Student, Teacher, Class, School, User, TestCategory, Test
+from fitness_scoring.models import Student, Teacher, Class, School, User, TestCategory, Test, PercentileBracketSet
 
 destination_directory = 'C:\\fitness_scoring_file_uploads\\'
 #destination_directory = '/tmp/fitness_scoring_file_uploads'
@@ -326,9 +326,10 @@ def read_test_information_from_file(file_path_on_server):
 
     values_ok = (
         (test_name != '') and TestCategory.objects.filter(test_category_name=test_category_name).exists() and
-        (description != '') and (result_type in [res_type for (res_type, text) in Test.RESULT_TYPE_CHOICES]) and
+        (description != '') and
+        (result_type in [res_type for (res_type, text) in PercentileBracketSet.RESULT_TYPE_CHOICES]) and
         (percentile_score_conversion_type in
-         [con_type for (con_type, text) in Test.PERCENTILE_SCORE_CONVERSION_TYPE_CHOICES])
+         [con_type for (con_type, text) in PercentileBracketSet.PERCENTILE_SCORE_CONVERSION_TYPE_CHOICES])
     )
 
     if values_ok:

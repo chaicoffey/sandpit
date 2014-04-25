@@ -1,5 +1,6 @@
 from django.db import models
 import datetime
+import time
 
 
 class School(models.Model):
@@ -476,7 +477,7 @@ class TestCategory(models.Model):
         return test_category_updated
 
 
-class Test(models.Model):
+class PercentileBracketSet(models.Model):
     RESULT_TYPE_CHOICES = (
         ('DOUBLE', 'Double'),
         ('TIME', 'Time'),
@@ -486,14 +487,134 @@ class Test(models.Model):
         ('DIRECT', 'Direct'),
         ('HIGH_MIDDLE', 'High Middle')
     )
+    result_type = models.CharField(max_length=20, choices=RESULT_TYPE_CHOICES)
+    is_upward_percentile_brackets = models.BooleanField()
+    percentile_score_conversion_type = models.CharField(max_length=20, choices=PERCENTILE_SCORE_CONVERSION_TYPE_CHOICES)
+
+    def __unicode__(self):
+        test = Test.objects.get(percentiles=self)
+        return test.test_name + ' (' + test.test_category.test_category_name + ')'
+
+    def update_percentile_bracket_set(self, percentile_scores):
+        (percentiles, age_genders, score_table) = percentile_scores
+
+        n_age_genders = len(age_genders)
+        for age_gender_index in range(n_age_genders):
+            (age, gender) = age_genders[age_gender_index]
+            scores = score_table[age_gender_index]
+            if not PercentileBracketList.objects.filter(percentile_bracket_set=self, age=age, gender=gender):
+                PercentileBracketList.create_percentile_bracket_list(percentile_bracket_set=self, age=age,
+                                                                     gender=gender, percentiles=percentiles,
+                                                                     scores=scores)
+
+    def delete_percentile_bracket_set_safe(self):
+        percentile_bracket_lists = PercentileBracketList.objects.filter(percentile_bracket_set=self)
+        for percentile_bracket_list in percentile_bracket_lists:
+            percentile_bracket_list.delete()
+        self.delete()
+        return True
+
+    @staticmethod
+    def create_percentile_bracket_set(result_information):
+
+        (result_type, is_upward_percentile_brackets,
+         percentile_score_conversion_type, percentile_scores) = result_information
+
+        percentile_bracket_set = PercentileBracketSet.objects.create(
+            result_type=result_type,
+            is_upward_percentile_brackets=is_upward_percentile_brackets,
+            percentile_score_conversion_type=percentile_score_conversion_type
+        )
+
+        (percentiles, age_genders, score_table) = percentile_scores
+
+        n_age_genders = len(age_genders)
+        for age_gender_index in range(n_age_genders):
+            (age, gender) = age_genders[age_gender_index]
+            scores = score_table[age_gender_index]
+            PercentileBracketList.create_percentile_bracket_list(percentile_bracket_set=percentile_bracket_set, age=age,
+                                                                 gender=gender, percentiles=percentiles, scores=scores)
+
+        return percentile_bracket_set
+
+
+class PercentileBracketList(models.Model):
+    percentile_bracket_set = models.ForeignKey(PercentileBracketSet)
+    age = models.IntegerField(max_length=3)
+    gender = models.CharField(max_length=1, choices=Student.GENDER_CHOICES)
+    comma_separated_scores = models.CharField(max_length=2000)
+
+    def __unicode__(self):
+        return str(self.percentile_bracket_set) + ' (' + str(self.age) + ', ' + self.gender + ')'
+
+    @staticmethod
+    def create_percentile_bracket_list(percentile_bracket_set, age, gender, percentiles, scores):
+
+        try:
+            int(age)
+            valid_data = ((gender in [gen for (gen, text) in Student.GENDER_CHOICES]) and
+                          (len(percentiles) == len(scores)))
+
+            if valid_data:
+                if percentiles[0] != 0:
+                    valid_data = False
+                n_percentiles = len(percentiles)
+                for percentile_index in range(1, n_percentiles):
+                    int(percentiles[percentile_index])
+                    if not (percentiles[percentile_index] > percentiles[percentile_index - 1]):
+                        valid_data = False
+                if percentiles[n_percentiles - 1] != 99:
+                    valid_data = False
+
+            scores_data = []
+            if valid_data:
+                for score_text in scores:
+                    if percentile_bracket_set.result_type == 'DOUBLE':
+                        score = float(score_text)
+                    elif percentile_bracket_set.result_type == 'TIME':
+                        time_structure = time.strptime(score_text, '%M:%S')
+                        score = 60*time_structure.tm_min + time_structure.tm_sec
+                    else:
+                        score = int(score_text)
+                    scores_data.append(score)
+
+                n_scores = len(scores_data)
+                for score_index in range(1, n_scores):
+                    if percentile_bracket_set.is_upward_percentile_brackets:
+                        if not (scores_data[score_index] > scores_data[score_index - 1]):
+                            valid_data = False
+                    else:
+                        if not (scores_data[score_index] < scores_data[score_index - 1]):
+                            valid_data = False
+
+            if valid_data:
+                comma_separated_scores = ''
+                n_percentiles = len(percentiles)
+                for percentile_index in range(n_percentiles - 1):
+                    percentile = percentiles[percentile_index]
+                    percentile_next = percentiles[percentile_index + 1]
+                    score_data = scores_data[percentile_index]
+                    score_data_next = scores_data[percentile_index + 1]
+                    for percentile_counter in range(percentile, percentile_next):
+                        score_data_increment = score_data + ((score_data_next - score_data) *
+                                                             (percentile_counter - percentile) /
+                                                             (percentile_next - percentile))
+                        comma_separated_scores += (str(score_data_increment) + ',')
+                comma_separated_scores += scores[n_percentiles - 1]
+
+                PercentileBracketList.objects.create(percentile_bracket_set=percentile_bracket_set, age=age,
+                                                     gender=gender, comma_separated_scores=comma_separated_scores)
+        except:
+            valid_data = False
+
+        return valid_data
+
+
+class Test(models.Model):
     test_name = models.CharField(max_length=200, unique=True)
     test_category = models.ForeignKey(TestCategory)
     description = models.CharField(max_length=400)
-    result_type = models.CharField(max_length=20, choices=RESULT_TYPE_CHOICES, default='DOUBLE')
-    is_upward_percentile_brackets = models.BooleanField(default=True)
-    percentile_score_conversion_type = models.CharField(max_length=20,
-                                                        choices=PERCENTILE_SCORE_CONVERSION_TYPE_CHOICES,
-                                                        default='DIRECT')
+    percentiles = models.ForeignKey(PercentileBracketSet)
 
     def __unicode__(self):
         return self.test_name + ' (' + self.test_category.test_category_name + ')'
@@ -502,10 +623,10 @@ class Test(models.Model):
         return [self.test_name, self.test_category.test_category_name]
 
     def delete_test_safe(self):
-        test_not_used = (not ClassTestSet.objects.filter(test_name=self).exists()) and\
-                        (not StudentClassTestResult.objects.filter(test_name=self).exists()) and\
-                        (not PercentileBracket.objects.filter(test_name=self).exists())
+        test_not_used = ((not ClassTestSet.objects.filter(test_name=self).exists()) and
+                         (not StudentClassTestResult.objects.filter(test_name=self).exists()))
         if test_not_used:
+            self.percentiles.delete_percentile_bracket_set_safe()
             self.delete()
         return test_not_used
 
@@ -525,16 +646,9 @@ class Test(models.Model):
     def create_test(test_name, test_category, description, result_information):
         test_name_unique = not Test.objects.filter(test_name=test_name).exists()
         if test_name_unique:
-            (result_type, is_upward_percentile_brackets,
-             percentile_score_conversion_type, percentile_scores) = result_information
-            #(percentiles, age_genders, score_table) = percentile_scores
-            #for age_gender in age_genders:
-            #    (age, gender) = age_gender
-            test = Test.objects.create(
-                test_name=test_name, test_category=test_category, description=description, result_type=result_type,
-                is_upward_percentile_brackets=is_upward_percentile_brackets,
-                percentile_score_conversion_type=percentile_score_conversion_type
-            )
+            percentiles = PercentileBracketSet.create_percentile_bracket_set(result_information)
+            test = Test.objects.create(test_name=test_name, test_category=test_category,
+                                       description=description, percentiles=percentiles)
         else:
             test = None
         return test
@@ -543,11 +657,9 @@ class Test(models.Model):
     def update_test(test_name, description, percentile_scores):
 
         if Test.objects.filter(test_name=test_name).exists():
-            #(percentiles, age_genders, score_table) = percentile_scores
-            #for age_gender in age_genders:
-            #    (age, gender) = age_gender
             test = Test.objects.get(test_name=test_name)
             test.description = description
+            test.percentiles.update_percentile_bracket_set(percentile_scores)
             test.save()
         else:
             test = None
@@ -576,9 +688,3 @@ class StudentClassTestResult(models.Model):
     test_result = models.IntegerField()
     age_at_time_of_test = models.IntegerField()
     percentile = models.IntegerField()
-
-
-class PercentileBracket(models.Model):
-    test_name = models.ForeignKey(Test)
-    percentile = models.PositiveIntegerField()
-    cutoff_result = models.FloatField()
