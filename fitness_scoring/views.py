@@ -666,7 +666,7 @@ def student_delete(request, student_pk):
             else:
                 context = {'finish_title': 'Student Not Deleted',
                            'user_error_message': 'Could Not Delete ' + student_display_text
-                                                 + ' (Student Being Used)'}
+                                                 + ' (Is Enrolled In A Class)'}
             return render(request, 'user_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/student/delete/' + str(student_pk),
@@ -1032,7 +1032,8 @@ def remove_student_from_class(request, class_pk, student_pk):
                            'user_message': 'Student Removed Successfully: ' + str(student)}
             else:
                 context = {'finish_title': 'Student Not Removed From Class',
-                           'user_error_message': 'Could Not Remove ' + str(student) + ' (Student Has Results Entered)'}
+                           'user_error_message': 'Could Not Remove ' + str(student) + ' (This Student Has Results'
+                                                                                      ' Entered In This Class)'}
             return render(request, 'user_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/class/student/delete/' + str(class_pk) + '/' + str(student_pk),
@@ -1123,8 +1124,8 @@ def remove_test_from_class(request, class_pk, test_pk):
                            'user_message': 'Test Removed Successfully: ' + str(test)}
             else:
                 context = {'finish_title': 'Test Not Removed From Class',
-                           'user_error_message': 'Could Not Remove ' + str(test) + ' (Results Entered Have Been Entered'
-                                                                                   ' For This Test)'}
+                           'user_error_message': 'Could Not Remove ' + str(test) + ' (Results Have Been Entered For'
+                                                                                   ' This Test In This Class)'}
             return render(request, 'user_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/class/test/delete/' + str(class_pk) + '/' + str(test_pk),
