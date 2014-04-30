@@ -8,7 +8,7 @@ function load_data_table(parent_id, item_list_url, n_headings_to_exclude, do_aft
     for (var back_index = 0; back_index < n_headings_to_exclude; back_index++)
         exclude_headings[back_index] = -n_headings_to_exclude + back_index;
     $('#' + parent_id).load(item_list_url, function(){
-        $('#item_list_table').dataTable({"aoColumnDefs": [{ 'bSortable': false, 'aTargets': exclude_headings }]});
+        $('#' + parent_id + ' .item_list_table').dataTable({"aoColumnDefs": [{ 'bSortable': false, 'aTargets': exclude_headings }]});
         if(!(typeof do_after_load_method === "undefined"))
             do_after_load_method();
     });
@@ -34,11 +34,22 @@ $(document).on('click', '.class_student_modal_load_link a', function(event){
     $('#item_list_user_message_alert').addClass('hidden');
 });
 
+//for loading modal links on class test item lists into remote modal
+$(document).on('click', '.class_test_modal_load_link a', function(event){
+    event.preventDefault();
+    $('#remoteModalContent').load(base_url + $(this).attr('href'), function(){
+        $('#modal_submit_button').val('class_test_item_list_submit')
+        $('#remoteModal').modal('show');
+    });
+    $('#item_list_user_message_alert').addClass('hidden');
+});
+
 //for loading load links on item_list page
 $(document).on('click', '.class_load_link a', function(event){
     event.preventDefault();
     class_load_link_clicked_event($(this).attr('href'), function(){
         load_data_table('class_students', base_url + $('#class_students').attr('href'), 1)
+        load_data_table('class_tests', base_url + $('#class_tests').attr('href'), 1)
     })
 });
 
@@ -90,6 +101,11 @@ function close_modal_and_update_list(button_value, user_message_element) {
         });
     } else if(button_value == 'class_student_item_list_submit') {
         load_data_table('class_students', base_url + $('#class_students').attr('href'), 1, function(){
+            $('#class_user_message').html(user_message_element);
+            $('#class_user_message_alert').removeClass('hidden');
+        });
+    } else if(button_value == 'class_test_item_list_submit') {
+        load_data_table('class_tests', base_url + $('#class_tests').attr('href'), 1, function(){
             $('#class_user_message').html(user_message_element);
             $('#class_user_message_alert').removeClass('hidden');
         });

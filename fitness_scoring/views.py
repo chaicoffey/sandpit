@@ -2,13 +2,15 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.template import RequestContext
 from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, TestCategory, Test, Student, Class
-from fitness_scoring.models import StudentClassEnrolment, TeacherClassAllocation
+from fitness_scoring.models import TeacherClassAllocation, StudentClassEnrolment, ClassTestSet
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
-from fitness_scoring.forms import AddTestForm, AddTestsForm, EditTestForm
+from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFileForm
 from fitness_scoring.forms import AddStudentForm, AddStudentsForm, EditStudentForm
 from fitness_scoring.forms import AddTeacherForm, AddTeachersForm, EditTeacherForm
-from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, EnrolStudentInClassForm
+from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm
+from fitness_scoring.forms import EnrolStudentInClassForm, EnrolStudentsInClassForm
+from fitness_scoring.forms import AssignTestToClassForm, AssignTestsToClassForm
 
 
 def logout_user(request):
@@ -401,11 +403,11 @@ def test_list(request):
             'item_list_title': 'Test List',
             'item_list_table_headings': Test.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['modal_load_link', '/test/add/', 'Add Test'],
-                       ['modal_load_link', '/test/adds/', 'Add/Edit Tests From .CSV']]]
+                ['+', [['modal_load_link', '/test/adds/', 'Add Tests From .CSVs']]]
             ],
             'item_list_options': [
                 ['modal_load_link', '/test/edit/', 'pencil'],
+                ['modal_load_link', '/test/update/', 'pencil'],
                 ['modal_load_link', '/test/delete/', 'remove']
             ]
         }
@@ -414,39 +416,15 @@ def test_list(request):
         return HttpResponseForbidden("You are not authorised to view test list")
 
 
-def test_add(request):
-    if request.session.get('user_type', None) == 'SuperUser':
-        if request.POST:
-            test_add_form = AddTestForm(request.POST)
-            if test_add_form.add_test():
-                context = {'finish_title': 'Test Added',
-                           'user_message': 'Test Added Successfully: '
-                                           + test_add_form.cleaned_data['test_name']}
-                return render(request, 'user_message.html', RequestContext(request, context))
-            else:
-                context = {'post_to_url': '/test/add/',
-                           'functionality_name': 'Add Test',
-                           'form': test_add_form}
-                return render(request, 'modal_form.html', RequestContext(request, context))
-        else:
-            context = {'post_to_url': '/test/add/',
-                       'functionality_name': 'Add Test',
-                       'form': AddTestForm()}
-            return render(request, 'modal_form.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to add a test")
-
-
 def test_adds(request):
     if request.session.get('user_type', None) == 'SuperUser':
         if request.POST:
-            test_adds_form = AddTestsForm(request.POST, request.FILES)
+            test_adds_form = AddTestsForm(data=request.POST, files=request.FILES)
             result = test_adds_form.add_tests(request)
             if result:
-                (n_created, n_updated, n_not_created_or_updated) = result
+                (n_created, n_not_created) = result
                 result_message = ['Tests Created: '+str(n_created),
-                                  'Tests Updated: '+str(n_updated),
-                                  'No Changes From Data Lines: '+str(n_not_created_or_updated)]
+                                  'No Changes From Data Lines: '+str(n_not_created)]
                 context = {'finish_title': 'Tests Added/Updated', 'user_messages': result_message}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
@@ -481,6 +459,27 @@ def test_edit(request, test_pk):
             context = {'post_to_url': '/test/edit/' + str(test_pk),
                        'functionality_name': 'Edit Test',
                        'form': EditTestForm(test_pk=test_pk)}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to edit a test")
+
+
+def test_update(request, test_pk):
+    if request.session.get('user_type', None) == 'SuperUser':
+        if request.POST:
+            test_update_form = UpdateTestFromFileForm(test_pk=test_pk, data=request.POST, files=request.FILES)
+            if test_update_form.update_test(request):
+                context = {'finish_title': 'Test Updated',
+                           'user_message': 'Test Updated Successfully'}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'finish_title': 'Test Not Updated',
+                           'user_message': 'Test Not Updated (Different Test Name Or Error in File)'}
+                return render(request, 'user_message.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/test/update/' + str(test_pk),
+                       'functionality_name': 'Update Test',
+                       'form': UpdateTestFromFileForm(test_pk=test_pk)}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to edit a test")
@@ -667,7 +666,7 @@ def student_delete(request, student_pk):
             else:
                 context = {'finish_title': 'Student Not Deleted',
                            'user_error_message': 'Could Not Delete ' + student_display_text
-                                                 + ' (Student Being Used)'}
+                                                 + ' (Is Enrolled In A Class)'}
             return render(request, 'user_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/student/delete/' + str(student_pk),
@@ -997,6 +996,32 @@ def add_student_to_class(request, class_pk):
         return HttpResponseForbidden("You are not authorised to add a student to this class")
 
 
+def add_students_to_class(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        if request.POST:
+            add_students_to_class_form = EnrolStudentsInClassForm(class_pk=class_pk, data=request.POST,
+                                                                  files=request.FILES)
+            result = add_students_to_class_form.enrol_students_in_class(request)
+            if result:
+                (n_created, n_updated, n_not_created_or_updated) = result
+                result_message = ['Students Added To Class Created: '+str(n_created),
+                                  'No Changes From Data Lines: '+str(n_not_created_or_updated)]
+                context = {'finish_title': 'Students Added To Class', 'user_messages': result_message}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/class/student/adds/' + str(class_pk),
+                           'functionality_name': 'Add Students To Class',
+                           'form': add_students_to_class_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/class/student/adds/' + str(class_pk),
+                       'functionality_name': 'Add Students To Class',
+                       'form': EnrolStudentsInClassForm(class_pk=class_pk)}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to add students to this class")
+
+
 def remove_student_from_class(request, class_pk, student_pk):
     if user_authorised_for_class(request, class_pk):
         class_instance = Class.objects.get(pk=class_pk)
@@ -1007,7 +1032,8 @@ def remove_student_from_class(request, class_pk, student_pk):
                            'user_message': 'Student Removed Successfully: ' + str(student)}
             else:
                 context = {'finish_title': 'Student Not Removed From Class',
-                           'user_error_message': 'Could Not Remove ' + str(student) + ' (Student Has Results Entered)'}
+                           'user_error_message': 'Could Not Remove ' + str(student) + ' (This Student Has Results'
+                                                                                      ' Entered In This Class)'}
             return render(request, 'user_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/class/student/delete/' + str(class_pk) + '/' + str(student_pk),
@@ -1016,6 +1042,98 @@ def remove_student_from_class(request, class_pk, student_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to remove a student from this class")
+
+
+def tests_for_class_list(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        tests_assigned = ClassTestSet.objects.filter(class_id=Class.objects.get(pk=class_pk))
+        context = {
+            'item_list': [(assignment.test_name, assignment.test_name.get_display_items())
+                          for assignment in tests_assigned],
+            'item_list_title': 'Tests For Class',
+            'item_list_table_headings': Test.get_display_list_headings(),
+            'item_list_buttons': [
+                ['+', [['class_test_modal_load_link', '/class/test/add/' + str(class_pk) + '/', 'Add Test To Class'],
+                       ['class_test_modal_load_link', '/class/test/adds/' + str(class_pk) + '/',
+                        'Add Tests To Class From .CSV']]]
+            ],
+            'item_list_options': [
+                ['class_test_modal_load_link', '/class/test/delete/' + str(class_pk) + '/', 'remove']
+            ]
+        }
+        return render(request, 'item_list.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to view test list")
+
+
+def add_test_to_class(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        if request.POST:
+            add_test_to_class_form = AssignTestToClassForm(class_pk=class_pk, data=request.POST)
+            if add_test_to_class_form.assign_test_to_class():
+                test_added = Test.objects.get(pk=add_test_to_class_form.cleaned_data['test'])
+                context = {'finish_title': 'Test Added To Class',
+                           'user_message': 'Test Added To Class Successfully: ' + str(test_added)}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/class/test/add/' + str(class_pk) + '/',
+                           'functionality_name': 'Add Test To Class',
+                           'form': add_test_to_class_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/class/test/add/' + str(class_pk) + '/',
+                       'functionality_name': 'Add Test To Class',
+                       'form': AssignTestToClassForm(class_pk=class_pk)}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to add a test to this class")
+
+
+def add_tests_to_class(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        if request.POST:
+            add_tests_to_class_form = AssignTestsToClassForm(class_pk=class_pk, data=request.POST, files=request.FILES)
+            result = add_tests_to_class_form.assign_tests_to_class(request)
+            if result:
+                (n_created, n_updated, n_not_created_or_updated) = result
+                result_message = ['Tests Added To Class Created: '+str(n_created),
+                                  'No Changes From Data Lines: '+str(n_not_created_or_updated)]
+                context = {'finish_title': 'Tests Added To Class', 'user_messages': result_message}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/class/test/adds/' + str(class_pk),
+                           'functionality_name': 'Add Tests To Class',
+                           'form': add_tests_to_class_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/class/test/adds/' + str(class_pk),
+                       'functionality_name': 'Add Tests To Class',
+                       'form': AssignTestsToClassForm(class_pk=class_pk)}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to add tests to this class")
+
+
+def remove_test_from_class(request, class_pk, test_pk):
+    if user_authorised_for_class(request, class_pk):
+        class_instance = Class.objects.get(pk=class_pk)
+        test = Test.objects.get(pk=test_pk)
+        if request.POST:
+            if class_instance.deallocate_test_safe(test):
+                context = {'finish_title': 'Remove Test From Class',
+                           'user_message': 'Test Removed Successfully: ' + str(test)}
+            else:
+                context = {'finish_title': 'Test Not Removed From Class',
+                           'user_error_message': 'Could Not Remove ' + str(test) + ' (Results Have Been Entered For'
+                                                                                   ' This Test In This Class)'}
+            return render(request, 'user_message.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/class/test/delete/' + str(class_pk) + '/' + str(test_pk),
+                       'functionality_name': 'Remove Test',
+                       'prompt_message': 'Are You Sure You Wish To Remove Test From Class ' + str(test) + "?"}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to remove a test from this class")
 
 
 def user_authorised_for_class(request, class_pk):

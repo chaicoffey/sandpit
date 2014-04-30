@@ -1,7 +1,7 @@
 from django.contrib import admin
 from fitness_scoring.models import School, Teacher, Administrator, Student, Class, Test, \
     TeacherClassAllocation, StudentClassEnrolment, ClassTestSet, StudentClassTestResult, \
-    PercentileBracket, TestCategory, SuperUser, User
+    PercentileBracketSet, PercentileBracketList, TestCategory, SuperUser, User
 
 
 class SchoolAdmin(admin.ModelAdmin):
@@ -26,5 +26,6 @@ admin.site.register(TeacherClassAllocation, TeacherClassAllocationAdmin)
 admin.site.register(StudentClassEnrolment)
 admin.site.register(ClassTestSet)
 admin.site.register(StudentClassTestResult)
-admin.site.register(PercentileBracket)
+admin.site.register(PercentileBracketSet)
+admin.site.register(PercentileBracketList)
 admin.site.register(TestCategory)
