@@ -12,7 +12,7 @@ from fitness_scoring.fileio import add_test_from_file_upload, update_test_from_f
 from fitness_scoring.fileio import add_students_from_file_upload, add_teachers_from_file_upload
 from fitness_scoring.fileio import add_classes_from_file_upload
 from fitness_scoring.fileio import enrol_students_in_class_from_file_upload, assign_tests_to_class_from_file_upload
-from pe_site.settings import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
+from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.validators import MinLengthValidator
 import datetime
 from django.core.mail import send_mail

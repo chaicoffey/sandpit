@@ -86,6 +86,11 @@ class User(models.Model):
     def __unicode__(self):
         return self.username
 
+    def reset_password(self):
+        self.password = self.username + '_C'
+        self.save()
+        return self.password
+
     def change_password(self, password):
         self.password = password
         self.save()
@@ -201,11 +206,14 @@ class Administrator(models.Model):
     email = models.EmailField(max_length=100)
 
     def __unicode__(self):
-        return self.user.username
+        return self.user.username + ' (' + self.school_id.name + ')'
 
     def edit_administrator_safe(self, email):
         self.email = email
         self.save()
+
+    def reset_password(self):
+        return self.user.reset_password()
 
     def change_password(self, password):
         self.user.change_password(password)

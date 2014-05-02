@@ -11,7 +11,8 @@ from fitness_scoring.forms import AddTeacherForm, AddTeachersForm, EditTeacherFo
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm
 from fitness_scoring.forms import EnrolStudentInClassForm, EnrolStudentsInClassForm
 from fitness_scoring.forms import AssignTestToClassForm, AssignTestsToClassForm
-
+from pe_site.settings import DEFAULT_FROM_EMAIL
+from django.core.mail import send_mail
 
 def logout_user(request):
     request.session.flush()
@@ -187,6 +188,7 @@ def school_list(request):
             ],
             'item_list_options': [
                 ['modal_load_link', '/school/edit/', 'pencil'],
+                ['modal_load_link', '/school/reset_password/', 'repeat'],
                 ['modal_load_link', '/school/delete/', 'remove']
             ]
         }
@@ -278,6 +280,27 @@ def school_delete(request, school_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to delete a school")
+
+
+def school_reset_password(request, school_pk):
+    if request.session.get('user_type', None) == 'SuperUser':
+        administrator = Administrator.objects.get(school_id=School.objects.get(pk=school_pk))
+        if request.POST:
+            new_password = administrator.reset_password()
+            message = ('username: ' + administrator.user.username + '\n' +
+                       'password: ' + new_password)
+            send_mail('Fitness Testing App - Administrator Login Details', message, DEFAULT_FROM_EMAIL,
+                      [administrator.email])
+            context = {'finish_title': 'Password Reset',
+                       'user_message': 'Password Reset For User: ' + str(administrator)}
+            return render(request, 'user_message.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/school/reset_password/' + str(school_pk),
+                       'functionality_name': 'Reset Password',
+                       'prompt_message': 'Are You Sure You Wish To Reset The Password For ' + str(administrator) + "?"}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to reset the administrator password for a school")
 
 
 def test_category_list(request):

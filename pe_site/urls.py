@@ -20,6 +20,8 @@ urlpatterns = patterns(
     url(r'^school/adds/', 'fitness_scoring.views.school_adds', name='school_adds'),
     url(r'^school/edit/(?P<school_pk>\d+)', 'fitness_scoring.views.school_edit', name='school_edit'),
     url(r'^school/delete/(?P<school_pk>\d+)', 'fitness_scoring.views.school_delete', name='school_delete'),
+    url(r'^school/reset_password/(?P<school_pk>\d+)', 'fitness_scoring.views.school_reset_password',
+        name='school_reset_password'),
     url(r'^test_category/list/', 'fitness_scoring.views.test_category_list', name='test_category_list'),
     url(r'^test_category/add/', 'fitness_scoring.views.test_category_add', name='test_category_add'),
     url(r'^test_category/adds/', 'fitness_scoring.views.test_category_adds', name='test_category_adds'),
