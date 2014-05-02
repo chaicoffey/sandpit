@@ -216,9 +216,11 @@ def add_schools_from_file(file_path_on_server):
     n_updated = 0
     n_not_created_or_updated = 0
     for line in schools_list_reader:
-        (name, subscription_paid_text) = (line['name'], line['subscription_paid'])
+        (name, subscription_paid_text, administrator_email) = (line['name'], line['subscription_paid'],
+                                                               line['administrator_email'])
         subscription_paid = (subscription_paid_text == "Yes")
-        if School.create_school_and_administrator(name=name, subscription_paid=subscription_paid):
+        if School.create_school_and_administrator(name=name, subscription_paid=subscription_paid,
+                                                  administrator_email=administrator_email):
             n_created += 1
         elif School.update_school(name=name, subscription_paid=subscription_paid):
             n_updated += 1

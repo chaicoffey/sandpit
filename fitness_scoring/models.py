@@ -39,11 +39,15 @@ class School(models.Model):
         return ['School Name', 'Subscription', 'Administrator Username']
 
     @staticmethod
-    def create_school_and_administrator(name, subscription_paid):
+    def create_school_and_administrator(name, subscription_paid, administrator_email):
         school = School.create_school(name, subscription_paid) if len(name) >= 3 else None
         if school:
-            Administrator.create_administrator(base_username=('admin_' + name[0:3]), school_id=school)
-        return school
+            (administrator, password) = Administrator.create_administrator(base_username=('admin_' + name[0:3]),
+                                                                           school_id=school, email=administrator_email)
+            return_details = (school, password)
+        else:
+            return_details = None
+        return return_details
 
     @staticmethod
     def create_school(name, subscription_paid):
@@ -86,7 +90,7 @@ class User(models.Model):
     def create_user(base_username):
         username = User.get_valid_username(base_username)
         password = username
-        return User.objects.create(username=username, password=password)
+        return User.objects.create(username=username, password=password), password
 
     @staticmethod
     def get_valid_username(base_username):
@@ -190,6 +194,7 @@ class Teacher(models.Model):
 class Administrator(models.Model):
     school_id = models.ForeignKey(School)
     user = models.ForeignKey(User)
+    email = models.EmailField(max_length=100)
 
     def __unicode__(self):
         return self.user.username
@@ -198,10 +203,9 @@ class Administrator(models.Model):
         self.user.change_password(password)
 
     @staticmethod
-    def create_administrator(base_username, school_id):
-
-        user = User.create_user(base_username=base_username)
-        return Administrator.objects.create(school_id=school_id, user=user)
+    def create_administrator(base_username, school_id, email):
+        (user, password) = User.create_user(base_username=base_username)
+        return Administrator.objects.create(school_id=school_id, user=user, email=email), password
 
 
 class Student(models.Model):

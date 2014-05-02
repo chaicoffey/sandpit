@@ -1,5 +1,5 @@
 from django import forms
-from fitness_scoring.models import Student, School, Class, Teacher, TestCategory, Test
+from fitness_scoring.models import School, Administrator, Student, Class, Teacher, TestCategory, Test
 from fitness_scoring.models import TeacherClassAllocation, StudentClassEnrolment, ClassTestSet
 from fitness_scoring.validators import validate_school_unique, validate_new_school_name_unique
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
@@ -12,8 +12,10 @@ from fitness_scoring.fileio import add_test_from_file_upload, update_test_from_f
 from fitness_scoring.fileio import add_students_from_file_upload, add_teachers_from_file_upload
 from fitness_scoring.fileio import add_classes_from_file_upload
 from fitness_scoring.fileio import enrol_students_in_class_from_file_upload, assign_tests_to_class_from_file_upload
+from pe_site.settings import DEFAULT_FROM_EMAIL, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
 from django.core.validators import MinLengthValidator
 import datetime
+from django.core.mail import send_mail
 
 
 class AddStudentForm(forms.Form):
@@ -423,20 +425,36 @@ class AddSchoolForm(forms.Form):
     name = forms.CharField(max_length=300, required=True, validators=[MinLengthValidator(3), validate_no_space(3),
                                                                       validate_school_unique])
     subscription_paid = forms.BooleanField(initial=False, required=False)
+    administrator_email = forms.EmailField(max_length=100, required=True)
 
     def __init__(self, *args, **kwargs):
         super(AddSchoolForm, self).__init__(*args, **kwargs)
         self.fields['name'].error_messages = {'required': 'Please Enter School Name',
                                               'min_length': 'School Name Must be at Least 3 Characters',
                                               'no_space': 'School Name Must not Have Spaces in First 3 Characters'}
+        self.fields['administrator_email'].error_messages = {'required': 'Please Enter Administrator Email'}
 
     def add_school(self):
         school_saved = self.is_valid()
         if school_saved:
             name = self.cleaned_data['name']
             subscription_paid = self.cleaned_data['subscription_paid']
-            school_saved = School.create_school_and_administrator(name=name, subscription_paid=subscription_paid)
-        return school_saved
+            administrator_email = self.cleaned_data['administrator_email']
+            school_saved = School.create_school_and_administrator(name=name, subscription_paid=subscription_paid,
+                                                                  administrator_email=administrator_email)
+        if school_saved:
+            administrator_email = self.cleaned_data['administrator_email']
+            (school, administrator_password) = school_saved
+            administrator_username = Administrator.objects.get(school_id=school).user.username
+
+            message = ('username: ' + administrator_username + '\n' +
+                       'password: ' + administrator_password)
+            send_mail('Fitness Testing App - Administrator Login Details', message, DEFAULT_FROM_EMAIL,
+                      [administrator_email])
+        else:
+            school = None
+
+        return school
 
 
 class AddSchoolsForm(forms.Form):
