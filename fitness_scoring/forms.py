@@ -485,17 +485,20 @@ class EditSchoolForm(forms.Form):
     school_pk = forms.CharField(widget=forms.HiddenInput())
     name = forms.CharField(max_length=300, required=True, validators=[MinLengthValidator(3), validate_no_space(3)])
     subscription_paid = forms.BooleanField(initial=False, required=False)
+    administrator_email = forms.EmailField(max_length=100, required=True)
 
     def __init__(self, school_pk, *args, **kwargs):
         super(EditSchoolForm, self).__init__(*args, **kwargs)
         self.fields['name'].error_messages = {'required': 'Please Enter School Name',
                                               'min_length': 'School Name Must be at Least 3 Characters',
                                               'no_space': 'School Name Must not Have Spaces in First 3 Characters'}
+        self.fields['administrator_email'].error_messages = {'required': 'Please Enter Administrator Email'}
 
         school = School.objects.get(pk=school_pk)
         self.fields['school_pk'].initial = school_pk
         self.fields['name'].initial = school.name
         self.fields['subscription_paid'].initial = school.subscription_paid
+        self.fields['administrator_email'].initial = Administrator.objects.get(school_id=school).email
 
         self.fields['name'].validators = [validate_new_school_name_unique(school_pk=school_pk)]
 
@@ -505,8 +508,10 @@ class EditSchoolForm(forms.Form):
             school_pk = self.cleaned_data['school_pk']
             name = self.cleaned_data['name']
             subscription_paid = self.cleaned_data['subscription_paid']
+            administrator_email = self.cleaned_data['administrator_email']
             school_editing = School.objects.get(pk=school_pk)
-            school_edited = school_editing.edit_school_safe(name=name, subscription_paid=subscription_paid)
+            school_edited = school_editing.edit_school_safe(name=name, subscription_paid=subscription_paid,
+                                                            administrator_email=administrator_email)
         return school_edited
 
 

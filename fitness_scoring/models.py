@@ -26,9 +26,10 @@ class School(models.Model):
             self.delete()
         return school_not_used
 
-    def edit_school_safe(self, name, subscription_paid):
+    def edit_school_safe(self, name, subscription_paid, administrator_email):
         is_edit_safe = (self.name == name) or (len(School.objects.filter(name=name)) == 0)
         if is_edit_safe:
+            Administrator.objects.get(school_id=self).edit_administrator_safe(email=administrator_email)
             self.name = name
             self.subscription_paid = subscription_paid
             self.save()
