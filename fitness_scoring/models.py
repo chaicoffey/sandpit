@@ -60,15 +60,18 @@ class School(models.Model):
         return school
 
     @staticmethod
-    def update_school(name, subscription_paid):
+    def update_school(name, subscription_paid, administrator_email):
 
         school_updated = False
 
         school_name_exists = (len(School.objects.filter(name=name)) == 1)
         if school_name_exists:
             school = School.objects.get(name=name)
-            school_updated = not (school.subscription_paid == subscription_paid)
+            administrator = Administrator.objects.get(school_id=school)
+            school_updated = not ((school.subscription_paid == subscription_paid) and
+                                  (administrator.email == administrator_email))
             if school_updated:
+                administrator.edit_administrator_safe(email=administrator_email)
                 school.subscription_paid = subscription_paid
                 school.save()
 
@@ -198,6 +201,10 @@ class Administrator(models.Model):
 
     def __unicode__(self):
         return self.user.username
+
+    def edit_administrator_safe(self, email):
+        self.email = email
+        self.save()
 
     def change_password(self, password):
         self.user.change_password(password)

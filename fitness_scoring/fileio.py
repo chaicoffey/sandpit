@@ -1,7 +1,8 @@
 import csv
 import tempfile
 import os
-from fitness_scoring.models import Student, Teacher, Class, School, User, TestCategory, Test, PercentileBracketSet
+from fitness_scoring.models import Student, Teacher, Administrator, Class, School, User, TestCategory, Test
+from fitness_scoring.models import PercentileBracketSet
 
 destination_directory = 'C:\\fitness_scoring_file_uploads\\'
 #destination_directory = '/tmp/fitness_scoring_file_uploads'
@@ -197,9 +198,9 @@ def assign_tests_to_class_from_file(file_path_on_server, class_instance):
 
 def add_schools_from_file_upload(uploaded_file):
     file_path_on_server = save_file(uploaded_file)
-    (n_created, n_updated, n_not_created_or_updated) = add_schools_from_file(file_path_on_server)
+    result = add_schools_from_file(file_path_on_server)
     delete_file(file_path_on_server)
-    return n_created, n_updated, n_not_created_or_updated
+    return result
 
 
 def add_schools_from_file(file_path_on_server):
@@ -212,22 +213,26 @@ def add_schools_from_file(file_path_on_server):
     schools_list_reader = csv.DictReader(file_handle, dialect=dialect)
     # check headings are correct else throw exception
 
-    n_created = 0
+    administrator_details = []
     n_updated = 0
     n_not_created_or_updated = 0
     for line in schools_list_reader:
         (name, subscription_paid_text, administrator_email) = (line['name'], line['subscription_paid'],
                                                                line['administrator_email'])
         subscription_paid = (subscription_paid_text == "Yes")
-        if School.create_school_and_administrator(name=name, subscription_paid=subscription_paid,
-                                                  administrator_email=administrator_email):
-            n_created += 1
-        elif School.update_school(name=name, subscription_paid=subscription_paid):
+
+        school_saved = School.create_school_and_administrator(name=name, subscription_paid=subscription_paid,
+                                                              administrator_email=administrator_email)
+        if school_saved:
+            (school, administrator_password) = school_saved
+            administrator_details.append((school, administrator_password))
+        elif School.update_school(name=name, subscription_paid=subscription_paid,
+                                  administrator_email=administrator_email):
             n_updated += 1
         else:
             n_not_created_or_updated += 1
 
-    return n_created, n_updated, n_not_created_or_updated
+    return administrator_details, n_updated, n_not_created_or_updated
 
 
 def add_test_categories_from_file_upload(uploaded_file):

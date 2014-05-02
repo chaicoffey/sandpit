@@ -466,7 +466,17 @@ class AddSchoolsForm(forms.Form):
 
     def add_schools(self, request):
         if self.is_valid():
-            return add_schools_from_file_upload(request.FILES['add_schools_file'])
+            (administrator_details,
+             n_updated, n_not_created_or_updated) = add_schools_from_file_upload(request.FILES['add_schools_file'])
+            for school, administrator_password in administrator_details:
+                administrator = Administrator.objects.get(school_id=school)
+                administrator_email = administrator.email
+                administrator_username = administrator.user.username
+                message = ('username: ' + administrator_username + '\n' +
+                           'password: ' + administrator_password)
+                send_mail('Fitness Testing App - Administrator Login Details', message, DEFAULT_FROM_EMAIL,
+                          [administrator_email])
+            return len(administrator_details), n_updated, n_not_created_or_updated
         else:
             return False
 
