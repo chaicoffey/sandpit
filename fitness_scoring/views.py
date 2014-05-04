@@ -14,6 +14,7 @@ from fitness_scoring.forms import AssignTestToClassForm, AssignTestsToClassForm
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.mail import send_mail
 
+
 def logout_user(request):
     request.session.flush()
     return redirect('fitness_scoring.views.login_user')
@@ -157,8 +158,8 @@ def superuser_view(request):
             'user_tabs': [
                 ['Home', '/superuser_home/', 'user_home_page'],
                 ['Add/Update School List', '/school/list/', 'item_list:2'],
-                ['Add/Update Test Category List', '/test_category/list/', 'item_list:2'],
-                ['Add/Update Test List', '/test/list/', 'item_list:2']
+                ['Add/Update Test List', '/test/list/', 'item_list:2'],
+                ['Add/Update Test Category List', '/test_category/list/', 'item_list:2']
             ]
         }
 
