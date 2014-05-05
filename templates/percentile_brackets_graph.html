@@ -1,0 +1,18 @@
+
+<div id="percentile_brackets_graph_header">
+
+    <div class="modal-header">
+        {{ test_label }} - Percentile Brackets
+    </div>
+
+    <select id="age_gender_selection">
+        {% for value, label, selected in age_gender_options %}
+            <option value="{{ value }}" {% if selected %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+    </select>
+
+</div>
+
+<div id="percentile_brackets_graph">
+    {{ percentile_bracket_scores }}
+</div>

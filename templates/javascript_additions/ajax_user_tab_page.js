@@ -10,7 +10,6 @@ $(document).ready(function(){
     load_main_view()
 });
 
-
 //for loading from side bar links into main window
 $('#main_view_links li a').click(function(event){
 

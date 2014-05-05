@@ -44,13 +44,25 @@ $(document).on('click', '.class_test_modal_load_link a', function(event){
     $('#item_list_user_message_alert').addClass('hidden');
 });
 
-//for loading load links on item_list page
+//for loading class load links on item_list page
 $(document).on('click', '.class_load_link a', function(event){
     event.preventDefault();
     class_load_link_clicked_event($(this).attr('href'), function(){
         load_data_table('class_students', base_url + $('#class_students').attr('href'), 1)
         load_data_table('class_tests', base_url + $('#class_tests').attr('href'), 1)
     })
+});
+
+//for loading percentile load links
+$(document).on('click', '.percentile_load_link a', function(event){
+    event.preventDefault();
+    percentile_load_link_clicked_event($(this).attr('href'));
+});
+
+//for loading percentile load links on age_gender_selection change
+$(document).on('change', '#age_gender_selection', function(event){
+    event.preventDefault();
+    percentile_load_link_clicked_event($('#age_gender_selection').val());
 });
 
 //for loading from a modal form submit to modal window (if form in response) or update the list (if no form in response)

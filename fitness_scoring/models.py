@@ -567,6 +567,35 @@ class PercentileBracketList(models.Model):
     def __unicode__(self):
         return str(self.percentile_bracket_set) + ' (' + str(self.age) + ', ' + self.gender + ')'
 
+    def get_score_strings(self):
+        score_strings = []
+        char_index = 0
+        for percentile in range(99):
+            char_start = char_index
+            while self.comma_separated_scores[char_index] != ',':
+                char_index += 1
+            score_strings.append(self.comma_separated_scores[char_start:char_index])
+            char_index += 1
+        score_strings.append(self.comma_separated_scores[char_index:len(self.comma_separated_scores)])
+        return score_strings
+
+    def get_scores(self, time_as_integer_in_seconds=False):
+        scores = []
+        score_strings = self.get_score_strings()
+        for score_string in score_strings:
+            if self.percentile_bracket_set.result_type == 'DOUBLE':
+                score = float(score_string)
+            elif self.percentile_bracket_set.result_type == 'TIME':
+                seconds = int(score_string)
+                if time_as_integer_in_seconds:
+                    score = seconds
+                else:
+                    score = datetime.time(0, seconds//60, seconds % 60)
+            else:
+                score = int(score_string)
+            scores.append(score)
+        return scores
+
     @staticmethod
     def create_percentile_bracket_list(percentile_bracket_set, age, gender, percentiles, scores):
 
@@ -619,8 +648,10 @@ class PercentileBracketList(models.Model):
                         score_data_increment = score_data + ((score_data_next - score_data) *
                                                              (percentile_counter - percentile) /
                                                              (percentile_next - percentile))
+                        if percentile_bracket_set.result_type != 'DOUBLE':
+                            score_data_increment = int(score_data_increment)
                         comma_separated_scores += (str(score_data_increment) + ',')
-                comma_separated_scores += scores[n_percentiles - 1]
+                comma_separated_scores += str(scores_data[n_percentiles - 1])
 
                 PercentileBracketList.objects.create(percentile_bracket_set=percentile_bracket_set, age=age,
                                                      gender=gender, comma_separated_scores=comma_separated_scores)

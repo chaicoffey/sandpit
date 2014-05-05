@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.template import RequestContext
 from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, TestCategory, Test, Student, Class
+from fitness_scoring.models import PercentileBracketList
 from fitness_scoring.models import TeacherClassAllocation, StudentClassEnrolment, ClassTestSet
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
@@ -290,7 +291,7 @@ def school_reset_password(request, school_pk):
             new_password = administrator.reset_password()
             message = ('username: ' + administrator.user.username + '\n' +
                        'password: ' + new_password)
-            send_mail('Fitness Testing App - Administrator Login Details', message, DEFAULT_FROM_EMAIL,
+            send_mail('Fitness Testing App - Administrator Password Reset', message, DEFAULT_FROM_EMAIL,
                       [administrator.email])
             context = {'finish_title': 'Password Reset',
                        'user_message': 'Password Reset For User: ' + str(administrator)}
@@ -432,7 +433,8 @@ def test_list(request):
             'item_list_options': [
                 ['modal_load_link', '/test/edit/', 'pencil'],
                 ['modal_load_link', '/test/update/', 'pencil'],
-                ['modal_load_link', '/test/delete/', 'remove']
+                ['modal_load_link', '/test/delete/', 'remove'],
+                ['percentile_load_link', '/test/percentile_brackets_graphs/None/', 'stats']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -529,6 +531,23 @@ def test_delete(request, test_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to delete a test")
+
+
+def test_percentile_brackets_graphs(request, percentile_bracket_list_pk, test_pk):
+    if request.session.get('user_type', None) == 'SuperUser':
+        test = Test.objects.get(pk=test_pk)
+        percentile_bracket_lists = PercentileBracketList.objects.filter(percentile_bracket_set=test.percentiles)
+        pk_local = (percentile_bracket_lists[0].pk
+                    if (percentile_bracket_list_pk == 'None') and percentile_bracket_lists.exists()
+                    else int(percentile_bracket_list_pk))
+        context = {'test_label': str(test),
+                   'age_gender_options': [('/test/percentile_brackets_graphs/' + str(bracket.pk) + '/' + str(test_pk),
+                                           '(' + str(bracket.age) + ', ' + bracket.gender + ')',
+                                           bracket.pk == pk_local) for bracket in percentile_bracket_lists],
+                   'percentile_bracket_scores': PercentileBracketList.objects.get(pk=pk_local).get_scores(True)}
+        return render(request, 'percentile_brackets_graph.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to view the percentile brackets for a test")
 
 
 def student_list(request):
