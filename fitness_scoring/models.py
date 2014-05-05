@@ -633,7 +633,7 @@ class PercentileBracketList(models.Model):
 class Test(models.Model):
     test_name = models.CharField(max_length=200, unique=True)
     test_category = models.ForeignKey(TestCategory)
-    description = models.CharField(max_length=400)
+    url_link = models.CharField(max_length=400)
     percentiles = models.ForeignKey(PercentileBracketSet)
 
     def __unicode__(self):
@@ -650,11 +650,11 @@ class Test(models.Model):
             self.delete()
         return test_not_used
 
-    def edit_test_safe(self, test_name, description):
+    def edit_test_safe(self, test_name, url_link):
         is_edit_safe = (self.test_name == test_name) or not Test.objects.filter(test_name=test_name).exists()
         if is_edit_safe:
             self.test_name = test_name
-            self.description = description
+            self.url_link = url_link
             self.save()
         return is_edit_safe
 
@@ -663,22 +663,22 @@ class Test(models.Model):
         return ['Test', 'Test Category']
 
     @staticmethod
-    def create_test(test_name, test_category, description, result_information):
+    def create_test(test_name, test_category, url_link, result_information):
         test_name_unique = not Test.objects.filter(test_name=test_name).exists()
         if test_name_unique:
             percentiles = PercentileBracketSet.create_percentile_bracket_set(result_information)
             test = Test.objects.create(test_name=test_name, test_category=test_category,
-                                       description=description, percentiles=percentiles)
+                                       url_link=url_link, percentiles=percentiles)
         else:
             test = None
         return test
 
     @staticmethod
-    def update_test(test_name, description, percentile_scores):
+    def update_test(test_name, url_link, percentile_scores):
 
         if Test.objects.filter(test_name=test_name).exists():
             test = Test.objects.get(test_name=test_name)
-            test.description = description
+            test.url_link = url_link
             test.percentiles.update_percentile_bracket_set(percentile_scores)
             test.save()
         else:

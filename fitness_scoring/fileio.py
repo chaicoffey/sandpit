@@ -1,7 +1,7 @@
 import csv
 import tempfile
 import os
-from fitness_scoring.models import Student, Teacher, Administrator, Class, School, User, TestCategory, Test
+from fitness_scoring.models import Student, Teacher, Class, School, User, TestCategory, Test
 from fitness_scoring.models import PercentileBracketSet
 
 destination_directory = 'C:\\fitness_scoring_file_uploads\\'
@@ -115,8 +115,8 @@ def add_classes_from_file(file_path_on_server, school_id):
         (year, class_name, teacher_username) = (line['year'], line['class_name'], line['teacher_username'])
         teacher_id = (
             Teacher.objects.get(user=User.objects.get(username=teacher_username))
-            if User.objects.filter(username=teacher_username).exists() and
-               Teacher.objects.filter(user=User.objects.get(username=teacher_username), school_id=school_id).exists()
+            if (User.objects.filter(username=teacher_username).exists() and
+                Teacher.objects.filter(user=User.objects.get(username=teacher_username), school_id=school_id).exists())
             else None
         )
 
@@ -270,8 +270,8 @@ def add_test_categories_from_file(file_path_on_server):
 def add_test_from_file_upload(uploaded_file):
     test_information = read_test_information_from_file_upload(uploaded_file)
     if test_information:
-        (test_name, test_category, description, result_information) = test_information
-        test = Test.create_test(test_name, test_category, description, result_information)
+        (test_name, test_category, url_link, result_information) = test_information
+        test = Test.create_test(test_name, test_category, url_link, result_information)
     else:
         test = None
     return test
@@ -280,11 +280,11 @@ def add_test_from_file_upload(uploaded_file):
 def update_test_from_file_upload(uploaded_file, test):
     test_information = read_test_information_from_file_upload(uploaded_file)
     if test_information:
-        (test_name, test_category, description, result_information) = test_information
+        (test_name, test_category, url_link, result_information) = test_information
         (result_type, is_upward_percentile_brackets,
          percentile_score_conversion_type, percentile_scores) = result_information
         if test.test_name == test_name:
-            test = Test.update_test(test_name, description, percentile_scores)
+            test = Test.update_test(test_name, url_link, percentile_scores)
         else:
             test = None
     else:
@@ -310,7 +310,7 @@ def read_test_information_from_file(file_path_on_server):
 
     test_name = ''
     test_category_name = ''
-    description = ''
+    url_link = ''
     result_type = ''
     is_upward_percentile_brackets = False
     percentile_score_conversion_type = ''
@@ -322,8 +322,8 @@ def read_test_information_from_file(file_path_on_server):
             test_name = value
         elif label == 'test category name':
             test_category_name = value
-        elif label == 'description':
-            description = value
+        elif label == 'url link':
+            url_link = value
         elif label == 'result type':
             result_type = value
         elif label == 'is upward percentile brackets':
@@ -333,7 +333,7 @@ def read_test_information_from_file(file_path_on_server):
 
     values_ok = (
         (test_name != '') and TestCategory.objects.filter(test_category_name=test_category_name).exists() and
-        (description != '') and
+        (url_link != '') and
         (result_type in [res_type for (res_type, text) in PercentileBracketSet.RESULT_TYPE_CHOICES]) and
         (percentile_score_conversion_type in
          [con_type for (con_type, text) in PercentileBracketSet.PERCENTILE_SCORE_CONVERSION_TYPE_CHOICES])
@@ -354,7 +354,7 @@ def read_test_information_from_file(file_path_on_server):
         percentile_scores = (percentiles, age_genders, score_table)
         result_information = (result_type, is_upward_percentile_brackets,
                               percentile_score_conversion_type, percentile_scores)
-        test_information = (test_name, test_category, description, result_information)
+        test_information = (test_name, test_category, url_link, result_information)
     else:
         test_information = None
 
