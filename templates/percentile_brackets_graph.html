@@ -5,6 +5,7 @@
         {{ test_label }} - Percentile Brackets
     </div>
 
+    Select Age and Gender:
     <select id="age_gender_selection">
         {% for value, label, selected in age_gender_options %}
             <option value="{{ value }}" {% if selected %}selected{% endif %}>{{ label }}</option>

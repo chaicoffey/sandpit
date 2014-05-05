@@ -433,8 +433,8 @@ def test_list(request):
             'item_list_options': [
                 ['modal_load_link', '/test/edit/', 'pencil'],
                 ['modal_load_link', '/test/update/', 'pencil'],
-                ['modal_load_link', '/test/delete/', 'remove'],
-                ['percentile_load_link', '/test/percentile_brackets_graphs/None/', 'stats']
+                ['percentile_load_link', '/test/percentile_brackets_graphs/None/', 'stats'],
+                ['modal_load_link', '/test/delete/', 'remove']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
