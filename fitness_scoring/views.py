@@ -797,7 +797,7 @@ def teacher_delete(request, teacher_pk):
             else:
                 context = {'finish_title': 'Teacher Not Deleted',
                            'user_error_message': 'Could Not Delete ' + teacher_display_text
-                                                 + ' (Teacher Being Used)'}
+                                                 + ' (Teacher is Assigned to one or more Classes)'}
             return render(request, 'user_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/teacher/delete/' + str(teacher_pk),
@@ -843,8 +843,8 @@ def class_list(request):
             ],
             'item_list_options': [
                 ['modal_load_link', '/class/edit/', 'pencil'],
-                ['modal_load_link', '/class/delete/', 'remove'],
-                ['class_load_link', '/class/class/', 'home']
+                ['class_load_link', '/class/class/', 'home'],
+                ['modal_load_link', '/class/delete/', 'remove']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))

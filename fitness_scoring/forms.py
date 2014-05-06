@@ -196,7 +196,7 @@ class AddClassForm(forms.Form):
     school_pk = forms.CharField(widget=forms.HiddenInput())
     year = forms.ChoiceField()
     class_name = forms.CharField(max_length=200)
-    teacher = forms.ChoiceField(required=False)
+    teacher = forms.ChoiceField(required=True)
 
     def __init__(self, school_pk, *args, **kwargs):
         super(AddClassForm, self).__init__(*args, **kwargs)
