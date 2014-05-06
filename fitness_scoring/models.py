@@ -125,6 +125,7 @@ class Teacher(models.Model):
     surname = models.CharField(max_length=100)
     school_id = models.ForeignKey(School)
     user = models.ForeignKey(User)
+    email = models.EmailField(max_length=100)
 
     def __unicode__(self):
         return self.first_name + " " + self.surname + " (" + self.user.username + ")"
@@ -139,10 +140,11 @@ class Teacher(models.Model):
             self.delete()
         return teacher_not_used
 
-    def edit_teacher_safe(self, first_name, surname, school_id):
+    def edit_teacher_safe(self, first_name, surname, school_id, email):
         self.first_name = first_name
         self.surname = surname
         self.school_id = school_id
+        self.email=email
         self.save()
         return True
 
@@ -154,7 +156,7 @@ class Teacher(models.Model):
         return ['Username', 'First Name', 'Surname']
 
     @staticmethod
-    def create_teacher(check_name, first_name, surname, school_id):
+    def create_teacher(check_name, first_name, surname, school_id, email):
 
         if check_name:
             teacher_created = not Teacher.objects.filter(first_name=first_name, surname=surname,
@@ -166,12 +168,14 @@ class Teacher(models.Model):
 
         if teacher_created:
             base_username = first_name[0:1] + '_' + surname
-            user = User.create_user(base_username=base_username)
-            teacher = Teacher.objects.create(first_name=first_name, surname=surname, school_id=school_id, user=user)
+            (user, password) = User.create_user(base_username=base_username)
+            teacher = Teacher.objects.create(first_name=first_name, surname=surname, school_id=school_id,
+                                             user=user, email=email)
+            teacher_details = (teacher, password)
         else:
-            teacher = None
+            teacher_details = None
 
-        return teacher
+        return teacher_details
 
     @staticmethod
     def update_teacher(check_name, first_name, surname, school_id):

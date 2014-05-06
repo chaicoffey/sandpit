@@ -124,6 +124,7 @@ class AddTeacherForm(forms.Form):
     school_pk = forms.CharField(widget=forms.HiddenInput())
     first_name = forms.CharField(max_length=100, required=True)
     surname = forms.CharField(max_length=100, required=True)
+    email = forms.EmailField(max_length=100, required=True)
 
     def __init__(self, school_pk, *args, **kwargs):
         super(AddTeacherForm, self).__init__(*args, **kwargs)
@@ -138,9 +139,21 @@ class AddTeacherForm(forms.Form):
             school = School.objects.get(pk=self.cleaned_data['school_pk'])
             first_name = self.cleaned_data['first_name']
             surname = self.cleaned_data['surname']
-            teacher = Teacher.create_teacher(check_name=False, first_name=first_name, surname=surname, school_id=school)
+            email = self.cleaned_data['email']
+            teacher_details = Teacher.create_teacher(check_name=False, first_name=first_name,
+                                                     surname=surname, school_id=school, email=email)
+        else:
+            teacher_details = None
+
+        if teacher_details:
+            (teacher, password) = teacher_details
+
+            message = ('username: ' + teacher.user.username + '\n' +
+                       'password: ' + password)
+            send_mail('Fitness Testing App - Teacher Login Details', message, DEFAULT_FROM_EMAIL, [teacher.email])
         else:
             teacher = None
+
         return teacher
 
 
@@ -167,26 +180,30 @@ class EditTeacherForm(forms.Form):
     school_pk = forms.CharField(widget=forms.HiddenInput())
     first_name = forms.CharField(max_length=100, required=True)
     surname = forms.CharField(max_length=100, required=True)
+    email = forms.EmailField(max_length=100, required=True)
 
     def __init__(self, school_pk, teacher_pk, *args, **kwargs):
         super(EditTeacherForm, self).__init__(*args, **kwargs)
 
         self.fields['first_name'].error_messages = {'required': 'Please Enter First Name'}
         self.fields['surname'].error_messages = {'required': 'Please Enter Surname'}
+        self.fields['email'].error_messages = {'required': 'Please Enter Email'}
 
         teacher = Teacher.objects.get(pk=teacher_pk)
         self.fields['teacher_pk'].initial = teacher_pk
         self.fields['school_pk'].initial = school_pk
         self.fields['first_name'].initial = teacher.first_name
         self.fields['surname'].initial = teacher.surname
+        self.fields['email'].initial = teacher.email
 
     def edit_teacher(self):
         if self.is_valid():
             first_name = self.cleaned_data['first_name']
             surname = self.cleaned_data['surname']
+            email = self.cleaned_data['email']
             school = School.objects.get(pk=self.cleaned_data['school_pk'])
             teacher = Teacher.objects.get(pk=self.cleaned_data['teacher_pk'])
-            if not teacher.edit_teacher_safe(first_name=first_name, surname=surname, school_id=school):
+            if not teacher.edit_teacher_safe(first_name=first_name, surname=surname, school_id=school, email=email):
                 teacher = None
         else:
             teacher = None
