@@ -188,11 +188,12 @@ def superuser_home(request):
 
 
 def instructions_page(request, instructions_name):
-    if instructions_name == 'administrator_add_teacher':
+    user_type = request.session.get('user_type', None)
+    if (instructions_name == 'administrator_add_teacher') and user_type == 'Administrator':
         return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
-    elif instructions_name == 'administrator_add_classes':
+    elif instructions_name == 'administrator_add_classes' and user_type == 'Administrator':
         return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
-    elif instructions_name == 'administrator_add_tests':
+    elif instructions_name == 'administrator_add_tests' and user_type == 'Administrator':
         return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
     else:
         return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
