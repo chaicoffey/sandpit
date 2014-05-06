@@ -3,7 +3,7 @@ from django.http import HttpResponseForbidden
 from django.template import RequestContext
 from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, TestCategory, Test, Student, Class
 from fitness_scoring.models import PercentileBracketList
-from fitness_scoring.models import TeacherClassAllocation, StudentClassEnrolment, ClassTestSet
+from fitness_scoring.models import TeacherClassAllocation, StudentClassEnrolment, ClassTests
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
 from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFileForm
@@ -1061,7 +1061,7 @@ def remove_student_from_class(request, class_pk, student_pk):
 
 def tests_for_class_list(request, class_pk):
     if user_authorised_for_class(request, class_pk):
-        tests_assigned = ClassTestSet.objects.filter(class_id=Class.objects.get(pk=class_pk))
+        tests_assigned = ClassTests.objects.filter(class_id=Class.objects.get(pk=class_pk))
         context = {
             'item_list': [(assignment.test_name, assignment.test_name.get_display_items())
                           for assignment in tests_assigned],
