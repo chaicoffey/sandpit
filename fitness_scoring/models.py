@@ -304,12 +304,15 @@ class Class(models.Model):
         return [self.year, self.class_name, teacher_display]
 
     def delete_class_safe(self):
-        class_not_used = (len(StudentClassEnrolment.objects.filter(class_id=self)) == 0) and\
-                         (len(ClassTestSet.objects.filter(class_id=self)) == 0)
+        class_not_used = not StudentClassEnrolment.objects.filter(class_id=self).exists()
         if class_not_used:
-            if len(TeacherClassAllocation.objects.filter(class_id=self)) == 1:
-                allocation = TeacherClassAllocation.objects.get(class_id=self)
-                allocation.delete()
+            teacher_allocation = TeacherClassAllocation.objects.filter(class_id=self)
+            if teacher_allocation.exists():
+                teacher_allocation[0].delete()
+            test_allocations = ClassTestSet.objects.filter(class_id=self)
+            if test_allocations.exists():
+                for test_allocation in test_allocations:
+                    test_allocation.delete()
             self.delete()
         return class_not_used
 

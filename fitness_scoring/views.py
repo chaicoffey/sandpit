@@ -943,7 +943,7 @@ def class_delete(request, class_pk):
             else:
                 context = {'finish_title': 'Class Not Deleted',
                            'user_error_message': 'Could Not Delete ' + class_display_text
-                                                 + ' (Class Being Used)'}
+                                                 + ' (Student Results are Entered for this Class)'}
             return render(request, 'user_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/class/delete/' + str(class_pk),
