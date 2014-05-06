@@ -144,7 +144,7 @@ class Teacher(models.Model):
         self.first_name = first_name
         self.surname = surname
         self.school_id = school_id
-        self.email=email
+        self.email = email
         self.save()
         return True
 
@@ -179,32 +179,6 @@ class Teacher(models.Model):
             teacher_details = None
 
         return teacher_details
-
-    @staticmethod
-    def update_teacher(check_name, first_name, surname, school_id):
-
-        if check_name:
-            teacher_exists = Teacher.objects.filter(first_name=first_name, surname=surname,
-                                                    school_id=school_id).exists()
-        else:
-            teacher_exists = False
-
-        teacher_updated = False
-        if teacher_exists:
-            teacher = Teacher.objects.get(first_name=first_name, surname=surname, school_id=school_id)
-            teacher_updated = not ((teacher.first_name == first_name) and (teacher.surname == surname) and
-                                   (teacher.school_id == school_id))
-        else:
-            teacher = None  # just for removing a warning
-
-        if teacher_updated:
-            teacher.first_name = first_name
-            teacher.surname = surname
-            teacher.school_id = school_id
-            teacher.save()
-            return teacher
-        else:
-            return None
 
 
 class Administrator(models.Model):

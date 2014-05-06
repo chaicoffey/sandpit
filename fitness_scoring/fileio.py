@@ -57,40 +57,6 @@ def add_students_from_file(file_path_on_server, school_id):
     return n_created, n_updated, n_not_created_or_updated
 
 
-def add_teachers_from_file_upload(uploaded_file, school_id):
-    file_path_on_server = save_file(uploaded_file)
-    (n_created, n_updated, n_not_created_or_updated) = add_teachers_from_file(file_path_on_server, school_id)
-    delete_file(file_path_on_server)
-    return n_created, n_updated, n_not_created_or_updated
-
-
-def add_teachers_from_file(file_path_on_server, school_id):
-    file_handle = open(file_path_on_server, 'rb')
-
-    dialect = csv.Sniffer().sniff(file_handle.read(1024))
-    dialect.strict = True
-
-    file_handle.seek(0)
-    teachers_list_reader = csv.DictReader(file_handle, dialect=dialect)
-    # check headings are correct else throw exception
-
-    n_created = 0
-    n_updated = 0
-    n_not_created_or_updated = 0
-    for line in teachers_list_reader:
-        (first_name, surname) = (line['first_name'], line['surname'])
-        if Teacher.create_teacher(check_name=True, first_name=first_name, surname=surname,
-                                  school_id=school_id):
-            n_created += 1
-        elif Teacher.update_teacher(check_name=False, first_name=first_name, surname=surname,
-                                    school_id=school_id):
-            n_updated += 1
-        else:
-            n_not_created_or_updated += 1
-
-    return n_created, n_updated, n_not_created_or_updated
-
-
 def add_classes_from_file_upload(uploaded_file, school_id):
     file_path_on_server = save_file(uploaded_file)
     (n_created, n_updated, n_not_created_or_updated) = add_classes_from_file(file_path_on_server, school_id)

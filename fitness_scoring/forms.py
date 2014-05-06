@@ -9,7 +9,7 @@ from fitness_scoring.validators import validate_no_space, validate_date_field
 from fitness_scoring.fields import MultiFileField
 from fitness_scoring.fileio import add_schools_from_file_upload, add_test_categories_from_file_upload
 from fitness_scoring.fileio import add_test_from_file_upload, update_test_from_file_upload
-from fitness_scoring.fileio import add_students_from_file_upload, add_teachers_from_file_upload
+from fitness_scoring.fileio import add_students_from_file_upload
 from fitness_scoring.fileio import add_classes_from_file_upload
 from fitness_scoring.fileio import enrol_students_in_class_from_file_upload, assign_tests_to_class_from_file_upload
 from pe_site.settings import DEFAULT_FROM_EMAIL
@@ -155,24 +155,6 @@ class AddTeacherForm(forms.Form):
             teacher = None
 
         return teacher
-
-
-class AddTeachersForm(forms.Form):
-    school_pk = forms.CharField(widget=forms.HiddenInput())
-    add_teachers_file = forms.FileField(required=True)
-
-    def __init__(self, school_pk, *args, **kwargs):
-        super(AddTeachersForm, self).__init__(*args, **kwargs)
-        self.fields['add_teachers_file'].error_messages = {'required': 'Please Choose Add Teachers File'}
-
-        self.fields['school_pk'].initial = school_pk
-
-    def add_teachers(self, request):
-        if self.is_valid():
-            school = School.objects.get(pk=self.cleaned_data['school_pk'])
-            return add_teachers_from_file_upload(uploaded_file=request.FILES['add_teachers_file'], school_id=school)
-        else:
-            return False
 
 
 class EditTeacherForm(forms.Form):

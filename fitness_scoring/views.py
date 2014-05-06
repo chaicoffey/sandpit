@@ -8,7 +8,7 @@ from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
 from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFileForm
 from fitness_scoring.forms import AddStudentForm, AddStudentsForm, EditStudentForm
-from fitness_scoring.forms import AddTeacherForm, AddTeachersForm, EditTeacherForm
+from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm
 from fitness_scoring.forms import EnrolStudentInClassForm, EnrolStudentsInClassForm
 from fitness_scoring.forms import AssignTestToClassForm, AssignTestsToClassForm
@@ -711,8 +711,7 @@ def teacher_list(request):
             'item_list_title': 'Teacher List',
             'item_list_table_headings': Teacher.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['modal_load_link', '/teacher/add/', 'Add Teacher'],
-                       ['modal_load_link', '/teacher/adds/', 'Add/Edit Teachers From .CSV']]]
+                ['+', [['modal_load_link', '/teacher/add/', 'Add Teacher']]]
             ],
             'item_list_options': [
                 ['modal_load_link', '/teacher/edit/', 'pencil'],
@@ -748,34 +747,6 @@ def teacher_add(request):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to add a teacher")
-
-
-def teacher_adds(request):
-    if request.session.get('user_type', None) == 'Administrator':
-        user = User.objects.get(username=request.session.get('username', None))
-        school_pk = Administrator.objects.get(user=user).school_id.pk
-        if request.POST:
-            teacher_adds_form = AddTeachersForm(school_pk=school_pk, data=request.POST, files=request.FILES)
-            result = teacher_adds_form.add_teachers(request)
-            if result:
-                (n_created, n_updated, n_not_created_or_updated) = result
-                result_message = ['Teachers Created: '+str(n_created),
-                                  'Teachers Updated: '+str(n_updated),
-                                  'No Changes From Data Lines: '+str(n_not_created_or_updated)]
-                context = {'finish_title': 'Teachers Added/Updated', 'user_messages': result_message}
-                return render(request, 'user_message.html', RequestContext(request, context))
-            else:
-                context = {'post_to_url': '/teacher/adds/',
-                           'functionality_name': 'Add Teachers',
-                           'form': teacher_adds_form}
-                return render(request, 'modal_form.html', RequestContext(request, context))
-        else:
-            context = {'post_to_url': '/teacher/adds/',
-                       'functionality_name': 'Add Teachers',
-                       'form': AddTeachersForm(school_pk=school_pk)}
-            return render(request, 'modal_form.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to add teachers")
 
 
 def teacher_edit(request, teacher_pk):
