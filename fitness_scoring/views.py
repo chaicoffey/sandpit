@@ -838,8 +838,7 @@ def class_list(request):
             'item_list_title': 'Class List',
             'item_list_table_headings': Class.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['modal_load_link', '/class/add/', 'Add Class'],
-                       ['modal_load_link', '/class/adds/', 'Add/Edit Classes From .CSV']]]
+                ['+', [['modal_load_link', '/class/add/', 'Add Class']]]
             ],
             'item_list_options': [
                 ['modal_load_link', '/class/edit/', 'pencil'],
