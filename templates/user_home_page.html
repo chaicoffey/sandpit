@@ -5,11 +5,21 @@
 
 <div class="text-info">
     {% if steps %}
+        <h4>Steps</h4>
         {% for step_text, step_link in steps %}
-            {{ step_text }}<br>
-            <a href="{{ step_link }}" target="_blank">click here for instructions</a><br>
+            {{ step_text }}
+            (<a href="{{ step_link }}" target="_blank">instructions</a>)<br>
         {% endfor %}
-    {% else %}
+    {% endif %}
+    {% if steps_optional %}
+        <hr>
+        <h4>Optional Steps</h4>
+        {% for step_text, step_link in steps_optional %}
+            {{ step_text }}
+            (<a href="{{ step_link }}" target="_blank">instructions</a>)<br>
+        {% endfor %}
+    {% endif %}
+    {% if not steps and not steps_optional %}
         No Steps Listed
     {% endif %}
 </div>

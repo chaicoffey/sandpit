@@ -142,16 +142,23 @@ def administrator_home(request):
         administrator = Administrator.objects.get(user=User.objects.get(username=request.session.get('username')))
 
         steps = [('Add Teachers', 'administrator_add_teacher'),
-                 ('(*optional) Add Classes For Teachers For The Year', 'administrator_add_classes'),
-                 ('(*optional) Add Tests To Classes For The Year', 'administrator_add_tests')]
+                 ('Add Classes For Teachers For The Year', 'administrator_add_classes'),
+                 ('Add Tests To Classes For The Year', 'administrator_add_tests')]
+        non_optional_steps = 1
         steps_formatted = []
-        for step_index in range(len(steps)):
+        for step_index in range(non_optional_steps):
             (step_text, instructions_name) = steps[step_index]
-            steps_formatted.append(('Step ' + str(step_index) + ': ' + step_text,
+            steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
                                     '/instructions_page/' + instructions_name))
+        steps_optional_formatted = []
+        for step_index in range(non_optional_steps, len(steps)):
+            (step_text, instructions_name) = steps[step_index]
+            steps_optional_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
+                                             '/instructions_page/' + instructions_name))
 
         context = {'user_home_page_title': 'Administrator: ' + administrator.school_id.name,
-                   'steps': steps_formatted}
+                   'steps': steps_formatted,
+                   'steps_optional': steps_optional_formatted}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
