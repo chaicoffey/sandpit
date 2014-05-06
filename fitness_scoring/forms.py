@@ -201,6 +201,9 @@ class AddClassForm(forms.Form):
     def __init__(self, school_pk, *args, **kwargs):
         super(AddClassForm, self).__init__(*args, **kwargs)
 
+        self.fields['class_name'].error_messages = {'required': 'Please Enter Class Name'}
+        self.fields['teacher'].error_messages = {'required': 'Please Select A Teacher For The Class'}
+
         current_year = datetime.datetime.now().year
         self.fields['year'].choices = []
         for year in range(2000, (current_year+2)):
@@ -268,10 +271,13 @@ class EditClassForm(forms.Form):
     school_pk = forms.CharField(widget=forms.HiddenInput())
     year = forms.ChoiceField()
     class_name = forms.CharField(max_length=200)
-    teacher = forms.ChoiceField(required=False)
+    teacher = forms.ChoiceField(required=True)
 
     def __init__(self, school_pk, class_pk, *args, **kwargs):
         super(EditClassForm, self).__init__(*args, **kwargs)
+
+        self.fields['class_name'].error_messages = {'required': 'Please Enter Class Name'}
+        self.fields['teacher'].error_messages = {'required': 'Please Select A Teacher For The Class'}
 
         current_year = datetime.datetime.now().year
         self.fields['year'].choices = []
