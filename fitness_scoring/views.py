@@ -97,8 +97,7 @@ def teacher_view(request):
             'user_name': request.session.get('username'),
             'user_tab_page_title': heading,
             'user_tabs': [
-                ['Home', '/teacher_home/', 'user_home_page'],
-                ['Add/Update Student List', '/student/list2/', 'item_list:2'],
+                ['Home', '/teacher_home/', 'user_home_page']
             ]
         }
 
@@ -127,7 +126,6 @@ def administrator_view(request):
             'user_tab_page_title': 'Administrator: ' + administrator.school_id.name,
             'user_tabs': [
                 ['Home', '/administrator_home/', 'user_home_page'],
-                ['Add/Update Student List', '/student/list/', 'item_list:2'],
                 ['Add/Update Teacher List', '/teacher/list/', 'item_list:2'],
                 ['Add/Update Class List', '/class/list/', 'item_list:2']
             ]
@@ -569,51 +567,6 @@ def test_percentile_brackets_graphs(request, percentile_bracket_list_pk, test_pk
         return render(request, 'percentile_brackets_graph.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to view the percentile brackets for a test")
-
-
-def student_list(request):
-    if request.session.get('user_type', None) == 'Administrator':
-        username = request.session.get('username', None)
-        school = Administrator.objects.get(user=User.objects.get(username=username)).school_id
-        context = {
-            'item_list': [(student, student.get_display_items())
-                          for student in Student.objects.filter(school_id=school)],
-            'item_list_title': 'Student List',
-            'item_list_table_headings': Student.get_display_list_headings(),
-            'item_list_buttons': [
-                ['+', [['modal_load_link', '/student/add/', 'Add Student'],
-                       ['modal_load_link', '/student/adds/', 'Add/Edit Students From .CSV']]]
-            ],
-            'item_list_options': [
-                ['modal_load_link', '/student/edit/', 'pencil'],
-                ['modal_load_link', '/student/delete/', 'remove']
-            ]
-        }
-        return render(request, 'item_list.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to view student list")
-
-
-def student_list2(request):
-    if request.session.get('user_type', None) == 'Teacher':
-        username = request.session.get('username', None)
-        school = Teacher.objects.get(user=User.objects.get(username=username)).school_id
-        context = {
-            'item_list': [(student, student.get_display_items())
-                          for student in Student.objects.filter(school_id=school)],
-            'item_list_title': 'Student List',
-            'item_list_table_headings': Student.get_display_list_headings(),
-            'item_list_buttons': [
-                ['+', [['modal_load_link', '/student/add/', 'Add Student']]]
-            ],
-            'item_list_options': [
-                ['modal_load_link', '/student/edit/', 'pencil'],
-                ['modal_load_link', '/student/delete/', 'remove']
-            ]
-        }
-        return render(request, 'item_list.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to view student list")
 
 
 def student_add(request):
