@@ -716,6 +716,7 @@ def teacher_list(request):
             ],
             'item_list_options': [
                 ['modal_load_link', '/teacher/edit/', 'pencil'],
+                ['modal_load_link', '/teacher/reset_password/', 'repeat'],
                 ['modal_load_link', '/teacher/delete/', 'remove']
             ]
         }
@@ -834,6 +835,26 @@ def teacher_delete(request, teacher_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to delete a teacher from this school")
+
+
+def teacher_reset_password(request, teacher_pk):
+    if request.session.get('user_type', None) == 'Administrator':
+        teacher = Teacher.objects.get(pk=teacher_pk)
+        if request.POST:
+            new_password = teacher.reset_password()
+            message = ('username: ' + teacher.user.username + '\n' +
+                       'password: ' + new_password)
+            send_mail('Fitness Testing App - Teacher Password Reset', message, DEFAULT_FROM_EMAIL, [teacher.email])
+            context = {'finish_title': 'Password Reset',
+                       'user_message': 'Password Reset For User: ' + str(teacher)}
+            return render(request, 'user_message.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/teacher/reset_password/' + str(teacher_pk),
+                       'functionality_name': 'Reset Password',
+                       'prompt_message': 'Are You Sure You Wish To Reset The Password For ' + str(teacher) + "?"}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to reset the password for a teacher")
 
 
 def class_list(request):

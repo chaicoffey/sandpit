@@ -148,6 +148,9 @@ class Teacher(models.Model):
         self.save()
         return True
 
+    def reset_password(self):
+        return self.user.reset_password()
+
     def change_password(self, password):
         self.user.change_password(password)
 
