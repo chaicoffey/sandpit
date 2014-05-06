@@ -16,6 +16,8 @@ urlpatterns = patterns(
     url(r'^superuser_view/', 'fitness_scoring.views.superuser_view', name='superuser_view'),
     url(r'^superuser_home/', 'fitness_scoring.views.superuser_home', name='superuser_home'),
     url(r'^school/list/', 'fitness_scoring.views.school_list', name='school_list'),
+    url(r'^instructions_page/(?P<instructions_name>\w+)', 'fitness_scoring.views.instructions_page',
+        name='instructions_page'),
     url(r'^school/add/', 'fitness_scoring.views.school_add', name='school_add'),
     url(r'^school/adds/', 'fitness_scoring.views.school_adds', name='school_adds'),
     url(r'^school/edit/(?P<school_pk>\d+)', 'fitness_scoring.views.school_edit', name='school_edit'),

@@ -4,5 +4,12 @@
 </div>
 
 <div class="text-info">
-    {{ user_home_page_text }}
+    {% if steps %}
+        {% for step_text, step_link in steps %}
+            {{ step_text }}<br>
+            <a href="{{ step_link }}" target="_blank">click here for instructions</a><br>
+        {% endfor %}
+    {% else %}
+        No Steps Listed
+    {% endif %}
 </div>

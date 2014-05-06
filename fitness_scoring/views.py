@@ -111,8 +111,7 @@ def teacher_home(request):
     if request.session.get('user_type', None) == 'Teacher':
         teacher = Teacher.objects.get(user=User.objects.get(username=request.session.get('username')))
         heading = teacher.first_name + ' ' + teacher.surname + ' (' + teacher.school_id.name + ')'
-        context = {'user_home_page_title': heading,
-                   'user_home_page_text': 'Select the view via the navigation side bar to the left'}
+        context = {'user_home_page_title': heading}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
@@ -141,9 +140,20 @@ def administrator_view(request):
 
 def administrator_home(request):
     if request.session.get('user_type', None) == 'Administrator':
+
         administrator = Administrator.objects.get(user=User.objects.get(username=request.session.get('username')))
+
+        steps = [('Add Teachers', 'administrator_add_teacher'),
+                 ('(*optional) Add Classes For Teachers For The Year', 'administrator_add_classes'),
+                 ('(*optional) Add Tests To Classes For The Year', 'administrator_add_tests')]
+        steps_formatted = []
+        for step_index in range(len(steps)):
+            (step_text, instructions_name) = steps[step_index]
+            steps_formatted.append(('Step ' + str(step_index) + ': ' + step_text,
+                                    '/instructions_page/' + instructions_name))
+
         context = {'user_home_page_title': 'Administrator: ' + administrator.school_id.name,
-                   'user_home_page_text': 'Select the view via the navigation side bar to the left'}
+                   'steps': steps_formatted}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
@@ -171,11 +181,21 @@ def superuser_view(request):
 
 def superuser_home(request):
     if request.session.get('user_type', None) == 'SuperUser':
-        context = {'user_home_page_title': 'Super User',
-                   'user_home_page_text': 'Select the view via the navigation side bar to the left'}
+        context = {'user_home_page_title': 'Super User'}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
+
+
+def instructions_page(request, instructions_name):
+    if instructions_name == 'administrator_add_teacher':
+        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+    elif instructions_name == 'administrator_add_classes':
+        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+    elif instructions_name == 'administrator_add_tests':
+        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+    else:
+        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
 
 
 def school_list(request):
