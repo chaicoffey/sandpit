@@ -1,6 +1,7 @@
 from django.db import models
 import datetime
 import time
+import collections
 
 
 class School(models.Model):
@@ -303,6 +304,18 @@ class Class(models.Model):
             teacher_display = 'No Teacher Assigned'
         return [self.year, self.class_name, teacher_display]
 
+    def get_tests(self):
+        return [class_test.test_name for class_test in ClassTest.objects.filter(class_id=self)]
+
+    def does_result_exist_for_test(self, test):
+        result_exists = False
+        student_class_enrolments = StudentClassEnrolment.objects.filter(class_id=self)
+        for student_class_enrolment in student_class_enrolments:
+            result_exists = (result_exists or
+                             StudentClassTestResult.objects.filter(student_class_enrolment=student_class_enrolment,
+                                                                   test=test).exists())
+        return result_exists
+
     def delete_class_safe(self):
         class_not_used = not StudentClassEnrolment.objects.filter(class_id=self).exists()
         if class_not_used:
@@ -337,6 +350,46 @@ class Class(models.Model):
             self.save()
         return is_edit_safe
 
+    def assign_test_safe(self, test):
+        assigned = not ClassTest.objects.filter(class_id=self, test_name=test).exists()
+        if assigned:
+            ClassTest.objects.create(class_id=self, test_name=test)
+        return assigned
+
+    def save_class_tests_as_test_set_safe(self, test_set_name):
+        return TestSet.create_test_set(test_set_name, self.school_id, ClassTest.objects.filter(class_id=self))
+
+    def load_test_set_as_class_tests_safe(self, test_set):
+        error_message = None
+        test_set_tests = test_set.get_tests()
+        class_tests = self.get_tests()
+        for class_test in class_tests:
+            if (not (class_test in test_set_tests)) and self.does_result_exist_for_test(test=class_test):
+                error_message = ('Test ' + class_test.test_name + ' has results entered but is not in test set '
+                                 + test_set.test_set_name)
+
+        if not error_message:
+            for class_test in class_tests:
+                if not (class_test in test_set_tests):
+                    ClassTest.objects.get(class_id=self, test_name=class_test).delete()
+            for test_set_test in test_set_tests:
+                ClassTest.objects.create(class_id=self, test_name=test_set_test)
+
+        return error_message
+
+    def deallocate_test_safe(self, test):
+        deallocate = ClassTest.objects.filter(class_id=self, test_name=test).exists()
+        if deallocate:
+            enrolments = StudentClassEnrolment.objects.filter(class_id=self)
+            for enrolment in enrolments:
+                deallocate = deallocate and not StudentClassTestResult.objects.filter(student_class_id=enrolment,
+                                                                                      test_name=test).exists()
+
+        if deallocate:
+            ClassTest.objects.get(class_id=self, test_name=test).delete()
+
+        return deallocate
+
     def enrol_student_safe(self, student):
         enrolled = ((self.school_id == student.school_id) and
                     not StudentClassEnrolment.objects.filter(class_id=self, student_id=student).exists())
@@ -354,25 +407,6 @@ class Class(models.Model):
             StudentClassEnrolment.objects.get(class_id=self, student_id=student).delete()
 
         return withdrawn
-
-    def assign_test_safe(self, test):
-        assigned = not ClassTest.objects.filter(class_id=self, test_name=test).exists()
-        if assigned:
-            ClassTest.objects.create(class_id=self, test_name=test)
-        return assigned
-
-    def deallocate_test_safe(self, test):
-        deallocate = ClassTest.objects.filter(class_id=self, test_name=test).exists()
-        if deallocate:
-            enrolments = StudentClassEnrolment.objects.filter(class_id=self)
-            for enrolment in enrolments:
-                deallocate = deallocate and not StudentClassTestResult.objects.filter(student_class_id=enrolment,
-                                                                                      test_name=test).exists()
-
-        if deallocate:
-            ClassTest.objects.get(class_id=self, test_name=test).delete()
-
-        return deallocate
 
     @staticmethod
     def get_display_list_headings():
@@ -724,6 +758,44 @@ class StudentClassEnrolment(models.Model):
 class ClassTest(models.Model):
     class_id = models.ForeignKey(Class)
     test_name = models.ForeignKey(Test)
+
+
+class TestSet(models.Model):
+    school = models.ForeignKey(School)
+    test_set_name = models.CharField(max_length=200)
+
+    def __unicode__(self):
+        return self.test_set_name + '(' + self.school_id.name + ')'
+
+    def get_tests(self):
+        return [test_set_test.test for test_set_test in TestSetTest.objects.filter(test_set=self)]
+
+    @staticmethod
+    def create_test_set(test_set_name, school, tests):
+
+        error_message = None
+        if TestSet.objects.filter(school=school, test_set_name=test_set_name).exists():
+            error_message = 'Test Set Name ' + test_set_name + ' Already Exists'
+
+        if not error_message:
+            test_sets = TestSet.objects.filter(school=school)
+            for test_set in test_sets:
+                if collections.Counter(test_set) == collections.Counter(tests):
+                    error_message = 'Test Set Has' + test_set.test_set_name + 'Same Tests'
+
+        if not error_message:
+            test_set = TestSet.objects.create(school=school, test_set_name=test_set_name)
+            for test in tests:
+                TestSetTest.objects.create(test_set=test_set, test=test)
+        else:
+            test_set = None
+
+        return test_set, error_message
+
+
+class TestSetTest(models.Model):
+    test_set = models.ForeignKey(TestSet)
+    test = models.ForeignKey(Test)
 
 
 class StudentClassTestResult(models.Model):
