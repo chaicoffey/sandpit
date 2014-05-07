@@ -965,27 +965,19 @@ def class_class(request, class_pk):
         return HttpResponseForbidden("You are not authorised to view class")
 
 
-def students_in_class_list(request, class_pk):
+def class_results_table(request, class_pk):
     if user_authorised_for_class(request, class_pk):
-        student_enrolments = StudentClassEnrolment.objects.filter(class_id=Class.objects.get(pk=class_pk))
+        class_instance = Class.objects.get(pk=class_pk)
+        class_tests = [(class_test.test_name, ) for class_test in ClassTests.objects.filter(class_id=class_instance)]
         context = {
-            'item_list': [(enrolment.student_id, enrolment.student_id.get_display_items())
-                          for enrolment in student_enrolments],
-            'item_list_title': 'Students In Class',
-            'item_list_table_headings': Student.get_display_list_headings(),
-            'item_list_buttons': [
-                ['+', [['class_student_modal_load_link', '/class/student/add/' + str(class_pk) + '/',
-                        'Add Student To Class'],
-                       ['class_student_modal_load_link', '/class/student/adds/' + str(class_pk) + '/',
-                        'Add Students To Class From .CSV']]]
-            ],
-            'item_list_options': [
-                ['class_student_modal_load_link', '/class/student/delete/' + str(class_pk) + '/', 'remove']
+            'class_tests': class_tests,
+            'results_table_buttons': [
+                ['+', [['class_results_modal_load_link', '/class/test/add/' + str(class_pk), 'Add Test To Class']]]
             ]
         }
-        return render(request, 'item_list.html', RequestContext(request, context))
+        return render(request, 'class_results_table.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to view student list")
+        return HttpResponseForbidden("You are not authorised to view class results table")
 
 
 def add_student_to_class(request, class_pk):
@@ -1057,28 +1049,6 @@ def remove_student_from_class(request, class_pk, student_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to remove a student from this class")
-
-
-def tests_for_class_list(request, class_pk):
-    if user_authorised_for_class(request, class_pk):
-        tests_assigned = ClassTests.objects.filter(class_id=Class.objects.get(pk=class_pk))
-        context = {
-            'item_list': [(assignment.test_name, assignment.test_name.get_display_items())
-                          for assignment in tests_assigned],
-            'item_list_title': 'Tests For Class',
-            'item_list_table_headings': Test.get_display_list_headings(),
-            'item_list_buttons': [
-                ['+', [['class_test_modal_load_link', '/class/test/add/' + str(class_pk) + '/', 'Add Test To Class'],
-                       ['class_test_modal_load_link', '/class/test/adds/' + str(class_pk) + '/',
-                        'Add Tests To Class From .CSV']]]
-            ],
-            'item_list_options': [
-                ['class_test_modal_load_link', '/class/test/delete/' + str(class_pk) + '/', 'remove']
-            ]
-        }
-        return render(request, 'item_list.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to view test list")
 
 
 def add_test_to_class(request, class_pk):

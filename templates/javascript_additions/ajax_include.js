@@ -1,6 +1,7 @@
 
-//must define the items_in_list_updated_event() in another .js to go with this.
-//it can use the helper function below.
+// Must define the items_in_list_updated_event(), class_load_link_clicked_event() and
+// percentile_load_link_clicked_event() in another .js to go with this.  It can use the below helper function
+// load_data_table().
 
 //helper function for loading the item list table and applying search and sort functionality
 function load_data_table(parent_id, item_list_url, n_headings_to_exclude, do_after_load_method) {
@@ -18,27 +19,17 @@ function load_data_table(parent_id, item_list_url, n_headings_to_exclude, do_aft
 $(document).on('click', '.modal_load_link a', function(event){
     event.preventDefault();
     $('#remoteModalContent').load(base_url + $(this).attr('href'), function(){
-        $('#modal_submit_button').val('item_list_submit')
-        $('#remoteModal').modal('show');
-    });
-    $('#item_list_user_message_alert').addClass('hidden');
-});
-
-//for loading modal links on class student item lists into remote modal
-$(document).on('click', '.class_student_modal_load_link a', function(event){
-    event.preventDefault();
-    $('#remoteModalContent').load(base_url + $(this).attr('href'), function(){
-        $('#modal_submit_button').val('class_student_item_list_submit')
+        $('#modal_submit_button').val('item_list_submit');
         $('#remoteModal').modal('show');
     });
     $('#item_list_user_message_alert').addClass('hidden');
 });
 
 //for loading modal links on class test item lists into remote modal
-$(document).on('click', '.class_test_modal_load_link a', function(event){
+$(document).on('click', '.class_results_modal_load_link a', function(event){
     event.preventDefault();
     $('#remoteModalContent').load(base_url + $(this).attr('href'), function(){
-        $('#modal_submit_button').val('class_test_item_list_submit')
+        $('#modal_submit_button').val('class_results_table_submit');
         $('#remoteModal').modal('show');
     });
     $('#item_list_user_message_alert').addClass('hidden');
@@ -48,8 +39,7 @@ $(document).on('click', '.class_test_modal_load_link a', function(event){
 $(document).on('click', '.class_load_link a', function(event){
     event.preventDefault();
     class_load_link_clicked_event($(this).attr('href'), function(){
-        load_data_table('class_students', base_url + $('#class_students').attr('href'), 1)
-        load_data_table('class_tests', base_url + $('#class_tests').attr('href'), 1)
+        $('#class_results').load(base_url + $('#class_results').attr('href'));
     })
 });
 
@@ -111,15 +101,10 @@ function close_modal_and_update_list(button_value, user_message_element) {
             $('#item_list_user_message').html(user_message_element);
             $('#item_list_user_message_alert').removeClass('hidden');
         });
-    } else if(button_value == 'class_student_item_list_submit') {
-        load_data_table('class_students', base_url + $('#class_students').attr('href'), 1, function(){
+    } else if(button_value == 'class_results_table_submit') {
+        $('#class_results').load(base_url + $('#class_results').attr('href'), function(){
             $('#class_user_message').html(user_message_element);
             $('#class_user_message_alert').removeClass('hidden');
-        });
-    } else if(button_value == 'class_test_item_list_submit') {
-        load_data_table('class_tests', base_url + $('#class_tests').attr('href'), 1, function(){
-            $('#class_user_message').html(user_message_element);
-            $('#class_user_message_alert').removeClass('hidden');
-        });
+        })
     }
 }

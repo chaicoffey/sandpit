@@ -1,0 +1,37 @@
+
+<div id="results_table_user_message_alert" class="alert alert-danger fade in hidden">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+    <div id="results_table_user_message"></div>
+</div>
+
+<div class="panel panel-default">
+
+    <div class="panel-heading">
+        Class Results
+        {% for button_label, button_options in results_table_buttons %}
+            <div class="btn-group">
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                    {{ button_label }}
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                    {% for link_type, link_url, label in button_options %}
+                        <li class="{{ link_type }}"><a href="{{ link_url }}">{{ label }}</a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover results_table" id="results_table">
+            <thead>
+                <tr>
+                    {% for test in class_tests %}
+                        <th>{{ test.test_name }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+        </table>
+    </div>
+
+</div>
