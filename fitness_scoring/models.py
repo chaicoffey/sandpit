@@ -356,6 +356,9 @@ class Class(models.Model):
             ClassTest.objects.create(class_id=self, test_name=test)
         return assigned
 
+    def save_class_tests_as_test_set_errors(self, test_set_name):
+        return TestSet.create_test_set_errors(test_set_name, self.school_id, self.get_tests())
+
     def save_class_tests_as_test_set_safe(self, test_set_name):
         return TestSet.create_test_set(test_set_name, self.school_id, self.get_tests())
 
@@ -771,26 +774,31 @@ class TestSet(models.Model):
         return [test_set_test.test for test_set_test in TestSetTest.objects.filter(test_set=self)]
 
     @staticmethod
-    def create_test_set(test_set_name, school, tests):
-
+    def create_test_set_errors(test_set_name, school, tests):
         error_message = None
+
         if TestSet.objects.filter(school=school, test_set_name=test_set_name).exists():
-            error_message = 'Test Set Name ' + test_set_name + ' Already Exists'
+            error_message = 'Test Set Name Already Being Used'
 
         if not error_message:
             test_sets = TestSet.objects.filter(school=school)
             for test_set in test_sets:
                 if collections.Counter(test_set.get_tests()) == collections.Counter(tests):
-                    error_message = 'Test Set Has' + test_set.test_set_name + 'Same Tests'
+                    error_message = ("Test Set Comprised Of The Same Tests Already Exists (" + test_set.test_set_name +
+                                     ")")
 
-        if not error_message:
+        return error_message
+
+    @staticmethod
+    def create_test_set(test_set_name, school, tests):
+        if not TestSet.create_test_set_errors(test_set_name, school, tests):
             test_set = TestSet.objects.create(school=school, test_set_name=test_set_name)
             for test in tests:
                 TestSetTest.objects.create(test_set=test_set, test=test)
         else:
             test_set = None
 
-        return test_set, error_message
+        return test_set
 
 
 class TestSetTest(models.Model):

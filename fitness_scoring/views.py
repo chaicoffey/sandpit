@@ -979,7 +979,7 @@ def save_class_tests_as_test_set(request, class_pk):
                     test_set_name=save_class_tests_as_test_set_form.cleaned_data['test_set_name']
                 )
                 context = {'finish_title': 'Test Set Saved',
-                           'user_message': 'Test Set Saved Successfully: ' + str(test_set_saved)}
+                           'user_message': 'Test Set Saved Successfully: ' + str(test_set_saved.test_set_name)}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/class/test_set/save/' + str(class_pk) + '/',
