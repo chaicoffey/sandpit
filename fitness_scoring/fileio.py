@@ -22,41 +22,6 @@ def delete_file(file_name):
     os.remove(file_name)
 
 
-def add_students_from_file_upload(uploaded_file, school_id):
-    file_path_on_server = save_file(uploaded_file)
-    (n_created, n_updated, n_not_created_or_updated) = add_students_from_file(file_path_on_server, school_id)
-    delete_file(file_path_on_server)
-    return n_created, n_updated, n_not_created_or_updated
-
-
-def add_students_from_file(file_path_on_server, school_id):
-    file_handle = open(file_path_on_server, 'rb')
-
-    dialect = csv.Sniffer().sniff(file_handle.read(1024))
-    dialect.strict = True
-
-    file_handle.seek(0)
-    students_list_reader = csv.DictReader(file_handle, dialect=dialect)
-    # check headings are correct else throw exception
-
-    n_created = 0
-    n_updated = 0
-    n_not_created_or_updated = 0
-    for line in students_list_reader:
-        (student_id, first_name, surname, gender, dob) = (line['student_id'], line['first_name'], line['surname'],
-                                                          line['gender'], line['dob'])
-        if Student.create_student(check_name=False, student_id=student_id, school_id=school_id,
-                                  first_name=first_name, surname=surname, gender=gender, dob=dob):
-            n_created += 1
-        elif Student.update_student(check_name=False, student_id=student_id, school_id=school_id,
-                                    first_name=first_name, surname=surname, gender=gender, dob=dob):
-            n_updated += 1
-        else:
-            n_not_created_or_updated += 1
-
-    return n_created, n_updated, n_not_created_or_updated
-
-
 def add_classes_from_file_upload(uploaded_file, school_id):
     file_path_on_server = save_file(uploaded_file)
     (n_created, n_updated, n_not_created_or_updated) = add_classes_from_file(file_path_on_server, school_id)
@@ -94,72 +59,6 @@ def add_classes_from_file(file_path_on_server, school_id):
             n_not_created_or_updated += 1
 
     return n_created, n_updated, n_not_created_or_updated
-
-
-def enrol_students_in_class_from_file_upload(uploaded_file, class_instance):
-    file_path_on_server = save_file(uploaded_file)
-    (n_created, n_not_created) = enrol_students_in_class_from_file(file_path_on_server, class_instance)
-    delete_file(file_path_on_server)
-    return n_created, 0, n_not_created
-
-
-def enrol_students_in_class_from_file(file_path_on_server, class_instance):
-    file_handle = open(file_path_on_server, 'rb')
-
-    dialect = csv.Sniffer().sniff(file_handle.read(1024))
-    dialect.strict = True
-
-    file_handle.seek(0)
-    classes_list_reader = csv.DictReader(file_handle, dialect=dialect)
-    # check headings are correct else throw exception
-
-    school = class_instance.school_id
-
-    n_created = 0
-    n_not_created = 0
-    for line in classes_list_reader:
-        (student_id) = (line['student_id'])
-        student = (Student.objects.get(student_id=student_id, school_id=school)
-                   if Student.objects.filter(student_id=student_id, school_id=school).exists()
-                   else None)
-
-        if student and class_instance.enrol_student_safe(student):
-            n_created += 1
-        else:
-            n_not_created += 1
-
-    return n_created, n_not_created
-
-
-def assign_tests_to_class_from_file_upload(uploaded_file, class_instance):
-    file_path_on_server = save_file(uploaded_file)
-    (n_created, n_not_created) = assign_tests_to_class_from_file(file_path_on_server, class_instance)
-    delete_file(file_path_on_server)
-    return n_created, 0, n_not_created
-
-
-def assign_tests_to_class_from_file(file_path_on_server, class_instance):
-    file_handle = open(file_path_on_server, 'rb')
-
-    dialect = csv.Sniffer().sniff(file_handle.read(1024))
-    dialect.strict = True
-
-    file_handle.seek(0)
-    classes_list_reader = csv.DictReader(file_handle, dialect=dialect)
-    # check headings are correct else throw exception
-
-    n_created = 0
-    n_not_created = 0
-    for line in classes_list_reader:
-        (test_name) = (line['test_name'])
-        test = Test.objects.get(test_name=test_name) if Test.objects.filter(test_name=test_name).exists() else None
-
-        if test and class_instance.assign_test_safe(test):
-            n_created += 1
-        else:
-            n_not_created += 1
-
-    return n_created, n_not_created
 
 
 def add_schools_from_file_upload(uploaded_file):

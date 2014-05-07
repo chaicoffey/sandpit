@@ -3,15 +3,14 @@ from django.http import HttpResponseForbidden
 from django.template import RequestContext
 from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, TestCategory, Test, Student, Class
 from fitness_scoring.models import PercentileBracketList
-from fitness_scoring.models import TeacherClassAllocation, StudentClassEnrolment, ClassTests
+from fitness_scoring.models import TeacherClassAllocation, ClassTests
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
 from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFileForm
-from fitness_scoring.forms import AddStudentForm, AddStudentsForm, EditStudentForm
+from fitness_scoring.forms import EditStudentForm
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm
-from fitness_scoring.forms import EnrolStudentInClassForm, EnrolStudentsInClassForm
-from fitness_scoring.forms import AssignTestToClassForm, AssignTestsToClassForm
+from fitness_scoring.forms import AssignTestToClassForm
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.mail import send_mail
 
@@ -576,63 +575,6 @@ def test_percentile_brackets_graphs(request, percentile_bracket_list_pk, test_pk
         return HttpResponseForbidden("You are not authorised to view the percentile brackets for a test")
 
 
-def student_add(request):
-    user_type = request.session.get('user_type', None)
-    if (user_type == 'Administrator') or (user_type == 'Teacher'):
-        user = User.objects.get(username=request.session.get('username', None))
-        school_pk = (Administrator.objects.get(user=user) if (user_type == 'Administrator')
-                     else Teacher.objects.get(user=user)).school_id.pk
-        if request.POST:
-            student_add_form = AddStudentForm(school_pk=school_pk, data=request.POST)
-            if student_add_form.add_student():
-                student_display_text = (student_add_form.cleaned_data['first_name'] + ' ' +
-                                        student_add_form.cleaned_data['surname'] + ' (' +
-                                        student_add_form.cleaned_data['student_id'] + ')')
-                context = {'finish_title': 'Student Added',
-                           'user_message': 'Student Added Successfully: ' + student_display_text}
-                return render(request, 'user_message.html', RequestContext(request, context))
-            else:
-                context = {'post_to_url': '/student/add/',
-                           'functionality_name': 'Add Student',
-                           'form': student_add_form}
-                return render(request, 'modal_form.html', RequestContext(request, context))
-        else:
-            context = {'post_to_url': '/student/add/',
-                       'functionality_name': 'Add Student',
-                       'form': AddStudentForm(school_pk=school_pk)}
-            return render(request, 'modal_form.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to add a student")
-
-
-def student_adds(request):
-    if request.session.get('user_type', None) == 'Administrator':
-        user = User.objects.get(username=request.session.get('username', None))
-        school_pk = Administrator.objects.get(user=user).school_id.pk
-        if request.POST:
-            student_adds_form = AddStudentsForm(school_pk=school_pk, data=request.POST, files=request.FILES)
-            result = student_adds_form.add_students(request)
-            if result:
-                (n_created, n_updated, n_not_created_or_updated) = result
-                result_message = ['Students Created: '+str(n_created),
-                                  'Students Updated: '+str(n_updated),
-                                  'No Changes From Data Lines: '+str(n_not_created_or_updated)]
-                context = {'finish_title': 'Students Added/Updated', 'user_messages': result_message}
-                return render(request, 'user_message.html', RequestContext(request, context))
-            else:
-                context = {'post_to_url': '/student/adds/',
-                           'functionality_name': 'Add Students',
-                           'form': student_adds_form}
-                return render(request, 'modal_form.html', RequestContext(request, context))
-        else:
-            context = {'post_to_url': '/student/adds/',
-                       'functionality_name': 'Add Students',
-                       'form': AddStudentsForm(school_pk=school_pk)}
-            return render(request, 'modal_form.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to add students")
-
-
 def student_edit(request, student_pk):
     user_type = request.session.get('user_type', None)
     authorised = (user_type == 'Administrator') or (user_type == 'Teacher')
@@ -968,7 +910,7 @@ def class_class(request, class_pk):
 def class_results_table(request, class_pk):
     if user_authorised_for_class(request, class_pk):
         class_instance = Class.objects.get(pk=class_pk)
-        class_tests = [(class_test.test_name, ) for class_test in ClassTests.objects.filter(class_id=class_instance)]
+        class_tests = [class_test.test_name for class_test in ClassTests.objects.filter(class_id=class_instance)]
         context = {
             'class_tests': class_tests,
             'results_table_buttons': [
@@ -978,55 +920,6 @@ def class_results_table(request, class_pk):
         return render(request, 'class_results_table.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to view class results table")
-
-
-def add_student_to_class(request, class_pk):
-    if user_authorised_for_class(request, class_pk):
-        if request.POST:
-            add_student_to_class_form = EnrolStudentInClassForm(class_pk=class_pk, data=request.POST)
-            if add_student_to_class_form.enrol_student_in_class():
-                student_added = Student.objects.get(pk=add_student_to_class_form.cleaned_data['student'])
-                context = {'finish_title': 'Student Added To Class',
-                           'user_message': 'Student Added To Class Successfully: ' + str(student_added)}
-                return render(request, 'user_message.html', RequestContext(request, context))
-            else:
-                context = {'post_to_url': '/class/student/add/' + str(class_pk) + '/',
-                           'functionality_name': 'Add Student To Class',
-                           'form': add_student_to_class_form}
-                return render(request, 'modal_form.html', RequestContext(request, context))
-        else:
-            context = {'post_to_url': '/class/student/add/' + str(class_pk) + '/',
-                       'functionality_name': 'Add Student To Class',
-                       'form': EnrolStudentInClassForm(class_pk=class_pk)}
-            return render(request, 'modal_form.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to add a student to this class")
-
-
-def add_students_to_class(request, class_pk):
-    if user_authorised_for_class(request, class_pk):
-        if request.POST:
-            add_students_to_class_form = EnrolStudentsInClassForm(class_pk=class_pk, data=request.POST,
-                                                                  files=request.FILES)
-            result = add_students_to_class_form.enrol_students_in_class(request)
-            if result:
-                (n_created, n_updated, n_not_created_or_updated) = result
-                result_message = ['Students Added To Class Created: '+str(n_created),
-                                  'No Changes From Data Lines: '+str(n_not_created_or_updated)]
-                context = {'finish_title': 'Students Added To Class', 'user_messages': result_message}
-                return render(request, 'user_message.html', RequestContext(request, context))
-            else:
-                context = {'post_to_url': '/class/student/adds/' + str(class_pk),
-                           'functionality_name': 'Add Students To Class',
-                           'form': add_students_to_class_form}
-                return render(request, 'modal_form.html', RequestContext(request, context))
-        else:
-            context = {'post_to_url': '/class/student/adds/' + str(class_pk),
-                       'functionality_name': 'Add Students To Class',
-                       'form': EnrolStudentsInClassForm(class_pk=class_pk)}
-            return render(request, 'modal_form.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to add students to this class")
 
 
 def remove_student_from_class(request, class_pk, student_pk):
@@ -1072,31 +965,6 @@ def add_test_to_class(request, class_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to add a test to this class")
-
-
-def add_tests_to_class(request, class_pk):
-    if user_authorised_for_class(request, class_pk):
-        if request.POST:
-            add_tests_to_class_form = AssignTestsToClassForm(class_pk=class_pk, data=request.POST, files=request.FILES)
-            result = add_tests_to_class_form.assign_tests_to_class(request)
-            if result:
-                (n_created, n_updated, n_not_created_or_updated) = result
-                result_message = ['Tests Added To Class Created: '+str(n_created),
-                                  'No Changes From Data Lines: '+str(n_not_created_or_updated)]
-                context = {'finish_title': 'Tests Added To Class', 'user_messages': result_message}
-                return render(request, 'user_message.html', RequestContext(request, context))
-            else:
-                context = {'post_to_url': '/class/test/adds/' + str(class_pk),
-                           'functionality_name': 'Add Tests To Class',
-                           'form': add_tests_to_class_form}
-                return render(request, 'modal_form.html', RequestContext(request, context))
-        else:
-            context = {'post_to_url': '/class/test/adds/' + str(class_pk),
-                       'functionality_name': 'Add Tests To Class',
-                       'form': AssignTestsToClassForm(class_pk=class_pk)}
-            return render(request, 'modal_form.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to add tests to this class")
 
 
 def remove_test_from_class(request, class_pk, test_pk):

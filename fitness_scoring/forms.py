@@ -1,75 +1,19 @@
 from django import forms
 from fitness_scoring.models import School, Administrator, Student, Class, Teacher, TestCategory, Test
-from fitness_scoring.models import TeacherClassAllocation, StudentClassEnrolment, ClassTests
+from fitness_scoring.models import TeacherClassAllocation, ClassTests
 from fitness_scoring.validators import validate_school_unique, validate_new_school_name_unique
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
 from fitness_scoring.validators import validate_new_test_name_unique
-from fitness_scoring.validators import validate_student_unique, validate_new_student_id_unique
+from fitness_scoring.validators import validate_new_student_id_unique
 from fitness_scoring.validators import validate_no_space, validate_date_field
 from fitness_scoring.fields import MultiFileField
 from fitness_scoring.fileio import add_schools_from_file_upload, add_test_categories_from_file_upload
 from fitness_scoring.fileio import add_test_from_file_upload, update_test_from_file_upload
-from fitness_scoring.fileio import add_students_from_file_upload
 from fitness_scoring.fileio import add_classes_from_file_upload
-from fitness_scoring.fileio import enrol_students_in_class_from_file_upload, assign_tests_to_class_from_file_upload
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.validators import MinLengthValidator
 import datetime
 from django.core.mail import send_mail
-
-
-class AddStudentForm(forms.Form):
-    student_id = forms.CharField(max_length=30, required=True)
-    school_pk = forms.CharField(widget=forms.HiddenInput())
-    first_name = forms.CharField(max_length=100, required=True)
-    surname = forms.CharField(max_length=100, required=True)
-    gender = forms.ChoiceField(choices=Student.GENDER_CHOICES, required=True)
-    dob = forms.CharField(required=True, help_text='(dd/mm/yyyy)', validators=[validate_date_field('%d/%m/%Y')])
-
-    def __init__(self, school_pk, *args, **kwargs):
-        super(AddStudentForm, self).__init__(*args, **kwargs)
-
-        self.fields['student_id'].error_messages = {'required': 'Please Enter Student ID'}
-        self.fields['first_name'].error_messages = {'required': 'Please Enter First Name'}
-        self.fields['surname'].error_messages = {'required': 'Please Enter Surname'}
-        self.fields['gender'].error_messages = {'required': 'Please Select A Gender'}
-        self.fields['dob'].error_messages = {'required': 'Please Enter Date Of Birth',
-                                             'date_format': 'Date Of Birth Should Be Of Form dd/mm/yyyy'}
-
-        self.fields['school_pk'].initial = school_pk
-
-        self.fields['student_id'].validators = [validate_student_unique(school_pk)]
-
-    def add_student(self):
-        student_saved = self.is_valid()
-        if student_saved:
-            student_id = self.cleaned_data['student_id']
-            school = School.objects.get(pk=self.cleaned_data['school_pk'])
-            first_name = self.cleaned_data['first_name']
-            surname = self.cleaned_data['surname']
-            gender = self.cleaned_data['gender']
-            dob = datetime.datetime.strptime(self.cleaned_data['dob'], '%d/%m/%Y')
-            student_saved = Student.create_student(check_name=False, student_id=student_id, school_id=school,
-                                                   first_name=first_name, surname=surname, gender=gender, dob=dob)
-        return student_saved
-
-
-class AddStudentsForm(forms.Form):
-    school_pk = forms.CharField(widget=forms.HiddenInput())
-    add_students_file = forms.FileField(required=True)
-
-    def __init__(self, school_pk, *args, **kwargs):
-        super(AddStudentsForm, self).__init__(*args, **kwargs)
-        self.fields['add_students_file'].error_messages = {'required': 'Please Choose Add Students File'}
-
-        self.fields['school_pk'].initial = school_pk
-
-    def add_students(self, request):
-        if self.is_valid():
-            school = School.objects.get(pk=self.cleaned_data['school_pk'])
-            return add_students_from_file_upload(uploaded_file=request.FILES['add_students_file'], school_id=school)
-        else:
-            return False
 
 
 class EditStudentForm(forms.Form):
@@ -333,53 +277,6 @@ class EditClassForm(forms.Form):
         return class_edited
 
 
-class EnrolStudentInClassForm(forms.Form):
-    class_pk = forms.CharField(widget=forms.HiddenInput())
-    student = forms.ChoiceField(required=True)
-
-    def __init__(self, class_pk, *args, **kwargs):
-        super(EnrolStudentInClassForm, self).__init__(*args, **kwargs)
-
-        self.fields['student'].error_messages = {'required': 'Please Select Student'}
-
-        class_instance = Class.objects.get(pk=class_pk)
-        self.fields['student'].choices = []
-        for student in Student.objects.filter(school_id=class_instance.school_id):
-            if not StudentClassEnrolment.objects.filter(class_id=class_instance, student_id=student):
-                self.fields['student'].choices.append((student.pk, str(student)))
-
-        self.fields['class_pk'].initial = class_pk
-
-    def enrol_student_in_class(self):
-        enrol_student_in_class = self.is_valid()
-        if enrol_student_in_class:
-            class_instance = Class.objects.get(pk=self.cleaned_data['class_pk'])
-            student = Student.objects.get(pk=self.cleaned_data['student'])
-            enrol_student_in_class = class_instance.enrol_student_safe(student=student)
-        return enrol_student_in_class
-
-
-class EnrolStudentsInClassForm(forms.Form):
-    class_pk = forms.CharField(widget=forms.HiddenInput())
-    add_students_to_class_file = forms.FileField(required=True)
-
-    def __init__(self, class_pk, *args, **kwargs):
-        super(EnrolStudentsInClassForm, self).__init__(*args, **kwargs)
-
-        self.fields['add_students_to_class_file'].error_messages = {'required': 'Please Select Add Students'
-                                                                                ' To Class File'}
-
-        self.fields['class_pk'].initial = class_pk
-
-    def enrol_students_in_class(self, request):
-        if self.is_valid():
-            class_instance = Class.objects.get(pk=self.cleaned_data['class_pk'])
-            uploaded_file = request.FILES['add_students_to_class_file']
-            return enrol_students_in_class_from_file_upload(uploaded_file=uploaded_file, class_instance=class_instance)
-        else:
-            return False
-
-
 class AssignTestToClassForm(forms.Form):
     class_pk = forms.CharField(widget=forms.HiddenInput())
     test = forms.ChoiceField(required=True)
@@ -404,26 +301,6 @@ class AssignTestToClassForm(forms.Form):
             test = Test.objects.get(pk=self.cleaned_data['test'])
             assign_test_to_class = class_instance.assign_test_safe(test=test)
         return assign_test_to_class
-
-
-class AssignTestsToClassForm(forms.Form):
-    class_pk = forms.CharField(widget=forms.HiddenInput())
-    add_tests_to_class_file = forms.FileField(required=True)
-
-    def __init__(self, class_pk, *args, **kwargs):
-        super(AssignTestsToClassForm, self).__init__(*args, **kwargs)
-
-        self.fields['add_tests_to_class_file'].error_messages = {'required': 'Please Select Add Tests To Class File'}
-
-        self.fields['class_pk'].initial = class_pk
-
-    def assign_tests_to_class(self, request):
-        if self.is_valid():
-            class_instance = Class.objects.get(pk=self.cleaned_data['class_pk'])
-            uploaded_file = request.FILES['add_tests_to_class_file']
-            return assign_tests_to_class_from_file_upload(uploaded_file=uploaded_file, class_instance=class_instance)
-        else:
-            return False
 
 
 class AddSchoolForm(forms.Form):
