@@ -3,7 +3,7 @@ from django.http import HttpResponseForbidden
 from django.template import RequestContext
 from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, TestCategory, Test, Student, Class
 from fitness_scoring.models import PercentileBracketList
-from fitness_scoring.models import TeacherClassAllocation, ClassTest
+from fitness_scoring.models import TeacherClassAllocation, ClassTest, StudentClassEnrolment
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
 from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFileForm
@@ -911,11 +911,14 @@ def class_results_table(request, class_pk):
     if user_authorised_for_class(request, class_pk):
         class_instance = Class.objects.get(pk=class_pk)
         class_tests = [class_test.test_name for class_test in ClassTest.objects.filter(class_id=class_instance)]
+        student_test_results = [(enrolment.student_id, enrolment.get_test_results()) for enrolment in
+                                StudentClassEnrolment.objects.filter(class_id=class_instance)]
         context = {
             'class_tests': class_tests,
             'results_table_buttons': [
                 ['+', [['class_results_modal_load_link', '/class/test/add/' + str(class_pk), 'Add Test To Class']]]
-            ]
+            ],
+            'student_test_results': student_test_results
         }
         return render(request, 'class_results_table.html', RequestContext(request, context))
     else:

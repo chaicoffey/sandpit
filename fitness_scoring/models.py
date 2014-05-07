@@ -710,6 +710,19 @@ class TeacherClassAllocation(models.Model):
 class StudentClassEnrolment(models.Model):
     class_id = models.ForeignKey(Class)
     student_id = models.ForeignKey(Student)
+    student_age_at_time_of_enrolment = models.IntegerField(max_length=4)
+
+    def get_test_results(self):
+        test_results = []
+
+        class_tests = ClassTest.objects.filter(class_id=self.class_id)
+        for class_test in class_tests:
+            test = class_test.test_name
+            student_class_test_result = StudentClassTestResult.objects.filter(student_class_enrolment=self, test=test)
+            result = student_class_test_result[0].result if student_class_test_result.exists() else None
+            test_results.append(result)
+
+        return test_results
     
 
 class ClassTest(models.Model):
@@ -717,14 +730,8 @@ class ClassTest(models.Model):
     test_name = models.ForeignKey(Test)
 
 
-class StudentClassTests(models.Model):
-    student_class_enrolment = models.ForeignKey(StudentClassEnrolment)
-    class_id = models.ForeignKey(Class)
-    student_age = models.IntegerField(max_length=4)
-
-
 class StudentClassTestResult(models.Model):
-    student_class_tests = models.ForeignKey(StudentClassTests)
+    student_class_enrolment = models.ForeignKey(StudentClassEnrolment)
     test = models.ForeignKey(Test)
     result = models.CharField(max_length=20)
     percentile = models.IntegerField(max_length=4)

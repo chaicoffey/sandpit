@@ -26,10 +26,19 @@
         <table class="table table-hover results_table" id="results_table">
             <thead>
                 <tr>
+                    <th>Students</th>
                     {% for test in class_tests %}
                         <th>{{ test.test_name }}</th>
                     {% endfor %}
                 </tr>
+                {% for student, test_results in student_test_results %}
+                    <tr>
+                        <td>{{ student }}</td>
+                        {% for result in test_results %}
+                            <td>result</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
             </thead>
         </table>
     </div>
