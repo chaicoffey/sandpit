@@ -3,14 +3,14 @@ from django.http import HttpResponseForbidden
 from django.template import RequestContext
 from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, TestCategory, Test, Student, Class
 from fitness_scoring.models import PercentileBracketList
-from fitness_scoring.models import TeacherClassAllocation, ClassTest, StudentClassEnrolment
+from fitness_scoring.models import TeacherClassAllocation, ClassTest, StudentClassEnrolment, TestSet
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
 from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFileForm
 from fitness_scoring.forms import EditStudentForm
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm
-from fitness_scoring.forms import AssignTestToClassForm
+from fitness_scoring.forms import AssignTestToClassForm, SaveClassTestsAsTestSetForm
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.mail import send_mail
 
@@ -935,35 +935,15 @@ def class_results_table(request, class_pk):
                 ['test_instructions_load_link', '/test/instructions/', 'info-sign']
             ],
             'results_table_buttons': [
-                ['+', [['class_results_modal_load_link', '/class/test/add/' + str(class_pk), 'Add Test To Class']]]
+                ['+', [['class_results_modal_load_link', '/class/test/add/' + str(class_pk), 'Add Test To Class'],
+                       ['class_results_modal_load_link', '/class/test_set/save/' + str(class_pk),
+                        'Save Class Tests As A Test Set']]]
             ],
             'student_test_results': student_test_results
         }
         return render(request, 'class_results_table.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to view class results table")
-
-
-def remove_student_from_class(request, class_pk, student_pk):
-    if user_authorised_for_class(request, class_pk):
-        class_instance = Class.objects.get(pk=class_pk)
-        student = Student.objects.get(pk=student_pk)
-        if request.POST:
-            if class_instance.withdraw_student_safe(student):
-                context = {'finish_title': 'Remove Student From Class',
-                           'user_message': 'Student Removed Successfully: ' + str(student)}
-            else:
-                context = {'finish_title': 'Student Not Removed From Class',
-                           'user_error_message': 'Could Not Remove ' + str(student) + ' (This Student Has Results'
-                                                                                      ' Entered In This Class)'}
-            return render(request, 'user_message.html', RequestContext(request, context))
-        else:
-            context = {'post_to_url': '/class/student/delete/' + str(class_pk) + '/' + str(student_pk),
-                       'functionality_name': 'Remove Student',
-                       'prompt_message': 'Are You Sure You Wish To Remove Student From Class ' + str(student) + "?"}
-            return render(request, 'modal_form.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to remove a student from this class")
 
 
 def add_test_to_class(request, class_pk):
@@ -989,6 +969,32 @@ def add_test_to_class(request, class_pk):
         return HttpResponseForbidden("You are not authorised to add a test to this class")
 
 
+def save_class_tests_as_test_set(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        if request.POST:
+            save_class_tests_as_test_set_form = SaveClassTestsAsTestSetForm(class_pk=class_pk, data=request.POST)
+            if save_class_tests_as_test_set_form.save_class_tests_as_test_set():
+                test_set_saved = TestSet.objects.get(
+                    school=Class.objects.get(pk=class_pk).school_id,
+                    test_set_name=save_class_tests_as_test_set_form.cleaned_data['test_set_name']
+                )
+                context = {'finish_title': 'Test Set Saved',
+                           'user_message': 'Test Set Saved Successfully: ' + str(test_set_saved)}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/class/test_set/save/' + str(class_pk) + '/',
+                           'functionality_name': 'Save Test Set',
+                           'form': save_class_tests_as_test_set_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/class/test_set/save/' + str(class_pk) + '/',
+                       'functionality_name': 'Save Test Set',
+                       'form': SaveClassTestsAsTestSetForm(class_pk=class_pk)}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to save a test set from this class")
+
+
 def remove_test_from_class(request, class_pk, test_pk):
     if user_authorised_for_class(request, class_pk):
         class_instance = Class.objects.get(pk=class_pk)
@@ -1009,6 +1015,28 @@ def remove_test_from_class(request, class_pk, test_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to remove a test from this class")
+
+
+def remove_student_from_class(request, class_pk, student_pk):
+    if user_authorised_for_class(request, class_pk):
+        class_instance = Class.objects.get(pk=class_pk)
+        student = Student.objects.get(pk=student_pk)
+        if request.POST:
+            if class_instance.withdraw_student_safe(student):
+                context = {'finish_title': 'Remove Student From Class',
+                           'user_message': 'Student Removed Successfully: ' + str(student)}
+            else:
+                context = {'finish_title': 'Student Not Removed From Class',
+                           'user_error_message': 'Could Not Remove ' + str(student) + ' (This Student Has Results'
+                                                                                      ' Entered In This Class)'}
+            return render(request, 'user_message.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/class/student/delete/' + str(class_pk) + '/' + str(student_pk),
+                       'functionality_name': 'Remove Student',
+                       'prompt_message': 'Are You Sure You Wish To Remove Student From Class ' + str(student) + "?"}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to remove a student from this class")
 
 
 def user_authorised_for_class(request, class_pk):

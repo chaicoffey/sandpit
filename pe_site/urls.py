@@ -58,6 +58,8 @@ urlpatterns = patterns(
     url(r'^class/student/delete/(?P<class_pk>\d+)/(?P<student_pk>\d+)',
         'fitness_scoring.views.remove_student_from_class', name='remove_student_from_class'),
     url(r'^class/test/add/(?P<class_pk>\d+)', 'fitness_scoring.views.add_test_to_class', name='add_test_to_class'),
+    url(r'^class/test_set/save/(?P<class_pk>\d+)', 'fitness_scoring.views.save_class_tests_as_test_set',
+        name='save_class_tests_as_test_set'),
     url(r'^class/test/delete/(?P<class_pk>\d+)/(?P<test_pk>\d+)', 'fitness_scoring.views.remove_test_from_class',
         name='remove_test_from_class'),
 )

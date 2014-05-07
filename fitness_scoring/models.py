@@ -765,7 +765,7 @@ class TestSet(models.Model):
     test_set_name = models.CharField(max_length=200)
 
     def __unicode__(self):
-        return self.test_set_name + '(' + self.school_id.name + ')'
+        return self.test_set_name + ' (' + self.school.name + ')'
 
     def get_tests(self):
         return [test_set_test.test for test_set_test in TestSetTest.objects.filter(test_set=self)]

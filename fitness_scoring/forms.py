@@ -323,14 +323,14 @@ class SaveClassTestsAsTestSetForm(forms.Form):
         if class_pk and test_set_name:
             error_message = None
             class_instance = Class.objects.get(pk=class_pk)
-            test_sets = TestSet.objects.filter(school=class_instance.school_id, test_set_name=test_set_name)
-            if test_sets.exists():
+            if TestSet.objects.filter(school=class_instance.school_id, test_set_name=test_set_name).exists():
                 error_message = 'Test Set Already Exists: ' + test_set_name
             else:
                 class_tests = class_instance.get_tests()
+                test_sets = TestSet.objects.filter(school=class_instance.school_id)
                 for test_set in test_sets:
                     if collections.Counter(test_set.get_tests()) == collections.Counter(class_tests):
-                        error_message = 'Test Set Has' + test_set.test_set_name + 'Same Tests'
+                        error_message = 'Test Set ' + test_set.test_set_name + ' Has Same Tests'
 
             if error_message:
                 self._errors["test_set_name"] = self.error_class([error_message])
@@ -338,6 +338,15 @@ class SaveClassTestsAsTestSetForm(forms.Form):
                 del cleaned_data["test_set_name"]
 
         return cleaned_data
+
+    def save_class_tests_as_test_set(self):
+        test_set_saved = self.is_valid()
+        if test_set_saved:
+            class_pk = self.cleaned_data['class_pk']
+            test_set_name = self.cleaned_data['test_set_name']
+            (test_set_saved,
+             error_message) = Class.objects.get(pk=class_pk).save_class_tests_as_test_set_safe(test_set_name)
+        return test_set_saved
 
 
 class AddSchoolForm(forms.Form):
