@@ -1,6 +1,6 @@
 from django import forms
 from fitness_scoring.models import School, Administrator, Student, Class, Teacher, TestCategory, Test
-from fitness_scoring.models import TeacherClassAllocation, ClassTests
+from fitness_scoring.models import TeacherClassAllocation, ClassTest
 from fitness_scoring.validators import validate_school_unique, validate_new_school_name_unique
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
 from fitness_scoring.validators import validate_new_test_name_unique
@@ -289,7 +289,7 @@ class AssignTestToClassForm(forms.Form):
         class_instance = Class.objects.get(pk=class_pk)
         self.fields['test'].choices = []
         for test in Test.objects.all():
-            if not ClassTests.objects.filter(class_id=class_instance, test_name=test):
+            if not ClassTest.objects.filter(class_id=class_instance, test_name=test):
                 self.fields['test'].choices.append((test.pk, str(test)))
 
         self.fields['class_pk'].initial = class_pk

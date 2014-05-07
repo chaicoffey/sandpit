@@ -309,7 +309,7 @@ class Class(models.Model):
             teacher_allocation = TeacherClassAllocation.objects.filter(class_id=self)
             if teacher_allocation.exists():
                 teacher_allocation[0].delete()
-            test_allocations = ClassTests.objects.filter(class_id=self)
+            test_allocations = ClassTest.objects.filter(class_id=self)
             if test_allocations.exists():
                 for test_allocation in test_allocations:
                     test_allocation.delete()
@@ -356,13 +356,13 @@ class Class(models.Model):
         return withdrawn
 
     def assign_test_safe(self, test):
-        assigned = not ClassTests.objects.filter(class_id=self, test_name=test).exists()
+        assigned = not ClassTest.objects.filter(class_id=self, test_name=test).exists()
         if assigned:
-            ClassTests.objects.create(class_id=self, test_name=test)
+            ClassTest.objects.create(class_id=self, test_name=test)
         return assigned
 
     def deallocate_test_safe(self, test):
-        deallocate = ClassTests.objects.filter(class_id=self, test_name=test).exists()
+        deallocate = ClassTest.objects.filter(class_id=self, test_name=test).exists()
         if deallocate:
             enrolments = StudentClassEnrolment.objects.filter(class_id=self)
             for enrolment in enrolments:
@@ -370,7 +370,7 @@ class Class(models.Model):
                                                                                       test_name=test).exists()
 
         if deallocate:
-            ClassTests.objects.get(class_id=self, test_name=test).delete()
+            ClassTest.objects.get(class_id=self, test_name=test).delete()
 
         return deallocate
 
@@ -658,7 +658,7 @@ class Test(models.Model):
         return [self.test_name, self.test_category.test_category_name]
 
     def delete_test_safe(self):
-        test_not_used = ((not ClassTests.objects.filter(test_name=self).exists()) and
+        test_not_used = ((not ClassTest.objects.filter(test_name=self).exists()) and
                          (not StudentClassTestResult.objects.filter(test_name=self).exists()))
         if test_not_used:
             self.percentiles.delete_percentile_bracket_set_safe()
@@ -712,14 +712,14 @@ class StudentClassEnrolment(models.Model):
     student_id = models.ForeignKey(Student)
     
 
-class ClassTests(models.Model):
+class ClassTest(models.Model):
     class_id = models.ForeignKey(Class)
     test_name = models.ForeignKey(Test)
 
 
 class StudentClassTests(models.Model):
     student_class_enrolment = models.ForeignKey(StudentClassEnrolment)
-    class_tests = models.ForeignKey(ClassTests)
+    class_id = models.ForeignKey(Class)
     student_age = models.IntegerField(max_length=4)
 
 
