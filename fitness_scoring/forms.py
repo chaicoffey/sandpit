@@ -1,6 +1,6 @@
 from django import forms
 from fitness_scoring.models import School, Administrator, Student, Class, Teacher, TestCategory, Test
-from fitness_scoring.models import TeacherClassAllocation, ClassTest
+from fitness_scoring.models import TeacherClassAllocation, ClassTest, TestSet
 from fitness_scoring.validators import validate_school_unique, validate_new_school_name_unique
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
 from fitness_scoring.validators import validate_new_test_name_unique
@@ -13,6 +13,7 @@ from fitness_scoring.fileio import add_classes_from_file_upload
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.validators import MinLengthValidator
 import datetime
+import collections
 from django.core.mail import send_mail
 
 
@@ -301,6 +302,42 @@ class AssignTestToClassForm(forms.Form):
             test = Test.objects.get(pk=self.cleaned_data['test'])
             assign_test_to_class = class_instance.assign_test_safe(test=test)
         return assign_test_to_class
+
+
+class SaveClassTestsAsTestSetForm(forms.Form):
+    class_pk = forms.CharField(widget=forms.HiddenInput())
+    test_set_name = forms.CharField(max_length=300, required=True)
+
+    def __init__(self, class_pk, *args, **kwargs):
+        super(SaveClassTestsAsTestSetForm, self).__init__(*args, **kwargs)
+
+        self.fields['test_set_name'].error_messages = {'required': 'Please Select Test Set Name'}
+
+        self.fields['class_pk'].initial = class_pk
+
+    def clean(self):
+        cleaned_data = super(SaveClassTestsAsTestSetForm, self).clean()
+        class_pk = cleaned_data.get("class_pk")
+        test_set_name = cleaned_data.get("test_set_name")
+
+        if class_pk and test_set_name:
+            error_message = None
+            class_instance = Class.objects.get(pk=class_pk)
+            test_sets = TestSet.objects.filter(school=class_instance.school_id, test_set_name=test_set_name)
+            if test_sets.exists():
+                error_message = 'Test Set Already Exists: ' + test_set_name
+            else:
+                class_tests = class_instance.get_tests()
+                for test_set in test_sets:
+                    if collections.Counter(test_set.get_tests()) == collections.Counter(class_tests):
+                        error_message = 'Test Set Has' + test_set.test_set_name + 'Same Tests'
+
+            if error_message:
+                self._errors["test_set_name"] = self.error_class([error_message])
+                del cleaned_data["class_pk"]
+                del cleaned_data["test_set_name"]
+
+        return cleaned_data
 
 
 class AddSchoolForm(forms.Form):

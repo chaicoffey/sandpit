@@ -357,7 +357,7 @@ class Class(models.Model):
         return assigned
 
     def save_class_tests_as_test_set_safe(self, test_set_name):
-        return TestSet.create_test_set(test_set_name, self.school_id, ClassTest.objects.filter(class_id=self))
+        return TestSet.create_test_set(test_set_name, self.school_id, self.get_tests())
 
     def load_test_set_as_class_tests_safe(self, test_set):
         error_message = None
@@ -780,7 +780,7 @@ class TestSet(models.Model):
         if not error_message:
             test_sets = TestSet.objects.filter(school=school)
             for test_set in test_sets:
-                if collections.Counter(test_set) == collections.Counter(tests):
+                if collections.Counter(test_set.get_tests()) == collections.Counter(tests):
                     error_message = 'Test Set Has' + test_set.test_set_name + 'Same Tests'
 
         if not error_message:
