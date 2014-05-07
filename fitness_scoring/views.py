@@ -915,6 +915,9 @@ def class_results_table(request, class_pk):
                                 StudentClassEnrolment.objects.filter(class_id=class_instance)]
         context = {
             'class_tests': class_tests,
+            'class_test_options': [
+                ['class_results_modal_load_link', '/class/test/delete/' + str(class_pk) + '/', 'remove']
+            ],
             'results_table_buttons': [
                 ['+', [['class_results_modal_load_link', '/class/test/add/' + str(class_pk), 'Add Test To Class']]]
             ],
