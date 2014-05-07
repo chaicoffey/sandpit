@@ -496,18 +496,15 @@ class UpdateTestFromFileForm(forms.Form):
 class EditTestForm(forms.Form):
     test_pk = forms.CharField(widget=forms.HiddenInput())
     test_name = forms.CharField(max_length=200, required=True)
-    url_link = forms.CharField(max_length=400, required=True)
 
     def __init__(self, test_pk, *args, **kwargs):
         super(EditTestForm, self).__init__(*args, **kwargs)
 
         self.fields['test_name'].error_messages = {'required': 'Please Enter Test Name'}
-        self.fields['url_link'].error_messages = {'required': 'Please Enter URL Link'}
 
         test = Test.objects.get(pk=test_pk)
         self.fields['test_pk'].initial = test_pk
         self.fields['test_name'].initial = test.test_name
-        self.fields['url_link'].initial = test.url_link
 
         self.fields['test_name'].validators = [validate_new_test_name_unique(test_pk=test_pk)]
 
@@ -516,6 +513,5 @@ class EditTestForm(forms.Form):
         if test_edited:
             test_pk = self.cleaned_data['test_pk']
             test_name = self.cleaned_data['test_name']
-            url_link = self.cleaned_data['url_link']
-            test_edited = Test.objects.get(pk=test_pk).edit_test_safe(test_name, url_link)
+            test_edited = Test.objects.get(pk=test_pk).edit_test_safe(test_name)
         return test_edited

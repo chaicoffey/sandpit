@@ -648,7 +648,6 @@ class PercentileBracketList(models.Model):
 class Test(models.Model):
     test_name = models.CharField(max_length=200, unique=True)
     test_category = models.ForeignKey(TestCategory)
-    url_link = models.CharField(max_length=400)
     percentiles = models.ForeignKey(PercentileBracketSet)
 
     def __unicode__(self):
@@ -659,17 +658,16 @@ class Test(models.Model):
 
     def delete_test_safe(self):
         test_not_used = ((not ClassTest.objects.filter(test_name=self).exists()) and
-                         (not StudentClassTestResult.objects.filter(test_name=self).exists()))
+                         (not StudentClassTestResult.objects.filter(test=self).exists()))
         if test_not_used:
             self.percentiles.delete_percentile_bracket_set_safe()
             self.delete()
         return test_not_used
 
-    def edit_test_safe(self, test_name, url_link):
+    def edit_test_safe(self, test_name):
         is_edit_safe = (self.test_name == test_name) or not Test.objects.filter(test_name=test_name).exists()
         if is_edit_safe:
             self.test_name = test_name
-            self.url_link = url_link
             self.save()
         return is_edit_safe
 
@@ -678,22 +676,20 @@ class Test(models.Model):
         return ['Test', 'Test Category']
 
     @staticmethod
-    def create_test(test_name, test_category, url_link, result_information):
+    def create_test(test_name, test_category, result_information):
         test_name_unique = not Test.objects.filter(test_name=test_name).exists()
         if test_name_unique:
             percentiles = PercentileBracketSet.create_percentile_bracket_set(result_information)
-            test = Test.objects.create(test_name=test_name, test_category=test_category,
-                                       url_link=url_link, percentiles=percentiles)
+            test = Test.objects.create(test_name=test_name, test_category=test_category, percentiles=percentiles)
         else:
             test = None
         return test
 
     @staticmethod
-    def update_test(test_name, url_link, percentile_scores):
+    def update_test(test_name, percentile_scores):
 
         if Test.objects.filter(test_name=test_name).exists():
             test = Test.objects.get(test_name=test_name)
-            test.url_link = url_link
             test.percentiles.update_percentile_bracket_set(percentile_scores)
             test.save()
         else:
