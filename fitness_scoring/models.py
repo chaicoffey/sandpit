@@ -362,8 +362,9 @@ class Class(models.Model):
     def save_class_tests_as_test_set_safe(self, test_set_name):
         return TestSet.create_test_set(test_set_name, self.school_id, self.get_tests())
 
-    def load_test_set_as_class_tests_safe(self, test_set):
+    def load_test_set_as_class_tests_errors(self, test_set):
         error_message = None
+
         test_set_tests = test_set.get_tests()
         class_tests = self.get_tests()
         for class_test in class_tests:
@@ -371,14 +372,22 @@ class Class(models.Model):
                 error_message = ('Test ' + class_test.test_name + ' has results entered but is not in test set '
                                  + test_set.test_set_name)
 
-        if not error_message:
+        return error_message
+
+    def load_test_set_as_class_tests_safe(self, test_set):
+        load_valid = not self.load_test_set_as_class_tests_errors(test_set)
+        if load_valid:
+
+            test_set_tests = test_set.get_tests()
+            class_tests = self.get_tests()
             for class_test in class_tests:
                 if not (class_test in test_set_tests):
                     ClassTest.objects.get(class_id=self, test_name=class_test).delete()
             for test_set_test in test_set_tests:
-                ClassTest.objects.create(class_id=self, test_name=test_set_test)
+                if not (test_set_test in class_tests):
+                    ClassTest.objects.create(class_id=self, test_name=test_set_test)
 
-        return error_message
+        return load_valid
 
     def deallocate_test_safe(self, test):
         deallocate = ClassTest.objects.filter(class_id=self, test_name=test).exists()
