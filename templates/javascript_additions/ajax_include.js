@@ -49,6 +49,11 @@ $(document).on('click', '.percentile_load_link a', function(event){
     percentile_load_link_clicked_event($(this).attr('href'));
 });
 
+//for loading test instructions load links
+$(document).on('click', '.test_instructions_load_link a', function(event){
+    $(this).attr('target', '_blank')
+});
+
 //for loading percentile load links on age_gender_selection change
 $(document).on('change', '#age_gender_selection', function(event){
     event.preventDefault();

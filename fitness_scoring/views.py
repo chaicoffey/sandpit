@@ -575,6 +575,21 @@ def test_percentile_brackets_graphs(request, percentile_bracket_list_pk, test_pk
         return HttpResponseForbidden("You are not authorised to view the percentile brackets for a test")
 
 
+def test_instructions(request, test_name):
+    user_type = request.session.get('user_type', None)
+    if (user_type == 'Administrator') or (user_type == 'Teacher'):
+        if test_name == 'Jump 20m':
+            return render(request, 'test_instructions/no_test_instructions.html', RequestContext(request, {}))
+        elif test_name == 'Run 20m':
+            return render(request, 'test_instructions/no_test_instructions.html', RequestContext(request, {}))
+        elif test_name == 'Throw 20m':
+            return render(request, 'test_instructions/no_test_instructions.html', RequestContext(request, {}))
+        else:
+            return render(request, 'test_instructions/no_test_instructions.html', RequestContext(request, {}))
+    else:
+        return HttpResponseForbidden("You are not authorised to view instructions for a test")
+
+
 def student_edit(request, student_pk):
     user_type = request.session.get('user_type', None)
     authorised = (user_type == 'Administrator') or (user_type == 'Teacher')
@@ -916,7 +931,8 @@ def class_results_table(request, class_pk):
         context = {
             'class_tests': class_tests,
             'class_test_options': [
-                ['class_results_modal_load_link', '/class/test/delete/' + str(class_pk) + '/', 'remove']
+                ['class_results_modal_load_link', '/class/test/delete/' + str(class_pk) + '/', 'remove'],
+                ['test_instructions_load_link', '/test/instructions/', 'info-sign']
             ],
             'results_table_buttons': [
                 ['+', [['class_results_modal_load_link', '/class/test/add/' + str(class_pk), 'Add Test To Class']]]
