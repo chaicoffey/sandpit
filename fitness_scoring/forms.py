@@ -1,6 +1,6 @@
 from django import forms
 from fitness_scoring.models import School, Administrator, Student, Class, Teacher, TestCategory, Test
-from fitness_scoring.models import TeacherClassAllocation, ClassTest, TestSet
+from fitness_scoring.models import TeacherClassAllocation, ClassTest
 from fitness_scoring.validators import validate_school_unique, validate_new_school_name_unique
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
 from fitness_scoring.validators import validate_new_test_name_unique
@@ -13,7 +13,6 @@ from fitness_scoring.fileio import add_classes_from_file_upload
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.validators import MinLengthValidator
 import datetime
-import collections
 from django.core.mail import send_mail
 
 
@@ -336,6 +335,39 @@ class SaveClassTestsAsTestSetForm(forms.Form):
         else:
             test_set = None
         return test_set
+
+
+class LoadClassTestsFromTestSetForm(forms.Form):
+    class_pk = forms.CharField(widget=forms.HiddenInput())
+    test_set_name = forms.CharField(max_length=300, required=True)
+
+    def __init__(self, class_pk, *args, **kwargs):
+        super(LoadClassTestsFromTestSetForm, self).__init__(*args, **kwargs)
+
+        self.fields['test_set_name'].error_messages = {'required': 'Please Select Test Set Name'}
+
+        self.fields['class_pk'].initial = class_pk
+
+    def clean(self):
+        cleaned_data = super(LoadClassTestsFromTestSetForm, self).clean()
+        class_pk = cleaned_data.get("class_pk")
+        test_set_name = cleaned_data.get("test_set_name")
+
+        if class_pk and test_set_name:
+            error_message = Class.objects.get(pk=class_pk).load_class_tests_from_test_set_errors(test_set_name)
+            if error_message:
+                self._errors["test_set_name"] = self.error_class([error_message])
+                del cleaned_data["test_set_name"]
+
+        return cleaned_data
+
+    def load_class_tests_from_test_set(self):
+        load_valid = self.is_valid()
+        if load_valid:
+            class_pk = self.cleaned_data['class_pk']
+            test_set_name = self.cleaned_data['test_set_name']
+            load_valid = Class.objects.get(pk=class_pk).load_class_tests_from_test_set_errors(test_set_name)
+        return load_valid
 
 
 class AddSchoolForm(forms.Form):

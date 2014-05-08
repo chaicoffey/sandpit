@@ -362,23 +362,28 @@ class Class(models.Model):
     def save_class_tests_as_test_set_safe(self, test_set_name):
         return TestSet.create_test_set(test_set_name, self.school_id, self.get_tests())
 
-    def load_test_set_as_class_tests_errors(self, test_set):
-        error_message = None
+    def load_class_tests_from_test_set_errors(self, test_set_name):
 
-        test_set_tests = test_set.get_tests()
-        class_tests = self.get_tests()
-        for class_test in class_tests:
-            if (not (class_test in test_set_tests)) and self.does_result_exist_for_test(test=class_test):
-                error_message = ('Test ' + class_test.test_name + ' has results entered but is not in test set '
-                                 + test_set.test_set_name)
+        if TestSet.objects.filter(school=self.school_id, test_set_name=test_set_name).exists():
+            error_message = None
+        else:
+            error_message = 'No Test Set Exists With Name: ' + test_set_name
+
+        if not error_message:
+            test_set_tests = TestSet.objects.get(school=self.school_id, test_set_name=test_set_name).get_tests()
+            class_tests = self.get_tests()
+            for class_test in class_tests:
+                if (not (class_test in test_set_tests)) and self.does_result_exist_for_test(test=class_test):
+                    error_message = ('Test ' + class_test.test_name + ' has results entered but is not in test set ' +
+                                     test_set_name)
 
         return error_message
 
-    def load_test_set_as_class_tests_safe(self, test_set):
-        load_valid = not self.load_test_set_as_class_tests_errors(test_set)
+    def load_class_tests_from_test_set_safe(self, test_set_name):
+        load_valid = not self.load_class_tests_from_test_set_errors(test_set_name)
         if load_valid:
 
-            test_set_tests = test_set.get_tests()
+            test_set_tests = TestSet.objects.get(school=self.school_id, test_set_name=test_set_name).get_tests()
             class_tests = self.get_tests()
             for class_test in class_tests:
                 if not (class_test in test_set_tests):
