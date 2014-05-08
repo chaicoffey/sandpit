@@ -1,6 +1,6 @@
 from django import forms
 from fitness_scoring.models import School, Administrator, Student, Class, Teacher, TestCategory, Test
-from fitness_scoring.models import TeacherClassAllocation, ClassTest
+from fitness_scoring.models import TeacherClassAllocation, ClassTest, TestSet
 from fitness_scoring.validators import validate_school_unique, validate_new_school_name_unique
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
 from fitness_scoring.validators import validate_new_test_name_unique
@@ -339,7 +339,7 @@ class SaveClassTestsAsTestSetForm(forms.Form):
 
 class LoadClassTestsFromTestSetForm(forms.Form):
     class_pk = forms.CharField(widget=forms.HiddenInput())
-    test_set_name = forms.CharField(max_length=300, required=True)
+    test_set_name = forms.ChoiceField(required=True)
 
     def __init__(self, class_pk, *args, **kwargs):
         super(LoadClassTestsFromTestSetForm, self).__init__(*args, **kwargs)
@@ -347,6 +347,11 @@ class LoadClassTestsFromTestSetForm(forms.Form):
         self.fields['test_set_name'].error_messages = {'required': 'Please Select Test Set Name'}
 
         self.fields['class_pk'].initial = class_pk
+
+        self.fields['test_set_name'].choices = [('', '')]
+        for test_set in TestSet.objects.filter(school_id=Class.objects.get(pk=class_pk).school_id):
+            self.fields['test_set_name'].choices.append((test_set.test_set_name, test_set.test_set_name))
+        self.fields['test_set_name'].initial = ''
 
     def clean(self):
         cleaned_data = super(LoadClassTestsFromTestSetForm, self).clean()
@@ -366,7 +371,7 @@ class LoadClassTestsFromTestSetForm(forms.Form):
         if load_valid:
             class_pk = self.cleaned_data['class_pk']
             test_set_name = self.cleaned_data['test_set_name']
-            load_valid = Class.objects.get(pk=class_pk).load_class_tests_from_test_set_errors(test_set_name)
+            load_valid = Class.objects.get(pk=class_pk).load_class_tests_from_test_set_safe(test_set_name)
         return load_valid
 
 

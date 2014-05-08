@@ -10,7 +10,7 @@ from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFile
 from fitness_scoring.forms import EditStudentForm
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm
-from fitness_scoring.forms import AssignTestToClassForm, SaveClassTestsAsTestSetForm
+from fitness_scoring.forms import AssignTestToClassForm, SaveClassTestsAsTestSetForm, LoadClassTestsFromTestSetForm
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.mail import send_mail
 
@@ -936,8 +936,10 @@ def class_results_table(request, class_pk):
             ],
             'results_table_buttons': [
                 ['+', [['class_results_modal_load_link', '/class/test/add/' + str(class_pk), 'Add Test To Class'],
+                       ['class_results_modal_load_link', '/class/test_set/load/' + str(class_pk),
+                        'Load Class Tests From A Test Set'],
                        ['class_results_modal_load_link', '/class/test_set/save/' + str(class_pk),
-                        'Save Class Tests As A Test Set']]]
+                        'Save Current Class Tests As A Test Set']]]
             ],
             'student_test_results': student_test_results
         }
@@ -993,6 +995,32 @@ def save_class_tests_as_test_set(request, class_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to save a test set from this class")
+
+
+def load_class_tests_from_test_set(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        if request.POST:
+            load_class_tests_from_test_set_form = LoadClassTestsFromTestSetForm(class_pk=class_pk, data=request.POST)
+            if load_class_tests_from_test_set_form.load_class_tests_from_test_set():
+                test_set_loaded = TestSet.objects.get(
+                    school=Class.objects.get(pk=class_pk).school_id,
+                    test_set_name=load_class_tests_from_test_set_form.cleaned_data['test_set_name']
+                )
+                context = {'finish_title': 'Test Set Loaded',
+                           'user_message': 'Test Set Loaded Successfully: ' + str(test_set_loaded.test_set_name)}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/class/test_set/load/' + str(class_pk) + '/',
+                           'functionality_name': 'Load Test Set',
+                           'form': load_class_tests_from_test_set_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/class/test_set/load/' + str(class_pk) + '/',
+                       'functionality_name': 'Load Test Set',
+                       'form': LoadClassTestsFromTestSetForm(class_pk=class_pk)}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to load a test set to this class")
 
 
 def remove_test_from_class(request, class_pk, test_pk):
