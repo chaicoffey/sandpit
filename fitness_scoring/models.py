@@ -2,6 +2,10 @@ from django.db import models
 import datetime
 import time
 import collections
+import string
+from time import time as time_seed
+from itertools import chain
+from random import seed, choice, sample
 
 
 class School(models.Model):
@@ -91,9 +95,10 @@ class User(models.Model):
         return self.password == User.encrypt_password(password)
 
     def reset_password(self):
-        self.password = User.encrypt_password(User.get_random_password())
+        password = User.get_random_password()
+        self.password = User.encrypt_password(password)
         self.save()
-        return self.password
+        return password
 
     def change_password(self, password):
         self.password = User.encrypt_password(password)
@@ -127,7 +132,28 @@ class User(models.Model):
 
     @staticmethod
     def get_random_password():
-        return 'pw'
+        seed(time_seed())
+
+        lowercase = string.lowercase.translate(None, "o")
+        uppercase = string.uppercase.translate(None, "O")
+        letters = "{0:s}{1:s}".format(lowercase, uppercase)
+
+        min_upper_case_letters = 2
+        min_lower_case_letters = 2
+        min_digits = 3
+        total_length = 10
+
+        password = list(
+            chain(
+                (choice(uppercase) for _ in range(min_upper_case_letters)),
+                (choice(lowercase) for _ in range(min_lower_case_letters)),
+                (choice(string.digits) for _ in range(min_digits)),
+                (choice(letters) for _ in range((total_length
+                                                 - min_digits - min_upper_case_letters - min_lower_case_letters)))
+            )
+        )
+
+        return "".join(sample(password, len(password)))
 
     @staticmethod
     def encrypt_password(password):
