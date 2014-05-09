@@ -6,6 +6,8 @@ import string
 from time import time as time_seed
 from itertools import chain
 from random import seed, choice, sample
+import random
+from hashlib import sha1
 
 
 class School(models.Model):
@@ -86,13 +88,14 @@ class School(models.Model):
 
 class User(models.Model):
     username = models.CharField(max_length=100, unique=True)
-    password = models.CharField(max_length=128)
+    password = models.CharField(max_length=1024)
 
     def __unicode__(self):
         return self.username
 
     def authenticate_user(self, password):
-        return self.password == User.encrypt_password(password)
+        salt, hsh = self.password.split('$')
+        return hsh == sha1('%s%s' % (salt, password)).hexdigest()
 
     def reset_password(self):
         password = User.get_random_password()
@@ -157,7 +160,9 @@ class User(models.Model):
 
     @staticmethod
     def encrypt_password(password):
-        return password + password + '1!'
+        salt = sha1('%s%s' % (str(random.random()), str(random.random()))).hexdigest()[:5]
+        hsh = sha1('%s%s' % (salt, password)).hexdigest()
+        return '%s$%s' % (salt, hsh)
 
 
 class SuperUser(models.Model):
