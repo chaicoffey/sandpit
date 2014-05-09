@@ -329,21 +329,24 @@ class Class(models.Model):
             self.delete()
         return class_not_used
 
+    def edit_class_errors(self, year, class_name, school_id, teacher_id):
+        error_message = None
+
+        if(((str(self.year) != str(year)) or (self.class_name != class_name) or (self.school_id != school_id)) and
+           Class.objects.filter(year=year, class_name=class_name, school_id=school_id).exists()):
+            error_message = "Class Already Exists: " + str(self)
+
+        if teacher_id.school_id != school_id:
+            error_message = "Teacher is not in this school"
+
+        return error_message
+
     def edit_class_safe(self, year, class_name, school_id, teacher_id):
-        is_edit_safe = ((str(self.year) == str(year)) and (self.class_name == class_name)
-                        and (self.school_id == school_id))\
-            or (len(Class.objects.filter(year=year, class_name=class_name, school_id=school_id)) == 0)
-        is_edit_safe = is_edit_safe and ((teacher_id is None) or (teacher_id.school_id == school_id))
+        is_edit_safe = not self.edit_class_errors(year, class_name, school_id, teacher_id)
         if is_edit_safe:
-            if len(TeacherClassAllocation.objects.filter(class_id=self)) == 1:
-                allocation = TeacherClassAllocation.objects.get(class_id=self)
-                if teacher_id is None:
-                    allocation.delete()
-                else:
-                    allocation.teacher_id = teacher_id
-                    allocation.save()
-            elif teacher_id is not None:
-                    TeacherClassAllocation.objects.create(class_id=self, teacher_id=teacher_id)
+            allocation = TeacherClassAllocation.objects.get(class_id=self)
+            allocation.teacher_id = teacher_id
+            allocation.save()
             self.year = year
             self.class_name = class_name
             self.school_id = school_id
@@ -430,57 +433,28 @@ class Class(models.Model):
         return ['Year', 'Class', 'Teacher']
 
     @staticmethod
-    def create_class(year, class_name, school_id, teacher_id):
+    def create_class_errors(year, class_name, school_id, teacher_id):
+        error_message = None
 
-        class_unique = (len(Class.objects.filter(year=year, class_name=class_name, school_id=school_id)) == 0)
-        teacher_in_school = (teacher_id is None) or (teacher_id.school_id == school_id)
-        will_create = class_unique and teacher_in_school
+        if Class.objects.filter(year=year, class_name=class_name, school_id=school_id).exists():
+            error_message = "Class Already Exists"
 
-        if will_create:
-            class_instance = Class.objects.create(year=year, class_name=class_name, school_id=school_id)
-            if teacher_id is not None:
-                TeacherClassAllocation.objects.create(class_id=class_instance, teacher_id=teacher_id)
+        if teacher_id.school_id != school_id:
+            error_message = "Teacher is not in this school"
 
-        return will_create
+        return error_message
 
     @staticmethod
-    def update_class(year, class_name, school_id, teacher_id):
+    def create_class_safe(year, class_name, school_id, teacher_id):
 
-        class_exists = (len(Class.objects.filter(year=year, class_name=class_name, school_id=school_id)) == 1)
-        teacher_in_school = (teacher_id is None) or (teacher_id.school_id == school_id)
+        error_message = Class.create_class_errors(year, class_name, school_id, teacher_id)
+        if not error_message:
+            class_instance = Class.objects.create(year=year, class_name=class_name, school_id=school_id)
+            TeacherClassAllocation.objects.create(class_id=class_instance, teacher_id=teacher_id)
+        else:
+            class_instance = None
 
-        class_updated = class_exists and teacher_in_school
-        if class_exists:
-            class_instance = Class.objects.get(year=year, class_name=class_name, school_id=school_id)
-            teacher_is_allocated = len(TeacherClassAllocation.objects.filter(class_id=class_instance)) == 1
-            teacher_is_to_be_allocated = teacher_id is not None
-            if teacher_is_allocated:
-                allocation = TeacherClassAllocation.objects.get(class_id=class_instance)
-                class_updated = not ((str(class_instance.year) == str(year)) and
-                                     (class_instance.class_name == class_name) and
-                                     (class_instance.school_id == school_id) and
-                                     (allocation.teacher_id == teacher_id))
-            else:
-                allocation = None  # just for removing a warning
-                class_updated = not ((str(class_instance.year) == str(year)) and
-                                     (class_instance.class_name == class_name) and
-                                     (class_instance.school_id == school_id) and
-                                     (not teacher_is_to_be_allocated))
-            if class_updated:
-                if teacher_is_allocated:
-                    if teacher_is_to_be_allocated:
-                        allocation.teacher_id = teacher_id
-                        allocation.save()
-                    else:
-                        allocation.delete()
-                elif teacher_is_to_be_allocated:
-                    TeacherClassAllocation.objects.create(class_id=class_instance, teacher_id=teacher_id)
-                class_instance.year = year
-                class_instance.class_name = class_name
-                class_instance.school_id = school_id
-                class_instance.save()
-
-        return class_updated
+        return class_instance
 
 
 class TestCategory(models.Model):

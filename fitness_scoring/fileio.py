@@ -51,7 +51,7 @@ def add_classes_from_file(file_path_on_server, school_id):
             else None
         )
 
-        if Class.create_class(year=year, class_name=class_name, school_id=school_id, teacher_id=teacher_id):
+        if Class.create_class_safe(year=year, class_name=class_name, school_id=school_id, teacher_id=teacher_id):
             n_created += 1
         elif Class.update_class(year=year, class_name=class_name, school_id=school_id, teacher_id=teacher_id):
             n_updated += 1

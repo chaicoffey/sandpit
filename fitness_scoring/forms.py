@@ -167,13 +167,15 @@ class AddClassForm(forms.Form):
         cleaned_data = super(AddClassForm, self).clean()
         year = cleaned_data.get("year")
         class_name = cleaned_data.get("class_name")
+        teacher_pk = cleaned_data.get("teacher")
         school = School.objects.get(pk=cleaned_data.get("school_pk"))
 
-        if year and class_name:
-            if Class.objects.filter(year=year, class_name=class_name, school_id=school).exists():
-                self._errors["class_name"] = self.error_class(['Class Already Exists: ' + class_name +
-                                                               '(' + year + ')'])
-                del cleaned_data["school_pk"]
+        if year and class_name and teacher_pk:
+            teacher = Teacher.objects.get(pk=teacher_pk)
+            error_message = Class.create_class_errors(year=year, class_name=class_name,
+                                                      school_id=school, teacher_id=teacher)
+            if error_message:
+                self._errors["class_name"] = self.error_class([error_message])
                 del cleaned_data["year"]
                 del cleaned_data["class_name"]
                 del cleaned_data["teacher"]
@@ -181,14 +183,18 @@ class AddClassForm(forms.Form):
         return cleaned_data
 
     def add_class(self):
-        class_saved = self.is_valid()
-        if class_saved:
+
+        if self.is_valid():
             school = School.objects.get(pk=self.cleaned_data['school_pk'])
             year = self.cleaned_data['year']
             class_name = self.cleaned_data['class_name']
             teacher_pk = self.cleaned_data['teacher']
-            teacher = None if teacher_pk == '' else Teacher.objects.get(pk=teacher_pk)
-            class_saved = Class.create_class(year=year, class_name=class_name, school_id=school, teacher_id=teacher)
+            teacher = Teacher.objects.get(pk=teacher_pk)
+            class_saved = Class.create_class_safe(year=year, class_name=class_name,
+                                                  school_id=school, teacher_id=teacher)
+        else:
+            class_saved = None
+
         return class_saved
 
 
@@ -248,15 +254,16 @@ class EditClassForm(forms.Form):
         cleaned_data = super(EditClassForm, self).clean()
         year = cleaned_data.get("year")
         class_name = cleaned_data.get("class_name")
+        teacher_pk = cleaned_data.get("teacher")
         class_instance = Class.objects.get(pk=cleaned_data.get("class_pk"))
         school = School.objects.get(pk=cleaned_data.get("school_pk"))
 
-        if year and class_name:
-            if ((class_instance.class_name != class_name) or (str(class_instance.year) != year)) and\
-                    Class.objects.filter(year=year, class_name=class_name, school_id=school).exists():
-                self._errors["class_name"] = self.error_class(['Class Already Exists: ' + class_name +
-                                                               ' (' + year + ')'])
-                del cleaned_data["school_pk"]
+        if year and class_name and teacher_pk:
+            teacher = Teacher.objects.get(pk=teacher_pk)
+            error_message = class_instance.edit_class_errors(year=year, class_name=class_name,
+                                                             school_id=school, teacher_id=teacher)
+            if error_message:
+                self._errors["class_name"] = self.error_class([error_message])
                 del cleaned_data["year"]
                 del cleaned_data["class_name"]
                 del cleaned_data["teacher"]

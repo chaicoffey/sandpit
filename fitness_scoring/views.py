@@ -870,7 +870,7 @@ def class_edit(request, class_pk):
             class_edit_form = EditClassForm(school_pk=school_pk, class_pk=class_pk, data=request.POST)
             if class_edit_form.edit_class():
                 class_display_text = (class_edit_form.cleaned_data['class_name'] +
-                                      '(' + class_edit_form.cleaned_data['year'] + ')')
+                                      ' (' + class_edit_form.cleaned_data['year'] + ')')
                 context = {'finish_title': 'Class Edited',
                            'user_message': 'Class Edited Successfully: ' + class_display_text}
                 return render(request, 'user_message.html', RequestContext(request, context))
