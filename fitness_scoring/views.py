@@ -21,52 +21,29 @@ def logout_user(request):
 
 def login_user(request):
 
-    def authenticate(username_local, password_local):
-
-        def check_password(password_local2, encrypted_password):
-            return password_local2 == encrypted_password
-
-        users = User.objects.filter(username=username_local)
-        if users.exists():
-            superusers = SuperUser.objects.filter(user=users[0])
-            administrators = Administrator.objects.filter(user=users[0])
-            teachers = Teacher.objects.filter(user=users[0])
-            if superusers.exists():
-                if check_password(password_local2=password_local, encrypted_password=superusers[0].user.password):
-                    user_type_local = 'SuperUser'
-                else:
-                    user_type_local = 'SuperUser Failed'
-            elif administrators.exists():
-                if check_password(password_local2=password_local, encrypted_password=administrators[0].user.password):
-                    if administrators[0].school_id.subscription_paid:
-                        user_type_local = 'Administrator'
-                    else:
-                        user_type_local = 'Unpaid'
-                else:
-                    user_type_local = 'Administrator Failed'
-            elif teachers.exists():
-                if check_password(password_local2=password_local, encrypted_password=teachers[0].user.password):
-                    if teachers[0].school_id.subscription_paid:
-                        user_type_local = 'Teacher'
-                    else:
-                        user_type_local = 'Unpaid'
-                else:
-                    user_type_local = 'Teacher Failed'
-
-            else:
-                user_type_local = 'Failed'
-        else:
-            user_type_local = 'Failed'
-
-        return user_type_local
-
     if request.POST:
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        user_type = authenticate(username_local=username, password_local=password)
+        user = User.get_authenticated_user(username=username, password=password)
+        if user:
+            if SuperUser.objects.filter(user=user).exists():
+                user_type = 'SuperUser'
+            elif Administrator.objects.filter(user=user).exists():
+                if Administrator.objects.get(user=user).school_id.subscription_paid:
+                    user_type = 'Administrator'
+                else:
+                    user_type = 'Unpaid'
+            elif Teacher.objects.filter(user=user).exists():
+                user_type = 'Teacher'
+            else:
+                user_type = "Unrecognised User"
+        else:
+            user_type = "Authentication Failed"
+
         request.session['user_type'] = user_type   
         request.session['username'] = username
+
         if user_type == 'SuperUser':
             return redirect('fitness_scoring.views.superuser_view')
         elif user_type == 'Administrator':

@@ -87,20 +87,32 @@ class User(models.Model):
     def __unicode__(self):
         return self.username
 
+    def authenticate_user(self, password):
+        return self.password == User.encrypt_password(password)
+
     def reset_password(self):
-        self.password = self.username + '_C'
+        self.password = User.encrypt_password(User.get_random_password())
         self.save()
         return self.password
 
     def change_password(self, password):
-        self.password = password
+        self.password = User.encrypt_password(password)
         self.save()
+
+    @staticmethod
+    def get_authenticated_user(username, password):
+        user = User.objects.filter(username=username)
+        if user.exists() and user[0].authenticate_user(password):
+            user = user[0]
+        else:
+            user = None
+        return user
 
     @staticmethod
     def create_user(base_username):
         username = User.get_valid_username(base_username)
-        password = username
-        return User.objects.create(username=username, password=password), password
+        password = User.get_random_password()
+        return User.objects.create(username=username, password=User.encrypt_password(password)), password
 
     @staticmethod
     def get_valid_username(base_username):
@@ -112,6 +124,14 @@ class User(models.Model):
                 incremental += 1
                 username = base_username + str(incremental)
         return username
+
+    @staticmethod
+    def get_random_password():
+        return 'pw'
+
+    @staticmethod
+    def encrypt_password(password):
+        return password + password + '1!'
 
 
 class SuperUser(models.Model):
