@@ -1,5 +1,5 @@
 from django import forms
-from fitness_scoring.models import School, Administrator, Student, Class, Teacher, TestCategory, Test
+from fitness_scoring.models import School, Administrator, Student, Class, Teacher, TestCategory, Test, User
 from fitness_scoring.models import TeacherClassAllocation, ClassTest, TestSet
 from fitness_scoring.validators import validate_school_unique, validate_new_school_name_unique
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
@@ -9,7 +9,7 @@ from fitness_scoring.validators import validate_no_space, validate_date_field
 from fitness_scoring.fields import MultiFileField
 from fitness_scoring.fileio import add_schools_from_file_upload, add_test_categories_from_file_upload
 from fitness_scoring.fileio import add_test_from_file_upload, update_test_from_file_upload
-from fitness_scoring.fileio import add_classes_from_file_upload
+from fitness_scoring.fileio import read_classes_file_upload
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.validators import MinLengthValidator
 import datetime
@@ -210,8 +210,53 @@ class AddClassesForm(forms.Form):
 
     def add_classes(self, request):
         if self.is_valid():
+
+            (valid_lines, invalid_lines) = read_classes_file_upload(uploaded_file=request.FILES['add_classes_file'])
             school = School.objects.get(pk=self.cleaned_data['school_pk'])
-            return add_classes_from_file_upload(uploaded_file=request.FILES['add_classes_file'], school_id=school)
+            n_created = 0
+            teacher_username_not_exist = []
+            test_set_not_exist = []
+            class_already_exists = []
+
+            for year, class_name, teacher_username, test_set_name in valid_lines:
+
+                if year is None:
+                    year = ''
+                if class_name is None:
+                    class_name = ''
+                if teacher_username is None:
+                    teacher_username = ''
+                if test_set_name is None:
+                    test_set_name = ''
+
+                user = User.objects.filter(username=teacher_username)
+                if user.exists() and Teacher.objects.filter(user=user[0], school_id=school).exists():
+                    teacher = Teacher.objects.get(user=user[0])
+                else:
+                    teacher = None
+                    teacher_username_not_exist.append('(' + year + ', ' + class_name + ', ' + teacher_username + ', ' +
+                                                      test_set_name + ')')
+
+                if TestSet.objects.filter(test_set_name=test_set_name, school=school).exists():
+                    test_set = TestSet.objects.get(test_set_name=test_set_name, school=school)
+                elif test_set_name == '':
+                    test_set = None
+                else:
+                    test_set = None
+                    test_set_not_exist.append('(' + year + ', ' + class_name + ', ' + teacher_username + ', ' +
+                                              test_set_name + ')')
+
+                if teacher and ((test_set_name == '') or test_set):
+                    class_instance = Class.create_class_safe(year, class_name, school, teacher)
+                    if class_instance:
+                        n_created += 1
+                        if test_set:
+                            class_instance.load_class_tests_from_test_set_safe(test_set.test_set_name)
+                    else:
+                        class_already_exists.append('(' + year + ', ' + class_name + ', ' + teacher_username + ', ' +
+                                                    test_set_name + ')')
+
+            return n_created, teacher_username_not_exist, test_set_not_exist, class_already_exists, invalid_lines
         else:
             return False
 

@@ -795,7 +795,8 @@ def class_list(request):
             'item_list_title': 'Class List',
             'item_list_table_headings': Class.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['modal_load_link', '/class/add/', 'Add Class']]]
+                ['+', [['modal_load_link', '/class/add/', 'Add Class'],
+                       ['modal_load_link', '/class/adds/', 'Add Classes']]]
             ],
             'item_list_options': [
                 ['modal_load_link', '/class/edit/', 'pencil'],
@@ -842,12 +843,29 @@ def class_adds(request):
             class_adds_form = AddClassesForm(school_pk=school_pk, data=request.POST, files=request.FILES)
             result = class_adds_form.add_classes(request)
             if result:
-                (n_created, n_updated, n_not_created_or_updated) = result
-                result_message = ['Classes Created: '+str(n_created),
-                                  'Classes Updated: '+str(n_updated),
-                                  'No Changes From Data Lines: '+str(n_not_created_or_updated)]
-                context = {'finish_title': 'Classes Added/Updated', 'user_messages': result_message}
+
+                (n_created, teacher_username_not_exist, test_set_not_exist,
+                 class_already_exists, invalid_lines) = result
+                result_message = ['Classes Created: ' + str(n_created)]
+                if len(teacher_username_not_exist) > 0:
+                    result_message.append('Could not recognise the teacher username on the following lines:')
+                    for line in teacher_username_not_exist:
+                        result_message.append(line)
+                if len(test_set_not_exist) > 0:
+                    result_message.append('Could not recognise the test set on the following lines:')
+                    for line in test_set_not_exist:
+                        result_message.append(line)
+                if len(class_already_exists) > 0:
+                    result_message.append('The class year and name already existed for the following lines:')
+                    for line in class_already_exists:
+                        result_message.append(line)
+                if len(invalid_lines) > 0:
+                    result_message.append('Error reading data on the following lines:')
+                    for line in invalid_lines:
+                        result_message.append(line)
+                context = {'finish_title': 'Classes Added', 'user_messages': result_message}
                 return render(request, 'user_message.html', RequestContext(request, context))
+
             else:
                 context = {'post_to_url': '/class/adds/',
                            'functionality_name': 'Add Classes',

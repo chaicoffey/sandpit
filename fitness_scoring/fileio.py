@@ -1,7 +1,7 @@
 import csv
 import tempfile
 import os
-from fitness_scoring.models import Teacher, Class, School, User, TestCategory, Test
+from fitness_scoring.models import School, TestCategory, Test
 from fitness_scoring.models import PercentileBracketSet
 
 destination_directory = 'C:\\fitness_scoring_file_uploads\\'
@@ -22,14 +22,14 @@ def delete_file(file_name):
     os.remove(file_name)
 
 
-def add_classes_from_file_upload(uploaded_file, school_id):
+def read_classes_file_upload(uploaded_file):
     file_path_on_server = save_file(uploaded_file)
-    (n_created, n_updated, n_not_created_or_updated) = add_classes_from_file(file_path_on_server, school_id)
+    (valid_lines, invalid_lines) = read_add_classes_file(file_path_on_server)
     delete_file(file_path_on_server)
-    return n_created, n_updated, n_not_created_or_updated
+    return valid_lines, invalid_lines
 
 
-def add_classes_from_file(file_path_on_server, school_id):
+def read_add_classes_file(file_path_on_server):
     file_handle = open(file_path_on_server, 'rb')
 
     dialect = csv.Sniffer().sniff(file_handle.read(1024))
@@ -39,26 +39,17 @@ def add_classes_from_file(file_path_on_server, school_id):
     classes_list_reader = csv.DictReader(file_handle, dialect=dialect)
     # check headings are correct else throw exception
 
-    n_created = 0
-    n_updated = 0
-    n_not_created_or_updated = 0
+    valid_lines = []
+    invalid_lines = []
     for line in classes_list_reader:
-        (year, class_name, teacher_username) = (line['year'], line['class_name'], line['teacher_username'])
-        teacher_id = (
-            Teacher.objects.get(user=User.objects.get(username=teacher_username))
-            if (User.objects.filter(username=teacher_username).exists() and
-                Teacher.objects.filter(user=User.objects.get(username=teacher_username), school_id=school_id).exists())
-            else None
-        )
+        try:
+            (year, class_name, teacher_username, test_set_name) = (line['year'], line['class_name'],
+                                                                   line['teacher_username'], line['test_set'])
+            valid_lines.append((year, class_name, teacher_username, test_set_name))
+        except:
+            invalid_lines.append(line)
 
-        if Class.create_class_safe(year=year, class_name=class_name, school_id=school_id, teacher_id=teacher_id):
-            n_created += 1
-        elif Class.update_class(year=year, class_name=class_name, school_id=school_id, teacher_id=teacher_id):
-            n_updated += 1
-        else:
-            n_not_created_or_updated += 1
-
-    return n_created, n_updated, n_not_created_or_updated
+    return valid_lines, invalid_lines
 
 
 def add_schools_from_file_upload(uploaded_file):
