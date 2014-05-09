@@ -1,11 +1,10 @@
 from django import forms
-from fitness_scoring.models import School, Administrator, Student, Class, Teacher, TestCategory, Test, User
+from fitness_scoring.models import School, Administrator, Class, Teacher, TestCategory, Test, User
 from fitness_scoring.models import TeacherClassAllocation, ClassTest, TestSet
 from fitness_scoring.validators import validate_school_unique, validate_new_school_name_unique
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
 from fitness_scoring.validators import validate_new_test_name_unique
-from fitness_scoring.validators import validate_new_student_id_unique
-from fitness_scoring.validators import validate_no_space, validate_date_field
+from fitness_scoring.validators import validate_no_space
 from fitness_scoring.fields import MultiFileField
 from fitness_scoring.fileio import add_schools_from_file_upload, add_test_categories_from_file_upload
 from fitness_scoring.fileio import add_test_from_file_upload, update_test_from_file_upload
@@ -14,54 +13,6 @@ from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.validators import MinLengthValidator
 import datetime
 from django.core.mail import send_mail
-
-
-class EditStudentForm(forms.Form):
-    student_pk = forms.CharField(widget=forms.HiddenInput())
-    school_pk = forms.CharField(widget=forms.HiddenInput())
-    student_id = forms.CharField(max_length=30, required=True)
-    first_name = forms.CharField(max_length=100, required=True)
-    surname = forms.CharField(max_length=100, required=True)
-    gender = forms.ChoiceField(choices=Student.GENDER_CHOICES, required=True)
-    dob = forms.CharField(required=True, help_text='(dd/mm/yyyy)', validators=[validate_date_field('%d/%m/%Y')])
-
-    def __init__(self, school_pk, student_pk, *args, **kwargs):
-        super(EditStudentForm, self).__init__(*args, **kwargs)
-
-        self.fields['student_id'].error_messages = {'required': 'Please Enter Student ID'}
-        self.fields['first_name'].error_messages = {'required': 'Please Enter First Name'}
-        self.fields['surname'].error_messages = {'required': 'Please Enter Surname'}
-        self.fields['gender'].error_messages = {'required': 'Please Select A Gender'}
-        self.fields['dob'].error_messages = {'required': 'Please Enter Date Of Birth',
-                                             'date_format': 'Date Of Birth Should Be Of Form dd/mm/yyyy'}
-
-        student = Student.objects.get(pk=student_pk)
-        self.fields['student_pk'].initial = student_pk
-        self.fields['school_pk'].initial = school_pk
-        self.fields['student_pk'].initial = student_pk
-        self.fields['student_id'].initial = student.student_id
-        self.fields['first_name'].initial = student.first_name
-        self.fields['surname'].initial = student.surname
-        self.fields['gender'].initial = student.gender
-        self.fields['dob'].initial = student.dob.strftime('%d/%m/%Y')
-
-        self.fields['student_id'].validators = [validate_new_student_id_unique(student_pk=student_pk,
-                                                                               school_pk=school_pk)]
-
-    def edit_student(self):
-        student_edited = self.is_valid()
-        if student_edited:
-            student_id = self.cleaned_data['student_id']
-            school = School.objects.get(pk=self.cleaned_data['school_pk'])
-            first_name = self.cleaned_data['first_name']
-            surname = self.cleaned_data['surname']
-            gender = self.cleaned_data['gender']
-            dob = datetime.datetime.strptime(self.cleaned_data['dob'], '%d/%m/%Y')
-            student_editing = Student.objects.get(pk=self.cleaned_data['student_pk'])
-            student_edited = student_editing.edit_student_safe(student_id=student_id, school_id=school,
-                                                               first_name=first_name, surname=surname,
-                                                               gender=gender, dob=dob)
-        return student_edited
 
 
 class AddTeacherForm(forms.Form):

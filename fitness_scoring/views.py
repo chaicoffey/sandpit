@@ -7,7 +7,6 @@ from fitness_scoring.models import TeacherClassAllocation, ClassTest, StudentCla
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
 from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFileForm
-from fitness_scoring.forms import EditStudentForm
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm
 from fitness_scoring.forms import AssignTestToClassForm, SaveClassTestsAsTestSetForm, LoadClassTestsFromTestSetForm
@@ -588,74 +587,6 @@ def test_instructions(request, test_name):
             return render(request, 'test_instructions/no_test_instructions.html', RequestContext(request, {}))
     else:
         return HttpResponseForbidden("You are not authorised to view instructions for a test")
-
-
-def student_edit(request, student_pk):
-    user_type = request.session.get('user_type', None)
-    authorised = (user_type == 'Administrator') or (user_type == 'Teacher')
-    if authorised:
-        user = User.objects.get(username=request.session.get('username', None))
-        school = (Administrator.objects.get(user=user) if (user_type == 'Administrator')
-                  else Teacher.objects.get(user=user)).school_id
-        student = Student.objects.get(pk=student_pk)
-        authorised = school == student.school_id
-
-    if authorised:
-        user = User.objects.get(username=request.session.get('username', None))
-        school_pk = (Administrator.objects.get(user=user) if (user_type == 'Administrator')
-                     else Teacher.objects.get(user=user)).school_id.pk
-        if request.POST:
-            student_edit_form = EditStudentForm(school_pk=school_pk, student_pk=student_pk, data=request.POST)
-            if student_edit_form.edit_student():
-                student_display_text = (student_edit_form.cleaned_data['first_name'] + ' ' +
-                                        student_edit_form.cleaned_data['surname'] + ' (' +
-                                        student_edit_form.cleaned_data['student_id'] + ')')
-                context = {'finish_title': 'Student Edited',
-                           'user_message': 'Student Edited Successfully: ' + student_display_text}
-                return render(request, 'user_message.html', RequestContext(request, context))
-            else:
-                context = {'post_to_url': '/student/edit/' + str(student_pk),
-                           'functionality_name': 'Edit Student',
-                           'form': student_edit_form}
-                return render(request, 'modal_form.html', RequestContext(request, context))
-        else:
-            context = {'post_to_url': '/student/edit/' + str(student_pk),
-                       'functionality_name': 'Edit Student',
-                       'form': EditStudentForm(school_pk=school_pk, student_pk=student_pk)}
-            return render(request, 'modal_form.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to edit a student")
-
-
-def student_delete(request, student_pk):
-    user_type = request.session.get('user_type', None)
-    authorised = (user_type == 'Administrator') or (user_type == 'Teacher')
-    if authorised:
-        user = User.objects.get(username=request.session.get('username', None))
-        school = (Administrator.objects.get(user=user) if (user_type == 'Administrator')
-                  else Teacher.objects.get(user=user)).school_id
-        student = Student.objects.get(pk=student_pk)
-        authorised = school == student.school_id
-
-    if authorised:
-        student_to_delete = Student.objects.get(pk=student_pk)
-        student_display_text = str(student_to_delete)
-        if request.POST:
-            if student_to_delete.delete_student_safe():
-                context = {'finish_title': 'Student Deleted',
-                           'user_message': 'Student Deleted Successfully: ' + student_display_text}
-            else:
-                context = {'finish_title': 'Student Not Deleted',
-                           'user_error_message': 'Could Not Delete ' + student_display_text
-                                                 + ' (Is Enrolled In A Class)'}
-            return render(request, 'user_message.html', RequestContext(request, context))
-        else:
-            context = {'post_to_url': '/student/delete/' + str(student_pk),
-                       'functionality_name': 'Delete Student',
-                       'prompt_message': 'Are You Sure You Wish To Delete ' + student_display_text + "?"}
-            return render(request, 'modal_form.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to delete a student")
 
 
 def teacher_list(request):

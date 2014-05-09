@@ -39,8 +39,6 @@ urlpatterns = patterns(
     url(r'^test/percentile_brackets_graphs/(?P<percentile_bracket_list_pk>\w+)/(?P<test_pk>\d+)',
         'fitness_scoring.views.test_percentile_brackets_graphs', name='test_percentile_brackets_graphs'),
     url(r'^test/instructions/(?P<test_name>\w+)', 'fitness_scoring.views.test_instructions', name='test_instructions'),
-    url(r'^student/edit/(?P<student_pk>\d+)', 'fitness_scoring.views.student_edit', name='student_edit'),
-    url(r'^student/delete/(?P<student_pk>\d+)', 'fitness_scoring.views.student_delete', name='student_delete'),
     url(r'^teacher/list/', 'fitness_scoring.views.teacher_list', name='teacher_list'),
     url(r'^teacher/add/', 'fitness_scoring.views.teacher_add', name='teacher_add'),
     url(r'^teacher/edit/(?P<teacher_pk>\d+)', 'fitness_scoring.views.teacher_edit', name='teacher_edit'),
