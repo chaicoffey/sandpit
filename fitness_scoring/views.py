@@ -100,9 +100,25 @@ def teacher_view(request):
 
 def teacher_home(request):
     if request.session.get('user_type', None) == 'Teacher':
+
         teacher = Teacher.objects.get(user=User.objects.get(username=request.session.get('username')))
+
+        steps = [('Add Classes For Year', 'teacher_add_classes'),
+                 ('Add Tests To Classes For The Year', 'teacher_add_tests'),
+                 ('Run Tests (*temp* see my sheet for what instructions should contain *temp*)', 'teacher_run_tests'),
+                 ('Get Students To Enter Results', 'teacher_student_enter_results'),
+                 ('Approve Entries For Class', 'teacher_approve_entries'),
+                 ('View Results', 'teacher_view_results')]
+        non_optional_steps = 6
+        steps_formatted = []
+        for step_index in range(non_optional_steps):
+            (step_text, instructions_name) = steps[step_index]
+            steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
+                                    '/instructions_page/' + instructions_name))
+
         heading = teacher.first_name + ' ' + teacher.surname + ' (' + teacher.school_id.name + ')'
-        context = {'user_home_page_title': heading}
+        context = {'user_home_page_title': heading,
+                   'steps': steps_formatted}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
@@ -191,6 +207,18 @@ def instructions_page(request, instructions_name):
     elif instructions_name == 'administrator_add_classes' and user_type == 'Administrator':
         return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
     elif instructions_name == 'administrator_add_tests' and user_type == 'Administrator':
+        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+    elif instructions_name == 'teacher_add_classes' and user_type == 'Teacher':
+        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+    elif instructions_name == 'teacher_add_tests' and user_type == 'Teacher':
+        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+    elif instructions_name == 'teacher_run_tests' and user_type == 'Teacher':
+        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+    elif instructions_name == 'teacher_student_enter_results' and user_type == 'Teacher':
+        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+    elif instructions_name == 'teacher_approve_entries' and user_type == 'Teacher':
+        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+    elif instructions_name == 'teacher_view_results' and user_type == 'Teacher':
         return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
     else:
         return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
