@@ -130,17 +130,19 @@ class User(models.Model):
 
     @staticmethod
     def get_valid_username(base_username):
-        username = base_username
+
         n_characters = len(base_username)
         for charIndex in range(0, n_characters):
             if base_username[charIndex] == ' ':
-                username = username[0:charIndex] + '_' + username[(charIndex + 1):n_characters]
+                base_username = base_username[0:charIndex] + '_' + base_username[(charIndex + 1):n_characters]
+
+        username = base_username
         if User.objects.filter(username=username).exists():
             incremental = 1
-            username = base_username + str(incremental)
+            username = base_username + "_" + str(incremental)
             while User.objects.filter(username=username).exists():
                 incremental += 1
-                username = base_username + str(incremental)
+                username = base_username + "_" + str(incremental)
         return username
 
     @staticmethod
@@ -395,6 +397,7 @@ class Class(models.Model):
             if test_allocations.exists():
                 for test_allocation in test_allocations:
                     test_allocation.delete()
+            self.user.delete()
             self.delete()
         return class_not_used
 
