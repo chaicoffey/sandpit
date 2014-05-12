@@ -88,23 +88,29 @@ class School(models.Model):
 
 class User(models.Model):
     username = models.CharField(max_length=100, unique=True)
-    password = models.CharField(max_length=1024)
+    encrypted_password = models.CharField(max_length=1024)
 
     def __unicode__(self):
         return self.username
 
     def authenticate_user(self, password):
-        salt, hsh = self.password.split('$')
+        salt, hsh = self.encrypted_password.split('$')
         return hsh == sha1('%s%s' % (salt, password)).hexdigest()
+
+    def reset_code(self):
+        password = User.get_random_code()
+        self.encrypted_password = User.encrypt_password(password)
+        self.save()
+        return password
 
     def reset_password(self):
         password = User.get_random_password()
-        self.password = User.encrypt_password(password)
+        self.encrypted_password = User.encrypt_password(password)
         self.save()
         return password
 
     def change_password(self, password):
-        self.password = User.encrypt_password(password)
+        self.encrypted_password = User.encrypt_password(password)
         self.save()
 
     @staticmethod
@@ -120,11 +126,15 @@ class User(models.Model):
     def create_user(base_username):
         username = User.get_valid_username(base_username)
         password = User.get_random_password()
-        return User.objects.create(username=username, password=User.encrypt_password(password)), password
+        return User.objects.create(username=username, encrypted_password=User.encrypt_password(password)), password
 
     @staticmethod
     def get_valid_username(base_username):
         username = base_username
+        n_characters = len(base_username)
+        for charIndex in range(0, n_characters):
+            if base_username[charIndex] == ' ':
+                username = username[0:charIndex] + '_' + username[(charIndex + 1):n_characters]
         if User.objects.filter(username=username).exists():
             incremental = 1
             username = base_username + str(incremental)
@@ -132,6 +142,13 @@ class User(models.Model):
                 incremental += 1
                 username = base_username + str(incremental)
         return username
+
+    @staticmethod
+    def get_random_code():
+        total_length = 6
+        seed(time_seed())
+        password = list(chain((choice(string.digits) for _ in range(total_length))))
+        return "".join(sample(password, len(password)))
 
     @staticmethod
     def get_random_password():
@@ -343,6 +360,7 @@ class Class(models.Model):
     year = models.IntegerField(max_length=5)
     class_name = models.CharField(max_length=200)
     school_id = models.ForeignKey(School)
+    user = models.ForeignKey(User)
 
     def __unicode__(self):
         return self.class_name + " (" + str(self.year) + ") - " + self.school_id.name
@@ -461,6 +479,9 @@ class Class(models.Model):
 
         return deallocate
 
+    def reset_code(self):
+        return self.user.reset_code()
+
     def enrol_student_safe(self, student):
         enrolled = ((self.school_id == student.school_id) and
                     not StudentClassEnrolment.objects.filter(class_id=self, student_id=student).exists())
@@ -500,7 +521,8 @@ class Class(models.Model):
 
         error_message = Class.create_class_errors(year, class_name, school_id, teacher_id)
         if not error_message:
-            class_instance = Class.objects.create(year=year, class_name=class_name, school_id=school_id)
+            (user, password) = User.create_user(str(year) + "_" + class_name)
+            class_instance = Class.objects.create(year=year, class_name=class_name, school_id=school_id, user=user)
             TeacherClassAllocation.objects.create(class_id=class_instance, teacher_id=teacher_id)
         else:
             class_instance = None

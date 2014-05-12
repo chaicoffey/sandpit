@@ -25,6 +25,10 @@
             {% endfor %}
         {% elif prompt_message %}
             {{ prompt_message }}
+        {% elif prompt_messages %}
+            {% for prompt_message in prompt_messages %}
+                {{ prompt_message }}<br>
+            {% endfor %}
         {% endif %}
     </div>
 

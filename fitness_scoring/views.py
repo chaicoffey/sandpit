@@ -35,9 +35,17 @@ def login_user(request):
                 else:
                     user_type = 'Unpaid'
             elif Teacher.objects.filter(user=user).exists():
-                user_type = 'Teacher'
+                if Teacher.objects.get(user=user).school_id.subscription_paid:
+                    user_type = 'Teacher'
+                else:
+                    user_type = 'Unpaid'
+            elif Class.objects.filter(user=user).exists():
+                if Class.objects.get(user=user).school_id.subscription_paid:
+                    user_type = 'Class'
+                else:
+                    user_type = 'Unpaid'
             else:
-                user_type = "Unrecognised User"
+                user_type = "Unrecognised User Type"
         else:
             user_type = "Authentication Failed"
 
@@ -50,6 +58,8 @@ def login_user(request):
             return redirect('fitness_scoring.views.administrator_view')
         elif user_type == 'Teacher':
             return redirect('fitness_scoring.views.teacher_view')
+        elif user_type == 'Class':
+            return redirect('fitness_scoring.views.class_student_view')
         elif user_type == 'Unpaid':
             state = "Subscription fee has not been paid for your school."
             return render(request, 'authentication.html', RequestContext(request, {'state': state,
@@ -60,6 +70,13 @@ def login_user(request):
                                                                                    'username': username}))
     else:
         return render(request, 'authentication.html', RequestContext(request, {'state': '', 'username': ''}))
+
+
+def class_student_view(request):
+    if request.session.get('user_type', None) == 'Class':
+        return render(request, 'student_entry_form.html', RequestContext(request, {}))
+    else:
+        return redirect('fitness_scoring.views.login_user')
 
 
 def teacher_view(request):
@@ -865,7 +882,9 @@ def class_results_table(request, class_pk):
                        ['class_results_modal_load_link', '/class/test_set/load/' + str(class_pk),
                         'Load Class Tests From A Test Set'],
                        ['class_results_modal_load_link', '/class/test_set/save/' + str(class_pk),
-                        'Save Current Class Tests As A Test Set']]]
+                        'Save Current Class Tests As A Test Set'],
+                       ['class_results_modal_load_link', '/class/get_new_code/' + str(class_pk),
+                        'Get New Class Login Password']]]
             ],
             'student_test_results': student_test_results
         }
@@ -969,6 +988,23 @@ def remove_test_from_class(request, class_pk, test_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to remove a test from this class")
+
+
+def get_new_class_code(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        if request.POST:
+            context = {'finish_title': 'New Login Password', 'user_message': 'New Login Password Done'}
+            return render(request, 'user_message.html', RequestContext(request, context))
+        else:
+            class_instance = Class.objects.get(pk=class_pk)
+            context = {'post_to_url': '/class/get_new_code/' + str(class_pk),
+                       'modal_title': 'New Class Login Details',
+                       'functionality_name': 'Done',
+                       'prompt_messages': ['Username: ' + class_instance.user.username,
+                                           'Password: ' + class_instance.reset_code()]}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to delete a teacher from this school")
 
 
 def remove_student_from_class(request, class_pk, student_pk):
