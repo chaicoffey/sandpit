@@ -661,13 +661,7 @@ def teacher_add(request):
 
 
 def teacher_edit(request, teacher_pk):
-    authorised = request.session.get('user_type', None) == 'Administrator'
-    if authorised:
-        administrator = Administrator.objects.get(user=User.objects.get(username=request.session.get('username', None)))
-        teacher = Teacher.objects.get(pk=teacher_pk)
-        authorised = administrator.school_id == teacher.school_id
-
-    if authorised:
+    if user_authorised_for_teacher(request, teacher_pk):
         user = User.objects.get(username=request.session.get('username', None))
         school_pk = Administrator.objects.get(user=user).school_id.pk
         if request.POST:
@@ -692,13 +686,7 @@ def teacher_edit(request, teacher_pk):
 
 
 def teacher_delete(request, teacher_pk):
-    authorised = request.session.get('user_type', None) == 'Administrator'
-    if authorised:
-        administrator = Administrator.objects.get(user=User.objects.get(username=request.session.get('username', None)))
-        teacher = Teacher.objects.get(pk=teacher_pk)
-        authorised = administrator.school_id == teacher.school_id
-
-    if authorised:
+    if user_authorised_for_teacher(request, teacher_pk):
         teacher_to_delete = Teacher.objects.get(pk=teacher_pk)
         teacher_display_text = str(teacher_to_delete)
         if request.POST:
@@ -746,12 +734,12 @@ def class_list(request):
         if user_type == 'Teacher':
             teacher = Teacher.objects.get(user=user)
             class_items = [(allocation.class_id, allocation.class_id.get_display_items_teacher())
-                          for allocation in TeacherClassAllocation.objects.filter(teacher_id=teacher)]
+                           for allocation in TeacherClassAllocation.objects.filter(teacher_id=teacher)]
             class_list_headings = Class.get_display_list_headings_teacher()
         else:
             school = Administrator.objects.get(user=user).school_id
             class_items = [(class_instance, class_instance.get_display_items()) for class_instance
-                          in Class.objects.filter(school_id=school)]
+                           in Class.objects.filter(school_id=school)]
             class_list_headings = Class.get_display_list_headings()
         context = {
             'item_list': class_items,
@@ -1076,6 +1064,18 @@ def remove_student_from_class(request, class_pk, student_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to remove a student from this class")
+
+
+def user_authorised_for_teacher(request, teacher_pk):
+
+    if request.session.get('user_type', None) == 'Administrator':
+        administrator = Administrator.objects.get(user=User.objects.get(username=request.session.get('username', None)))
+        teacher = Teacher.objects.get(pk=teacher_pk)
+        authorised = administrator.school_id == teacher.school_id
+    else:
+        authorised = False
+
+    return authorised
 
 
 def user_authorised_for_class(request, class_pk):
