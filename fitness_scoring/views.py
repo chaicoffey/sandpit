@@ -73,25 +73,32 @@ def logout_user(request):
     return redirect('fitness_scoring.views.login_user')
 
 
-def change_user_password(request):
+def change_user_password(request, is_finished):
     user_type = request.session.get('user_type', None)
     if (user_type == 'SuperUser') or (user_type == 'Administrator') or (user_type == 'Teacher'):
-        user_pk = User.objects.get(username=request.session.get('username', None)).pk
-        if request.POST:
-            change_password_form = ChangePasswordFrom(user_pk=user_pk, data=request.POST)
-            if change_password_form.change_password():
-                context = {'finish_title': 'Password Changed', 'user_message': 'Password Changed Successfully: '}
-                return render(request, 'user_message.html', RequestContext(request, context))
-            else:
-                context = {'post_to_url': '/change_password/',
-                           'functionality_name': 'Change Password',
-                           'form': change_password_form}
-                return render(request, 'modal_form.html', RequestContext(request, context))
+        if is_finished == 'finished':
+            context = {'finish_title': 'Password Changed', 'user_message': 'Password Changed Successfully'}
+            return render(request, 'user_message.html', RequestContext(request, context))
         else:
-            context = {'post_to_url': '/change_password/',
-                       'functionality_name': 'Change Password',
-                       'form': ChangePasswordFrom(user_pk=user_pk)}
-            return render(request, 'modal_form.html', RequestContext(request, context))
+            user_pk = User.objects.get(username=request.session.get('username', None)).pk
+            if request.POST:
+                change_password_form = ChangePasswordFrom(user_pk=user_pk, data=request.POST)
+                if change_password_form.change_password():
+                    context = {'post_to_url': '/change_password/finished',
+                               'modal_title': 'Password Changed',
+                               'functionality_name': 'Done',
+                               'prompt_message': 'Password Changed Successfully'}
+                    return render(request, 'modal_form.html', RequestContext(request, context))
+                else:
+                    context = {'post_to_url': '/change_password/not_finished',
+                               'functionality_name': 'Change Password',
+                               'form': change_password_form}
+                    return render(request, 'modal_form.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/change_password/not_finished',
+                           'functionality_name': 'Change Password',
+                           'form': ChangePasswordFrom(user_pk=user_pk)}
+                return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to change password")
 
