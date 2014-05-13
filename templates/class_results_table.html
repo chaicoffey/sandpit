@@ -30,9 +30,9 @@
                     {% for test in class_tests %}
                         <th>
                             {{ test.test_name }}
-                            {% for link_type, option_link, option_glyph_icon in class_test_options %}
+                            {% for link_type, option_link, option_glyph_icon, hover_message in class_test_options %}
                                 <td class="{{ link_type }}">
-                                    <a href="{{ option_link }}{{ test.pk }}">
+                                    <a href="{{ option_link }}{{ test.pk }}" title="{{ hover_message }}">
                                         <span class="glyphicon glyphicon-{{ option_glyph_icon }}"></span>
                                     </a>
                                 </td>

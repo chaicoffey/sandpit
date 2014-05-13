@@ -166,8 +166,8 @@ def administrator_view(request):
             'user_tab_page_title': 'Administrator: ' + administrator.school_id.name,
             'user_tabs': [
                 ['Home', '/administrator_home/', 'user_home_page'],
-                ['Add/Update Teacher List', '/teacher/list/', 'item_list:2'],
-                ['Add/Update Class List', '/class/list/', 'item_list:2']
+                ['Add/Update Teacher List', '/teacher/list/', 'item_list:3'],
+                ['Add/Update Class List', '/class/list/', 'item_list:3']
             ]
         }
 
@@ -213,8 +213,8 @@ def superuser_view(request):
             'user_tab_page_title': 'Super User',
             'user_tabs': [
                 ['Home', '/superuser_home/', 'user_home_page'],
-                ['Add/Update School List', '/school/list/', 'item_list:2'],
-                ['Add/Update Test List', '/test/list/', 'item_list:2'],
+                ['Add/Update School List', '/school/list/', 'item_list:3'],
+                ['Add/Update Test List', '/test/list/', 'item_list:4'],
                 ['Add/Update Test Category List', '/test_category/list/', 'item_list:2']
             ]
         }
@@ -263,13 +263,13 @@ def school_list(request):
             'item_list_title': 'School List',
             'item_list_table_headings': School.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['modal_load_link', '/school/add/', 'Add School'],
-                       ['modal_load_link', '/school/adds/', 'Add/Edit Schools From .CSV']]]
+                ['+', [['item_list_modal_load_link', '/school/add/', 'Add School'],
+                       ['item_list_modal_load_link', '/school/adds/', 'Add/Edit Schools From .CSV']]]
             ],
             'item_list_options': [
-                ['modal_load_link', '/school/edit/', 'pencil'],
-                ['modal_load_link', '/school/reset_password/', 'repeat'],
-                ['modal_load_link', '/school/delete/', 'remove']
+                ['item_list_modal_load_link', '/school/edit/', 'pencil', 'edit school'],
+                ['item_list_modal_load_link', '/school/reset_password/', 'repeat', 'reset administrator password'],
+                ['item_list_modal_load_link', '/school/delete/', 'remove', 'delete school']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -391,12 +391,12 @@ def test_category_list(request):
             'item_list_title': 'Test Category List',
             'item_list_table_headings': TestCategory.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['modal_load_link', '/test_category/add/', 'Add Test Category'],
-                       ['modal_load_link', '/test_category/adds/', 'Add/Edit Test Categories From .CSV']]]
+                ['+', [['item_list_modal_load_link', '/test_category/add/', 'Add Test Category'],
+                       ['item_list_modal_load_link', '/test_category/adds/', 'Add/Edit Test Categories From .CSV']]]
             ],
             'item_list_options': [
-                ['modal_load_link', '/test_category/edit/', 'pencil'],
-                ['modal_load_link', '/test_category/delete/', 'remove']
+                ['item_list_modal_load_link', '/test_category/edit/', 'pencil', 'edit test category'],
+                ['item_list_modal_load_link', '/test_category/delete/', 'remove', 'delete test category']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -506,13 +506,13 @@ def test_list(request):
             'item_list_title': 'Test List',
             'item_list_table_headings': Test.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['modal_load_link', '/test/adds/', 'Add Tests From .CSVs']]]
+                ['+', [['item_list_modal_load_link', '/test/adds/', 'Add Tests From .CSVs']]]
             ],
             'item_list_options': [
-                ['modal_load_link', '/test/edit/', 'pencil'],
-                ['modal_load_link', '/test/update/', 'pencil'],
-                ['percentile_load_link', '/test/percentile_brackets_graphs/None/', 'stats'],
-                ['modal_load_link', '/test/delete/', 'remove']
+                ['item_list_modal_load_link', '/test/edit/', 'pencil', 'edit test'],
+                ['item_list_modal_load_link', '/test/update/', 'pencil', 'add to percentile brackets'],
+                ['percentile_load_link', '/test/percentile_brackets_graphs/None/', 'stats', 'view percentile brackets'],
+                ['item_list_modal_load_link', '/test/delete/', 'remove', 'delete test']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -653,12 +653,12 @@ def teacher_list(request):
             'item_list_title': 'Teacher List',
             'item_list_table_headings': Teacher.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['modal_load_link', '/teacher/add/', 'Add Teacher']]]
+                ['+', [['item_list_modal_load_link', '/teacher/add/', 'Add Teacher']]]
             ],
             'item_list_options': [
-                ['modal_load_link', '/teacher/edit/', 'pencil'],
-                ['modal_load_link', '/teacher/reset_password/', 'repeat'],
-                ['modal_load_link', '/teacher/delete/', 'remove']
+                ['item_list_modal_load_link', '/teacher/edit/', 'pencil', 'edit teacher'],
+                ['item_list_modal_load_link', '/teacher/reset_password/', 'repeat', 'reset teacher password'],
+                ['item_list_modal_load_link', '/teacher/delete/', 'remove', 'delete teacher']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -777,13 +777,13 @@ def class_list(request):
             'item_list_title': 'Class List',
             'item_list_table_headings': class_list_headings,
             'item_list_buttons': [
-                ['+', [['modal_load_link', '/class/add/', 'Add Class'],
-                       ['modal_load_link', '/class/adds/', 'Add Classes']]]
+                ['+', [['item_list_modal_load_link', '/class/add/', 'Add Class'],
+                       ['item_list_modal_load_link', '/class/adds/', 'Add Classes']]]
             ],
             'item_list_options': [
-                ['modal_load_link', '/class/edit/', 'pencil'],
-                ['class_load_link', '/class/class/', 'home'],
-                ['modal_load_link', '/class/delete/', 'remove']
+                ['item_list_modal_load_link', '/class/edit/', 'pencil', 'edit class'],
+                ['class_load_link', '/class/class/', 'home', 'go to class page'],
+                ['item_list_modal_load_link', '/class/delete/', 'remove', 'delete class']
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -942,8 +942,9 @@ def class_results_table(request, class_pk):
         context = {
             'class_tests': class_tests,
             'class_test_options': [
-                ['class_results_modal_load_link', '/class/test/delete/' + str(class_pk) + '/', 'remove'],
-                ['test_instructions_load_link', '/test/instructions/', 'info-sign']
+                ['class_results_modal_load_link', '/class/test/delete/' + str(class_pk) + '/',
+                 'remove', 'remove test from class'],
+                ['test_instructions_load_link', '/test/instructions/', 'info-sign', 'see instructions for test']
             ],
             'results_table_buttons': [
                 ['+', [['class_results_modal_load_link', '/class/test/add/' + str(class_pk), 'Add Test To Class'],
