@@ -375,6 +375,9 @@ class Class(models.Model):
             teacher_display = 'No Teacher Assigned'
         return [self.year, self.class_name, teacher_display]
 
+    def get_display_items_teacher(self):
+        return [self.year, self.class_name]
+
     def get_tests(self):
         return [class_test.test_name for class_test in ClassTest.objects.filter(class_id=self)]
 
@@ -406,7 +409,7 @@ class Class(models.Model):
 
         if(((str(self.year) != str(year)) or (self.class_name != class_name) or (self.school_id != school_id)) and
            Class.objects.filter(year=year, class_name=class_name, school_id=school_id).exists()):
-            error_message = "Class Already Exists: " + str(self)
+            error_message = "Class Already Exists"
 
         if teacher_id.school_id != school_id:
             error_message = "Teacher is not in this school"
@@ -506,6 +509,10 @@ class Class(models.Model):
     @staticmethod
     def get_display_list_headings():
         return ['Year', 'Class', 'Teacher']
+
+    @staticmethod
+    def get_display_list_headings_teacher():
+        return ['Year', 'Class']
 
     @staticmethod
     def create_class_errors(year, class_name, school_id, teacher_id):

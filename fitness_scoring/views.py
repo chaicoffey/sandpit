@@ -8,7 +8,7 @@ from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
 from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFileForm
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
-from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm
+from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, AddClassTeacherForm, EditClassTeacherForm
 from fitness_scoring.forms import AssignTestToClassForm, SaveClassTestsAsTestSetForm, LoadClassTestsFromTestSetForm
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.mail import send_mail
@@ -89,7 +89,8 @@ def teacher_view(request):
             'user_name': request.session.get('username'),
             'user_tab_page_title': heading,
             'user_tabs': [
-                ['Home', '/teacher_home/', 'user_home_page']
+                ['Home', '/teacher_home/', 'user_home_page'],
+                ['Add/Update Class List', '/class/list/', 'item_list:2']
             ]
         }
 
@@ -739,14 +740,23 @@ def teacher_reset_password(request, teacher_pk):
 
 
 def class_list(request):
-    if request.session.get('user_type', None) == 'Administrator':
-        username = request.session.get('username', None)
-        school = Administrator.objects.get(user=User.objects.get(username=username)).school_id
+    user_type = request.session.get('user_type', None)
+    if (user_type == 'Administrator') or (user_type == 'Teacher'):
+        user = User.objects.get(username=request.session.get('username', None))
+        if user_type == 'Teacher':
+            teacher = Teacher.objects.get(user=user)
+            class_items = [(allocation.class_id, allocation.class_id.get_display_items_teacher())
+                          for allocation in TeacherClassAllocation.objects.filter(teacher_id=teacher)]
+            class_list_headings = Class.get_display_list_headings_teacher()
+        else:
+            school = Administrator.objects.get(user=user).school_id
+            class_items = [(class_instance, class_instance.get_display_items()) for class_instance
+                          in Class.objects.filter(school_id=school)]
+            class_list_headings = Class.get_display_list_headings()
         context = {
-            'item_list': [(class_instance, class_instance.get_display_items())
-                          for class_instance in Class.objects.filter(school_id=school)],
+            'item_list': class_items,
             'item_list_title': 'Class List',
-            'item_list_table_headings': Class.get_display_list_headings(),
+            'item_list_table_headings': class_list_headings,
             'item_list_buttons': [
                 ['+', [['modal_load_link', '/class/add/', 'Add Class'],
                        ['modal_load_link', '/class/adds/', 'Add Classes']]]
@@ -763,11 +773,14 @@ def class_list(request):
 
 
 def class_add(request):
-    if request.session.get('user_type', None) == 'Administrator':
+    user_type = request.session.get('user_type', None)
+    if (user_type == 'Administrator') or (user_type == 'Teacher'):
         user = User.objects.get(username=request.session.get('username', None))
-        school_pk = Administrator.objects.get(user=user).school_id.pk
+        teacher_or_administrator = (Teacher if user_type == 'Teacher' else Administrator).objects.get(user=user)
+        school_pk = teacher_or_administrator.school_id.pk
         if request.POST:
-            class_add_form = AddClassForm(school_pk=school_pk, data=request.POST)
+            class_add_form = (AddClassTeacherForm(teacher_pk=teacher_or_administrator.pk, data=request.POST)
+                              if user_type == 'Teacher' else AddClassForm(school_pk=school_pk, data=request.POST))
             if class_add_form.add_class():
                 class_display_text = (class_add_form.cleaned_data['class_name'] +
                                       ' (' + class_add_form.cleaned_data['year'] + ')')
@@ -780,9 +793,11 @@ def class_add(request):
                            'form': class_add_form}
                 return render(request, 'modal_form.html', RequestContext(request, context))
         else:
+            class_add_form = (AddClassTeacherForm(teacher_pk=teacher_or_administrator.pk) if user_type == 'Teacher'
+                              else AddClassForm(school_pk=school_pk))
             context = {'post_to_url': '/class/add/',
                        'functionality_name': 'Add Class',
-                       'form': AddClassForm(school_pk=school_pk)}
+                       'form': class_add_form}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to add a class")
@@ -834,11 +849,15 @@ def class_adds(request):
 
 
 def class_edit(request, class_pk):
-    if request.session.get('user_type', None) == 'Administrator':
+    if user_authorised_for_class(request, class_pk):
+        user_type = request.session.get('user_type', None)
         user = User.objects.get(username=request.session.get('username', None))
-        school_pk = Administrator.objects.get(user=user).school_id.pk
+        teacher_or_administrator = (Teacher if user_type == 'Teacher' else Administrator).objects.get(user=user)
+        school_pk = teacher_or_administrator.school_id.pk
         if request.POST:
-            class_edit_form = EditClassForm(school_pk=school_pk, class_pk=class_pk, data=request.POST)
+            class_edit_form = (EditClassTeacherForm(teacher_pk=teacher_or_administrator.pk, class_pk=class_pk,
+                                                    data=request.POST) if user_type == 'Teacher'
+                               else EditClassForm(school_pk=school_pk, class_pk=class_pk, data=request.POST))
             if class_edit_form.edit_class():
                 class_display_text = (class_edit_form.cleaned_data['class_name'] +
                                       ' (' + class_edit_form.cleaned_data['year'] + ')')
@@ -851,16 +870,18 @@ def class_edit(request, class_pk):
                            'form': class_edit_form}
                 return render(request, 'modal_form.html', RequestContext(request, context))
         else:
+            class_edit_form = (EditClassTeacherForm(teacher_pk=teacher_or_administrator.pk, class_pk=class_pk)
+                               if user_type == 'Teacher' else EditClassForm(school_pk=school_pk, class_pk=class_pk))
             context = {'post_to_url': '/class/edit/' + str(class_pk),
                        'functionality_name': 'Edit Class',
-                       'form': EditClassForm(school_pk=school_pk, class_pk=class_pk)}
+                       'form': class_edit_form}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to edit a class")
 
 
 def class_delete(request, class_pk):
-    if request.session.get('user_type', None) == 'Administrator':
+    if user_authorised_for_class(request, class_pk):
         class_to_delete = Class.objects.get(pk=class_pk)
         class_display_text = (class_to_delete.class_name + ' ' + ' (' + str(class_to_delete.year) + ')')
         if request.POST:

@@ -280,6 +280,109 @@ class EditClassForm(forms.Form):
         return class_edited
 
 
+class AddClassTeacherForm(forms.Form):
+    teacher_pk = forms.CharField(widget=forms.HiddenInput())
+    year = forms.ChoiceField()
+    class_name = forms.CharField(max_length=200)
+
+    def __init__(self, teacher_pk, *args, **kwargs):
+        super(AddClassTeacherForm, self).__init__(*args, **kwargs)
+
+        self.fields['class_name'].error_messages = {'required': 'Please Enter Class Name'}
+
+        current_year = datetime.datetime.now().year
+        self.fields['year'].choices = []
+        for year in range(2000, (current_year+2)):
+            self.fields['year'].choices.append((str(year), str(year)))
+        self.fields['year'].initial = str(current_year)
+
+        self.fields['teacher_pk'].initial = teacher_pk
+
+    def clean(self):
+        cleaned_data = super(AddClassTeacherForm, self).clean()
+        year = cleaned_data.get("year")
+        class_name = cleaned_data.get("class_name")
+        teacher = Teacher.objects.get(pk=cleaned_data.get("teacher_pk"))
+        school = teacher.school_id
+
+        if year and class_name:
+            error_message = Class.create_class_errors(year=year, class_name=class_name,
+                                                      school_id=school, teacher_id=teacher)
+            if error_message:
+                self._errors["class_name"] = self.error_class([error_message])
+                del cleaned_data["year"]
+                del cleaned_data["class_name"]
+
+        return cleaned_data
+
+    def add_class(self):
+
+        if self.is_valid():
+            teacher = Teacher.objects.get(pk=self.cleaned_data['teacher_pk'])
+            school = teacher.school_id
+            year = self.cleaned_data['year']
+            class_name = self.cleaned_data['class_name']
+            class_saved = Class.create_class_safe(year=year, class_name=class_name,
+                                                  school_id=school, teacher_id=teacher)
+        else:
+            class_saved = None
+
+        return class_saved
+
+
+class EditClassTeacherForm(forms.Form):
+    class_pk = forms.CharField(widget=forms.HiddenInput())
+    teacher_pk = forms.CharField(widget=forms.HiddenInput())
+    year = forms.ChoiceField()
+    class_name = forms.CharField(max_length=200)
+
+    def __init__(self, teacher_pk, class_pk, *args, **kwargs):
+        super(EditClassTeacherForm, self).__init__(*args, **kwargs)
+
+        self.fields['class_name'].error_messages = {'required': 'Please Enter Class Name'}
+
+        current_year = datetime.datetime.now().year
+        self.fields['year'].choices = []
+        for year in range(2000, (current_year+2)):
+            self.fields['year'].choices.append((str(year), str(year)))
+
+        class_instance = Class.objects.get(pk=class_pk)
+        self.fields['class_pk'].initial = class_pk
+        self.fields['teacher_pk'].initial = teacher_pk
+        self.fields['year'].initial = str(class_instance.year)
+        self.fields['class_name'].initial = class_instance.class_name
+
+    def clean(self):
+        cleaned_data = super(EditClassTeacherForm, self).clean()
+        year = cleaned_data.get("year")
+        class_name = cleaned_data.get("class_name")
+        class_instance = Class.objects.get(pk=cleaned_data.get("class_pk"))
+        teacher = Teacher.objects.get(pk=cleaned_data.get("teacher_pk"))
+        school = teacher.school_id
+
+        if year and class_name:
+            error_message = class_instance.edit_class_errors(year=year, class_name=class_name,
+                                                             school_id=school, teacher_id=teacher)
+            if error_message:
+                self._errors["class_name"] = self.error_class([error_message])
+                del cleaned_data["year"]
+                del cleaned_data["class_name"]
+
+        return cleaned_data
+
+    def edit_class(self):
+        class_edited = self.is_valid()
+        if class_edited:
+            teacher = Teacher.objects.get(pk=self.cleaned_data['teacher_pk'])
+            school = teacher.school_id
+            year = self.cleaned_data['year']
+            class_name = self.cleaned_data['class_name']
+            class_instance = Class.objects.get(pk=self.cleaned_data['class_pk'])
+            class_edited = class_instance.edit_class_safe(year=year, class_name=class_name,
+                                                          school_id=school, teacher_id=teacher)
+        return class_edited
+
+
 class AssignTestToClassForm(forms.Form):
     class_pk = forms.CharField(widget=forms.HiddenInput())
     test = forms.ChoiceField(required=True)
