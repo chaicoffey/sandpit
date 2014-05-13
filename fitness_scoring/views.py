@@ -937,7 +937,8 @@ def class_results_table(request, class_pk):
     if user_authorised_for_class(request, class_pk):
         class_instance = Class.objects.get(pk=class_pk)
         class_tests = [class_test.test_name for class_test in ClassTest.objects.filter(class_id=class_instance)]
-        student_test_results = [(enrolment.student_id, enrolment.get_test_results()) for enrolment in
+        student_test_results = [(enrolment.student_id, enrolment.student_age_at_time_of_enrolment,
+                                 enrolment.get_test_results()) for enrolment in
                                 StudentClassEnrolment.objects.filter(class_id=class_instance)]
         context = {
             'class_tests': class_tests,
