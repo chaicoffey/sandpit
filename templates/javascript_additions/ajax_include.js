@@ -19,20 +19,19 @@ function load_data_table(parent_id, item_list_url, n_headings_to_exclude, do_aft
 $(document).on('click', '.modal_load_link a', function(event){
     event.preventDefault();
     $('#remoteModalContent').load(base_url + $(this).attr('href'), function(){
-        $('#modal_submit_button').val('item_list_submit');
+        $('#modal_submit_button').val('null_submit');
         $('#remoteModal').modal('show');
     });
-    $('#item_list_user_message_alert').addClass('hidden');
 });
 
-//for loading modal links on class test item lists into remote modal
+//for loading modal links on class results table into remote modal
 $(document).on('click', '.class_results_modal_load_link a', function(event){
     event.preventDefault();
     $('#remoteModalContent').load(base_url + $(this).attr('href'), function(){
         $('#modal_submit_button').val('class_results_table_submit');
         $('#remoteModal').modal('show');
     });
-    $('#item_list_user_message_alert').addClass('hidden');
+    $('#class_user_message_alert').addClass('hidden');
 });
 
 //for loading class load links on item_list page
@@ -101,12 +100,7 @@ function close_modal_and_update_list(button_value, user_message_element) {
 
     base_url = window.location.protocol + "//" + window.location.host;
     close_modal();
-    if(button_value == 'item_list_submit') {
-        items_in_list_updated_event(function(){
-            $('#item_list_user_message').html(user_message_element);
-            $('#item_list_user_message_alert').removeClass('hidden');
-        });
-    } else if(button_value == 'class_results_table_submit') {
+    if(button_value == 'class_results_table_submit') {
         $('#class_results').load(base_url + $('#class_results').attr('href'), function(){
             $('#class_user_message').html(user_message_element);
             $('#class_user_message_alert').removeClass('hidden');

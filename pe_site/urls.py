@@ -9,6 +9,7 @@ urlpatterns = patterns(
     url(r'^$', 'fitness_scoring.views.login_user'),
     url(r'^login', 'fitness_scoring.views.login_user', name='login'),
     url(r'^logout/', 'fitness_scoring.views.logout_user', name='logout'),
+    url(r'^change_password/', 'fitness_scoring.views.change_user_password', name='change_user_password'),
     url(r'^superuser_view/', 'fitness_scoring.views.superuser_view', name='superuser_view'),
     url(r'^superuser_home/', 'fitness_scoring.views.superuser_home', name='superuser_home'),
     url(r'^administrator_view/', 'fitness_scoring.views.administrator_view', name='administrator_view'),

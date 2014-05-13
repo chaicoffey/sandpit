@@ -15,6 +15,51 @@ import datetime
 from django.core.mail import send_mail
 
 
+class ChangePasswordFrom(forms.Form):
+    user_pk = forms.CharField(widget=forms.HiddenInput())
+    old_password = forms.CharField(widget=forms.PasswordInput())
+    new_password = forms.CharField(widget=forms.PasswordInput())
+    new_password_again = forms.CharField(widget=forms.PasswordInput())
+
+    def __init__(self, user_pk, *args, **kwargs):
+        super(ChangePasswordFrom, self).__init__(*args, **kwargs)
+
+        self.fields['old_password'].error_messages = {'required': 'Please Enter Old Password'}
+        self.fields['new_password'].error_messages = {'required': 'Please Enter New Password'}
+        self.fields['new_password_again'].error_messages = {'required': 'Please Enter New Password Again'}
+
+        self.fields['user_pk'].initial = user_pk
+
+    def clean(self):
+        cleaned_data = super(ChangePasswordFrom, self).clean()
+        old_password = cleaned_data.get("old_password")
+        new_password = cleaned_data.get("new_password")
+        new_password_again = cleaned_data.get("new_password_again")
+        user = User.objects.get(pk=cleaned_data.get("user_pk"))
+
+        if old_password and new_password and new_password_again:
+            if not user.authenticate_user(password=old_password):
+                self._errors["old_password"] = self.error_class(['Incorrect Password'])
+                del cleaned_data["old_password"]
+
+            if new_password != new_password_again:
+                error_message = 'New Passwords Do Not Match'
+                self._errors["new_password"] = self.error_class([error_message])
+                self._errors["new_password_again"] = self.error_class([error_message])
+                del cleaned_data["new_password"]
+                del cleaned_data["new_password_again"]
+
+        return cleaned_data
+
+    def change_password(self):
+        password_changed = self.is_valid()
+        if password_changed:
+            user = User.objects.get(pk=self.cleaned_data['user_pk'])
+            new_password = self.cleaned_data['new_password']
+            user.change_password(new_password)
+        return password_changed
+
+
 class AddTeacherForm(forms.Form):
     school_pk = forms.CharField(widget=forms.HiddenInput())
     first_name = forms.CharField(max_length=100, required=True)

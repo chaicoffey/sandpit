@@ -4,6 +4,7 @@ from django.template import RequestContext
 from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, TestCategory, Test, Student, Class
 from fitness_scoring.models import PercentileBracketList
 from fitness_scoring.models import TeacherClassAllocation, ClassTest, StudentClassEnrolment, TestSet
+from fitness_scoring.forms import ChangePasswordFrom
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
 from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFileForm
@@ -12,11 +13,6 @@ from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, A
 from fitness_scoring.forms import AssignTestToClassForm, SaveClassTestsAsTestSetForm, LoadClassTestsFromTestSetForm
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.mail import send_mail
-
-
-def logout_user(request):
-    request.session.flush()
-    return redirect('fitness_scoring.views.login_user')
 
 
 def login_user(request):
@@ -70,6 +66,34 @@ def login_user(request):
                                                                                    'username': username}))
     else:
         return render(request, 'authentication.html', RequestContext(request, {'state': '', 'username': ''}))
+
+
+def logout_user(request):
+    request.session.flush()
+    return redirect('fitness_scoring.views.login_user')
+
+
+def change_user_password(request):
+    user_type = request.session.get('user_type', None)
+    if (user_type == 'SuperUser') or (user_type == 'Administrator') or (user_type == 'Teacher'):
+        user_pk = User.objects.get(username=request.session.get('username', None)).pk
+        if request.POST:
+            change_password_form = ChangePasswordFrom(user_pk=user_pk, data=request.POST)
+            if change_password_form.change_password():
+                context = {'finish_title': 'Password Changed', 'user_message': 'Password Changed Successfully: '}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/change_password/',
+                           'functionality_name': 'Change Password',
+                           'form': change_password_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/change_password/',
+                       'functionality_name': 'Change Password',
+                       'form': ChangePasswordFrom(user_pk=user_pk)}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to change password")
 
 
 def class_student_view(request):
@@ -920,7 +944,7 @@ def class_results_table(request, class_pk):
                         'Load Class Tests From A Test Set'],
                        ['class_results_modal_load_link', '/class/test_set/save/' + str(class_pk),
                         'Save Current Class Tests As A Test Set'],
-                       ['class_results_modal_load_link', '/class/get_new_code/' + str(class_pk),
+                       ['modal_load_link', '/class/get_new_code/' + str(class_pk),
                         'Get New Class Login Password']]]
             ],
             'student_test_results': student_test_results
