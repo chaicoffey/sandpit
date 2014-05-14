@@ -1,3 +1,4 @@
+from pe_site.settings import MAX_FILE_UPLOAD_SIZE_MB
 from django import forms
 from django.core.exceptions import ValidationError
 
@@ -26,9 +27,9 @@ class MultiFileField(forms.FileField):
     }
 
     def __init__(self, *args, **kwargs):
-        self.min_num = kwargs.pop('min_num', 0)
+        self.min_num = kwargs.pop('min_num', 1)
         self.max_num = kwargs.pop('max_num', None)
-        self.maximum_file_size = kwargs.pop('maximum_file_size', None)
+        self.maximum_file_size = kwargs.pop('maximum_file_size', 1024*1024*MAX_FILE_UPLOAD_SIZE_MB)
         super(MultiFileField, self).__init__(*args, **kwargs)
 
     def to_python(self, data):
@@ -43,9 +44,9 @@ class MultiFileField(forms.FileField):
         if len(data) and not data[0]:
             num_files = 0
         if num_files < self.min_num:
-            raise ValidationError(self.error_messages['min_num'] % {'min_num': self.min_num, 'num_files': num_files})
+            raise ValidationError('Need To Upload At Least ' + str(self.min_num) + ' File(s)')
         elif self.max_num and (num_files > self.max_num):
-            raise ValidationError(self.error_messages['max_num'] % {'max_num': self.max_num, 'num_files': num_files})
+            raise ValidationError('Cannot Upload More Than ' + str(self.max_num) + ' File(s)')
         for uploaded_file in data:
-            if self.maximum_file_size and (uploaded_file.size > self.maximum_file_size):
-                raise ValidationError(self.error_messages['file_size'] % {'uploaded_file_name': uploaded_file.name})
+            if (self.maximum_file_size is not None) and uploaded_file and (uploaded_file.size > self.maximum_file_size):
+                raise ValidationError('File To Large: ' + uploaded_file.name)

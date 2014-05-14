@@ -568,7 +568,7 @@ class AddSchoolForm(forms.Form):
 
 
 class AddSchoolsForm(forms.Form):
-    add_schools_file = forms.FileField(required=True)
+    add_schools_file = forms.FileField(required=True, validators=[validate_file_size])
 
     def __init__(self, *args, **kwargs):
         super(AddSchoolsForm, self).__init__(*args, **kwargs)
@@ -643,7 +643,7 @@ class AddTestCategoryForm(forms.Form):
 
 
 class AddTestCategoriesForm(forms.Form):
-    add_test_categories_file = forms.FileField(required=True)
+    add_test_categories_file = forms.FileField(required=True, validators=[validate_file_size])
 
     def __init__(self, *args, **kwargs):
         super(AddTestCategoriesForm, self).__init__(*args, **kwargs)
