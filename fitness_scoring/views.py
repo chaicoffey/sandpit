@@ -301,9 +301,8 @@ def school_adds(request):
             school_adds_form = AddSchoolsForm(request.POST, request.FILES)
             result = school_adds_form.add_schools(request)
             if result:
-                (n_created, n_updated, n_not_created_or_updated) = result
+                (n_created, n_not_created_or_updated) = result
                 result_message = ['Schools Created: '+str(n_created),
-                                  'Schools Updated: '+str(n_updated),
                                   'No Changes From Data Lines: '+str(n_not_created_or_updated)]
                 context = {'finish_title': 'Schools Added/Updated', 'user_messages': result_message}
                 return render(request, 'user_message.html', RequestContext(request, context))

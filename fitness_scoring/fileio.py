@@ -70,25 +70,23 @@ def add_schools_from_file(file_path_on_server):
     # check headings are correct else throw exception
 
     administrator_details = []
-    n_updated = 0
     n_not_created_or_updated = 0
     for line in schools_list_reader:
-        (name, subscription_paid_text, administrator_email) = (line['name'], line['subscription_paid'],
-                                                               line['administrator_email'])
+        (name, state, subscription_paid_text, administrator_email) = (line['name'], line['state'],
+                                                                      line['subscription_paid'],
+                                                                      line['administrator_email'])
         subscription_paid = (subscription_paid_text == "Yes")
 
-        school_saved = School.create_school_and_administrator(name=name, subscription_paid=subscription_paid,
+        school_saved = School.create_school_and_administrator(name=name, state=state,
+                                                              subscription_paid=subscription_paid,
                                                               administrator_email=administrator_email)
         if school_saved:
             (school, administrator_password) = school_saved
             administrator_details.append((school, administrator_password))
-        elif School.update_school(name=name, subscription_paid=subscription_paid,
-                                  administrator_email=administrator_email):
-            n_updated += 1
         else:
             n_not_created_or_updated += 1
 
-    return administrator_details, n_updated, n_not_created_or_updated
+    return administrator_details, n_not_created_or_updated
 
 
 def add_test_categories_from_file_upload(uploaded_file):

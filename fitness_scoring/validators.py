@@ -4,21 +4,6 @@ from django.core.exceptions import ValidationError
 import datetime
 
 
-def validate_school_unique(name):
-    if School.objects.filter(name=name).exists():
-        raise ValidationError('School Already Exists: ' + name)
-
-
-def validate_new_school_name_unique(school_pk):
-
-    def new_school_name_unique(name):
-        school = School.objects.get(pk=school_pk)
-        if (school.name != name) and (School.objects.filter(name=name).exists()):
-            raise ValidationError('School Name Already Exists: ' + name)
-
-    return new_school_name_unique
-
-
 def validate_test_category_unique(test_category_name):
     if TestCategory.objects.filter(test_category_name=test_category_name).exists():
         raise ValidationError('Test Category Already Exists: ' + test_category_name)

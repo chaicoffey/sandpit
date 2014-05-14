@@ -11,14 +11,25 @@ from hashlib import sha1
 
 
 class School(models.Model):
-    name = models.CharField(max_length=300, unique=True)
+    STATE_CHOICES = (
+        ('VIC', 'Victoria'),
+        ('NSW', 'New South Wales'),
+        ('QLD', 'Queensland'),
+        ('SA', 'South Australia'),
+        ('WA', 'Western Australia'),
+        ('TAS', 'Tasmania'),
+        ('NT', 'Northern Territory'),
+        ('ACT', 'Australian Capital Territory')
+    )
+    name = models.CharField(max_length=300)
+    state = models.CharField(max_length=50, choices=STATE_CHOICES)
     subscription_paid = models.BooleanField(default=False)
 
     def __unicode__(self):
         return self.name
 
     def get_display_items(self):
-        return [self.name,
+        return [self.name, self.state,
                 'Paid' if self.subscription_paid else 'Unpaid',
                 Administrator.objects.get(school_id=self).user.username]
 
@@ -33,22 +44,22 @@ class School(models.Model):
             self.delete()
         return school_not_used
 
-    def edit_school_safe(self, name, subscription_paid, administrator_email):
-        is_edit_safe = (self.name == name) or (len(School.objects.filter(name=name)) == 0)
+    def edit_school_safe(self, name, state, subscription_paid, administrator_email):
+        is_edit_safe = Administrator.objects.get(school_id=self).edit_administrator_safe(email=administrator_email)
         if is_edit_safe:
-            Administrator.objects.get(school_id=self).edit_administrator_safe(email=administrator_email)
             self.name = name
+            self.state = state
             self.subscription_paid = subscription_paid
             self.save()
         return is_edit_safe
 
     @staticmethod
     def get_display_list_headings():
-        return ['School Name', 'Subscription', 'Administrator Username']
+        return ['School', 'State', 'Subscription', 'Administrator Username']
 
     @staticmethod
-    def create_school_and_administrator(name, subscription_paid, administrator_email):
-        school = School.create_school(name, subscription_paid) if len(name) >= 3 else None
+    def create_school_and_administrator(name, state, subscription_paid, administrator_email):
+        school = School.create_school(name, state, subscription_paid) if len(name) >= 3 else None
         if school:
             (administrator, password) = Administrator.create_administrator(base_username=('admin_' + name[0:3]),
                                                                            school_id=school, email=administrator_email)
@@ -58,32 +69,8 @@ class School(models.Model):
         return return_details
 
     @staticmethod
-    def create_school(name, subscription_paid):
-
-        if not School.objects.filter(name=name).exists():
-            school = School.objects.create(name=name, subscription_paid=subscription_paid)
-        else:
-            school = None
-
-        return school
-
-    @staticmethod
-    def update_school(name, subscription_paid, administrator_email):
-
-        school_updated = False
-
-        school_name_exists = (len(School.objects.filter(name=name)) == 1)
-        if school_name_exists:
-            school = School.objects.get(name=name)
-            administrator = Administrator.objects.get(school_id=school)
-            school_updated = not ((school.subscription_paid == subscription_paid) and
-                                  (administrator.email == administrator_email))
-            if school_updated:
-                administrator.edit_administrator_safe(email=administrator_email)
-                school.subscription_paid = subscription_paid
-                school.save()
-
-        return school_updated
+    def create_school(name, state, subscription_paid):
+        return School.objects.create(name=name, state=state, subscription_paid=subscription_paid)
 
 
 class User(models.Model):
@@ -263,6 +250,7 @@ class Administrator(models.Model):
     def edit_administrator_safe(self, email):
         self.email = email
         self.save()
+        return True
 
     def reset_password(self):
         return self.user.reset_password()

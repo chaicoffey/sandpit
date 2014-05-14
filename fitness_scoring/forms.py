@@ -1,7 +1,6 @@
 from django import forms
 from fitness_scoring.models import School, Administrator, Class, Teacher, TestCategory, Test, User
 from fitness_scoring.models import TeacherClassAllocation, ClassTest, TestSet
-from fitness_scoring.validators import validate_school_unique, validate_new_school_name_unique
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
 from fitness_scoring.validators import validate_new_test_name_unique
 from fitness_scoring.validators import validate_no_space
@@ -527,8 +526,8 @@ class LoadClassTestsFromTestSetForm(forms.Form):
 
 
 class AddSchoolForm(forms.Form):
-    name = forms.CharField(max_length=300, required=True, validators=[MinLengthValidator(3), validate_no_space(3),
-                                                                      validate_school_unique])
+    name = forms.CharField(max_length=300, required=True, validators=[MinLengthValidator(3), validate_no_space(3)])
+    state = forms.ChoiceField(choices=School.STATE_CHOICES, required=True)
     subscription_paid = forms.BooleanField(initial=False, required=False)
     administrator_email = forms.EmailField(max_length=100, required=True)
 
@@ -537,15 +536,18 @@ class AddSchoolForm(forms.Form):
         self.fields['name'].error_messages = {'required': 'Please Enter School Name',
                                               'min_length': 'School Name Must be at Least 3 Characters',
                                               'no_space': 'School Name Must not Have Spaces in First 3 Characters'}
+        self.fields['state'].error_messages = {'required': 'Please Select A State'}
         self.fields['administrator_email'].error_messages = {'required': 'Please Enter Administrator Email'}
 
     def add_school(self):
         school_saved = self.is_valid()
         if school_saved:
             name = self.cleaned_data['name']
+            state = self.cleaned_data['state']
             subscription_paid = self.cleaned_data['subscription_paid']
             administrator_email = self.cleaned_data['administrator_email']
-            school_saved = School.create_school_and_administrator(name=name, subscription_paid=subscription_paid,
+            school_saved = School.create_school_and_administrator(name=name, state=state,
+                                                                  subscription_paid=subscription_paid,
                                                                   administrator_email=administrator_email)
         if school_saved:
             administrator_email = self.cleaned_data['administrator_email']
@@ -572,7 +574,7 @@ class AddSchoolsForm(forms.Form):
     def add_schools(self, request):
         if self.is_valid():
             (administrator_details,
-             n_updated, n_not_created_or_updated) = add_schools_from_file_upload(request.FILES['add_schools_file'])
+             n_not_created_or_updated) = add_schools_from_file_upload(request.FILES['add_schools_file'])
             for school, administrator_password in administrator_details:
                 administrator = Administrator.objects.get(school_id=school)
                 administrator_email = administrator.email
@@ -581,7 +583,7 @@ class AddSchoolsForm(forms.Form):
                            'password: ' + administrator_password)
                 send_mail('Fitness Testing App - Administrator Login Details', message, DEFAULT_FROM_EMAIL,
                           [administrator_email])
-            return len(administrator_details), n_updated, n_not_created_or_updated
+            return len(administrator_details), n_not_created_or_updated
         else:
             return False
 
@@ -589,6 +591,7 @@ class AddSchoolsForm(forms.Form):
 class EditSchoolForm(forms.Form):
     school_pk = forms.CharField(widget=forms.HiddenInput())
     name = forms.CharField(max_length=300, required=True, validators=[MinLengthValidator(3), validate_no_space(3)])
+    state = forms.ChoiceField(choices=School.STATE_CHOICES, required=True)
     subscription_paid = forms.BooleanField(initial=False, required=False)
     administrator_email = forms.EmailField(max_length=100, required=True)
 
@@ -597,25 +600,26 @@ class EditSchoolForm(forms.Form):
         self.fields['name'].error_messages = {'required': 'Please Enter School Name',
                                               'min_length': 'School Name Must be at Least 3 Characters',
                                               'no_space': 'School Name Must not Have Spaces in First 3 Characters'}
+        self.fields['state'].error_messages = {'required': 'Please Select A State'}
         self.fields['administrator_email'].error_messages = {'required': 'Please Enter Administrator Email'}
 
         school = School.objects.get(pk=school_pk)
         self.fields['school_pk'].initial = school_pk
         self.fields['name'].initial = school.name
+        self.fields['state'].initial = school.state
         self.fields['subscription_paid'].initial = school.subscription_paid
         self.fields['administrator_email'].initial = Administrator.objects.get(school_id=school).email
-
-        self.fields['name'].validators = [validate_new_school_name_unique(school_pk=school_pk)]
 
     def edit_school(self):
         school_edited = self.is_valid()
         if school_edited:
             school_pk = self.cleaned_data['school_pk']
             name = self.cleaned_data['name']
+            state = self.cleaned_data['state']
             subscription_paid = self.cleaned_data['subscription_paid']
             administrator_email = self.cleaned_data['administrator_email']
             school_editing = School.objects.get(pk=school_pk)
-            school_edited = school_editing.edit_school_safe(name=name, subscription_paid=subscription_paid,
+            school_edited = school_editing.edit_school_safe(name=name, state=state, subscription_paid=subscription_paid,
                                                             administrator_email=administrator_email)
         return school_edited
 
