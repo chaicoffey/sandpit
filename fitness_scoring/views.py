@@ -462,14 +462,27 @@ def test_category_add(request):
 def test_category_adds(request):
     if request.session.get('user_type', None) == 'SuperUser':
         if request.POST:
-            test_category_adds_form = AddTestCategoriesForm(request.POST, request.FILES)
+            test_category_adds_form = AddTestCategoriesForm(data=request.POST, files=request.FILES)
             result = test_category_adds_form.add_test_categories(request)
             if result:
-                (n_created, n_updated, n_not_created_or_updated) = result
-                result_message = ['Test Categories Created: '+str(n_created),
-                                  'Test Categories Updated: '+str(n_updated),
-                                  'No Changes From Data Lines: '+str(n_not_created_or_updated)]
-                context = {'finish_title': 'Test Categories Added/Updated', 'user_messages': result_message}
+
+                (n_created, n_blank, test_category_already_exist, invalid_lines) = result
+                result_message = ['Tests Categories Created: ' + str(n_created),
+                                  'Lines With Blank Test Category: ' + str(n_blank)]
+                if len(test_category_already_exist) > 0:
+                    result_message.append('Test category already existed on the following lines:')
+                    for line in test_category_already_exist:
+                        result_message.append(line)
+                if len(invalid_lines) > 0:
+                    result_message.append('Error reading data on the following lines:')
+                    for line in invalid_lines:
+                        result_message.append(line)
+                context = {'finish_title': 'Test Categories Added', 'user_messages': result_message}
+                return render(request, 'user_message.html', RequestContext(request, context))
+
+            elif result is None:
+                context = {'finish_title': 'Test Categories Not Added',
+                           'user_message': 'Test Categories Not Added: Error Reading File'}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/test_category/adds/',

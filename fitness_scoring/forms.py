@@ -6,7 +6,6 @@ from fitness_scoring.validators import validate_new_test_name_unique
 from fitness_scoring.validators import validate_no_space, validate_file_size
 from fitness_scoring.validators import is_valid_email
 from fitness_scoring.fields import MultiFileField
-from fitness_scoring.fileio import add_test_categories_from_file_upload
 from fitness_scoring.fileio import add_test_from_file_upload, update_test_from_file_upload
 from fitness_scoring.fileio import read_file_upload
 from pe_site.settings import DEFAULT_FROM_EMAIL
@@ -709,7 +708,29 @@ class AddTestCategoriesForm(forms.Form):
 
     def add_test_categories(self, request):
         if self.is_valid():
-            return add_test_categories_from_file_upload(request.FILES['add_test_categories_file'])
+            result = read_file_upload(uploaded_file=request.FILES['add_test_categories_file'],
+                                      headings=['test_category_name'])
+            if result:
+                (valid_lines, invalid_lines) = result
+                n_created = 0
+                n_blank = 0
+                test_category_already_exist = []
+
+                for line in valid_lines:
+
+                    [test_category_name] = line
+
+                    if (test_category_name is None) or (test_category_name == ''):
+                        n_blank += 1
+                    else:
+                        if TestCategory.create_test_category(test_category_name=test_category_name):
+                            n_created += 1
+                        else:
+                            test_category_already_exist.append(test_category_name)
+
+                return n_created, n_blank, test_category_already_exist, invalid_lines
+            else:
+                return None
         else:
             return False
 

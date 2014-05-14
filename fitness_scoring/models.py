@@ -562,20 +562,6 @@ class TestCategory(models.Model):
             TestCategory.objects.create(test_category_name=test_category_name)
         return test_category_name_unique
 
-    @staticmethod
-    def update_test_category(test_category_name):
-
-        test_category_updated = False
-
-        test_category_exists = TestCategory.objects.filter(test_category_name=test_category_name).exists()
-        if test_category_exists:
-            test_category = TestCategory.objects.get(test_category_name=test_category_name)
-            test_category_updated = not (test_category.test_category_name == test_category_name)
-            if test_category_updated:
-                test_category.save()
-
-        return test_category_updated
-
 
 class PercentileBracketSet(models.Model):
     RESULT_TYPE_CHOICES = (
