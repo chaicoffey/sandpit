@@ -852,6 +852,10 @@ def class_adds(request):
                 context = {'finish_title': 'Classes Added', 'user_messages': result_message}
                 return render(request, 'user_message.html', RequestContext(request, context))
 
+            elif result is None:
+                context = {'finish_title': 'Classes Not Added',
+                           'user_message': 'Classes Not Added: Error Reading File'}
+                return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/class/adds/',
                            'functionality_name': 'Add Classes',

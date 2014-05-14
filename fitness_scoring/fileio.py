@@ -24,30 +24,36 @@ def delete_file(file_name):
 
 def read_classes_file_upload(uploaded_file):
     file_path_on_server = save_file(uploaded_file)
-    (valid_lines, invalid_lines) = read_add_classes_file(file_path_on_server)
+    try:
+        result = read_classes_file(file_path_on_server)
+    except:
+        result = None
     delete_file(file_path_on_server)
-    return valid_lines, invalid_lines
+    return result
 
 
-def read_add_classes_file(file_path_on_server):
+def read_classes_file(file_path_on_server):
     file_handle = open(file_path_on_server, 'rb')
 
-    dialect = csv.Sniffer().sniff(file_handle.read(1024))
-    dialect.strict = True
+    try:
+        dialect = csv.Sniffer().sniff(file_handle.read(1024))
+        dialect.strict = True
 
-    file_handle.seek(0)
-    classes_list_reader = csv.DictReader(file_handle, dialect=dialect)
-    # check headings are correct else throw exception
+        file_handle.seek(0)
+        classes_list_reader = csv.DictReader(file_handle, dialect=dialect)
+        # check headings are correct else throw exception
 
-    valid_lines = []
-    invalid_lines = []
-    for line in classes_list_reader:
-        try:
-            (year, class_name, teacher_username, test_set_name) = (line['year'], line['class_name'],
-                                                                   line['teacher_username'], line['test_set'])
-            valid_lines.append((year, class_name, teacher_username, test_set_name))
-        except:
-            invalid_lines.append(line)
+        valid_lines = []
+        invalid_lines = []
+        for line in classes_list_reader:
+            try:
+                (year, class_name, teacher_username, test_set_name) = (line['year'], line['class_name'],
+                                                                       line['teacher_username'], line['test_set'])
+                valid_lines.append((year, class_name, teacher_username, test_set_name))
+            except:
+                invalid_lines.append(line)
+    finally:
+        file_handle.close()
 
     return valid_lines, invalid_lines
 

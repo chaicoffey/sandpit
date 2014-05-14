@@ -1,7 +1,17 @@
 
 from fitness_scoring.models import School, TestCategory, Test, Student
+from pe_site.settings import MAX_FILE_UPLOAD_SIZE_MB
 from django.core.exceptions import ValidationError
 import datetime
+
+
+def validate_file_size(file_data):
+    if file_data:
+        if file_data._size > (1024*1024*MAX_FILE_UPLOAD_SIZE_MB):
+            raise ValidationError("File too large (must be less than: " + str(MAX_FILE_UPLOAD_SIZE_MB) + " MB)")
+        return file_data
+    else:
+        raise ValidationError("Couldn't read uploaded file")
 
 
 def validate_test_category_unique(test_category_name):

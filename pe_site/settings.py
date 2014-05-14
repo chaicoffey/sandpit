@@ -91,3 +91,5 @@ EMAIL_HOST_USER = 'pe.fitness.testing.superuser@gmail.com'
 EMAIL_HOST_PASSWORD = 'super11!'
 DEFAULT_FROM_EMAIL = 'pe.fitness.testing.superuser@gmail.com'
 DEFAULT_TO_EMAIL = 'pe.fitness.testing.superuser@gmail.com'
+
+MAX_FILE_UPLOAD_SIZE_MB = 2
