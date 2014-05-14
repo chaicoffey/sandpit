@@ -3,6 +3,7 @@ from fitness_scoring.models import School, TestCategory, Test, Student
 from pe_site.settings import MAX_FILE_UPLOAD_SIZE_MB
 from django.core.exceptions import ValidationError
 import datetime
+import re
 
 
 def validate_file_size(file_data):
@@ -81,3 +82,7 @@ def validate_date_field(date_format):
             raise ValidationError("Date should be of form " + date_format, code='date_format')
 
     return test_date_field
+
+
+def is_valid_email(email):
+    return re.match(r"[^@]+@[^@]+\.[^@]+", email)

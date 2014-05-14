@@ -1,7 +1,7 @@
 import csv
 import tempfile
 import os
-from fitness_scoring.models import School, TestCategory, Test
+from fitness_scoring.models import TestCategory, Test
 from fitness_scoring.models import PercentileBracketSet
 
 destination_directory = 'C:\\fitness_scoring_file_uploads\\'
@@ -57,43 +57,6 @@ def read_file(file_path_on_server, headings):
         file_handle.close()
 
     return valid_lines, invalid_lines
-
-
-def add_schools_from_file_upload(uploaded_file):
-    file_path_on_server = save_file(uploaded_file)
-    result = add_schools_from_file(file_path_on_server)
-    delete_file(file_path_on_server)
-    return result
-
-
-def add_schools_from_file(file_path_on_server):
-    file_handle = open(file_path_on_server, 'rb')
-
-    dialect = csv.Sniffer().sniff(file_handle.read(1024))
-    dialect.strict = True
-
-    file_handle.seek(0)
-    schools_list_reader = csv.DictReader(file_handle, dialect=dialect)
-    # check headings are correct else throw exception
-
-    administrator_details = []
-    n_not_created_or_updated = 0
-    for line in schools_list_reader:
-        (name, state, subscription_paid_text, administrator_email) = (line['name'], line['state'],
-                                                                      line['subscription_paid'],
-                                                                      line['administrator_email'])
-        subscription_paid = (subscription_paid_text == "Yes")
-
-        school_saved = School.create_school_and_administrator(name=name, state=state,
-                                                              subscription_paid=subscription_paid,
-                                                              administrator_email=administrator_email)
-        if school_saved:
-            (school, administrator_password) = school_saved
-            administrator_details.append((school, administrator_password))
-        else:
-            n_not_created_or_updated += 1
-
-    return administrator_details, n_not_created_or_updated
 
 
 def add_test_categories_from_file_upload(uploaded_file):

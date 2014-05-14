@@ -298,13 +298,44 @@ def school_add(request):
 def school_adds(request):
     if request.session.get('user_type', None) == 'SuperUser':
         if request.POST:
-            school_adds_form = AddSchoolsForm(request.POST, request.FILES)
+            school_adds_form = AddSchoolsForm(data=request.POST, files=request.FILES)
             result = school_adds_form.add_schools(request)
             if result:
-                (n_created, n_not_created_or_updated) = result
-                result_message = ['Schools Created: '+str(n_created),
-                                  'No Changes From Data Lines: '+str(n_not_created_or_updated)]
-                context = {'finish_title': 'Schools Added/Updated', 'user_messages': result_message}
+
+                (n_created, school_name_not_exceed_three_characters, invalid_state,
+                 invalid_email, error_adding_school, invalid_lines, same_name_warning) = result
+                result_message = ['Schools Created: ' + str(n_created)]
+                if len(school_name_not_exceed_three_characters) > 0:
+                    result_message.append('School name did not exceed 3 characters on the following lines:')
+                    for line in school_name_not_exceed_three_characters:
+                        result_message.append(line)
+                if len(invalid_state) > 0:
+                    result_message.append('Could not recognise the state on the following lines:')
+                    for line in invalid_state:
+                        result_message.append(line)
+                if len(invalid_email) > 0:
+                    result_message.append('Invalid email on the following lines:')
+                    for line in invalid_email:
+                        result_message.append(line)
+                if len(error_adding_school) > 0:
+                    result_message.append('Some unexpected error was found for the following lines:')
+                    for line in error_adding_school:
+                        result_message.append(line)
+                if len(invalid_lines) > 0:
+                    result_message.append('Error reading data on the following lines:')
+                    for line in invalid_lines:
+                        result_message.append(line)
+                if len(same_name_warning) > 0:
+                    result_message.append('Warning the following schools have the same name and state as others already'
+                                          ' in the database:')
+                    for line in same_name_warning:
+                        result_message.append(line)
+                context = {'finish_title': 'Schools Added', 'user_messages': result_message}
+                return render(request, 'user_message.html', RequestContext(request, context))
+
+            elif result is None:
+                context = {'finish_title': 'Schools Not Added',
+                           'user_message': 'Schools Not Added: Error Reading File'}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/school/adds/',
@@ -312,7 +343,9 @@ def school_adds(request):
                            'form': school_adds_form}
                 return render(request, 'modal_form.html', RequestContext(request, context))
         else:
-            context = {'post_to_url': '/school/adds/', 'functionality_name': 'Add Schools', 'form': AddSchoolsForm()}
+            context = {'post_to_url': '/school/adds/',
+                       'functionality_name': 'Add Schools',
+                       'form': AddSchoolsForm()}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to add schools")

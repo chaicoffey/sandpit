@@ -4,8 +4,9 @@ from fitness_scoring.models import TeacherClassAllocation, ClassTest, TestSet
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
 from fitness_scoring.validators import validate_new_test_name_unique
 from fitness_scoring.validators import validate_no_space, validate_file_size
+from fitness_scoring.validators import is_valid_email
 from fitness_scoring.fields import MultiFileField
-from fitness_scoring.fileio import add_schools_from_file_upload, add_test_categories_from_file_upload
+from fitness_scoring.fileio import add_test_categories_from_file_upload
 from fitness_scoring.fileio import add_test_from_file_upload, update_test_from_file_upload
 from fitness_scoring.fileio import read_file_upload
 from pe_site.settings import DEFAULT_FROM_EMAIL
@@ -583,17 +584,67 @@ class AddSchoolsForm(forms.Form):
 
     def add_schools(self, request):
         if self.is_valid():
-            (administrator_details,
-             n_not_created_or_updated) = add_schools_from_file_upload(request.FILES['add_schools_file'])
-            for school, administrator_password in administrator_details:
-                administrator = Administrator.objects.get(school_id=school)
-                administrator_email = administrator.email
-                administrator_username = administrator.user.username
-                message = ('username: ' + administrator_username + '\n' +
-                           'password: ' + administrator_password)
-                send_mail('Fitness Testing App - Administrator Login Details', message, DEFAULT_FROM_EMAIL,
-                          [administrator_email])
-            return len(administrator_details), n_not_created_or_updated
+            result = read_file_upload(uploaded_file=request.FILES['add_schools_file'],
+                                      headings=['name', 'state', 'subscription_paid', 'administrator_email'])
+            if result:
+                (valid_lines, invalid_lines) = result
+                n_created = 0
+                school_name_not_exceed_three_characters = []
+                invalid_state = []
+                invalid_email = []
+                error_adding_school = []
+                same_name_warning = []
+
+                for name, state, subscription_paid_text, administrator_email in valid_lines:
+
+                    if name is None:
+                        name = ''
+                    if state is None:
+                        state = ''
+                    if subscription_paid_text is None:
+                        subscription_paid_text = ''
+                    if administrator_email is None:
+                        administrator_email = ''
+
+                    subscription_paid = (subscription_paid_text == "Yes")
+
+                    if len(name) < 3:
+                        school_name_not_exceed_three_characters.append('(' + name + ', ' + state + ', ' +
+                                                                       subscription_paid_text + ', ' +
+                                                                       administrator_email + ')')
+                    elif state not in [state_choice for (state_choice, state_text) in School.STATE_CHOICES]:
+                        invalid_state.append('(' + name + ', ' + state + ', ' + subscription_paid_text + ', ' +
+                                             administrator_email + ')')
+                    elif not is_valid_email(administrator_email):
+                        invalid_email.append('(' + name + ', ' + state + ', ' + subscription_paid_text + ', ' +
+                                             administrator_email + ')')
+                    else:
+
+                        school_saved = School.create_school_and_administrator(name=name, state=state,
+                                                                              subscription_paid=subscription_paid,
+                                                                              administrator_email=administrator_email)
+                        if school_saved:
+                            n_created += 1
+                            if len(School.objects.filter(name=name, state=state)) > 1:
+                                same_name_warning.append('(' + name + ', ' + state + ', ' +
+                                                         subscription_paid_text + ', ' + administrator_email + ')')
+
+                            (school, administrator_password) = school_saved
+                            administrator = Administrator.objects.get(school_id=school)
+                            administrator_email = administrator.email
+                            administrator_username = administrator.user.username
+                            message = ('username: ' + administrator_username + '\n' +
+                                       'password: ' + administrator_password)
+                            send_mail('Fitness Testing App - Administrator Login Details', message, DEFAULT_FROM_EMAIL,
+                                      [administrator_email])
+                        else:
+                            error_adding_school.append('(' + name + ', ' + state + ', ' +
+                                                       subscription_paid_text + ', ' + administrator_email + ')')
+
+                return (n_created, school_name_not_exceed_three_characters, invalid_state, invalid_email,
+                        error_adding_school, invalid_lines, same_name_warning)
+            else:
+                return None
         else:
             return False
 
