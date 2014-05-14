@@ -22,17 +22,17 @@ def delete_file(file_name):
     os.remove(file_name)
 
 
-def read_classes_file_upload(uploaded_file):
+def read_file_upload(uploaded_file, headings):
     file_path_on_server = save_file(uploaded_file)
     try:
-        result = read_classes_file(file_path_on_server)
+        result = read_file(file_path_on_server, headings)
     except:
         result = None
     delete_file(file_path_on_server)
     return result
 
 
-def read_classes_file(file_path_on_server):
+def read_file(file_path_on_server, headings):
     file_handle = open(file_path_on_server, 'rb')
 
     try:
@@ -47,9 +47,10 @@ def read_classes_file(file_path_on_server):
         invalid_lines = []
         for line in classes_list_reader:
             try:
-                (year, class_name, teacher_username, test_set_name) = (line['year'], line['class_name'],
-                                                                       line['teacher_username'], line['test_set'])
-                valid_lines.append((year, class_name, teacher_username, test_set_name))
+                data_line = []
+                for heading in headings:
+                    data_line.append(line[heading])
+                valid_lines.append(data_line)
             except:
                 invalid_lines.append(line)
     finally:

@@ -7,7 +7,7 @@ from fitness_scoring.validators import validate_no_space, validate_file_size
 from fitness_scoring.fields import MultiFileField
 from fitness_scoring.fileio import add_schools_from_file_upload, add_test_categories_from_file_upload
 from fitness_scoring.fileio import add_test_from_file_upload, update_test_from_file_upload
-from fitness_scoring.fileio import read_classes_file_upload
+from fitness_scoring.fileio import read_file_upload
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.validators import MinLengthValidator
 import datetime
@@ -205,7 +205,8 @@ class AddClassesForm(forms.Form):
 
     def add_classes(self, request):
         if self.is_valid():
-            result = read_classes_file_upload(uploaded_file=request.FILES['add_classes_file'])
+            result = read_file_upload(uploaded_file=request.FILES['add_classes_file'],
+                                      headings=['year', 'class_name', 'teacher_username', 'test_set'])
             if result:
                 (valid_lines, invalid_lines) = result
                 school = School.objects.get(pk=self.cleaned_data['school_pk'])
