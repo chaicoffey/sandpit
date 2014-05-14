@@ -209,10 +209,12 @@ class AddClassesForm(forms.Form):
             if result:
                 (valid_lines, invalid_lines) = result
                 school = School.objects.get(pk=self.cleaned_data['school_pk'])
+                current_year = datetime.datetime.now().year
                 n_created = 0
                 teacher_username_not_exist = []
                 test_set_not_exist = []
                 class_already_exists = []
+                not_current_year_warning = []
 
                 for year, class_name, teacher_username, test_set_name in valid_lines:
 
@@ -245,6 +247,9 @@ class AddClassesForm(forms.Form):
                     if teacher and ((test_set_name == '') or test_set):
                         class_instance = Class.create_class_safe(year, class_name, school, teacher)
                         if class_instance:
+                            if str(year) != str(current_year):
+                                not_current_year_warning.append('(' + year + ', ' + class_name + ', ' + teacher_username
+                                                                + ', ' + test_set_name + ')')
                             n_created += 1
                             if test_set:
                                 class_instance.load_class_tests_from_test_set_safe(test_set.test_set_name)
@@ -252,7 +257,8 @@ class AddClassesForm(forms.Form):
                             class_already_exists.append('(' + year + ', ' + class_name + ', ' + teacher_username +
                                                         ', ' + test_set_name + ')')
 
-                return n_created, teacher_username_not_exist, test_set_not_exist, class_already_exists, invalid_lines
+                return (n_created, teacher_username_not_exist, test_set_not_exist, class_already_exists, invalid_lines,
+                        not_current_year_warning)
             else:
                 return None
         else:

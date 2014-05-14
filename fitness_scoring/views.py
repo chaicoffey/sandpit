@@ -831,7 +831,7 @@ def class_adds(request):
             if result:
 
                 (n_created, teacher_username_not_exist, test_set_not_exist,
-                 class_already_exists, invalid_lines) = result
+                 class_already_exists, invalid_lines, not_current_year_warning) = result
                 result_message = ['Classes Created: ' + str(n_created)]
                 if len(teacher_username_not_exist) > 0:
                     result_message.append('Could not recognise the teacher username on the following lines:')
@@ -848,6 +848,10 @@ def class_adds(request):
                 if len(invalid_lines) > 0:
                     result_message.append('Error reading data on the following lines:')
                     for line in invalid_lines:
+                        result_message.append(line)
+                if len(not_current_year_warning) > 0:
+                    result_message.append('Warning the following classes were added not for the current year:')
+                    for line in not_current_year_warning:
                         result_message.append(line)
                 context = {'finish_title': 'Classes Added', 'user_messages': result_message}
                 return render(request, 'user_message.html', RequestContext(request, context))
