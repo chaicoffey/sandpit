@@ -657,7 +657,7 @@ def test_update(request, test_pk):
                            'user_message': 'Test Not Updated: Error Reading File'}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
-                context = {'post_to_url': '/test/update/',
+                context = {'post_to_url': '/test/update/' + str(test_pk),
                            'functionality_name': 'Update Test',
                            'form': test_update_form}
                 return render(request, 'modal_form.html', RequestContext(request, context))
