@@ -6,7 +6,7 @@ from fitness_scoring.validators import validate_new_test_name_unique
 from fitness_scoring.validators import validate_no_space, validate_file_size
 from fitness_scoring.validators import is_valid_email
 from fitness_scoring.fields import MultiFileField
-from fitness_scoring.fileio import add_test_from_file_upload, update_test_from_file_upload
+from fitness_scoring.fileio import update_test_from_file_upload, read_test_information_from_file_upload
 from fitness_scoring.fileio import read_file_upload
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.validators import MinLengthValidator
@@ -771,17 +771,29 @@ class AddTestsForm(forms.Form):
     def add_tests(self, request):
         if self.is_valid():
             n_created = 0
-            n_not_created = 0
+            test_name_already_exists = []
+            error_reading_file = []
+            problems_in_files = []
+
             file_list = request.FILES.getlist('add_tests_files')
             for add_test_file in file_list:
-                if add_test_from_file_upload(add_test_file):
-                    n_created += 1
+                file_name = add_test_file.name
+                result = read_test_information_from_file_upload(add_test_file)
+                if result:
+                    problems_in_data, test_information = result
+                    if test_information is None:
+                        problems_in_files.append((file_name, problems_in_data))
+                    else:
+                        (test_name, test_category, result_information) = test_information
+                        if Test.create_test(test_name, test_category, result_information):
+                            n_created += 1
+                        else:
+                            test_name_already_exists.append(file_name + ' (' + test_name + ')')
                 else:
-                    n_not_created += 1
-            result = (n_created, n_not_created)
+                    error_reading_file.append(file_name)
+            return n_created, test_name_already_exists, error_reading_file, problems_in_files
         else:
-            result = None
-        return result
+            return False
 
 
 class UpdateTestFromFileForm(forms.Form):

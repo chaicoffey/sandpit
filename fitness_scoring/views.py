@@ -571,16 +571,32 @@ def test_adds(request):
             test_adds_form = AddTestsForm(data=request.POST, files=request.FILES)
             result = test_adds_form.add_tests(request)
             if result:
-                (n_created, n_not_created) = result
-                result_message = ['Tests Created: '+str(n_created),
-                                  'No Changes From Data Lines: '+str(n_not_created)]
+
+                (n_created, test_name_already_exists, error_reading_file, problems_in_files) = result
+                result_message = ['TEST CATEGORIES CREATED: ' + str(n_created)]
+                if len(test_name_already_exists) > 0:
+                    result_message.append('TEST NAME ALREADY EXISTED FOR THE FOLLOWING FILES:')
+                    for line in test_name_already_exists:
+                        result_message.append('    ' + line)
+                if len(error_reading_file) > 0:
+                    result_message.append('ERROR READING THE FOLLOWING FILES:')
+                    for line in error_reading_file:
+                        result_message.append(line)
+                if len(problems_in_files) > 0:
+                    for file_name, problems_in_data in problems_in_files:
+                        result_message.append('SPECIFIC PROBLEMS WERE FOUND IN THE FOLLOWING FILE: ' + file_name)
+                        for problem in problems_in_data:
+                            result_message.append(problem)
+
                 context = {'finish_title': 'Tests Added/Updated', 'user_messages': result_message}
                 return render(request, 'user_message.html', RequestContext(request, context))
+
             else:
                 context = {'post_to_url': '/test/adds/',
                            'functionality_name': 'Add Tests',
                            'form': test_adds_form}
                 return render(request, 'modal_form.html', RequestContext(request, context))
+
         else:
             context = {'post_to_url': '/test/adds/',
                        'functionality_name': 'Add Tests',
