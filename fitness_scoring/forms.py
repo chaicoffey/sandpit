@@ -6,8 +6,7 @@ from fitness_scoring.validators import validate_new_test_name_unique
 from fitness_scoring.validators import validate_no_space, validate_file_size
 from fitness_scoring.validators import is_valid_email
 from fitness_scoring.fields import MultiFileField
-from fitness_scoring.fileio import update_test_from_file_upload, read_test_information_from_file_upload
-from fitness_scoring.fileio import read_file_upload
+from fitness_scoring.fileio import read_file_upload, read_test_information_from_file_upload
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.validators import MinLengthValidator
 import datetime
@@ -86,14 +85,24 @@ class AddTeacherForm(forms.Form):
 
         if teacher_details:
             (teacher, password) = teacher_details
-
-            message = ('username: ' + teacher.user.username + '\n' +
-                       'password: ' + password)
-            send_mail('Fitness Testing App - Teacher Login Details', message, DEFAULT_FROM_EMAIL, [teacher.email])
+            AddTeacherForm.send_teacher_email(teacher.user.username, password, teacher.email)
         else:
             teacher = None
 
         return teacher
+
+    @staticmethod
+    def send_teacher_email(username, password, teacher_email):
+        send_mail('Fitness Testing App - Teacher Login Details',
+                  ('Hi,\n\n'
+                   'You are now signed up for the fitness testing application\n\n'
+                   'To start using go to www.not_sure_yet.com and enter the login details below:\n'
+                   'username: ' + username + '\n'
+                   'password: ' + password + '\n\n'
+                   "After you login just start following the steps and you're away!\n\n"
+                   'Regards,\n' +
+                   'Fitness testing app team\n'),
+                  DEFAULT_FROM_EMAIL, [teacher_email])
 
 
 class EditTeacherForm(forms.Form):
@@ -563,15 +572,24 @@ class AddSchoolForm(forms.Form):
             administrator_email = self.cleaned_data['administrator_email']
             (school, administrator_password) = school_saved
             administrator_username = Administrator.objects.get(school_id=school).user.username
-
-            message = ('username: ' + administrator_username + '\n' +
-                       'password: ' + administrator_password)
-            send_mail('Fitness Testing App - Administrator Login Details', message, DEFAULT_FROM_EMAIL,
-                      [administrator_email])
+            AddSchoolForm.send_administrator_email(administrator_username, administrator_password, administrator_email)
         else:
             school = None
 
         return school
+
+    @staticmethod
+    def send_administrator_email(administrator_username, administrator_password, administrator_email):
+        send_mail('Fitness Testing App - Administrator Login Details',
+                  ('Hi,\n\n'
+                   'You are now signed up for the fitness testing application\n\n'
+                   'To start using go to www.not_sure_yet.com and enter the login details below:\n'
+                   'username: ' + administrator_username + '\n'
+                   'password: ' + administrator_password + '\n\n'
+                   "After you login just follow the steps and you're away!\n\n"
+                   'Regards,\n' +
+                   'Fitness testing app team\n'),
+                  DEFAULT_FROM_EMAIL, [administrator_email])
 
 
 class AddSchoolsForm(forms.Form):
@@ -632,10 +650,8 @@ class AddSchoolsForm(forms.Form):
                             administrator = Administrator.objects.get(school_id=school)
                             administrator_email = administrator.email
                             administrator_username = administrator.user.username
-                            message = ('username: ' + administrator_username + '\n' +
-                                       'password: ' + administrator_password)
-                            send_mail('Fitness Testing App - Administrator Login Details', message, DEFAULT_FROM_EMAIL,
-                                      [administrator_email])
+                            AddSchoolForm.send_administrator_email(administrator_username, administrator_password,
+                                                                   administrator_email)
                         else:
                             error_adding_school.append('(' + name + ', ' + state + ', ' +
                                                        subscription_paid_text + ', ' + administrator_email + ')')

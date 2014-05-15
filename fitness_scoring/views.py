@@ -389,10 +389,14 @@ def school_reset_password(request, school_pk):
         administrator = Administrator.objects.get(school_id=School.objects.get(pk=school_pk))
         if request.POST:
             new_password = administrator.reset_password()
-            message = ('username: ' + administrator.user.username + '\n' +
-                       'password: ' + new_password)
-            send_mail('Fitness Testing App - Administrator Password Reset', message, DEFAULT_FROM_EMAIL,
-                      [administrator.email])
+            send_mail('Fitness Testing App - Administrator Password Reset',
+                      ('Hi,\n\n'
+                       'Your administrator password has been reset (details below)\n\n'
+                       'username: ' + administrator.user.username + '\n'
+                       'password: ' + new_password + '\n\n'
+                       'Regards,\n' +
+                       'Fitness testing app team\n'),
+                      DEFAULT_FROM_EMAIL, [administrator.email])
             context = {'finish_title': 'Password Reset',
                        'user_message': 'Password Reset For User: ' + str(administrator)}
             return render(request, 'user_message.html', RequestContext(request, context))
@@ -815,9 +819,14 @@ def teacher_reset_password(request, teacher_pk):
         teacher = Teacher.objects.get(pk=teacher_pk)
         if request.POST:
             new_password = teacher.reset_password()
-            message = ('username: ' + teacher.user.username + '\n' +
-                       'password: ' + new_password)
-            send_mail('Fitness Testing App - Teacher Password Reset', message, DEFAULT_FROM_EMAIL, [teacher.email])
+            send_mail('Fitness Testing App - Teacher Password Reset',
+                      ('Hi,\n\n'
+                       'Your password has been reset (details below)\n\n'
+                       'username: ' + teacher.user.username + '\n'
+                       'password: ' + new_password + '\n\n'
+                       'Regards,\n' +
+                       'Fitness testing app team\n'),
+                      DEFAULT_FROM_EMAIL, [teacher.email])
             context = {'finish_title': 'Password Reset',
                        'user_message': 'Password Reset For User: ' + str(teacher)}
             return render(request, 'user_message.html', RequestContext(request, context))
