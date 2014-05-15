@@ -6,18 +6,26 @@
         </div>
     {% elif user_error_message %}
         <div class="user_error_message">
-            {{ user_error_message }}
+            <b>{{ user_error_message }} <br></b>
         </div>
     {% elif user_messages %}
         <div class="user_message">
-            {% for user_message in user_messages %}
-                {{ user_message }} <br>
+            {% for user_message, is_heading in user_messages %}
+                {% if is_heading %}
+                    <b>{{ user_message }} <br></b>
+                {% else %}
+                    {{ user_message }} <br>
+                {% endif %}
             {% endfor %}
         </div>
     {% elif user_error_messages %}
         <div class="user_error_message">
-            {% for user_error_message in user_error_messages %}
-                {{ user_error_message }} <br>
+            {% for user_message, is_heading in user_error_messages %}
+                {% if is_heading %}
+                    <b>{{ user_message }} <br></b>
+                {% else %}
+                    {{ user_message }} <br>
+                {% endif %}
             {% endfor %}
         </div>
     {% endif %}

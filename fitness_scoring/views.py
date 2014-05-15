@@ -304,38 +304,28 @@ def school_adds(request):
 
                 (n_created, school_name_not_exceed_three_characters, invalid_state,
                  invalid_email, error_adding_school, invalid_lines, same_name_warning) = result
-                result_message = ['Schools Created: ' + str(n_created)]
-                if len(school_name_not_exceed_three_characters) > 0:
-                    result_message.append('School name did not exceed 3 characters on the following lines:')
-                    for line in school_name_not_exceed_three_characters:
-                        result_message.append(line)
-                if len(invalid_state) > 0:
-                    result_message.append('Could not recognise the state on the following lines:')
-                    for line in invalid_state:
-                        result_message.append(line)
-                if len(invalid_email) > 0:
-                    result_message.append('Invalid email on the following lines:')
-                    for line in invalid_email:
-                        result_message.append(line)
-                if len(error_adding_school) > 0:
-                    result_message.append('Some unexpected error was found for the following lines:')
-                    for line in error_adding_school:
-                        result_message.append(line)
-                if len(invalid_lines) > 0:
-                    result_message.append('Error reading data on the following lines:')
-                    for line in invalid_lines:
-                        result_message.append(line)
-                if len(same_name_warning) > 0:
-                    result_message.append('Warning the following schools have the same name and state as others already'
-                                          ' in the database:')
-                    for line in same_name_warning:
-                        result_message.append(line)
+
+                problem_types = [(school_name_not_exceed_three_characters,
+                                  'School name did not exceed 3 characters on the following lines:'),
+                                 (invalid_state, 'Could not recognise the state on the following lines:'),
+                                 (invalid_email, 'Invalid email on the following lines:'),
+                                 (invalid_lines, 'Error reading data on the following lines:'),
+                                 (same_name_warning, 'Warning the following schools have the same name and state as'
+                                                     ' others already in the database:')]
+
+                result_message = [('Schools Created: ' + str(n_created), True)]
+                for problem_type, heading in problem_types:
+                    if len(problem_type) > 0:
+                        result_message.append((heading, True))
+                        for line in problem_type:
+                            result_message.append((line, False))
+
                 context = {'finish_title': 'Schools Added', 'user_messages': result_message}
                 return render(request, 'user_message.html', RequestContext(request, context))
 
             elif result is None:
                 context = {'finish_title': 'Schools Not Added',
-                           'user_message': 'Schools Not Added: Error Reading File'}
+                           'user_error_message': 'Schools Not Added: Error Reading File'}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/school/adds/',
@@ -467,22 +457,24 @@ def test_category_adds(request):
             if result:
 
                 (n_created, n_blank, test_category_already_exist, invalid_lines) = result
-                result_message = ['Tests Categories Created: ' + str(n_created),
-                                  'Lines With Blank Test Category: ' + str(n_blank)]
-                if len(test_category_already_exist) > 0:
-                    result_message.append('Test category already existed on the following lines:')
-                    for line in test_category_already_exist:
-                        result_message.append(line)
-                if len(invalid_lines) > 0:
-                    result_message.append('Error reading data on the following lines:')
-                    for line in invalid_lines:
-                        result_message.append(line)
+
+                problem_types = [(test_category_already_exist, 'Test category already existed on the following lines:'),
+                                 (invalid_lines, 'Error reading data on the following lines:')]
+
+                result_message = [('Tests Categories Created: ' + str(n_created), True),
+                                  ('Lines With Blank Test Category: ' + str(n_blank), True)]
+                for problem_type, heading in problem_types:
+                    if len(problem_type) > 0:
+                        result_message.append((heading, True))
+                        for line in problem_type:
+                            result_message.append((line, False))
+
                 context = {'finish_title': 'Test Categories Added', 'user_messages': result_message}
                 return render(request, 'user_message.html', RequestContext(request, context))
 
             elif result is None:
                 context = {'finish_title': 'Test Categories Not Added',
-                           'user_message': 'Test Categories Not Added: Error Reading File'}
+                           'user_error_message': 'Test Categories Not Added: Error Reading File'}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/test_category/adds/',
@@ -573,22 +565,21 @@ def test_adds(request):
             if result:
 
                 (n_created, test_name_already_exists, error_reading_file, problems_in_files) = result
-                result_message = ['TEST CATEGORIES CREATED: ' + str(n_created)]
-                if len(test_name_already_exists) > 0:
-                    result_message.append('TEST NAME ALREADY EXISTED FOR THE FOLLOWING FILES:')
-                    for line in test_name_already_exists:
-                        result_message.append('    ' + line)
-                if len(error_reading_file) > 0:
-                    result_message.append('ERROR READING THE FOLLOWING FILES:')
-                    for line in error_reading_file:
-                        result_message.append(line)
-                if len(problems_in_files) > 0:
-                    for file_name, problems_in_data in problems_in_files:
-                        result_message.append('SPECIFIC PROBLEMS WERE FOUND IN THE FOLLOWING FILE: ' + file_name)
-                        for problem in problems_in_data:
-                            result_message.append(problem)
 
-                context = {'finish_title': 'Tests Added/Updated', 'user_messages': result_message}
+                problem_types = [(test_name_already_exists, 'Test name already exists for the following lines:'),
+                                 (error_reading_file, 'Error reading the following files:')]
+                for file_name, problems_in_data in problems_in_files:
+                    problem_types.append((problems_in_data,
+                                          'Specific problems were found in the following file: ' + file_name))
+
+                result_message = [('Tests Created: ' + str(n_created), True)]
+                for problem_type, heading in problem_types:
+                    if len(problem_type) > 0:
+                        result_message.append((heading, True))
+                        for line in problem_type:
+                            result_message.append((line, False))
+
+                context = {'finish_title': 'Tests Added', 'user_messages': result_message}
                 return render(request, 'user_message.html', RequestContext(request, context))
 
             else:
@@ -640,13 +631,13 @@ def test_update(request, test_pk):
 
                 result_message = []
                 if len(problems_in_data) > 0:
-                    result_message.append('SPECIFIC PROBLEMS WERE FOUND IN THE FILE:')
+                    result_message.append(('The following problems were found in the file:', True))
                     for problem in problems_in_data:
-                        result_message.append(problem)
+                        result_message.append((problem, False))
                 elif error_line:
-                    result_message.append(error_line)
+                    result_message.append((error_line, True))
                 else:
-                    result_message.append('Test Updated Successfully')
+                    result_message.append(('Test Updated Successfully', False))
 
                 context = {'finish_title': 'Test Updated Attempt',
                            'user_messages': result_message}
@@ -654,7 +645,7 @@ def test_update(request, test_pk):
 
             elif result is None:
                 context = {'finish_title': 'Test Not Updated',
-                           'user_message': 'Test Not Updated: Error Reading File'}
+                           'user_error_message': 'Test Not Updated: Error Reading File'}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/test/update/' + str(test_pk),
@@ -914,33 +905,29 @@ def class_adds(request):
 
                 (n_created, teacher_username_not_exist, test_set_not_exist,
                  class_already_exists, invalid_lines, not_current_year_warning) = result
-                result_message = ['Classes Created: ' + str(n_created)]
-                if len(teacher_username_not_exist) > 0:
-                    result_message.append('Could not recognise the teacher username on the following lines:')
-                    for line in teacher_username_not_exist:
-                        result_message.append(line)
-                if len(test_set_not_exist) > 0:
-                    result_message.append('Could not recognise the test set on the following lines:')
-                    for line in test_set_not_exist:
-                        result_message.append(line)
-                if len(class_already_exists) > 0:
-                    result_message.append('The class year and name already existed for the following lines:')
-                    for line in class_already_exists:
-                        result_message.append(line)
-                if len(invalid_lines) > 0:
-                    result_message.append('Error reading data on the following lines:')
-                    for line in invalid_lines:
-                        result_message.append(line)
-                if len(not_current_year_warning) > 0:
-                    result_message.append('Warning the following classes were added not for the current year:')
-                    for line in not_current_year_warning:
-                        result_message.append(line)
+
+                problem_types = [(teacher_username_not_exist,
+                                  'Could not recognise the teacher username on the following lines:'),
+                                 (test_set_not_exist, 'Could not recognise the test set on the following lines:'),
+                                 (class_already_exists,
+                                  'The class year and name already existed for the following lines:'),
+                                 (invalid_lines, 'Error reading data on the following lines:'),
+                                 (not_current_year_warning, 'Warning the following classes were added not for the'
+                                                            ' current year:')]
+
+                result_message = [('Classes Created: ' + str(n_created), True)]
+                for problem_type, heading in problem_types:
+                    if len(problem_type) > 0:
+                        result_message.append((heading, True))
+                        for line in problem_type:
+                            result_message.append((line, False))
+
                 context = {'finish_title': 'Classes Added', 'user_messages': result_message}
                 return render(request, 'user_message.html', RequestContext(request, context))
 
             elif result is None:
                 context = {'finish_title': 'Classes Not Added',
-                           'user_message': 'Classes Not Added: Error Reading File'}
+                           'user_error_message': 'Classes Not Added: Error Reading File'}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/class/adds/',
