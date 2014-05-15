@@ -809,10 +809,24 @@ class UpdateTestFromFileForm(forms.Form):
 
     def update_test(self, request):
         if self.is_valid():
-            test = Test.objects.get(pk=self.cleaned_data['test_pk'])
-            return update_test_from_file_upload(request.FILES['update_test_file'], test)
+            result = read_test_information_from_file_upload(request.FILES['update_test_file'])
+            if result:
+                (problems_in_data, test_information) = result
+                error_line = None
+                if test_information:
+                    test = Test.objects.get(pk=self.cleaned_data['test_pk'])
+                    (test_name, test_category, result_information) = test_information
+                    (result_type, is_upward_percentile_brackets,
+                     percentile_score_conversion_type, percentile_scores) = result_information
+                    if test.test_name == test_name:
+                        Test.update_test(test_name, percentile_scores)
+                    else:
+                        error_line = 'Test names do not match'
+                return problems_in_data, error_line
+            else:
+                return None
         else:
-            return None
+            return False
 
 
 class EditTestForm(forms.Form):

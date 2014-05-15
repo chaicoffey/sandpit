@@ -633,14 +633,34 @@ def test_update(request, test_pk):
     if request.session.get('user_type', None) == 'SuperUser':
         if request.POST:
             test_update_form = UpdateTestFromFileForm(test_pk=test_pk, data=request.POST, files=request.FILES)
-            if test_update_form.update_test(request):
-                context = {'finish_title': 'Test Updated',
-                           'user_message': 'Test Updated Successfully'}
+            result = test_update_form.update_test(request)
+            if result:
+
+                (problems_in_data, error_line) = result
+
+                result_message = []
+                if len(problems_in_data) > 0:
+                    result_message.append('SPECIFIC PROBLEMS WERE FOUND IN THE FILE:')
+                    for problem in problems_in_data:
+                        result_message.append(problem)
+                elif error_line:
+                    result_message.append(error_line)
+                else:
+                    result_message.append('Test Updated Successfully')
+
+                context = {'finish_title': 'Test Updated Attempt',
+                           'user_messages': result_message}
+                return render(request, 'user_message.html', RequestContext(request, context))
+
+            elif result is None:
+                context = {'finish_title': 'Test Not Updated',
+                           'user_message': 'Test Not Updated: Error Reading File'}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
-                context = {'finish_title': 'Test Not Updated',
-                           'user_message': 'Test Not Updated (Different Test Name Or Error in File)'}
-                return render(request, 'user_message.html', RequestContext(request, context))
+                context = {'post_to_url': '/test/update/',
+                           'functionality_name': 'Update Test',
+                           'form': test_update_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/test/update/' + str(test_pk),
                        'functionality_name': 'Update Test',
