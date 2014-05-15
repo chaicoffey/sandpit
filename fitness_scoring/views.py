@@ -555,7 +555,7 @@ def test_list(request):
             ],
             'item_list_options': [
                 ['item_list_modal_load_link', '/test/edit/', 'pencil', 'edit test'],
-                ['item_list_modal_load_link', '/test/update/', 'pencil', 'add to percentile brackets'],
+                ['item_list_modal_load_link', '/test/update/', 'plus', 'add to percentile brackets'],
                 ['percentile_load_link', '/test/percentile_brackets_graphs/None/', 'stats', 'view percentile brackets'],
                 ['item_list_modal_load_link', '/test/delete/', 'remove', 'delete test']
             ]
