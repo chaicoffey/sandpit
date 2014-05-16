@@ -1145,13 +1145,16 @@ def remove_test_from_class(request, class_pk, test_pk):
         class_instance = Class.objects.get(pk=class_pk)
         test = Test.objects.get(pk=test_pk)
         if request.POST:
-            if class_instance.deallocate_test_safe(test):
+            error_message = class_instance.deallocate_test_errors(test)
+            if error_message:
+                context = {'finish_title': 'Test Not Removed From Class',
+                           'user_error_message': 'Could Not Remove ' + str(test) + ' (' + error_message + ')'}
+            elif class_instance.deallocate_test_safe(test):
                 context = {'finish_title': 'Remove Test From Class',
                            'user_message': 'Test Removed Successfully: ' + str(test)}
             else:
                 context = {'finish_title': 'Test Not Removed From Class',
-                           'user_error_message': 'Could Not Remove ' + str(test) + ' (Results Have Been Entered For'
-                                                                                   ' This Test In This Class)'}
+                           'user_error_message': 'Could Not Remove ' + str(test) + ' (Delete Not Safe)'}
             return render(request, 'user_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/class/test/delete/' + str(class_pk) + '/' + str(test_pk),

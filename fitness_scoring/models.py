@@ -483,17 +483,21 @@ class Class(models.Model):
 
         return load_valid
 
-    def deallocate_test_safe(self, test):
-        deallocate = ClassTest.objects.filter(class_id=self, test_name=test).exists()
-        if deallocate:
+    def deallocate_test_errors(self, test):
+        error_message = None
+        if ClassTest.objects.filter(class_id=self, test_name=test).exists():
             enrolments = StudentClassEnrolment.objects.filter(class_id=self)
             for enrolment in enrolments:
-                deallocate = deallocate and not StudentClassTestResult.objects.filter(student_class_id=enrolment,
-                                                                                      test_name=test).exists()
+                if StudentClassTestResult.objects.filter(student_class_enrolment=enrolment, test=test).exists():
+                    error_message = 'Test Has Results Entered For Student: ' + str(enrolment.student_id)
+        else:
+            error_message = 'Test Not In Class'
+        return error_message
 
+    def deallocate_test_safe(self, test):
+        deallocate = not self.deallocate_test_errors(test)
         if deallocate:
             ClassTest.objects.get(class_id=self, test_name=test).delete()
-
         return deallocate
 
     def reset_code(self):
@@ -826,6 +830,9 @@ class StudentClassEnrolment(models.Model):
     student_id = models.ForeignKey(Student)
     student_age_at_time_of_enrolment = models.IntegerField(max_length=4)
 
+    def __unicode__(self):
+        return str(self.class_id) + ' : ' + str(self.student_id)
+
     def get_test_results(self):
         test_results = []
 
@@ -842,6 +849,9 @@ class StudentClassEnrolment(models.Model):
 class ClassTest(models.Model):
     class_id = models.ForeignKey(Class)
     test_name = models.ForeignKey(Test)
+
+    def __unicode__(self):
+        return str(self.class_id) + ' : ' + str(self.test_name)
 
 
 class TestSet(models.Model):
@@ -886,9 +896,14 @@ class TestSetTest(models.Model):
     test_set = models.ForeignKey(TestSet)
     test = models.ForeignKey(Test)
 
+    def __unicode__(self):
+        return str(self.test_set) + ' : ' + str(self.test)
 
 class StudentClassTestResult(models.Model):
     student_class_enrolment = models.ForeignKey(StudentClassEnrolment)
     test = models.ForeignKey(Test)
     result = models.CharField(max_length=20)
     percentile = models.IntegerField(max_length=4)
+
+    def __unicode__(self):
+        return str(self.student_class_enrolment) + ' : ' + str(self.test)
