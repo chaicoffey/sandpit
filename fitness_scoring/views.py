@@ -368,12 +368,16 @@ def school_delete(request, school_pk):
         school_to_delete = School.objects.get(pk=school_pk)
         school_name = school_to_delete.name
         if request.POST:
-            if school_to_delete.delete_school_safe():
+            error_message = school_to_delete.delete_school_errors()
+            if error_message:
+                context = {'finish_title': 'School Not Deleted',
+                           'user_error_message': 'Could Not Delete ' + school_name + ' (' + error_message + ')'}
+            elif school_to_delete.delete_school_safe():
                 context = {'finish_title': 'School Deleted',
                            'user_message': 'School Deleted Successfully: ' + school_name}
             else:
                 context = {'finish_title': 'School Not Deleted',
-                           'user_error_message': 'Could Not Delete ' + school_name + ' (School Being Used)'}
+                           'user_error_message': 'Could Not Delete ' + school_name + ' (Delete Not Safe)'}
             return render(request, 'user_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/school/delete/' + str(school_pk),
@@ -522,13 +526,16 @@ def test_category_delete(request, test_category_pk):
         test_category_to_delete = TestCategory.objects.get(pk=test_category_pk)
         test_category_name = test_category_to_delete.test_category_name
         if request.POST:
-            if test_category_to_delete.delete_test_category_safe():
+            error_message = test_category_to_delete.delete_test_category_errors()
+            if error_message:
+                context = {'finish_title': 'Test Category Not Deleted',
+                           'user_error_message': 'Could Not Delete ' + test_category_name + ' (' + error_message + ')'}
+            elif test_category_to_delete.delete_test_category_safe():
                 context = {'finish_title': 'Test Category Deleted',
                            'user_message': 'Test Category Deleted Successfully: ' + test_category_name}
             else:
                 context = {'finish_title': 'Test Category Not Deleted',
-                           'user_error_message': 'Could Not Delete ' + test_category_name
-                                                 + ' (Test Category Being Used)'}
+                           'user_error_message': 'Could Not Delete ' + test_category_name + ' (Delete Not Safe)'}
             return render(request, 'user_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/test_category/delete/' + str(test_category_pk),
@@ -670,13 +677,16 @@ def test_delete(request, test_pk):
         test_to_delete = Test.objects.get(pk=test_pk)
         test_name = test_to_delete.test_name
         if request.POST:
-            if test_to_delete.delete_test_safe():
+            error_message = test_to_delete.delete_test_errors()
+            if error_message:
+                context = {'finish_title': 'Test Not Deleted',
+                           'user_error_message': 'Could Not Delete ' + test_name + ' (' + error_message + ')'}
+            elif test_to_delete.delete_test_safe():
                 context = {'finish_title': 'Test Deleted',
                            'user_message': 'Test Deleted Successfully: ' + test_name}
             else:
                 context = {'finish_title': 'Test Not Deleted',
-                           'user_error_message': 'Could Not Delete ' + test_name
-                                                 + ' (Test Being Used)'}
+                           'user_error_message': 'Could Not Delete ' + test_name + ' (Delete Not Safe)'}
             return render(request, 'user_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/test/delete/' + str(test_pk),
@@ -797,13 +807,17 @@ def teacher_delete(request, teacher_pk):
         teacher_to_delete = Teacher.objects.get(pk=teacher_pk)
         teacher_display_text = str(teacher_to_delete)
         if request.POST:
-            if teacher_to_delete.delete_teacher_safe():
+            error_message = teacher_to_delete.delete_teacher_errors()
+            if error_message:
+                context = {'finish_title': 'Teacher Not Deleted',
+                           'user_error_message': 'Could Not Delete ' + teacher_display_text +
+                                                 ' (' + error_message + ')'}
+            elif teacher_to_delete.delete_teacher_safe():
                 context = {'finish_title': 'Teacher Deleted',
                            'user_message': 'Teacher Deleted Successfully: ' + teacher_display_text}
             else:
                 context = {'finish_title': 'Teacher Not Deleted',
-                           'user_error_message': 'Could Not Delete ' + teacher_display_text
-                                                 + ' (Teacher is Assigned to one or more Classes)'}
+                           'user_error_message': 'Could Not Delete ' + teacher_display_text + ' (Delete Not Safe)'}
             return render(request, 'user_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/teacher/delete/' + str(teacher_pk),
@@ -989,13 +1003,16 @@ def class_delete(request, class_pk):
         class_to_delete = Class.objects.get(pk=class_pk)
         class_display_text = (class_to_delete.class_name + ' ' + ' (' + str(class_to_delete.year) + ')')
         if request.POST:
-            if class_to_delete.delete_class_safe():
+            error_message = class_to_delete.delete_class_errors()
+            if error_message:
+                context = {'finish_title': 'Class Not Deleted',
+                           'user_error_message': 'Could Not Delete ' + class_display_text + ' (' + error_message + ')'}
+            elif class_to_delete.delete_class_safe():
                 context = {'finish_title': 'Class Deleted',
                            'user_message': 'Class Deleted Successfully: ' + class_display_text}
             else:
                 context = {'finish_title': 'Class Not Deleted',
-                           'user_error_message': 'Could Not Delete ' + class_display_text
-                                                 + ' (Student Results are Entered for this Class)'}
+                           'user_error_message': 'Could Not Delete ' + class_display_text + ' (Delete Not Safe)'}
             return render(request, 'user_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/class/delete/' + str(class_pk),

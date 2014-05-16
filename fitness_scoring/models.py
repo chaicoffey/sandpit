@@ -33,10 +33,18 @@ class School(models.Model):
                 'Paid' if self.subscription_paid else 'Unpaid',
                 Administrator.objects.get(school_id=self).user.username]
 
+    def delete_school_errors(self):
+        error_message = None
+        if Teacher.objects.filter(school_id=self).exists():
+            error_message = 'Teacher(s) Have Been Created'
+        elif Class.objects.filter(school_id=self).exists():
+            error_message = 'Class(es) Have Been Created'
+        elif Student.objects.filter(school_id=self).exists():
+            error_message = 'Student(s) Are in The Database'
+        return error_message
+
     def delete_school_safe(self):
-        school_not_used = (len(Teacher.objects.filter(school_id=self)) == 0) and\
-                          (len(Class.objects.filter(school_id=self)) == 0) and\
-                          (len(Student.objects.filter(school_id=self)) == 0)
+        school_not_used = not self.delete_school_errors()
         if school_not_used:
             administrator_to_delete = Administrator.objects.get(school_id=self)
             administrator_to_delete.user.delete()
@@ -191,8 +199,17 @@ class Teacher(models.Model):
     def get_display_items(self):
         return [self.user.username, self.first_name, self.surname]
 
+    def delete_teacher_errors(self):
+        error_message = None
+        allocations = TeacherClassAllocation.objects.filter(teacher_id=self)
+        if allocations.exists():
+            error_message = 'Teacher Is Assigned To The Following Class(es): '
+            for allocation in allocations:
+                error_message += allocation.class_id.class_name + ' (' + str(allocation.class_id.year) + '), '
+        return error_message
+
     def delete_teacher_safe(self):
-        teacher_not_used = not TeacherClassAllocation.objects.filter(teacher_id=self).exists()
+        teacher_not_used = not self.delete_teacher_errors()
         if teacher_not_used:
             self.user.delete()
             self.delete()
@@ -378,8 +395,14 @@ class Class(models.Model):
                                                                    test=test).exists())
         return result_exists
 
+    def delete_class_errors(self):
+        error_message = None
+        if StudentClassEnrolment.objects.filter(class_id=self).exists():
+            error_message = 'Students Are Assigned To This Class'
+        return error_message
+
     def delete_class_safe(self):
-        class_not_used = not StudentClassEnrolment.objects.filter(class_id=self).exists()
+        class_not_used = not self.delete_class_errors()
         if class_not_used:
             teacher_allocation = TeacherClassAllocation.objects.filter(class_id=self)
             if teacher_allocation.exists():
@@ -537,8 +560,14 @@ class TestCategory(models.Model):
     def get_display_items(self):
         return [self.test_category_name]
 
+    def delete_test_category_errors(self):
+        error_message = None
+        if Test.objects.filter(test_category=self).exists():
+            error_message = 'Test(s) Exist In This Category'
+        return error_message
+
     def delete_test_category_safe(self):
-        test_category_not_used = not Test.objects.filter(test_category=self).exists()
+        test_category_not_used = not self.delete_test_category_errors()
         if test_category_not_used:
             self.delete()
         return test_category_not_used
@@ -738,9 +767,16 @@ class Test(models.Model):
     def get_display_items(self):
         return [self.test_name, self.test_category.test_category_name]
 
+    def delete_test_errors(self):
+        error_message = None
+        if ClassTest.objects.filter(test_name=self).exists():
+            error_message = 'Class(es) Have This Test Assigned'
+        elif StudentClassTestResult.objects.filter(test=self).exists():
+            error_message = 'Result(s) Have Been Given For This Test'
+        return error_message
+
     def delete_test_safe(self):
-        test_not_used = ((not ClassTest.objects.filter(test_name=self).exists()) and
-                         (not StudentClassTestResult.objects.filter(test=self).exists()))
+        test_not_used = not self.delete_test_errors()
         if test_not_used:
             self.percentiles.delete_percentile_bracket_set_safe()
             self.delete()
