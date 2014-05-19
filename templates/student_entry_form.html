@@ -5,10 +5,11 @@
     {% csrf_token %}
     {% for field in form.fields %}
         <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
-            <div class="col-sm-1"><label for="{{ field.label }}">{{ field.label }}:</label></div>
+            <div class="col-sm-1"><label for="{{ field.name }}">{{ field.label }}:</label></div>
             <div class="col-sm-11">
-                <input type="text" id="{{ field.label }}"
-                       {% if field.place_holder %}placeholder="{{ field.place_holder }}"{% endif %}>
+                <input type="text" id="{{ field.name }}" name={{ field.name }}
+                        {% if field.value %}value="{{ field.value }}"{% endif %}
+                        {% if field.place_holder %}placeholder="{{ field.place_holder }}"{% endif %}>
                 {% if field.help_text %}<span class="form-field-help">{{ field.help_text }}</span>{% endif %}
                 {% if field.errors %}<span class="help-block">{{ field.errors }}</span>{% endif %}
             </div>

@@ -10,6 +10,7 @@ from fitness_scoring.fileio import read_file_upload, read_test_information_from_
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.validators import MinLengthValidator
 import datetime
+import time
 from django.core.mail import send_mail
 
 
@@ -878,17 +879,45 @@ class StudentEntryForm:
 
         self.fields = []
         for test in tests:
-            if test.percentiles.result_type == 'DOUBLE':
-                field = StudentEntryForm.StudentEntryFormField(test.test_name)
-            elif test.percentiles.result_type == 'TIME':
-                field = StudentEntryForm.StudentEntryFormField(test.test_name, 'mm:ss')
-            else:
-                field = StudentEntryForm.StudentEntryFormField(test.test_name)
+            name = test.test_name
+            n_characters = len(name)
+            for charIndex in range(0, n_characters):
+                if name[charIndex] == ' ':
+                    name = name[0:charIndex] + '_' + name[(charIndex + 1):n_characters]
+            value = data[name] if data else None
+            check_for_errors = data is not None
+            field = StudentEntryForm.StudentEntryFormField(test=test, name=name, value=value,
+                                                           check_for_errors=check_for_errors)
             self.fields.append(field)
 
     class StudentEntryFormField:
 
-        def __init__(self, label, place_holder=None):
-            self.label = label
-            if place_holder:
-                self.place_holder = place_holder
+        def __init__(self, test, name, value=None, check_for_errors=False):
+            self.label = test.test_name
+            self.name = name
+
+            if value:
+                self.value = value
+
+            if test.percentiles.result_type == 'TIME':
+                self.place_holder = 'mm:ss'
+
+            if check_for_errors:
+                if value == '':
+                    self.errors = 'Please enter result for ' + test.test_name
+                elif test.percentiles.result_type == 'DOUBLE':
+                    try:
+                        float(value)
+                    except ValueError:
+                        self.errors = 'Please enter a decimal value for ' + test.test_name
+                elif test.percentiles.result_type == 'TIME':
+                    try:
+                        time.strptime(value, '%M:%S')
+                    except ValueError:
+                        self.errors = 'Please enter a time value of the form mm:ss for ' + test.test_name
+                elif test.percentiles.result_type == 'INTEGER':
+                    try:
+                        if int(value) != float(value):
+                            self.errors = 'Please enter a whole number value for ' + test.test_name
+                    except ValueError:
+                        self.errors = 'Please enter a whole number value for ' + test.test_name
