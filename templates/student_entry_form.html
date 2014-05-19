@@ -1,5 +1,9 @@
 {% extends "fitness_test_base.html" %}
 
 {% block content_fitness_testing_base  %}
-Student Entry Page
+<form method="POST" enctype="multipart/form-data" action="/class_student_view/" class="form-horizontal">
+    {% csrf_token %}
+    <input type="submit" class="btn btn-default" name='results_cancel_button' value="Cancel"></button>
+    <input type="submit" class="btn btn-primary" name='results_save_button' value="Save Results"></button>
+</form>
 {% endblock %}

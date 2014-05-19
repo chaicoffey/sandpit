@@ -105,7 +105,13 @@ def change_user_password(request, is_finished):
 
 def class_student_view(request):
     if request.session.get('user_type', None) == 'Class':
-        return render(request, 'student_entry_form.html', RequestContext(request, {}))
+        if request.POST:
+            if request.POST.get('results_cancel_button'):
+                return redirect('fitness_scoring.views.logout_user')
+            else:
+                return render(request, 'student_entry_form.html', RequestContext(request, {}))
+        else:
+            return render(request, 'student_entry_form.html', RequestContext(request, {}))
     else:
         return redirect('fitness_scoring.views.login_user')
 

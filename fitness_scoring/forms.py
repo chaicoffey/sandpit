@@ -867,3 +867,10 @@ class EditTestForm(forms.Form):
             test_name = self.cleaned_data['test_name']
             test_edited = Test.objects.get(pk=test_pk).edit_test_safe(test_name)
         return test_edited
+
+
+# class StudentEntryForm:
+#
+#    def __init__(self, class_pk):
+#        self.class_pk = class_pk
+#        class_instance = Class.objects.get(pk=class_pk)
