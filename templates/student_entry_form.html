@@ -12,11 +12,21 @@
                 <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
                     <div class="col-sm-1"><label for="{{ field.name }}">{{ field.label }}:</label></div>
                     <div class="col-sm-11">
-                        <input type="{{ form.input_type }}" id="{{ field.name }}" name={{ field.name }}
-                                {% if field.value %}value="{{ field.value }}"{% endif %}
-                                {% if field.place_holder %}placeholder="{{ field.place_holder }}"{% endif %}>
-                        {% if field.help_text %}<span class="form-field-help">{{ field.help_text }}</span>{% endif %}
-                        {% if field.errors %}<span class="help-block">{{ field.errors }}</span>{% endif %}
+                        {% if field.input_type %}
+                            <input type="{{ field.input_type }}" id="{{ field.name }}" name="{{ field.name }}"
+                                    {% if field.value %}value="{{ field.value }}"{% endif %}
+                                    {% if field.place_holder %}placeholder="{{ field.place_holder }}"{% endif %}>
+                            {% if field.help_text %}<span class="form-field-help">{{ field.help_text }}</span>{% endif %}
+                            {% if field.errors %}<span class="help-block">{{ field.errors }}</span>{% endif %}
+                        {% elif field.choices %}
+                            <select id="{{ field.name }}" name="{{ field.name }}">
+                                {% for value, option_label, selected in field.choices %}
+                                    <option value="{{ value }}" {% if selected %}selected{% endif %}>
+                                        {{ option_label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                        {% endif %}
                     </div>
                 </div>
             {% endfor %}
@@ -29,7 +39,7 @@
                 <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
                     <div class="col-sm-1"><label for="{{ field.name }}">{{ field.label }}:</label></div>
                     <div class="col-sm-11">
-                        <input type="text" id="{{ field.name }}" name={{ field.name }}
+                        <input type="text" id="{{ field.name }}" name="{{ field.name }}"
                                 {% if field.value %}value="{{ field.value }}"{% endif %}
                                 {% if field.place_holder %}placeholder="{{ field.place_holder }}"{% endif %}>
                         {% if field.help_text %}<span class="form-field-help">{{ field.help_text }}</span>{% endif %}

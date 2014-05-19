@@ -1,5 +1,5 @@
 from django import forms
-from fitness_scoring.models import School, Administrator, Class, Teacher, TestCategory, Test, User
+from fitness_scoring.models import School, Administrator, Class, Teacher, Student, TestCategory, Test, User
 from fitness_scoring.models import TeacherClassAllocation, ClassTest, TestSet
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
 from fitness_scoring.validators import validate_new_test_name_unique
@@ -877,17 +877,20 @@ class StudentEntryForm:
         class_instance = Class.objects.get(pk=class_pk)
         tests = class_instance.get_tests()
 
-        student_detail_field_description = [('text', 'Student ID'),
-                                            ('text', 'First Name'),
-                                            ('text', 'Surname'),
-                                            ('date', 'DOB')]
+        student_detail_field_description = [('text', 'Student ID', None),
+                                            ('text', 'First Name', None),
+                                            ('text', 'Surname', None),
+                                            ('select', 'Gender', [(value, option_label, False)
+                                                                  for value, option_label in Student.GENDER_CHOICES]),
+                                            ('date', 'DOB', None)]
         self.student_detail_fields = []
-        for field_type, label in student_detail_field_description:
+        for field_type, label, extra in student_detail_field_description:
             name = StudentEntryForm.get_name(label)
             value = data[name] if data else None
             check_for_errors = data is not None
-            field = StudentEntryForm.StudentDetailsField(field_type=field_type, label=label, name=name, value=value,
-                                                         check_for_errors=check_for_errors)
+            choices = extra if field_type == 'select' else None
+            field = StudentEntryForm.StudentDetailsField(field_type=field_type, label=label, name=name, choices=choices,
+                                                         value=value, check_for_errors=check_for_errors)
             self.student_detail_fields.append(field)
 
         self.test_result_fields = []
@@ -923,8 +926,16 @@ class StudentEntryForm:
 
     class StudentDetailsField:
 
-        def __init__(self, field_type, label, name, value=None, check_for_errors=False):
-            self.input_type = 'text'
+        def __init__(self, field_type, label, name, choices=None, value=None, check_for_errors=False):
+            if (field_type == 'text') or (field_type == 'date'):
+                self.input_type = 'text'
+            elif choices:
+                if value:
+                    for choice_index in range(len(choices)):
+                        (choice_value, option_label, selected) = choices[choice_index]
+                        if choice_value == value:
+                            choices[choice_index] = (choice_value, option_label, True)
+                self.choices = choices
             self.label = label
             self.name = name
 
