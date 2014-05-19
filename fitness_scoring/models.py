@@ -3,6 +3,7 @@ import datetime
 import time
 import collections
 import string
+from datetime import date
 from time import time as time_seed
 from itertools import chain
 from random import seed, choice, sample
@@ -299,6 +300,10 @@ class Student(models.Model):
     def get_display_items(self):
         return [self.student_id, self.first_name, self.surname]
 
+    def get_student_age(self):
+        today = date.today()
+        return today.year - self.dob.year - (1 if (today.month, today.day) < (self.dob.month, self.dob.day) else 0)
+
     def delete_student_safe(self):
         student_not_used = (len(StudentClassEnrolment.objects.filter(student_id=self)) == 0)
         if student_not_used:
@@ -306,8 +311,8 @@ class Student(models.Model):
         return student_not_used
 
     def edit_student_safe(self, student_id, school_id, first_name, surname, gender, dob):
-        is_edit_safe = ((self.student_id == student_id) and (self.school_id == school_id)) or\
-                       (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 0)
+        is_edit_safe = (self.student_id == student_id) and (self.school_id == school_id)
+        is_edit_safe = is_edit_safe or not Student.objects.filter(school_id=school_id, student_id=student_id).exists()
         if is_edit_safe:
             self.student_id = student_id
             self.school_id = school_id
@@ -507,7 +512,7 @@ class Class(models.Model):
         enrolled = ((self.school_id == student.school_id) and
                     not StudentClassEnrolment.objects.filter(class_id=self, student_id=student).exists())
         if enrolled:
-            StudentClassEnrolment.objects.create(class_id=self, student_id=student)
+            StudentClassEnrolment.create_student_class_enrolment(class_id=self, student_id=student)
         return enrolled
 
     def withdraw_student_safe(self, student):
@@ -828,6 +833,7 @@ class TeacherClassAllocation(models.Model):
 class StudentClassEnrolment(models.Model):
     class_id = models.ForeignKey(Class)
     student_id = models.ForeignKey(Student)
+    student_gender_at_time_of_enrolment = models.CharField(max_length=1, choices=Student.GENDER_CHOICES)
     student_age_at_time_of_enrolment = models.IntegerField(max_length=4)
 
     def __unicode__(self):
@@ -844,7 +850,16 @@ class StudentClassEnrolment(models.Model):
             test_results.append(result)
 
         return test_results
-    
+
+    @staticmethod
+    def create_student_class_enrolment(class_id, student_id):
+        gender = student_id.gender
+        age = student_id.get_student_age()
+        student_class_enrolment = StudentClassEnrolment.objects.create(class_id=class_id, student_id=student_id,
+                                                                       student_gender_at_time_of_enrolment=gender,
+                                                                       student_age_at_time_of_enrolment=age)
+        return student_class_enrolment
+
 
 class ClassTest(models.Model):
     class_id = models.ForeignKey(Class)
@@ -898,6 +913,7 @@ class TestSetTest(models.Model):
 
     def __unicode__(self):
         return str(self.test_set) + ' : ' + str(self.test)
+
 
 class StudentClassTestResult(models.Model):
     student_class_enrolment = models.ForeignKey(StudentClassEnrolment)

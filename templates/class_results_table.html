@@ -41,12 +41,12 @@
                         </th>
                     {% endfor %}
                 </tr>
-                {% for student, age, test_results in student_test_results %}
+                {% for student, gender, age, test_results in student_test_results %}
                     <tr>
                         <td>{{ student }}</td>
-                        <td>{{ student.gender }}/{{ age }}</td>
+                        <td>{{ gender }}/{{ age }}</td>
                         {% for result in test_results %}
-                            <td>result</td>
+                            <td>{{ result }}</td>
                         {% endfor %}
                     </tr>
                 {% endfor %}
