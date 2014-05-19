@@ -11,6 +11,7 @@ from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFile
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, AddClassTeacherForm, EditClassTeacherForm
 from fitness_scoring.forms import AssignTestToClassForm, SaveClassTestsAsTestSetForm, LoadClassTestsFromTestSetForm
+from fitness_scoring.forms import StudentEntryForm
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.mail import send_mail
 
@@ -105,13 +106,19 @@ def change_user_password(request, is_finished):
 
 def class_student_view(request):
     if request.session.get('user_type', None) == 'Class':
+        user = User.objects.get(username=request.session.get('username', None))
+        class_instance = Class.objects.get(user=user)
+        context = {'post_to_url': '/class_student_view/'}
         if request.POST:
             if request.POST.get('results_cancel_button'):
                 return redirect('fitness_scoring.views.logout_user')
             else:
-                return render(request, 'student_entry_form.html', RequestContext(request, {}))
+                form = StudentEntryForm(class_pk=class_instance.pk, data=request.POST)
+                context['form'] = form
+                return render(request, 'student_entry_form.html', RequestContext(request, context))
         else:
-            return render(request, 'student_entry_form.html', RequestContext(request, {}))
+            context['form'] = StudentEntryForm(class_pk=class_instance.pk)
+            return render(request, 'student_entry_form.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
 

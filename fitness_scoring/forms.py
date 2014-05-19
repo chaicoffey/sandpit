@@ -869,8 +869,26 @@ class EditTestForm(forms.Form):
         return test_edited
 
 
-# class StudentEntryForm:
-#
-#    def __init__(self, class_pk):
-#        self.class_pk = class_pk
-#        class_instance = Class.objects.get(pk=class_pk)
+class StudentEntryForm:
+
+    def __init__(self, class_pk, data=None):
+        self.class_pk = class_pk
+        class_instance = Class.objects.get(pk=class_pk)
+        tests = class_instance.get_tests()
+
+        self.fields = []
+        for test in tests:
+            if test.percentiles.result_type == 'DOUBLE':
+                field = StudentEntryForm.StudentEntryFormField(test.test_name)
+            elif test.percentiles.result_type == 'TIME':
+                field = StudentEntryForm.StudentEntryFormField(test.test_name, 'mm:ss')
+            else:
+                field = StudentEntryForm.StudentEntryFormField(test.test_name)
+            self.fields.append(field)
+
+    class StudentEntryFormField:
+
+        def __init__(self, label, place_holder=None):
+            self.label = label
+            if place_holder:
+                self.place_holder = place_holder
