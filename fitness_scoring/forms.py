@@ -877,22 +877,33 @@ class StudentEntryForm:
         class_instance = Class.objects.get(pk=class_pk)
         tests = class_instance.get_tests()
 
-        self.fields = []
-        for test in tests:
-            name = test.test_name
-            n_characters = len(name)
-            for charIndex in range(0, n_characters):
-                if name[charIndex] == ' ':
-                    name = name[0:charIndex] + '_' + name[(charIndex + 1):n_characters]
+        student_detail_field_description = [('text', 'Student ID'),
+                                            ('text', 'First Name'),
+                                            ('text', 'Surname'),
+                                            ('date', 'DOB')]
+        self.student_detail_fields = []
+        for field_type, label in student_detail_field_description:
+            name = StudentEntryForm.get_name(label)
             value = data[name] if data else None
             check_for_errors = data is not None
-            field = StudentEntryForm.StudentEntryFormField(test=test, name=name, value=value,
-                                                           check_for_errors=check_for_errors)
-            self.fields.append(field)
+            field = StudentEntryForm.StudentDetailsField(field_type=field_type, label=label, name=name, value=value,
+                                                         check_for_errors=check_for_errors)
+            self.student_detail_fields.append(field)
+
+        self.test_result_fields = []
+        for test in tests:
+            name = StudentEntryForm.get_name(test.test_name)
+            value = data[name] if data else None
+            check_for_errors = data is not None
+            field = StudentEntryForm.ResultField(test=test, name=name, value=value, check_for_errors=check_for_errors)
+            self.test_result_fields.append(field)
 
     def save_student_entry(self):
         is_valid = True
-        for field in self.fields:
+        for field in self.student_detail_fields:
+            if hasattr(field, 'errors'):
+                is_valid = False
+        for field in self.test_result_fields:
             if hasattr(field, 'errors'):
                 is_valid = False
 
@@ -901,7 +912,38 @@ class StudentEntryForm:
 
         return is_valid
 
-    class StudentEntryFormField:
+    @staticmethod
+    def get_name(label):
+        name = label
+        n_characters = len(name)
+        for charIndex in range(0, n_characters):
+            if name[charIndex] == ' ':
+                name = name[0:charIndex] + '_' + name[(charIndex + 1):n_characters]
+        return name
+
+    class StudentDetailsField:
+
+        def __init__(self, field_type, label, name, value=None, check_for_errors=False):
+            self.input_type = 'text'
+            self.label = label
+            self.name = name
+
+            if value:
+                self.value = value
+
+            if field_type == 'date':
+                self.place_holder = 'dd/mm/yyyy'
+
+            if check_for_errors:
+                if value == '':
+                    self.errors = 'Please enter result for ' + label
+                elif field_type == 'date':
+                    try:
+                        datetime.datetime.strptime(value, '%d/%m/%Y')
+                    except ValueError:
+                        self.errors = 'Please enter date of form dd/mm/yyyy'
+
+    class ResultField:
 
         def __init__(self, test, name, value=None, check_for_errors=False):
             self.label = test.test_name
