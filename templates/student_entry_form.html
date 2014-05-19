@@ -3,19 +3,26 @@
 {% block content_fitness_testing_base  %}
 <form method="POST" enctype="multipart/form-data" action="{{ post_to_url }}" class="form-horizontal">
     {% csrf_token %}
-    {% for field in form.fields %}
-        <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
-            <div class="col-sm-1"><label for="{{ field.name }}">{{ field.label }}:</label></div>
-            <div class="col-sm-11">
-                <input type="text" id="{{ field.name }}" name={{ field.name }}
-                        {% if field.value %}value="{{ field.value }}"{% endif %}
-                        {% if field.place_holder %}placeholder="{{ field.place_holder }}"{% endif %}>
-                {% if field.help_text %}<span class="form-field-help">{{ field.help_text }}</span>{% endif %}
-                {% if field.errors %}<span class="help-block">{{ field.errors }}</span>{% endif %}
+    {% if form %}
+        {% for field in form.fields %}
+            <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
+                <div class="col-sm-1"><label for="{{ field.name }}">{{ field.label }}:</label></div>
+                <div class="col-sm-11">
+                    <input type="text" id="{{ field.name }}" name={{ field.name }}
+                            {% if field.value %}value="{{ field.value }}"{% endif %}
+                            {% if field.place_holder %}placeholder="{{ field.place_holder }}"{% endif %}>
+                    {% if field.help_text %}<span class="form-field-help">{{ field.help_text }}</span>{% endif %}
+                    {% if field.errors %}<span class="help-block">{{ field.errors }}</span>{% endif %}
+                </div>
             </div>
+        {% endfor %}
+        <input type="submit" class="btn btn-default" name='results_cancel_button' value="Cancel">
+        <input type="submit" class="btn btn-primary" name='results_save_button' value="Save Results">
+    {% else %}
+        <div class="h1">
+            {{ user_message }}
         </div>
-    {% endfor %}
-    <input type="submit" class="btn btn-default" name='results_cancel_button' value="Cancel">
-    <input type="submit" class="btn btn-primary" name='results_save_button' value="Save Results">
+        <input type="submit" class="btn btn-primary" name='results_done_button' value="Done">
+    {% endif %}
 </form>
 {% endblock %}

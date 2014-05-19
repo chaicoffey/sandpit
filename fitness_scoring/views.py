@@ -110,12 +110,19 @@ def class_student_view(request):
         class_instance = Class.objects.get(user=user)
         context = {'post_to_url': '/class_student_view/'}
         if request.POST:
-            if request.POST.get('results_cancel_button'):
+            if request.POST.get('results_done_button'):
                 return redirect('fitness_scoring.views.logout_user')
+            elif request.POST.get('results_cancel_button'):
+                context['user_message'] = 'Results were not entered'
+                return render(request, 'student_entry_form.html', RequestContext(request, context))
             else:
                 form = StudentEntryForm(class_pk=class_instance.pk, data=request.POST)
-                context['form'] = form
-                return render(request, 'student_entry_form.html', RequestContext(request, context))
+                if form.save_student_entry():
+                    context['user_message'] = 'Your results have been entered'
+                    return render(request, 'student_entry_form.html', RequestContext(request, context))
+                else:
+                    context['form'] = form
+                    return render(request, 'student_entry_form.html', RequestContext(request, context))
         else:
             context['form'] = StudentEntryForm(class_pk=class_instance.pk)
             return render(request, 'student_entry_form.html', RequestContext(request, context))

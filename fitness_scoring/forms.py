@@ -890,6 +890,17 @@ class StudentEntryForm:
                                                            check_for_errors=check_for_errors)
             self.fields.append(field)
 
+    def save_student_entry(self):
+        is_valid = True
+        for field in self.fields:
+            if hasattr(field, 'errors'):
+                is_valid = False
+
+        if is_valid:
+            pass
+
+        return is_valid
+
     class StudentEntryFormField:
 
         def __init__(self, test, name, value=None, check_for_errors=False):
