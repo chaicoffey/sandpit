@@ -880,8 +880,7 @@ class StudentEntryForm:
         student_detail_field_description = [('text', 'Student ID', None),
                                             ('text', 'First Name', None),
                                             ('text', 'Surname', None),
-                                            ('select', 'Gender', [(value, option_label, False)
-                                                                  for value, option_label in Student.GENDER_CHOICES]),
+                                            ('select', 'Gender', Student.GENDER_CHOICES),
                                             ('date', 'DOB', None)]
         self.student_detail_fields = []
         for field_type, label, extra in student_detail_field_description:
@@ -927,16 +926,6 @@ class StudentEntryForm:
     class StudentDetailsField:
 
         def __init__(self, field_type, label, name, choices=None, value=None, check_for_errors=False):
-            if (field_type == 'text') or (field_type == 'date'):
-                self.input_type = 'text'
-            elif choices:
-                if value:
-                    for choice_index in range(len(choices)):
-                        (choice_value, option_label, selected) = choices[choice_index]
-                        if choice_value == value:
-                            choices[choice_index] = (choice_value, option_label, True)
-                self.choices = choices
-            self.label = label
             self.name = name
 
             if value:
@@ -944,6 +933,26 @@ class StudentEntryForm:
 
             if field_type == 'date':
                 self.place_holder = 'dd/mm/yyyy'
+
+            self.label_tag = '<label for="' + name + '">' + label + ':</label>'
+
+            if (field_type == 'text') or (field_type == 'date'):
+                self.html = 'input type="text" id="' + name + '" name="' + name + '"'
+                if value:
+                    self.html += ' value="' + value + '"'
+                if hasattr(self, 'place_holder'):
+                    self.html += ' placeholder="' + self.place_holder + '"'
+                self.html = '<' + self.html + '>'
+            elif choices:
+                self.html = '<select id="' + name + '" name="' + name + '">'
+                for choice_index in range(len(choices)):
+                    (choice_value, option_label) = choices[choice_index]
+                    self.html += '<option value="' + choice_value + '"'
+                    if value:
+                        if choice_value == value:
+                            self.html += ' selected'
+                    self.html += '>' + option_label + '</option>'
+                self.html += '</select>'
 
             if check_for_errors:
                 if value == '':
@@ -957,7 +966,6 @@ class StudentEntryForm:
     class ResultField:
 
         def __init__(self, test, name, value=None, check_for_errors=False):
-            self.label = test.test_name
             self.name = name
 
             if value:
@@ -965,6 +973,15 @@ class StudentEntryForm:
 
             if test.percentiles.result_type == 'TIME':
                 self.place_holder = 'mm:ss'
+
+            self.label_tag =  '<label for="' + name + '">' + test.test_name + ':</label>'
+
+            self.html = 'input type="text" id="' + name + '" name="' + name + '"'
+            if value:
+                self.html += ' value="' + value + '"'
+            if hasattr(self, 'place_holder'):
+                self.html += ' placeholder="' + self.place_holder + '"'
+            self.html = '<' + self.html + '>'
 
             if check_for_errors:
                 if value == '':
