@@ -108,7 +108,9 @@ def class_student_view(request):
     if request.session.get('user_type', None) == 'Class':
         user = User.objects.get(username=request.session.get('username', None))
         class_instance = Class.objects.get(user=user)
-        context = {'post_to_url': '/class_student_view/'}
+        context = {'post_to_url': '/class_student_view/',
+                   'school_name': class_instance.school_id.name,
+                   'class_name': class_instance.class_name}
         if request.POST:
             if request.POST.get('results_done_button'):
                 return redirect('fitness_scoring.views.logout_user')
