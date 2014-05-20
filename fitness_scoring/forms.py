@@ -874,6 +874,8 @@ class StudentEntryForm:
 
     def __init__(self, class_pk, data=None):
         self.class_pk = class_pk
+        if data:
+            self.data = data
         class_instance = Class.objects.get(pk=class_pk)
         tests = class_instance.get_tests()
 
@@ -901,7 +903,7 @@ class StudentEntryForm:
             self.test_result_fields.append(field)
 
     def save_student_entry(self):
-        is_valid = True
+        is_valid = hasattr(self, 'data')
         for field in self.student_detail_fields:
             if hasattr(field, 'errors'):
                 is_valid = False
@@ -910,7 +912,38 @@ class StudentEntryForm:
                 is_valid = False
 
         if is_valid:
-            pass
+            class_instance = Class.objects.get(pk=self.class_pk)
+            school_id = class_instance.school_id
+            student_id = None
+            first_name = None
+            surname = None
+            gender = None
+            dob = None
+            for field in self.student_detail_fields:
+                if field.name == 'Student_ID':
+                    student_id = self.data[field.name]
+                elif field.name == 'First_Name':
+                    first_name = self.data[field.name]
+                elif field.name == 'Surname':
+                    surname = self.data[field.name]
+                elif field.name == 'Gender':
+                    gender = self.data[field.name]
+                elif field.name == 'DOB':
+                    dob = datetime.datetime.strptime(self.data[field.name], '%d/%m/%Y')
+
+            student = Student.create_student(student_id=student_id, school_id=school_id, first_name=first_name,
+                                             surname=surname, gender=gender, dob=dob)
+            if not student:
+                student = Student.objects.get(student_id=student_id, school_id=school_id, first_name=first_name,
+                                              surname=surname, gender=gender, dob=dob)
+
+            enrolment = class_instance.enrol_student_safe(student=student)
+
+            tests = class_instance.get_tests()
+            for test in tests:
+                data_label = StudentEntryForm.get_name(test.test_name)
+                if self.data[data_label]:
+                    enrolment.enter_result_safe(test, self.data[data_label])
 
         return is_valid
 
@@ -974,7 +1007,7 @@ class StudentEntryForm:
             if test.percentiles.result_type == 'TIME':
                 self.place_holder = 'mm:ss'
 
-            self.label_tag =  '<label for="' + name + '">' + test.test_name + ':</label>'
+            self.label_tag = '<label for="' + name + '">' + test.test_name + ':</label>'
 
             self.html = 'input type="text" id="' + name + '" name="' + name + '"'
             if value:

@@ -297,75 +297,26 @@ class Student(models.Model):
     def __unicode__(self):
         return self.first_name + " " + self.surname + " (" + self.student_id + ")"
 
-    def get_display_items(self):
-        return [self.student_id, self.first_name, self.surname]
-
     def get_student_age(self):
         today = date.today()
         return today.year - self.dob.year - (1 if (today.month, today.day) < (self.dob.month, self.dob.day) else 0)
 
     def delete_student_safe(self):
-        student_not_used = (len(StudentClassEnrolment.objects.filter(student_id=self)) == 0)
+        student_not_used = not StudentClassEnrolment.objects.filter(student_id=self).exists()
         if student_not_used:
             self.delete()
         return student_not_used
 
-    def edit_student_safe(self, student_id, school_id, first_name, surname, gender, dob):
-        is_edit_safe = (self.student_id == student_id) and (self.school_id == school_id)
-        is_edit_safe = is_edit_safe or not Student.objects.filter(school_id=school_id, student_id=student_id).exists()
-        if is_edit_safe:
-            self.student_id = student_id
-            self.school_id = school_id
-            self.first_name = first_name
-            self.surname = surname
-            self.gender = gender
-            self.dob = dob
-            self.save()
-        return is_edit_safe
-
     @staticmethod
-    def get_display_list_headings():
-        return ['Student ID', 'First Name', 'Surname']
-
-    @staticmethod
-    def create_student(check_name, student_id, school_id, first_name, surname, gender, dob):
-
-        student_unique = (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 0)
-        if check_name:
-            student_unique = student_unique and (len(Student.objects.filter(school_id=school_id,
-                                                                            first_name=first_name,
-                                                                            surname=surname)) == 0)
-
+    def create_student(student_id, school_id, first_name, surname, gender, dob):
+        student_unique = not Student.objects.filter(student_id=student_id, school_id=school_id, first_name=first_name,
+                                                    surname=surname, gender=gender, dob=dob).exists()
         if student_unique:
-            Student.objects.create(student_id=student_id, school_id=school_id, first_name=first_name,
-                                   surname=surname, gender=gender, dob=dob)
-
-        return student_unique
-
-    @staticmethod
-    def update_student(check_name, student_id, school_id, first_name, surname, gender, dob):
-
-        if check_name:
-            student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id,
-                                                         first_name=first_name, surname=surname)) == 1)
+            student = Student.objects.create(student_id=student_id, school_id=school_id, first_name=first_name,
+                                             surname=surname, gender=gender, dob=dob)
         else:
-            student_exists = (len(Student.objects.filter(school_id=school_id, student_id=student_id)) == 1)
-
-        student_updated = student_exists
-        if student_exists:
-            student = Student.objects.get(school_id=school_id, student_id=student_id)
-            student_updated = not ((student.school_id == school_id) and (student.first_name == first_name) and
-                                   (student.surname == surname) and (student.gender == gender) and
-                                   (student.dob == datetime.datetime.strptime(dob, "%Y-%m-%d").date()))
-            if student_updated:
-                student.school_id = school_id
-                student.first_name = first_name
-                student.surname = surname
-                student.gender = gender
-                student.dob = dob
-                student.save()
-
-        return student_updated
+            student = None
+        return student
 
 
 class Class(models.Model):
@@ -509,11 +460,12 @@ class Class(models.Model):
         return self.user.reset_code()
 
     def enrol_student_safe(self, student):
-        enrolled = ((self.school_id == student.school_id) and
-                    not StudentClassEnrolment.objects.filter(class_id=self, student_id=student).exists())
+        enrolled = self.school_id == student.school_id
         if enrolled:
-            StudentClassEnrolment.create_student_class_enrolment(class_id=self, student_id=student)
-        return enrolled
+            enrolment = StudentClassEnrolment.create_student_class_enrolment(class_id=self, student_id=student)
+        else:
+            enrolment = None
+        return enrolment
 
     def withdraw_student_safe(self, student):
         withdrawn = StudentClassEnrolment.objects.filter(class_id=self, student_id=student).exists()
@@ -619,6 +571,13 @@ class PercentileBracketSet(models.Model):
         test = Test.objects.get(percentiles=self)
         return test.test_name + ' (' + test.test_category.test_category_name + ')'
 
+    def get_percentile(self, gender, age, result):
+        if PercentileBracketList.objects.filter(percentile_bracket_set=self, age=age, gender=gender).exists():
+            return PercentileBracketList.objects.get(percentile_bracket_set=self,
+                                                     age=age, gender=gender).get_percentile(result)
+        else:
+            return None
+
     def update_percentile_bracket_set(self, percentile_scores):
         (percentiles, age_genders, score_table) = percentile_scores
 
@@ -670,6 +629,57 @@ class PercentileBracketList(models.Model):
 
     def __unicode__(self):
         return str(self.percentile_bracket_set) + ' (' + str(self.age) + ', ' + self.gender + ')'
+
+    def get_percentile(self, result):
+        score = self.get_score(result, True)
+        if score:
+            scores = self.get_scores(True)
+            if self.percentile_bracket_set.is_upward_percentile_brackets:
+                if score < scores[0]:
+                    percentile = 0
+                elif score >= scores[99]:
+                    percentile = 99
+                else:
+                    percentile = 0
+                    while score >= scores[percentile + 1]:
+                        percentile += 1
+            else:
+                if score > scores[0]:
+                    percentile = 0
+                elif score <= scores[99]:
+                    percentile = 99
+                else:
+                    percentile = 0
+                    while score <= scores[percentile + 1]:
+                        percentile += 1
+            return percentile
+        else:
+            return False
+
+    def get_score(self, result, time_as_integer_in_seconds=False):
+        score = None
+        if self.percentile_bracket_set.result_type == 'DOUBLE':
+            try:
+                score = float(result)
+            except ValueError:
+                score = None
+        elif self.percentile_bracket_set.result_type == 'TIME':
+            try:
+                time_value = time.strptime(result, '%M:%S')
+                if time_as_integer_in_seconds:
+                    score = 60*time_value.tm_min + time_value.tm_sec
+                else:
+                    score = time_value
+            except ValueError:
+                score = None
+        elif self.percentile_bracket_set.result_type == 'INTEGER':
+            try:
+                score = int(result)
+                if int(result) != float(result):
+                    score = None
+            except ValueError:
+                score = None
+        return score
 
     def get_score_strings(self):
         score_strings = []
@@ -839,17 +849,27 @@ class StudentClassEnrolment(models.Model):
     def __unicode__(self):
         return str(self.class_id) + ' : ' + str(self.student_id)
 
-    def get_test_results(self):
+    def get_test_results(self, text=False):
         test_results = []
 
         class_tests = ClassTest.objects.filter(class_id=self.class_id)
         for class_test in class_tests:
             test = class_test.test_name
             student_class_test_result = StudentClassTestResult.objects.filter(student_class_enrolment=self, test=test)
-            result = student_class_test_result[0].result if student_class_test_result.exists() else None
+            result = (student_class_test_result[0].result if student_class_test_result.exists()
+                      else ('' if text else None))
             test_results.append(result)
 
         return test_results
+
+    def enter_result_safe(self, test, result):
+        test_in_class = ClassTest.objects.filter(class_id=self.class_id, test_name=test).exists()
+        already_entered = StudentClassTestResult.objects.filter(student_class_enrolment=self, test=test).exists()
+        result_entered = test_in_class and not already_entered
+        if result_entered:
+            result_entered = StudentClassTestResult.create_student_class_test_result(student_class_enrolment=self,
+                                                                                     test=test, result=result)
+        return result_entered
 
     @staticmethod
     def create_student_class_enrolment(class_id, student_id):
@@ -919,7 +939,18 @@ class StudentClassTestResult(models.Model):
     student_class_enrolment = models.ForeignKey(StudentClassEnrolment)
     test = models.ForeignKey(Test)
     result = models.CharField(max_length=20)
-    percentile = models.IntegerField(max_length=4)
+    percentile = models.IntegerField(max_length=4, null=True)
 
     def __unicode__(self):
         return str(self.student_class_enrolment) + ' : ' + str(self.test)
+
+    @staticmethod
+    def create_student_class_test_result(student_class_enrolment, test, result):
+        student = student_class_enrolment.student_id
+        percentile = test.percentiles.get_percentile(gender=student.gender, age=student.get_student_age(),
+                                                     result=result)
+        result_created = percentile is not False
+        if result_created:
+            StudentClassTestResult.objects.create(student_class_enrolment=student_class_enrolment, test=test,
+                                                  result=result, percentile=percentile)
+        return result_created
