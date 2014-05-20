@@ -287,12 +287,15 @@ class Student(models.Model):
         ('M', 'Male'),
         ('F', 'Female')
     )
-    student_id = models.CharField(max_length=30)
     school_id = models.ForeignKey(School)
+    student_id = models.CharField(max_length=30)
     first_name = models.CharField(max_length=100)
     surname = models.CharField(max_length=100)
     gender = models.CharField(max_length=1, choices=GENDER_CHOICES, default='M')
     dob = models.DateField()
+    student_id_lowercase = models.CharField(max_length=30)
+    first_name_lowercase = models.CharField(max_length=100)
+    surname_lowercase = models.CharField(max_length=100)
 
     def __unicode__(self):
         return self.first_name + " " + self.surname + " (" + self.student_id + ")"
@@ -308,12 +311,30 @@ class Student(models.Model):
         return student_not_used
 
     @staticmethod
-    def create_student(student_id, school_id, first_name, surname, gender, dob):
-        student_unique = not Student.objects.filter(student_id=student_id, school_id=school_id, first_name=first_name,
-                                                    surname=surname, gender=gender, dob=dob).exists()
+    def get_student(school_id, student_id, first_name, surname, gender, dob):
+        student_id_lowercase = student_id.lower()
+        first_name_lowercase = first_name.lower()
+        surname_lowercase = surname.lower()
+        return Student.objects.get(school_id=school_id, student_id_lowercase=student_id_lowercase,
+                                   first_name_lowercase=first_name_lowercase, surname_lowercase=surname_lowercase,
+                                   gender=gender, dob=dob)
+
+    @staticmethod
+    def create_student(school_id, student_id, first_name, surname, gender, dob):
+        student_id_lowercase = student_id.lower()
+        first_name_lowercase = first_name.lower()
+        surname_lowercase = surname.lower()
+        student_unique = not Student.objects.filter(school_id=school_id,
+                                                    student_id_lowercase=student_id_lowercase,
+                                                    first_name_lowercase=first_name_lowercase,
+                                                    surname_lowercase=surname_lowercase,
+                                                    gender=gender, dob=dob).exists()
         if student_unique:
             student = Student.objects.create(student_id=student_id, school_id=school_id, first_name=first_name,
-                                             surname=surname, gender=gender, dob=dob)
+                                             surname=surname, gender=gender, dob=dob,
+                                             student_id_lowercase=student_id_lowercase,
+                                             first_name_lowercase=first_name_lowercase,
+                                             surname_lowercase=surname_lowercase)
         else:
             student = None
         return student

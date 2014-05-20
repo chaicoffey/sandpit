@@ -931,10 +931,10 @@ class StudentEntryForm:
                 elif field.name == 'DOB':
                     dob = datetime.datetime.strptime(self.data[field.name], '%d/%m/%Y')
 
-            student = Student.create_student(student_id=student_id, school_id=school_id, first_name=first_name,
+            student = Student.create_student(school_id=school_id, student_id=student_id, first_name=first_name,
                                              surname=surname, gender=gender, dob=dob)
             if not student:
-                student = Student.objects.get(student_id=student_id, school_id=school_id, first_name=first_name,
+                student = Student.get_student(school_id=school_id, student_id=student_id, first_name=first_name,
                                               surname=surname, gender=gender, dob=dob)
 
             enrolment = class_instance.enrol_student_safe(student=student)
