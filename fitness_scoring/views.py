@@ -1205,28 +1205,6 @@ def get_new_class_code(request, class_pk):
         return HttpResponseForbidden("You are not authorised to delete a teacher from this school")
 
 
-def remove_student_from_class(request, class_pk, student_pk):
-    if user_authorised_for_class(request, class_pk):
-        class_instance = Class.objects.get(pk=class_pk)
-        student = Student.objects.get(pk=student_pk)
-        if request.POST:
-            if class_instance.withdraw_student_safe(student):
-                context = {'finish_title': 'Remove Student From Class',
-                           'user_message': 'Student Removed Successfully: ' + str(student)}
-            else:
-                context = {'finish_title': 'Student Not Removed From Class',
-                           'user_error_message': 'Could Not Remove ' + str(student) + ' (This Student Has Results'
-                                                                                      ' Entered In This Class)'}
-            return render(request, 'user_message.html', RequestContext(request, context))
-        else:
-            context = {'post_to_url': '/class/student/delete/' + str(class_pk) + '/' + str(student_pk),
-                       'functionality_name': 'Remove Student',
-                       'prompt_message': 'Are You Sure You Wish To Remove Student From Class ' + str(student) + "?"}
-            return render(request, 'modal_form.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to remove a student from this class")
-
-
 def user_authorised_for_teacher(request, teacher_pk):
 
     if request.session.get('user_type', None) == 'Administrator':

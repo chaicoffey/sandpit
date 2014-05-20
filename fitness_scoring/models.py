@@ -480,13 +480,13 @@ class Class(models.Model):
     def reset_code(self):
         return self.user.reset_code()
 
-    def enrol_student_safe(self, student):
-        enrolled = self.school_id == student.school_id
-        if enrolled:
-            enrolment = StudentClassEnrolment.create_student_class_enrolment(class_id=self, student_id=student)
-        else:
-            enrolment = None
-        return enrolment
+    def enrol_student_safe(self, student_id, first_name, surname, gender, dob):
+        student = Student.create_student(school_id=self.school_id, student_id=student_id, first_name=first_name,
+                                         surname=surname, gender=gender, dob=dob)
+        if not student:
+            student = Student.get_student(school_id=self.school_id, student_id=student_id, first_name=first_name,
+                                          surname=surname, gender=gender, dob=dob)
+        return StudentClassEnrolment.create_student_class_enrolment(class_id=self, student_id=student)
 
     def withdraw_student_safe(self, student):
         withdrawn = StudentClassEnrolment.objects.filter(class_id=self, student_id=student).exists()
@@ -496,6 +496,8 @@ class Class(models.Model):
 
         if withdrawn:
             StudentClassEnrolment.objects.get(class_id=self, student_id=student).delete()
+            if not StudentClassEnrolment.objects.filter(student_id=student).exists():
+                student.delete()
 
         return withdrawn
 

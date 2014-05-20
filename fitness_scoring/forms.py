@@ -913,7 +913,6 @@ class StudentEntryForm:
 
         if is_valid:
             class_instance = Class.objects.get(pk=self.class_pk)
-            school_id = class_instance.school_id
             student_id = None
             first_name = None
             surname = None
@@ -931,13 +930,8 @@ class StudentEntryForm:
                 elif field.name == 'DOB':
                     dob = datetime.datetime.strptime(self.data[field.name], '%d/%m/%Y')
 
-            student = Student.create_student(school_id=school_id, student_id=student_id, first_name=first_name,
-                                             surname=surname, gender=gender, dob=dob)
-            if not student:
-                student = Student.get_student(school_id=school_id, student_id=student_id, first_name=first_name,
-                                              surname=surname, gender=gender, dob=dob)
-
-            enrolment = class_instance.enrol_student_safe(student=student)
+            enrolment = class_instance.enrol_student_safe(student_id=student_id, first_name=first_name, surname=surname,
+                                                          gender=gender, dob=dob)
 
             tests = class_instance.get_tests()
             for test in tests:
