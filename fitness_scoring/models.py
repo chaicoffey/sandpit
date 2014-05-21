@@ -481,24 +481,15 @@ class Class(models.Model):
         return self.user.reset_code()
 
     def enrol_student_safe(self, student_id, first_name, surname, gender, dob):
-        student = Student.create_student(school_id=self.school_id, student_id=student_id, first_name=first_name,
-                                         surname=surname, gender=gender, dob=dob)
-        if not student:
-            student = Student.get_student(school_id=self.school_id, student_id=student_id, first_name=first_name,
-                                          surname=surname, gender=gender, dob=dob)
-        return StudentClassEnrolment.create_student_class_enrolment(class_id=self, student_id=student)
+        return StudentClassEnrolment.create_student_class_enrolment(class_id=self, student_id=student_id,
+                                                                    first_name=first_name, surname=surname,
+                                                                    gender=gender, dob=dob)
 
     def withdraw_student_safe(self, student):
         withdrawn = StudentClassEnrolment.objects.filter(class_id=self, student_id=student).exists()
         if withdrawn:
-            enrolment = StudentClassEnrolment.objects.get(class_id=self, student_id=student)
-            withdrawn = not StudentClassTestResult.objects.filter(student_class_id=enrolment).exists()
-
-        if withdrawn:
-            StudentClassEnrolment.objects.get(class_id=self, student_id=student).delete()
-            if not StudentClassEnrolment.objects.filter(student_id=student).exists():
-                student.delete()
-
+            withdrawn = StudentClassEnrolment.objects.get(class_id=self,
+                                                          student_id=student).delete_student_class_enrolment_safe()
         return withdrawn
 
     @staticmethod
@@ -864,10 +855,16 @@ class TeacherClassAllocation(models.Model):
 
 
 class StudentClassEnrolment(models.Model):
+    APPROVAL_STATUS_CHOICES = (
+        ('APPROVED', 'Approved'),
+        ('PENDING', 'Pending Issues'),
+        ('UNAPPROVED', 'Unapproved')
+    )
     class_id = models.ForeignKey(Class)
     student_id = models.ForeignKey(Student)
     student_gender_at_time_of_enrolment = models.CharField(max_length=1, choices=Student.GENDER_CHOICES)
     student_age_at_time_of_enrolment = models.IntegerField(max_length=4)
+    approval_status = models.CharField(max_length=20, choices=APPROVAL_STATUS_CHOICES)
 
     def __unicode__(self):
         return str(self.class_id) + ' : ' + str(self.student_id)
@@ -894,14 +891,29 @@ class StudentClassEnrolment(models.Model):
                                                                                      test=test, result=result)
         return result_entered
 
+    def delete_student_class_enrolment_safe(self):
+        student = self.student_id
+        self.delete()
+        if not StudentClassEnrolment.objects.filter(student_id=student).exists():
+            student.delete()
+        return True
+
     @staticmethod
-    def create_student_class_enrolment(class_id, student_id):
-        gender = student_id.gender
-        age = student_id.get_student_age()
-        student_class_enrolment = StudentClassEnrolment.objects.create(class_id=class_id, student_id=student_id,
-                                                                       student_gender_at_time_of_enrolment=gender,
-                                                                       student_age_at_time_of_enrolment=age)
-        return student_class_enrolment
+    def create_student_class_enrolment(class_id, student_id, first_name, surname, gender, dob):
+        student = Student.create_student(school_id=class_id.school_id, student_id=student_id, first_name=first_name,
+                                         surname=surname, gender=gender, dob=dob)
+        if not student:
+            student = Student.get_student(school_id=class_id.school_id, student_id=student_id, first_name=first_name,
+                                          surname=surname, gender=gender, dob=dob)
+        gender = student.gender
+        age = student.get_student_age()
+
+        approval_status = 'UNAPPROVED'
+
+        return StudentClassEnrolment.objects.create(class_id=class_id, student_id=student,
+                                                    student_gender_at_time_of_enrolment=gender,
+                                                    student_age_at_time_of_enrolment=age,
+                                                    approval_status=approval_status)
 
 
 class ClassTest(models.Model):

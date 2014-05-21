@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.template import RequestContext
-from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, TestCategory, Test, Student, Class
+from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, TestCategory, Test, Class
 from fitness_scoring.models import PercentileBracketList
 from fitness_scoring.models import TeacherClassAllocation, ClassTest, StudentClassEnrolment, TestSet
 from fitness_scoring.forms import ChangePasswordFrom
