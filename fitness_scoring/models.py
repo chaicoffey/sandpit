@@ -867,6 +867,7 @@ class StudentClassEnrolment(models.Model):
     pending_issue_personal = models.BooleanField(default=False)
     pending_issue_other_class_member = models.BooleanField(default=False)
     pending_issue_other_school_member = models.BooleanField(default=False)
+    pending_issue_other_school_member_student_name_approval = models.BooleanField(default=False)
 
     def __unicode__(self):
         return str(self.class_id) + ' : ' + str(self.student_id)
@@ -893,11 +894,34 @@ class StudentClassEnrolment(models.Model):
                                                                                      test=test, result=result)
         return result_entered
 
+    def update_pending_issue_flags(self, check_school_for_school_issue, check_self_for_school_issue):
+
+        for student_enrolment in StudentClassEnrolment.objects.filter(student_id=self.student_id):
+            student_enrolment.pending_issue_personal = ((student_enrolment.student_age_at_time_of_enrolment < 11) or
+                                                        (student_enrolment.student_age_at_time_of_enrolment > 19))
+            student_enrolment.save()
+
+            class_enrolments = StudentClassEnrolment.objects.filter(student_id=self.student_id,
+                                                                    class_id=student_enrolment.class_id)
+            for class_enrolment in class_enrolments:
+                class_enrolment.pending_issue_other_class_member = (len(class_enrolments) > 1)
+                class_enrolment.save()
+
+        if check_school_for_school_issue:
+            for student in Student.objects.filter(school_id=self.class_id.school_id):
+                student_enrolments = StudentClassEnrolment.objects.filter(student_id=student)
+                if student_enrolments.exists() and student_enrolments[0].pending_issue_other_school_member:
+                    StudentClassEnrolment.update_pending_issue_other_school_member_flag(student=student)
+
+        if check_self_for_school_issue:
+            StudentClassEnrolment.update_pending_issue_other_school_member_flag(student=self.student_id)
+
     def delete_student_class_enrolment_safe(self):
         student = self.student_id
         self.delete()
         if not StudentClassEnrolment.objects.filter(student_id=student).exists():
             student.delete()
+        self.update_pending_issue_flags(check_school_for_school_issue=True, check_self_for_school_issue=False)
         return True
 
     @staticmethod
@@ -913,7 +937,40 @@ class StudentClassEnrolment(models.Model):
         enrolment = StudentClassEnrolment.objects.create(class_id=class_id, student_id=student,
                                                          student_gender_at_time_of_enrolment=gender,
                                                          student_age_at_time_of_enrolment=age)
+        enrolment.update_pending_issue_flags(check_school_for_school_issue=False, check_self_for_school_issue=True)
         return enrolment
+
+    @staticmethod
+    def update_pending_issue_other_school_member_flag(student):
+
+        def update_flag(student_to_update, flag, check_name_approval):
+            for student_enrolment in StudentClassEnrolment.objects.filter(student_id=student_to_update):
+                if check_name_approval:
+                    extra_approval = student_enrolment.pending_issue_other_school_member_student_name_approval
+                else:
+                    extra_approval = False
+                student_enrolment.pending_issue_other_school_member = flag or extra_approval
+                student_enrolment.save()
+
+        student_issue = False
+        update_flag(student, student_issue, False)
+
+        if not student_issue:
+            same_ids = Student.objects.filter(school_id=student.school_id,
+                                              student_id_lowercase=student.student_id_lowercase)
+            if len(same_ids) > 1:
+                student_issue = True
+                for same_id in same_ids:
+                    update_flag(same_id, student_issue, False)
+
+        if not student_issue:
+            same_names = Student.objects.filter(school_id=student.school_id,
+                                                first_name_lowercase=student.first_name_lowercase,
+                                                surname_lowercase=student.surname_lowercase)
+            if len(same_names) > 1:
+                student_issue = True
+                for same_name in same_names:
+                    update_flag(same_name, student_issue, True)
 
 
 class ClassTest(models.Model):
