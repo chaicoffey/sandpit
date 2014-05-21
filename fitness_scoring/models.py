@@ -857,14 +857,16 @@ class TeacherClassAllocation(models.Model):
 class StudentClassEnrolment(models.Model):
     APPROVAL_STATUS_CHOICES = (
         ('APPROVED', 'Approved'),
-        ('PENDING', 'Pending Issues'),
         ('UNAPPROVED', 'Unapproved')
     )
     class_id = models.ForeignKey(Class)
     student_id = models.ForeignKey(Student)
     student_gender_at_time_of_enrolment = models.CharField(max_length=1, choices=Student.GENDER_CHOICES)
     student_age_at_time_of_enrolment = models.IntegerField(max_length=4)
-    approval_status = models.CharField(max_length=20, choices=APPROVAL_STATUS_CHOICES)
+    approval_status = models.CharField(max_length=20, choices=APPROVAL_STATUS_CHOICES, default='UNAPPROVED')
+    pending_issue_personal = models.BooleanField(default=False)
+    pending_issue_other_class_member = models.BooleanField(default=False)
+    pending_issue_other_school_member = models.BooleanField(default=False)
 
     def __unicode__(self):
         return str(self.class_id) + ' : ' + str(self.student_id)
@@ -908,12 +910,10 @@ class StudentClassEnrolment(models.Model):
         gender = student.gender
         age = student.get_student_age()
 
-        approval_status = 'UNAPPROVED'
-
-        return StudentClassEnrolment.objects.create(class_id=class_id, student_id=student,
-                                                    student_gender_at_time_of_enrolment=gender,
-                                                    student_age_at_time_of_enrolment=age,
-                                                    approval_status=approval_status)
+        enrolment = StudentClassEnrolment.objects.create(class_id=class_id, student_id=student,
+                                                         student_gender_at_time_of_enrolment=gender,
+                                                         student_age_at_time_of_enrolment=age)
+        return enrolment
 
 
 class ClassTest(models.Model):
