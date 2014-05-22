@@ -300,9 +300,11 @@ class Student(models.Model):
     def __unicode__(self):
         return self.first_name + " " + self.surname + " (" + self.student_id + ")"
 
-    def get_student_age(self):
+    def get_student_current_age(self):
+        dob = self.dob
         today = date.today()
-        return today.year - self.dob.year - (1 if (today.month, today.day) < (self.dob.month, self.dob.day) else 0)
+        return ((today.year - dob.year) -
+                (1 if (today.month, today.day) < (dob.month, dob.day) else 0))
 
     def delete_student_safe(self):
         student_not_used = not StudentClassEnrolment.objects.filter(student_id=self).exists()
@@ -855,7 +857,7 @@ class StudentClassEnrolment(models.Model):
     class_id = models.ForeignKey(Class)
     student_id = models.ForeignKey(Student)
     student_gender_at_time_of_enrolment = models.CharField(max_length=1, choices=Student.GENDER_CHOICES)
-    student_age_at_time_of_enrolment = models.IntegerField(max_length=4)
+    enrolment_date = models.DateField()
     approval_status = models.CharField(max_length=20, choices=APPROVAL_STATUS_CHOICES, default='UNAPPROVED')
     pending_issue_personal = models.BooleanField(default=False)
     pending_issue_other_class_member = models.BooleanField(default=False)
@@ -878,6 +880,11 @@ class StudentClassEnrolment(models.Model):
 
         return test_results
 
+    def get_student_age_at_time_of_enrolment(self):
+        dob = self.student_id.dob
+        return ((self.enrolment_date.year - dob.year) -
+                (1 if (self.enrolment_date.month, self.enrolment_date.day) < (dob.month, dob.day) else 0))
+
     def enter_result_safe(self, test, result):
         test_in_class = ClassTest.objects.filter(class_id=self.class_id, test_name=test).exists()
         already_entered = StudentClassTestResult.objects.filter(student_class_enrolment=self, test=test).exists()
@@ -899,8 +906,8 @@ class StudentClassEnrolment(models.Model):
     def update_pending_issue_flags(self, check_school_for_school_issue, check_self_for_school_issue):
 
         for student_enrolment in StudentClassEnrolment.objects.filter(student_id=self.student_id):
-            student_enrolment.pending_issue_personal = ((student_enrolment.student_age_at_time_of_enrolment < 11) or
-                                                        (student_enrolment.student_age_at_time_of_enrolment > 19))
+            enrolment_age = student_enrolment.get_student_age_at_time_of_enrolment()
+            student_enrolment.pending_issue_personal = (enrolment_age < 11) or (enrolment_age > 19)
             student_enrolment.save()
 
             class_enrolments = StudentClassEnrolment.objects.filter(student_id=self.student_id,
@@ -934,11 +941,10 @@ class StudentClassEnrolment(models.Model):
             student = Student.get_student(school_id=class_id.school_id, student_id=student_id, first_name=first_name,
                                           surname=surname, gender=gender, dob=dob)
         gender = student.gender
-        age = student.get_student_age()
 
         enrolment = StudentClassEnrolment.objects.create(class_id=class_id, student_id=student,
                                                          student_gender_at_time_of_enrolment=gender,
-                                                         student_age_at_time_of_enrolment=age)
+                                                         enrolment_date=date.today())
         enrolment.update_pending_issue_flags(check_school_for_school_issue=False, check_self_for_school_issue=True)
         return enrolment
 
@@ -1040,9 +1046,8 @@ class StudentClassTestResult(models.Model):
 
     def edit_student_class_test_result_safe(self, new_result):
         student = self.student_class_enrolment.student_id
-        percentile = self.test.percentiles.get_percentile(gender=student.gender,
-                                                          age=student.get_student_age(),
-                                                          result=new_result)
+        age = self.student_class_enrolment.get_student_age_at_time_of_enrolment()
+        percentile = self.test.percentiles.get_percentile(gender=student.gender, age=age, result=new_result)
         result_edited = percentile is not False
         if result_edited:
             self.result = new_result
@@ -1053,8 +1058,8 @@ class StudentClassTestResult(models.Model):
     @staticmethod
     def create_student_class_test_result(student_class_enrolment, test, result):
         student = student_class_enrolment.student_id
-        percentile = test.percentiles.get_percentile(gender=student.gender, age=student.get_student_age(),
-                                                     result=result)
+        age = student.get_student_current_age()
+        percentile = test.percentiles.get_percentile(gender=student.gender, age=age, result=result)
         result_created = percentile is not False
         if result_created:
             StudentClassTestResult.objects.create(student_class_enrolment=student_class_enrolment, test=test,

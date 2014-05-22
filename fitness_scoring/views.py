@@ -1062,7 +1062,7 @@ def class_results_table(request, class_pk):
         class_instance = Class.objects.get(pk=class_pk)
         class_tests = [class_test.test_name for class_test in ClassTest.objects.filter(class_id=class_instance)]
         student_test_results = [(enrolment.pk, enrolment.student_id, enrolment.student_gender_at_time_of_enrolment,
-                                 enrolment.student_age_at_time_of_enrolment,
+                                 enrolment.get_student_age_at_time_of_enrolment(),
                                  enrolment.get_test_results(True)) for enrolment in
                                 StudentClassEnrolment.objects.filter(class_id=class_instance)]
         context = {
