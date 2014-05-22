@@ -104,7 +104,7 @@ def change_user_password(request, is_finished):
         return HttpResponseForbidden("You are not authorised to change password")
 
 
-def class_student_view(request):
+def class_student_view(request, enrolment_pk=None):
     if request.session.get('user_type', None) == 'Class':
         user = User.objects.get(username=request.session.get('username', None))
         class_instance = Class.objects.get(user=user)
