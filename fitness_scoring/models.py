@@ -887,6 +887,15 @@ class StudentClassEnrolment(models.Model):
                                                                                      test=test, result=result)
         return result_entered
 
+    def edit_result_safe(self, test, new_result):
+        test_in_class = ClassTest.objects.filter(class_id=self.class_id, test_name=test).exists()
+        already_entered = StudentClassTestResult.objects.filter(student_class_enrolment=self, test=test).exists()
+        result_edited = test_in_class and already_entered
+        if result_edited:
+            test_result = StudentClassTestResult.objects.get(student_class_enrolment=self, test=test)
+            result_edited = test_result.edit_student_class_test_result_safe(new_result=new_result)
+        return result_edited
+
     def update_pending_issue_flags(self, check_school_for_school_issue, check_self_for_school_issue):
 
         for student_enrolment in StudentClassEnrolment.objects.filter(student_id=self.student_id):
@@ -1028,6 +1037,17 @@ class StudentClassTestResult(models.Model):
 
     def __unicode__(self):
         return str(self.student_class_enrolment) + ' : ' + str(self.test)
+
+    def edit_student_class_test_result_safe(self, new_result):
+        percentile = self.test.percentiles.get_percentile(gender=self.student.gender,
+                                                          age=self.student.get_student_age(),
+                                                          result=new_result)
+        result_edited = percentile is not False
+        if result_edited:
+            self.result = new_result
+            self.percentile = percentile
+            self.save()
+        return result_edited
 
     @staticmethod
     def create_student_class_test_result(student_class_enrolment, test, result):

@@ -1,6 +1,7 @@
 from django import forms
 from fitness_scoring.models import School, Administrator, Class, Teacher, Student, TestCategory, Test, User
-from fitness_scoring.models import TeacherClassAllocation, ClassTest, TestSet
+from fitness_scoring.models import TeacherClassAllocation, ClassTest, TestSet, StudentClassEnrolment
+from fitness_scoring.models import StudentClassTestResult
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
 from fitness_scoring.validators import validate_new_test_name_unique
 from fitness_scoring.validators import validate_no_space, validate_file_size
@@ -1029,3 +1030,107 @@ class StudentEntryForm:
                             self.errors = 'Please enter a whole number value for ' + test.test_name
                     except ValueError:
                         self.errors = 'Please enter a whole number value for ' + test.test_name
+
+
+class StudentEntryEditForm:
+
+    def __init__(self, enrolment_pk, data=None):
+        self.enrolment_pk = enrolment_pk
+        if data:
+            self.data = data
+        enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
+        tests = enrolment.class_id.get_tests()
+
+        student_detail_field_description = [('text', 'Student ID', None),
+                                            ('text', 'First Name', None),
+                                            ('text', 'Surname', None),
+                                            ('select', 'Gender', Student.GENDER_CHOICES),
+                                            ('date', 'DOB', None)]
+        self.student_detail_fields = []
+        for field_type, label, extra in student_detail_field_description:
+            name = StudentEntryForm.get_name(label)
+            if data:
+                value = data[name]
+            else:
+                if label == 'Student ID':
+                    value = enrolment.student_id.student_id
+                elif label == 'First Name':
+                    value = enrolment.student_id.first_name
+                elif label == 'Surname':
+                    value = enrolment.student_id.surname
+                elif label == 'Gender':
+                    value = enrolment.student_id.gender
+                elif label == 'DOB':
+                    value = enrolment.student_id.dob.strftime('%d/%m/%Y')
+                else:
+                    value = None
+            check_for_errors = data is not None
+            choices = extra if field_type == 'select' else None
+            field = StudentEntryForm.StudentDetailsField(field_type=field_type, label=label, name=name, choices=choices,
+                                                         value=value, check_for_errors=check_for_errors)
+            self.student_detail_fields.append(field)
+
+        self.test_result_fields = []
+        for test in tests:
+            name = StudentEntryForm.get_name(test.test_name)
+            if data:
+                value = data[name]
+            else:
+                if StudentClassTestResult.objects.filter(student_class_enrolment=enrolment, test=test).exists():
+                    value = StudentClassTestResult.objects.get(student_class_enrolment=enrolment, test=test).result
+                else:
+                    value = None
+            check_for_errors = data is not None
+            field = StudentEntryForm.ResultField(test=test, name=name, value=value, check_for_errors=check_for_errors)
+            self.test_result_fields.append(field)
+
+    def edit_student_entry(self):
+        is_valid = hasattr(self, 'data')
+        for field in self.student_detail_fields:
+            if hasattr(field, 'errors'):
+                is_valid = False
+        for field in self.test_result_fields:
+            if hasattr(field, 'errors'):
+                is_valid = False
+
+        if is_valid:
+            enrolment_old = StudentClassEnrolment.objects.get(pk=self.enrolment_pk)
+            student_id = None
+            first_name = None
+            surname = None
+            gender = None
+            dob = None
+            for field in self.student_detail_fields:
+                if field.name == 'Student_ID':
+                    student_id = self.data[field.name]
+                elif field.name == 'First_Name':
+                    first_name = self.data[field.name]
+                elif field.name == 'Surname':
+                    surname = self.data[field.name]
+                elif field.name == 'Gender':
+                    gender = self.data[field.name]
+                elif field.name == 'DOB':
+                    dob = datetime.datetime.strptime(self.data[field.name], '%d/%m/%Y')
+
+            class_instance = enrolment_old.class_id
+            student_old = enrolment_old.student_id
+            tests = class_instance.get_tests()
+            if ((student_old.student_id != student_id) or (student_old.first_name != first_name) or
+                    (student_old.surname != surname) or (student_old.gender != gender) or (student_old.dob != dob)):
+                enrolment_old.delete_student_class_enrolment_safe()
+                enrolment = class_instance.enrol_student_safe(student_id=student_id, first_name=first_name,
+                                                              surname=surname, gender=gender, dob=dob)
+
+                for test in tests:
+                    data_label = StudentEntryForm.get_name(test.test_name)
+                    if self.data[data_label]:
+                        enrolment.enter_result_safe(test, self.data[data_label])
+            else:
+                for test in tests:
+                    data_label = StudentEntryForm.get_name(test.test_name)
+                    result = self.data[data_label]
+                    if result and (StudentClassTestResult.objects.get(student_class_enrolment=enrolment_old,
+                                                                      test=test).result != result):
+                        enrolment_old.edit_result_safe(test, self.data[data_label])
+
+        return is_valid
