@@ -1,0 +1,61 @@
+<form method="POST" enctype="multipart/form-data" action="{{ post_to_url }}"
+      class="form-horizontal {{ form_class }}">
+    {% csrf_token %}
+    {% if form %}
+        {% if form.student_detail_fields %}
+            <h4>Student Details</h4>
+            <hr>
+            {{ form.non_field_errors }}
+            {% for field in form.student_detail_fields %}
+                {% if field.is_hidden %}
+                    <div class="form-group" style="display: none">{{ field }}</div>
+                {% else %}
+                    <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
+                        {% autoescape off %}
+                        <div class="col-sm-1">{{ field.label_tag }}</div>
+                        <div class="col-sm-11">
+                            {{ field.html }}
+                        {% endautoescape %}
+                            {% if field.help_text %}
+                                <span class="form-field-help">{{ field.help_text }}</span>
+                            {% endif %}
+                            {% if field.errors %}<span class="help-block">{{ field.errors }}</span>{% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        {% if form.test_result_fields %}
+            <hr>
+            <h4>Results</h4>
+            <hr>
+            {{ form.non_field_errors }}
+            {% for field in form.test_result_fields %}
+                {% if field.is_hidden %}
+                    <div class="form-group" style="display: none">{{ field }}</div>
+                {% else %}
+                    <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
+                        {% autoescape off %}
+                        <div class="col-sm-1">{{ field.label_tag }}</div>
+                        <div class="col-sm-11">
+                            {{ field.html }}
+                        {% endautoescape %}
+                            {% if field.help_text %}
+                                <span class="form-field-help">{{ field.help_text }}</span>
+                            {% endif %}
+                            {% if field.errors %}<span class="help-block">{{ field.errors }}</span>{% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+        <input type="submit" class="btn btn-default{% if hide_cancel_button %} hidden{% endif %}"
+               name='results_cancel_button' value="Cancel">
+        <input type="submit" class="btn btn-primary" name='results_save_button' value="Save Results">
+    {% else %}
+        <div class="h1">
+            {{ user_message }}
+        </div>
+        <input type="submit" class="btn btn-primary" name='results_done_button' value="Done">
+    {% endif %}
+</form>

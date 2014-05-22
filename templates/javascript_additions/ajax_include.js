@@ -52,6 +52,12 @@ $(document).on('click', '.class_load_link a', function(event){
     })
 });
 
+//for loading class load links on item_list page
+$(document).on('click', '.class_result_edit_page_load_link a', function(event){
+    event.preventDefault();
+    $('#class_results').load(base_url + $(this).attr('href'));
+});
+
 //for loading percentile load links
 $(document).on('click', '.percentile_load_link a', function(event){
     event.preventDefault();
@@ -67,6 +73,27 @@ $(document).on('click', '.test_instructions_load_link a', function(event){
 $(document).on('change', '#age_gender_selection', function(event){
     event.preventDefault();
     percentile_load_link_clicked_event($('#age_gender_selection').val());
+});
+
+//for loading from a load in class page form submit to class page
+$(document).on('submit', '.load_in_class_page', function(formEvent) {
+
+    formEvent.preventDefault();
+
+    var form = $('.load_in_class_page');
+
+    var options = {
+        url: form.attr('action'),
+        error: function(response) {
+            $('#class_results').html("An error occurred accessing form");
+        },
+        success: function(response) {
+            $('#class_results').html(response);
+        }
+    };
+
+    $('.load_in_class_page').ajaxSubmit(options);
+
 });
 
 //for loading from a modal form submit to modal window (if form in response) or update the list (if no form in response)

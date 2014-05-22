@@ -104,57 +104,29 @@ def change_user_password(request, is_finished):
         return HttpResponseForbidden("You are not authorised to change password")
 
 
-def class_student_view(request, enrolment_pk=None):
-
-    if enrolment_pk:
-        class_pk = StudentClassEnrolment.objects.get(pk=enrolment_pk).class_id.pk
-        authorised = user_authorised_for_class(request, class_pk)
-    else:
-        authorised = request.session.get('user_type', None) == 'Class'
-
-    if authorised:
+def class_student_view(request):
+    if request.session.get('user_type', None) == 'Class':
         user = User.objects.get(username=request.session.get('username', None))
-        if enrolment_pk:
-            class_instance = StudentClassEnrolment.objects.get(pk=enrolment_pk).class_id
-        else:
-            class_instance = Class.objects.get(user=user)
-        context = {'post_to_url': '/class_student_view/' + ((str(enrolment_pk) + '/') if enrolment_pk else ''),
+        class_instance = Class.objects.get(user=user)
+        context = {'post_to_url': '/class_student_view/',
                    'school_name': class_instance.school_id.name,
                    'class_name': class_instance.class_name}
         if request.POST:
             if request.POST.get('results_done_button'):
                 return redirect('fitness_scoring.views.logout_user')
             elif request.POST.get('results_cancel_button'):
-                if Administrator.objects.filter(user=user).exists():
-                    return redirect('fitness_scoring.views.administrator_view')
-                elif Teacher.objects.filter(user=user).exists():
-                    return redirect('fitness_scoring.views.teacher_view')
-                else:
-                    context['user_message'] = 'Results were not entered'
-                    return render(request, 'student_entry_form.html', RequestContext(request, context))
+                context['user_message'] = 'Results were not entered'
+                return render(request, 'student_entry_form.html', RequestContext(request, context))
             else:
-                if enrolment_pk:
-                    form = StudentEntryEditForm(enrolment_pk=enrolment_pk, data=request.POST)
-                    results_saved = form.edit_student_entry()
-                else:
-                    form = StudentEntryForm(class_pk=class_instance.pk, data=request.POST)
-                    results_saved = form.save_student_entry()
-                if results_saved:
-                    if Administrator.objects.filter(user=user).exists():
-                        return redirect('fitness_scoring.views.administrator_view')
-                    elif Teacher.objects.filter(user=user).exists():
-                        return redirect('fitness_scoring.views.teacher_view')
-                    else:
-                        context['user_message'] = 'Your results have been entered'
-                        return render(request, 'student_entry_form.html', RequestContext(request, context))
+                form = StudentEntryForm(class_pk=class_instance.pk, data=request.POST)
+                if form.save_student_entry():
+                    context['user_message'] = 'Your results have been entered'
+                    return render(request, 'student_entry_form.html', RequestContext(request, context))
                 else:
                     context['form'] = form
                     return render(request, 'student_entry_form.html', RequestContext(request, context))
         else:
-            if enrolment_pk:
-                context['form'] = StudentEntryEditForm(enrolment_pk=enrolment_pk)
-            else:
-                context['form'] = StudentEntryForm(class_pk=class_instance.pk)
+            context['form'] = StudentEntryForm(class_pk=class_instance.pk)
             return render(request, 'student_entry_form.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
@@ -1101,7 +1073,7 @@ def class_results_table(request, class_pk):
                  'remove', 'remove test from class']
             ],
             'enrolment_options': [
-                ['student_entry_page_link', '/class_student_view/', 'pencil', 'edit student result entry'],
+                ['class_result_edit_page_load_link', '/class_enrolment/edit/', 'pencil', 'edit student result entry'],
                 ['class_results_modal_load_link', '/class_enrolment/delete/', 'remove', 'delete student result entry']
             ],
             'results_table_buttons': [
@@ -1235,6 +1207,32 @@ def remove_test_from_class(request, class_pk, test_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to remove a test from this class")
+
+
+def class_enrolment_edit(request, enrolment_pk):
+    enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
+    if user_authorised_for_class(request, enrolment.class_id.pk):
+        class_instance = enrolment.class_id
+        context = {'post_to_url': '/class_enrolment/edit/' + str(enrolment_pk),
+                   'school_name': class_instance.school_id.name,
+                   'class_name': class_instance.class_name,
+                   'form_class': 'load_in_class_page',
+                   'hide_cancel_button': 'True'}
+        if request.POST:
+            if request.POST.get('results_cancel_button'):
+                return redirect('fitness_scoring.views.class_results_table', class_pk=class_instance.pk)
+            else:
+                form = StudentEntryEditForm(enrolment_pk=enrolment_pk, data=request.POST)
+                if form.edit_student_entry():
+                    return redirect('fitness_scoring.views.class_results_table', class_pk=class_instance.pk)
+                else:
+                    context['form'] = form
+                    return render(request, 'student_entry_form_inner.html', RequestContext(request, context))
+        else:
+            context['form'] = StudentEntryEditForm(enrolment_pk=enrolment_pk)
+            return render(request, 'student_entry_form_inner.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to edit a student result entry from this class")
 
 
 def class_enrolment_delete(request, enrolment_pk):
