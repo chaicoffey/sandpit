@@ -11,7 +11,7 @@ from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFile
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, AddClassTeacherForm, EditClassTeacherForm
 from fitness_scoring.forms import AssignTestToClassForm, SaveClassTestsAsTestSetForm, LoadClassTestsFromTestSetForm
-from fitness_scoring.forms import StudentEntryForm
+from fitness_scoring.forms import StudentEntryForm, StudentEntryEditForm
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.mail import send_mail
 
@@ -105,28 +105,56 @@ def change_user_password(request, is_finished):
 
 
 def class_student_view(request, enrolment_pk=None):
-    if request.session.get('user_type', None) == 'Class':
+
+    if enrolment_pk:
+        class_pk = StudentClassEnrolment.objects.get(pk=enrolment_pk).class_id.pk
+        authorised = user_authorised_for_class(request, class_pk)
+    else:
+        authorised = request.session.get('user_type', None) == 'Class'
+
+    if authorised:
         user = User.objects.get(username=request.session.get('username', None))
-        class_instance = Class.objects.get(user=user)
-        context = {'post_to_url': '/class_student_view/',
+        if enrolment_pk:
+            class_instance = StudentClassEnrolment.objects.get(pk=enrolment_pk).class_id
+        else:
+            class_instance = Class.objects.get(user=user)
+        context = {'post_to_url': '/class_student_view/' + ((str(enrolment_pk) + '/') if enrolment_pk else ''),
                    'school_name': class_instance.school_id.name,
                    'class_name': class_instance.class_name}
         if request.POST:
             if request.POST.get('results_done_button'):
                 return redirect('fitness_scoring.views.logout_user')
             elif request.POST.get('results_cancel_button'):
-                context['user_message'] = 'Results were not entered'
-                return render(request, 'student_entry_form.html', RequestContext(request, context))
-            else:
-                form = StudentEntryForm(class_pk=class_instance.pk, data=request.POST)
-                if form.save_student_entry():
-                    context['user_message'] = 'Your results have been entered'
+                if Administrator.objects.filter(user=user).exists():
+                    return redirect('fitness_scoring.views.administrator_view')
+                elif Teacher.objects.filter(user=user).exists():
+                    return redirect('fitness_scoring.views.teacher_view')
+                else:
+                    context['user_message'] = 'Results were not entered'
                     return render(request, 'student_entry_form.html', RequestContext(request, context))
+            else:
+                if enrolment_pk:
+                    form = StudentEntryEditForm(enrolment_pk=enrolment_pk, data=request.POST)
+                    results_saved = form.edit_student_entry()
+                else:
+                    form = StudentEntryForm(class_pk=class_instance.pk, data=request.POST)
+                    results_saved = form.save_student_entry()
+                if results_saved:
+                    if Administrator.objects.filter(user=user).exists():
+                        return redirect('fitness_scoring.views.administrator_view')
+                    elif Teacher.objects.filter(user=user).exists():
+                        return redirect('fitness_scoring.views.teacher_view')
+                    else:
+                        context['user_message'] = 'Your results have been entered'
+                        return render(request, 'student_entry_form.html', RequestContext(request, context))
                 else:
                     context['form'] = form
                     return render(request, 'student_entry_form.html', RequestContext(request, context))
         else:
-            context['form'] = StudentEntryForm(class_pk=class_instance.pk)
+            if enrolment_pk:
+                context['form'] = StudentEntryEditForm(enrolment_pk=enrolment_pk)
+            else:
+                context['form'] = StudentEntryForm(class_pk=class_instance.pk)
             return render(request, 'student_entry_form.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
@@ -1073,6 +1101,7 @@ def class_results_table(request, class_pk):
                  'remove', 'remove test from class']
             ],
             'enrolment_options': [
+                ['student_entry_page_link', '/class_student_view/', 'pencil', 'edit student result entry'],
                 ['class_results_modal_load_link', '/class_enrolment/delete/', 'remove', 'delete student result entry']
             ],
             'results_table_buttons': [

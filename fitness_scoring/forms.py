@@ -929,7 +929,7 @@ class StudentEntryForm:
                 elif field.name == 'Gender':
                     gender = self.data[field.name]
                 elif field.name == 'DOB':
-                    dob = datetime.datetime.strptime(self.data[field.name], '%d/%m/%Y')
+                    dob = datetime.datetime.strptime(self.data[field.name], '%d/%m/%Y').date()
 
             enrolment = class_instance.enrol_student_safe(student_id=student_id, first_name=first_name, surname=surname,
                                                           gender=gender, dob=dob)
@@ -1110,7 +1110,7 @@ class StudentEntryEditForm:
                 elif field.name == 'Gender':
                     gender = self.data[field.name]
                 elif field.name == 'DOB':
-                    dob = datetime.datetime.strptime(self.data[field.name], '%d/%m/%Y')
+                    dob = datetime.datetime.strptime(self.data[field.name], '%d/%m/%Y').date()
 
             class_instance = enrolment_old.class_id
             student_old = enrolment_old.student_id

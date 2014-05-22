@@ -1039,8 +1039,9 @@ class StudentClassTestResult(models.Model):
         return str(self.student_class_enrolment) + ' : ' + str(self.test)
 
     def edit_student_class_test_result_safe(self, new_result):
-        percentile = self.test.percentiles.get_percentile(gender=self.student.gender,
-                                                          age=self.student.get_student_age(),
+        student = self.student_class_enrolment.student_id
+        percentile = self.test.percentiles.get_percentile(gender=student.gender,
+                                                          age=student.get_student_age(),
                                                           result=new_result)
         result_edited = percentile is not False
         if result_edited:
