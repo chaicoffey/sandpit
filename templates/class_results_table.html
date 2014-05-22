@@ -8,10 +8,10 @@
 
     <div class="panel-heading">
         Class Results
-        {% for button_label, button_options in results_table_buttons %}
+        {% for button_glyph_icon, button_options in results_table_buttons %}
             <div class="btn-group">
                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    {{ button_label }}
+                    <span class="glyphicon glyphicon-{{ button_glyph_icon }}"></span>
                 </button>
                 <ul class="dropdown-menu" role="menu">
                     {% for link_type, link_url, label in button_options %}
@@ -44,25 +44,25 @@
                     {% endfor %}
                     <th></th>
                 </tr>
-                {% for enrolment_pk, student, gender, age, test_results in student_test_results %}
-                    <tr>
-                        <td>{{ student }}</td>
-                        <td>{{ gender }}/{{ age }}</td>
-                        {% for result in test_results %}
-                            <td>{{ result }}</td>
-                        {% endfor %}
-                        <td><table><tr>
-                            {% for link_type, option_link, option_glyph_icon, hover_message in enrolment_options %}
-                                <td class="{{ link_type }}">
-                                    <a href="{{ option_link }}{{ enrolment_pk }}" title="{{ hover_message }}">
-                                        <span class="glyphicon glyphicon-{{ option_glyph_icon }}"></span>
-                                    </a>
-                                </td>
-                            {% endfor %}
-                        </tr></table></td>
-                    </tr>
-                {% endfor %}
             </thead>
+            {% for enrolment_pk, student, gender, age, test_results in student_test_results %}
+                <tr>
+                    <td>{{ student }}</td>
+                    <td>{{ gender }}/{{ age }}</td>
+                    {% for result in test_results %}
+                        <td>{{ result }}</td>
+                    {% endfor %}
+                    <td><table><tr>
+                        {% for link_type, option_link, option_glyph_icon, hover_message in enrolment_options %}
+                            <td class="{{ link_type }}">
+                                <a href="{{ option_link }}{{ enrolment_pk }}" title="{{ hover_message }}">
+                                    <span class="glyphicon glyphicon-{{ option_glyph_icon }}"></span>
+                                </a>
+                            </td>
+                        {% endfor %}
+                    </tr></table></td>
+                </tr>
+            {% endfor %}
         </table>
     </div>
 

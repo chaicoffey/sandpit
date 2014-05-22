@@ -1073,16 +1073,16 @@ def class_results_table(request, class_pk):
                  'remove', 'remove test from class']
             ],
             'enrolment_options': [
-                ['class_results_modal_load_link', '/class_enrolment/delete/', 'remove', 'delete student result']
+                ['class_results_modal_load_link', '/class_enrolment/delete/', 'remove', 'delete student result entry']
             ],
             'results_table_buttons': [
-                ['+', [['class_results_modal_load_link', '/class/test/add/' + str(class_pk), 'Add Test To Class'],
-                       ['class_results_modal_load_link', '/class/test_set/load/' + str(class_pk),
-                        'Load Class Tests From A Test Set']]],
-                ['o', [['class_results_modal_load_link', '/class/test_set/save/' + str(class_pk),
-                        'Save Current Class Tests As A Test Set'],
-                       ['modal_load_link', '/class/get_new_code/' + str(class_pk),
-                        'Get New Class Login Password']]]
+                ['plus', [['class_results_modal_load_link', '/class/test/add/' + str(class_pk), 'Add Test To Class'],
+                          ['class_results_modal_load_link', '/class/test_set/load/' + str(class_pk),
+                           'Load Class Tests From A Test Set']]],
+                ['record', [['class_results_modal_load_link', '/class/test_set/save/' + str(class_pk),
+                             'Save Current Class Tests As A Test Set'],
+                            ['modal_load_link', '/class/get_new_code/' + str(class_pk),
+                             'Get New Class Login Password']]]
             ],
             'student_test_results': student_test_results
         }
@@ -1213,17 +1213,17 @@ def class_enrolment_delete(request, enrolment_pk):
     if user_authorised_for_class(request, enrolment.class_id.pk):
         if request.POST:
             enrolment.delete_student_class_enrolment_safe()
-            context = {'finish_title': 'Student Result Deleted',
-                       'user_message': 'Student Result Deleted Successfully'}
+            context = {'finish_title': 'Student Result Entry Deleted',
+                       'user_message': 'Student Result Entry Deleted Successfully'}
             return render(request, 'user_message.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/class_enrolment/delete/' + str(enrolment_pk),
-                       'functionality_name': 'Delete Student Result',
-                       'prompt_message': 'Are You Sure You Wish To Delete Student Result From Class ' +
+                       'functionality_name': 'Delete Student Result Entry',
+                       'prompt_message': 'Are You Sure You Wish To Delete Student Result Entry ' +
                                          str(enrolment.student_id) + '?'}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to delete a student result from this class")
+        return HttpResponseForbidden("You are not authorised to delete a student result entry from this class")
 
 
 def user_authorised_for_teacher(request, teacher_pk):
