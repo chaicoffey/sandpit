@@ -61,8 +61,10 @@ urlpatterns = patterns(
         name='save_class_tests_as_test_set'),
     url(r'^class/test_set/load/(?P<class_pk>\d+)', 'fitness_scoring.views.load_class_tests_from_test_set',
         name='load_class_tests_from_test_set'),
-    url(r'^class/test/delete/(?P<class_pk>\d+)/(?P<test_pk>\d+)', 'fitness_scoring.views.remove_test_from_class',
-        name='remove_test_from_class'),
     url(r'^class/get_new_code/(?P<class_pk>\d+)', 'fitness_scoring.views.get_new_class_code',
         name='get_new_class_code'),
+    url(r'^class/test/delete/(?P<class_pk>\d+)/(?P<test_pk>\d+)', 'fitness_scoring.views.remove_test_from_class',
+        name='remove_test_from_class'),
+    url(r'^class_enrolment/delete/(?P<enrolment_pk>\d+)', 'fitness_scoring.views.class_enrolment_delete',
+        name='class_enrolment_delete'),
 )

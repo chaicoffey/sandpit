@@ -485,13 +485,6 @@ class Class(models.Model):
                                                                     first_name=first_name, surname=surname,
                                                                     gender=gender, dob=dob)
 
-    def withdraw_student_safe(self, student):
-        withdrawn = StudentClassEnrolment.objects.filter(class_id=self, student_id=student).exists()
-        if withdrawn:
-            withdrawn = StudentClassEnrolment.objects.get(class_id=self,
-                                                          student_id=student).delete_student_class_enrolment_safe()
-        return withdrawn
-
     @staticmethod
     def get_display_list_headings():
         return ['Year', 'Class', 'Teacher']

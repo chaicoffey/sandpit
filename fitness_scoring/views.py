@@ -1061,22 +1061,25 @@ def class_results_table(request, class_pk):
     if user_authorised_for_class(request, class_pk):
         class_instance = Class.objects.get(pk=class_pk)
         class_tests = [class_test.test_name for class_test in ClassTest.objects.filter(class_id=class_instance)]
-        student_test_results = [(enrolment.student_id, enrolment.student_gender_at_time_of_enrolment,
+        student_test_results = [(enrolment.pk, enrolment.student_id, enrolment.student_gender_at_time_of_enrolment,
                                  enrolment.student_age_at_time_of_enrolment,
                                  enrolment.get_test_results(True)) for enrolment in
                                 StudentClassEnrolment.objects.filter(class_id=class_instance)]
         context = {
             'class_tests': class_tests,
             'class_test_options': [
+                ['test_instructions_load_link', '/test/instructions/', 'info-sign', 'see instructions for test'],
                 ['class_results_modal_load_link', '/class/test/delete/' + str(class_pk) + '/',
-                 'remove', 'remove test from class'],
-                ['test_instructions_load_link', '/test/instructions/', 'info-sign', 'see instructions for test']
+                 'remove', 'remove test from class']
+            ],
+            'enrolment_options': [
+                ['class_results_modal_load_link', '/class_enrolment/delete/', 'remove', 'delete student result']
             ],
             'results_table_buttons': [
                 ['+', [['class_results_modal_load_link', '/class/test/add/' + str(class_pk), 'Add Test To Class'],
                        ['class_results_modal_load_link', '/class/test_set/load/' + str(class_pk),
-                        'Load Class Tests From A Test Set'],
-                       ['class_results_modal_load_link', '/class/test_set/save/' + str(class_pk),
+                        'Load Class Tests From A Test Set']]],
+                ['o', [['class_results_modal_load_link', '/class/test_set/save/' + str(class_pk),
                         'Save Current Class Tests As A Test Set'],
                        ['modal_load_link', '/class/get_new_code/' + str(class_pk),
                         'Get New Class Login Password']]]
@@ -1163,6 +1166,23 @@ def load_class_tests_from_test_set(request, class_pk):
         return HttpResponseForbidden("You are not authorised to load a test set to this class")
 
 
+def get_new_class_code(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        if request.POST:
+            context = {'finish_title': 'New Login Password', 'user_message': 'New Login Password Done'}
+            return render(request, 'user_message.html', RequestContext(request, context))
+        else:
+            class_instance = Class.objects.get(pk=class_pk)
+            context = {'post_to_url': '/class/get_new_code/' + str(class_pk),
+                       'modal_title': 'New Class Login Details',
+                       'functionality_name': 'Done',
+                       'prompt_messages': ['Username: ' + class_instance.user.username,
+                                           'Password: ' + class_instance.reset_code()]}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to delete a teacher from this school")
+
+
 def remove_test_from_class(request, class_pk, test_pk):
     if user_authorised_for_class(request, class_pk):
         class_instance = Class.objects.get(pk=class_pk)
@@ -1188,21 +1208,22 @@ def remove_test_from_class(request, class_pk, test_pk):
         return HttpResponseForbidden("You are not authorised to remove a test from this class")
 
 
-def get_new_class_code(request, class_pk):
-    if user_authorised_for_class(request, class_pk):
+def class_enrolment_delete(request, enrolment_pk):
+    enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
+    if user_authorised_for_class(request, enrolment.class_id.pk):
         if request.POST:
-            context = {'finish_title': 'New Login Password', 'user_message': 'New Login Password Done'}
+            enrolment.delete_student_class_enrolment_safe()
+            context = {'finish_title': 'Student Result Deleted',
+                       'user_message': 'Student Result Deleted Successfully'}
             return render(request, 'user_message.html', RequestContext(request, context))
         else:
-            class_instance = Class.objects.get(pk=class_pk)
-            context = {'post_to_url': '/class/get_new_code/' + str(class_pk),
-                       'modal_title': 'New Class Login Details',
-                       'functionality_name': 'Done',
-                       'prompt_messages': ['Username: ' + class_instance.user.username,
-                                           'Password: ' + class_instance.reset_code()]}
+            context = {'post_to_url': '/class_enrolment/delete/' + str(enrolment_pk),
+                       'functionality_name': 'Delete Student Result',
+                       'prompt_message': 'Are You Sure You Wish To Delete Student Result From Class ' +
+                                         str(enrolment.student_id) + '?'}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to delete a teacher from this school")
+        return HttpResponseForbidden("You are not authorised to delete a student result from this class")
 
 
 def user_authorised_for_teacher(request, teacher_pk):

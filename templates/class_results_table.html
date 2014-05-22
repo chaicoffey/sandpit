@@ -42,14 +42,24 @@
                             {{ test.test_name }}
                         </th>
                     {% endfor %}
+                    <th></th>
                 </tr>
-                {% for student, gender, age, test_results in student_test_results %}
+                {% for enrolment_pk, student, gender, age, test_results in student_test_results %}
                     <tr>
                         <td>{{ student }}</td>
                         <td>{{ gender }}/{{ age }}</td>
                         {% for result in test_results %}
                             <td>{{ result }}</td>
                         {% endfor %}
+                        <td><table><tr>
+                            {% for link_type, option_link, option_glyph_icon, hover_message in enrolment_options %}
+                                <td class="{{ link_type }}">
+                                    <a href="{{ option_link }}{{ enrolment_pk }}" title="{{ hover_message }}">
+                                        <span class="glyphicon glyphicon-{{ option_glyph_icon }}"></span>
+                                    </a>
+                                </td>
+                            {% endfor %}
+                        </tr></table></td>
                     </tr>
                 {% endfor %}
             </thead>
