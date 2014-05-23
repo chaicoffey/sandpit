@@ -1084,12 +1084,24 @@ class StudentEntryEditForm:
             field = StudentEntryForm.ResultField(test=test, name=name, value=value, check_for_errors=check_for_errors)
             self.test_result_fields.append(field)
 
+        date_of_enrolment_label = 'Date Tests Were Performed'
+        date_of_enrolment_name = StudentEntryForm.get_name(date_of_enrolment_label)
+        if data:
+            value = data[date_of_enrolment_name]
+        else:
+            value = enrolment.enrolment_date.strftime('%d/%m/%Y')
+        self.extra_fields = [StudentEntryEditForm.DateOfEnrolmentField(date_of_enrolment_label, date_of_enrolment_name,
+                                                                       value, data is not None)]
+
     def edit_student_entry(self):
         is_valid = hasattr(self, 'data')
         for field in self.student_detail_fields:
             if hasattr(field, 'errors'):
                 is_valid = False
         for field in self.test_result_fields:
+            if hasattr(field, 'errors'):
+                is_valid = False
+        for field in self.extra_fields:
             if hasattr(field, 'errors'):
                 is_valid = False
 
@@ -1115,6 +1127,7 @@ class StudentEntryEditForm:
             class_instance = enrolment_old.class_id
             student_old = enrolment_old.student_id
             tests = class_instance.get_tests()
+            new_enrolment_date = datetime.datetime.strptime(self.data['Date_Tests_Were_Performed'], '%d/%m/%Y').date()
             if ((student_old.student_id != student_id) or (student_old.first_name != first_name) or
                     (student_old.surname != surname) or (student_old.gender != gender) or (student_old.dob != dob)):
                 enrolment_old.delete_student_class_enrolment_safe()
@@ -1125,6 +1138,9 @@ class StudentEntryEditForm:
                     data_label = StudentEntryForm.get_name(test.test_name)
                     if self.data[data_label]:
                         enrolment.enter_result_safe(test, self.data[data_label])
+
+                enrolment.edit_enrolment_date(new_enrolment_date)
+
             else:
                 for test in tests:
                     data_label = StudentEntryForm.get_name(test.test_name)
@@ -1133,4 +1149,30 @@ class StudentEntryEditForm:
                                                                       test=test).result != result):
                         enrolment_old.edit_result_safe(test, self.data[data_label])
 
+                enrolment_old.edit_enrolment_date(new_enrolment_date)
+
         return is_valid
+
+    class DateOfEnrolmentField:
+
+        def __init__(self, label, name, value, check_for_errors=False):
+
+            self.name = name
+            self.value = value
+            self.place_holder = 'dd/mm/yyyy'
+
+            self.label_tag = '<label for="' + name + '">' + label + ':</label>'
+
+            self.html = 'input type="text" id="' + name + '" name="' + name + '"'
+            self.html += ' value="' + value + '"'
+            self.html += ' placeholder="' + self.place_holder + '"'
+            self.html = '<' + self.html + '>'
+
+            if check_for_errors:
+                if value == '':
+                    self.errors = 'Please enter result for ' + label
+                else:
+                    try:
+                        datetime.datetime.strptime(value, '%d/%m/%Y')
+                    except ValueError:
+                        self.errors = 'Please enter date of form dd/mm/yyyy'

@@ -894,6 +894,11 @@ class StudentClassEnrolment(models.Model):
                                                                                      test=test, result=result)
         return result_entered
 
+    def edit_enrolment_date(self, new_enrolment_date):
+        self.enrolment_date = new_enrolment_date
+        self.save()
+        self.update_pending_issue_flags(check_school_for_school_issue=False, check_self_for_school_issue=False)
+
     def edit_result_safe(self, test, new_result):
         test_in_class = ClassTest.objects.filter(class_id=self.class_id, test_name=test).exists()
         already_entered = StudentClassTestResult.objects.filter(student_class_enrolment=self, test=test).exists()
