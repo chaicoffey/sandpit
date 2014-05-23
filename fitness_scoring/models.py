@@ -934,16 +934,13 @@ class StudentClassEnrolment(models.Model):
 
     def update_pending_issue_flags(self, check_school_for_school_issue, check_self_for_school_issue):
 
-        for student_enrolment in StudentClassEnrolment.objects.filter(student_id=self.student_id):
+        student_enrolments = StudentClassEnrolment.objects.filter(student_id=self.student_id)
+        for student_enrolment in student_enrolments:
             enrolment_age = student_enrolment.get_student_age_at_time_of_enrolment()
             student_enrolment.pending_issue_personal = (enrolment_age < 11) or (enrolment_age > 19)
+            multiple_enrolments = (len(student_enrolments.filter(class_id=student_enrolment.class_id)) > 1)
+            student_enrolment.pending_issue_other_class_member = multiple_enrolments
             student_enrolment.save()
-
-            class_enrolments = StudentClassEnrolment.objects.filter(student_id=self.student_id,
-                                                                    class_id=student_enrolment.class_id)
-            for class_enrolment in class_enrolments:
-                class_enrolment.pending_issue_other_class_member = (len(class_enrolments) > 1)
-                class_enrolment.save()
 
         if check_school_for_school_issue:
             for student in Student.objects.filter(school_id=self.class_id.school_id):
@@ -983,10 +980,10 @@ class StudentClassEnrolment(models.Model):
         def update_flag(student_to_update, flag, check_name_approval):
             for student_enrolment in StudentClassEnrolment.objects.filter(student_id=student_to_update):
                 if check_name_approval:
-                    extra_approval = student_enrolment.pending_issue_other_school_member_student_name_approval
+                    veto_approval = student_enrolment.pending_issue_other_school_member_student_name_approval
                 else:
-                    extra_approval = False
-                student_enrolment.pending_issue_other_school_member = flag or extra_approval
+                    veto_approval = False
+                student_enrolment.pending_issue_other_school_member = flag and not veto_approval
                 student_enrolment.save()
 
         student_issue = False
