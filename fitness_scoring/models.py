@@ -580,12 +580,35 @@ class PercentileBracketSet(models.Model):
         test = Test.objects.get(percentiles=self)
         return test.test_name + ' (' + test.test_category.test_category_name + ')'
 
+    def valid_result(self, result):
+        is_valid = True
+        if self.result_type == 'DOUBLE':
+            try:
+                float(result)
+            except ValueError:
+                is_valid = False
+        elif self.result_type == 'TIME':
+            try:
+                time.strptime(result, '%M:%S')
+            except ValueError:
+                is_valid = False
+        elif self.result_type == 'INTEGER':
+            try:
+                if int(result) != float(result):
+                    is_valid = False
+            except ValueError:
+                is_valid = False
+        return is_valid
+
     def get_percentile(self, gender, age, result):
-        if PercentileBracketList.objects.filter(percentile_bracket_set=self, age=age, gender=gender).exists():
-            return PercentileBracketList.objects.get(percentile_bracket_set=self,
-                                                     age=age, gender=gender).get_percentile(result)
+        if self.valid_result(result):
+            if PercentileBracketList.objects.filter(percentile_bracket_set=self, age=age, gender=gender).exists():
+                return PercentileBracketList.objects.get(percentile_bracket_set=self,
+                                                         age=age, gender=gender).get_percentile(result)
+            else:
+                return None
         else:
-            return None
+            return False
 
     def update_percentile_bracket_set(self, percentile_scores):
         (percentiles, age_genders, score_table) = percentile_scores
