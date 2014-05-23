@@ -972,6 +972,7 @@ class StudentClassEnrolment(models.Model):
                                                          student_gender_at_time_of_enrolment=gender,
                                                          enrolment_date=date.today())
         enrolment.update_pending_issue_flags(check_school_for_school_issue=False, check_self_for_school_issue=True)
+        enrolment = StudentClassEnrolment.objects.get(enrolment.pk)
         return enrolment
 
     @staticmethod
