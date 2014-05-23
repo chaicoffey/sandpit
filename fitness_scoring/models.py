@@ -917,6 +917,8 @@ class StudentClassEnrolment(models.Model):
                                                                                      test=test, result=result)
         return result_entered
 
+    # be careful when using this, should get afterwards don't use original object, due to issue in
+    # update_pending_issue_flags()
     def edit_enrolment_date(self, new_enrolment_date):
         self.enrolment_date = new_enrolment_date
         self.approval_status = 'UNAPPROVED'
@@ -973,7 +975,7 @@ class StudentClassEnrolment(models.Model):
                                                          student_gender_at_time_of_enrolment=gender,
                                                          enrolment_date=date.today())
         enrolment.update_pending_issue_flags(check_school_for_school_issue=False, check_self_for_school_issue=True)
-        enrolment = StudentClassEnrolment.objects.get(pk=enrolment.pk)
+        enrolment = StudentClassEnrolment.objects.get(pk=enrolment.pk)  # Need to do this due to bug in updating flags
         return enrolment
 
     @staticmethod
