@@ -917,13 +917,12 @@ class StudentClassEnrolment(models.Model):
                                                                                      test=test, result=result)
         return result_entered
 
-    # be careful when using this, should get afterwards don't use original object, due to issue in
-    # update_pending_issue_flags()
     def edit_enrolment_date(self, new_enrolment_date):
         self.enrolment_date = new_enrolment_date
         self.approval_status = 'UNAPPROVED'
+        enrolment_age = self.get_student_age_at_time_of_enrolment()
+        self.pending_issue_personal = (enrolment_age < 11) or (enrolment_age > 19)
         self.save()
-        self.update_pending_issue_flags(check_school_for_school_issue=False, check_self_for_school_issue=False)
 
     def edit_result_safe(self, test, new_result):
         test_in_class = ClassTest.objects.filter(class_id=self.class_id, test_name=test).exists()
