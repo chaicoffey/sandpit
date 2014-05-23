@@ -896,6 +896,7 @@ class StudentClassEnrolment(models.Model):
 
     def edit_enrolment_date(self, new_enrolment_date):
         self.enrolment_date = new_enrolment_date
+        self.approval_status = 'UNAPPROVED'
         self.save()
         self.update_pending_issue_flags(check_school_for_school_issue=False, check_self_for_school_issue=False)
 
