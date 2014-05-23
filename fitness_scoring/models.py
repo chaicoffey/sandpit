@@ -932,6 +932,7 @@ class StudentClassEnrolment(models.Model):
             result_edited = test_result.edit_student_class_test_result_safe(new_result=new_result)
         return result_edited
 
+    # There is a problem here!  Make sure to re get enrolment after calling this (see create_student_class_enrolment())
     def update_pending_issue_flags(self, check_school_for_school_issue, check_self_for_school_issue):
 
         student_enrolments = StudentClassEnrolment.objects.filter(student_id=self.student_id)
