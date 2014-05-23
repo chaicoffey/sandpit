@@ -1145,9 +1145,13 @@ class StudentEntryEditForm:
                 for test in tests:
                     data_label = StudentEntryForm.get_name(test.test_name)
                     result = self.data[data_label]
-                    if result and (StudentClassTestResult.objects.get(student_class_enrolment=enrolment_old,
-                                                                      test=test).result != result):
-                        enrolment_old.edit_result_safe(test, self.data[data_label])
+                    if result:
+                        test_result = StudentClassTestResult.objects.filter(student_class_enrolment=enrolment_old,
+                                                                            test=test)
+                        if not test_result.exists():
+                            enrolment_old.enter_result_safe(test, self.data[data_label])
+                        elif test_result[0].result != result:
+                            enrolment_old.edit_result_safe(test, self.data[data_label])
 
                 enrolment_old.edit_enrolment_date(new_enrolment_date)
 
