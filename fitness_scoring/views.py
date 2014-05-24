@@ -1209,6 +1209,48 @@ def remove_test_from_class(request, class_pk, test_pk):
         return HttpResponseForbidden("You are not authorised to remove a test from this class")
 
 
+def class_enrolment_approve(request, enrolment_pk):
+    enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
+    if user_authorised_for_class(request, enrolment.class_id.pk):
+        if request.POST:
+            if enrolment.approve_student_results():
+                context = {'finish_title': 'Student Result Entry Approved',
+                           'user_message': 'Student Result Entry Approved Successfully'}
+            else:
+                context = {'finish_title': 'Student Result Entry Not Approved',
+                           'user_error_message': 'Could Not Approved Student Result Entry (Has Pending Issues)'}
+            return render(request, 'user_message.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/class_enrolment/approve/' + str(enrolment_pk),
+                       'functionality_name': 'Approve Student Result Entry',
+                       'prompt_message': 'Are You Sure You Wish To Approve Student Result Entry ' +
+                                         str(enrolment.student_id) + '?'}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to approve a student result entry from this class")
+
+
+def class_enrolment_un_approve(request, enrolment_pk):
+    enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
+    if user_authorised_for_class(request, enrolment.class_id.pk):
+        if request.POST:
+            if enrolment.un_approve_student_results():
+                context = {'finish_title': 'Student Result Entry Approval Removed',
+                           'user_message': 'Student Result Entry Approval Removed Successfully'}
+            else:
+                context = {'finish_title': 'Student Result Entry Approval Not Removed',
+                           'user_error_message': 'Could Not Remove Student Result Entry Approval (Has Pending Issues)'}
+            return render(request, 'user_message.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/class_enrolment/un_approve/' + str(enrolment_pk),
+                       'functionality_name': 'Remove Student Result Entry Approval',
+                       'prompt_message': 'Are You Sure You Wish To Remove Student Result Entry Approval For ' +
+                                         str(enrolment.student_id) + '?'}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to remove a student result entry approval from this class")
+
+
 def class_enrolment_edit(request, enrolment_pk):
     enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
     if user_authorised_for_class(request, enrolment.class_id.pk):
