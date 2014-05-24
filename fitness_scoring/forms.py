@@ -11,6 +11,7 @@ from fitness_scoring.fileio import read_file_upload, read_test_information_from_
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.validators import MinLengthValidator
 import datetime
+from datetime import date
 import time
 from django.core.mail import send_mail
 
@@ -932,7 +933,7 @@ class StudentEntryForm:
                     dob = datetime.datetime.strptime(self.data[field.name], '%d/%m/%Y').date()
 
             enrolment = class_instance.enrol_student_safe(student_id=student_id, first_name=first_name, surname=surname,
-                                                          gender=gender, dob=dob)
+                                                          gender=gender, dob=dob, enrolment_date=date.today())
 
             tests = class_instance.get_tests()
             for test in tests:
@@ -1129,17 +1130,17 @@ class StudentEntryEditForm:
             tests = class_instance.get_tests()
             new_enrolment_date = datetime.datetime.strptime(self.data['Date_Tests_Were_Performed'], '%d/%m/%Y').date()
             if ((student_old.student_id != student_id) or (student_old.first_name != first_name) or
-                    (student_old.surname != surname) or (student_old.gender != gender) or (student_old.dob != dob)):
+                    (student_old.surname != surname) or (student_old.gender != gender) or (student_old.dob != dob) or
+                    (enrolment_old.enrolment_date != new_enrolment_date)):
                 enrolment_old.delete_student_class_enrolment_safe()
                 enrolment = class_instance.enrol_student_safe(student_id=student_id, first_name=first_name,
-                                                              surname=surname, gender=gender, dob=dob)
+                                                              surname=surname, gender=gender, dob=dob,
+                                                              enrolment_date=new_enrolment_date)
 
                 for test in tests:
                     data_label = StudentEntryForm.get_name(test.test_name)
                     if self.data[data_label]:
                         enrolment.enter_result_safe(test, self.data[data_label])
-
-                enrolment.edit_enrolment_date(new_enrolment_date)
 
             else:
                 for test in tests:
@@ -1152,8 +1153,6 @@ class StudentEntryEditForm:
                             enrolment_old.enter_result_safe(test, self.data[data_label])
                         elif test_result[0].result != result:
                             enrolment_old.edit_result_safe(test, self.data[data_label])
-
-                enrolment_old.edit_enrolment_date(new_enrolment_date)
 
         return is_valid
 

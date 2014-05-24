@@ -482,10 +482,11 @@ class Class(models.Model):
     def reset_code(self):
         return self.user.reset_code()
 
-    def enrol_student_safe(self, student_id, first_name, surname, gender, dob):
+    def enrol_student_safe(self, student_id, first_name, surname, gender, dob, enrolment_date):
         return StudentClassEnrolment.create_student_class_enrolment(class_id=self, student_id=student_id,
                                                                     first_name=first_name, surname=surname,
-                                                                    gender=gender, dob=dob)
+                                                                    gender=gender, dob=dob,
+                                                                    enrolment_date=enrolment_date)
 
     @staticmethod
     def get_display_list_headings():
@@ -917,13 +918,6 @@ class StudentClassEnrolment(models.Model):
                                                                                      test=test, result=result)
         return result_entered
 
-    def edit_enrolment_date(self, new_enrolment_date):
-        self.enrolment_date = new_enrolment_date
-        self.approval_status = 'UNAPPROVED'
-        enrolment_age = self.get_student_age_at_time_of_enrolment()
-        self.pending_issue_personal = (enrolment_age < 11) or (enrolment_age > 19)
-        self.save()
-
     def edit_result_safe(self, test, new_result):
         test_in_class = ClassTest.objects.filter(class_id=self.class_id, test_name=test).exists()
         already_entered = StudentClassTestResult.objects.filter(student_class_enrolment=self, test=test).exists()
@@ -962,7 +956,7 @@ class StudentClassEnrolment(models.Model):
         return True
 
     @staticmethod
-    def create_student_class_enrolment(class_id, student_id, first_name, surname, gender, dob):
+    def create_student_class_enrolment(class_id, student_id, first_name, surname, gender, dob, enrolment_date):
         student = Student.create_student(school_id=class_id.school_id, student_id=student_id, first_name=first_name,
                                          surname=surname, gender=gender, dob=dob)
         if not student:
@@ -972,7 +966,7 @@ class StudentClassEnrolment(models.Model):
 
         enrolment = StudentClassEnrolment.objects.create(class_id=class_id, student_id=student,
                                                          student_gender_at_time_of_enrolment=gender,
-                                                         enrolment_date=date.today())
+                                                         enrolment_date=enrolment_date)
         enrolment.update_pending_issue_flags(check_school_for_school_issue=False, check_self_for_school_issue=True)
         enrolment = StudentClassEnrolment.objects.get(pk=enrolment.pk)  # Need to do this due to bug in updating flags
         return enrolment
