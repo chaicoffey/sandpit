@@ -909,6 +909,10 @@ class StudentClassEnrolment(models.Model):
         return ((self.enrolment_date.year - dob.year) -
                 (1 if (self.enrolment_date.month, self.enrolment_date.day) < (dob.month, dob.day) else 0))
 
+    def has_pending_issues(self):
+        return (self.pending_issue_personal or self.pending_issue_other_class_member or
+                self.pending_issue_other_school_member)
+
     def enter_result_safe(self, test, result):
         test_in_class = ClassTest.objects.filter(class_id=self.class_id, test_name=test).exists()
         already_entered = StudentClassTestResult.objects.filter(student_class_enrolment=self, test=test).exists()
@@ -926,6 +930,18 @@ class StudentClassEnrolment(models.Model):
             test_result = StudentClassTestResult.objects.get(student_class_enrolment=self, test=test)
             result_edited = test_result.edit_student_class_test_result_safe(new_result=new_result)
         return result_edited
+
+    def approve_student_results(self):
+        approved = not self.has_pending_issues()
+        if approved:
+            self.approval_status = 'APPROVED'
+        return approved
+
+    def un_approve_student_results(self):
+        unapproved = not self.has_pending_issues()
+        if unapproved:
+            self.approval_status = 'UNAPPROVED'
+        return unapproved
 
     # There is a problem here!  Make sure to re get enrolment after calling this (see create_student_class_enrolment())
     def update_pending_issue_flags(self, check_school_for_school_issue, check_self_for_school_issue):
