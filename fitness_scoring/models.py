@@ -913,6 +913,9 @@ class StudentClassEnrolment(models.Model):
         return (self.pending_issue_personal or self.pending_issue_other_class_member or
                 self.pending_issue_other_school_member)
 
+    def is_approved(self):
+        return self.approval_status == 'APPROVED'
+
     def enter_result_safe(self, test, result):
         test_in_class = ClassTest.objects.filter(class_id=self.class_id, test_name=test).exists()
         already_entered = StudentClassTestResult.objects.filter(student_class_enrolment=self, test=test).exists()
@@ -935,12 +938,14 @@ class StudentClassEnrolment(models.Model):
         approved = not self.has_pending_issues()
         if approved:
             self.approval_status = 'APPROVED'
+            self.save()
         return approved
 
     def un_approve_student_results(self):
         unapproved = not self.has_pending_issues()
         if unapproved:
             self.approval_status = 'UNAPPROVED'
+            self.save()
         return unapproved
 
     # There is a problem here!  Make sure to re get enrolment after calling this (see create_student_class_enrolment())

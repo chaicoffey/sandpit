@@ -1061,10 +1061,22 @@ def class_results_table(request, class_pk):
     if user_authorised_for_class(request, class_pk):
         class_instance = Class.objects.get(pk=class_pk)
         class_tests = [class_test.test_name for class_test in ClassTest.objects.filter(class_id=class_instance)]
-        student_test_results = [(enrolment.pk, enrolment.student_id, enrolment.student_gender_at_time_of_enrolment,
-                                 enrolment.get_student_age_at_time_of_enrolment(),
-                                 enrolment.get_test_results(True)) for enrolment in
-                                StudentClassEnrolment.objects.filter(class_id=class_instance)]
+        student_test_results = []
+        for enrolment in StudentClassEnrolment.objects.filter(class_id=class_instance):
+            if enrolment.has_pending_issues():
+                approval_option = ['class_results_modal_load_link', '/class_enrolment/resolve_pending_issues/',
+                                   'info-sign', 'student result entry has pending issues' + '\n' +
+                                                'click to resolve issues']
+            elif enrolment.is_approved():
+                approval_option = ['class_results_modal_load_link', '/class_enrolment/un_approve/',
+                                   'plus', 'student result entry approved' + '\n' + 'click to remove approval']
+            else:
+                approval_option = ['class_results_modal_load_link', '/class_enrolment/approve/',
+                                   'remove', 'student result entry not yet approved' + '\n' + 'click to approve']
+            student_test_results.append(([approval_option], enrolment.pk, enrolment.student_id,
+                                         enrolment.student_gender_at_time_of_enrolment,
+                                         enrolment.get_student_age_at_time_of_enrolment(),
+                                         enrolment.get_test_results(True)))
         context = {
             'class_tests': class_tests,
             'class_test_options': [

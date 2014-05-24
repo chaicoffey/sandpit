@@ -26,6 +26,7 @@
         <table class="table table-hover results_table" id="results_table">
             <thead>
                 <tr>
+                    <th></th>
                     <th>Students</th>
                     <th>Gender/Age</th>
                     {% for test in class_tests %}
@@ -45,8 +46,17 @@
                     <th></th>
                 </tr>
             </thead>
-            {% for enrolment_pk, student, gender, age, test_results in student_test_results %}
+            {% for approval_options, enrolment_pk, student, gender, age, test_results in student_test_results %}
                 <tr>
+                    <td><table><tr>
+                        {% for link_type, option_link, option_glyph_icon, hover_message in approval_options %}
+                            <td class="{{ link_type }}">
+                                <a href="{{ option_link }}{{ enrolment_pk }}" title="{{ hover_message }}">
+                                    <span class="glyphicon glyphicon-{{ option_glyph_icon }}"></span>
+                                </a>
+                            </td>
+                        {% endfor %}
+                    </tr></table></td>
                     <td>{{ student }}</td>
                     <td>{{ gender }}/{{ age }}</td>
                     {% for result in test_results %}
