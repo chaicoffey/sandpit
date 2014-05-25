@@ -1095,7 +1095,9 @@ def class_results_table(request, class_pk):
                 ['record', [['class_results_modal_load_link', '/class/test_set/save/' + str(class_pk),
                              'Save Current Class Tests As A Test Set'],
                             ['modal_load_link', '/class/get_new_code/' + str(class_pk),
-                             'Get New Class Login Password']]]
+                             'Get New Class Login Password'],
+                            ['class_results_modal_load_link', '/class/approve_all/' + str(class_pk),
+                             'Approve All Student Result Entries For Class']]]
             ],
             'student_test_results': student_test_results
         }
@@ -1194,6 +1196,27 @@ def get_new_class_code(request, class_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to delete a teacher from this school")
+
+
+def approve_all_class_results(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        class_instance = Class.objects.get(pk=class_pk)
+        if request.POST:
+            if class_instance.approve_all_results():
+                context = {'finish_title': 'All Student Entry Results Approved',
+                           'user_message': 'All Student Entry Results Approved Successfully'}
+            else:
+                context = {'finish_title': 'Student Entry Results Not Approved',
+                           'user_error_message': 'Could Not Approve Student Entry Results'
+                                                 ' (Some Entries Have Pending Issues)'}
+            return render(request, 'user_message.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/class/approve_all/' + str(class_pk),
+                       'functionality_name': 'Approve All Student Entry Results',
+                       'prompt_message': 'Are You Sure You Wish To Approve All Student Entry Results For The Class?'}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to approve all student entry results for this class")
 
 
 def remove_test_from_class(request, class_pk, test_pk):

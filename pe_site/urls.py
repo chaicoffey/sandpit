@@ -63,6 +63,8 @@ urlpatterns = patterns(
         name='load_class_tests_from_test_set'),
     url(r'^class/get_new_code/(?P<class_pk>\d+)', 'fitness_scoring.views.get_new_class_code',
         name='get_new_class_code'),
+    url(r'^class/approve_all/(?P<class_pk>\d+)', 'fitness_scoring.views.approve_all_class_results',
+        name='approve_all_class_results'),
     url(r'^class/test/delete/(?P<class_pk>\d+)/(?P<test_pk>\d+)', 'fitness_scoring.views.remove_test_from_class',
         name='remove_test_from_class'),
     url(r'^class_enrolment/approve/(?P<enrolment_pk>\d+)', 'fitness_scoring.views.class_enrolment_approve',
