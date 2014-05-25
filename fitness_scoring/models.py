@@ -482,6 +482,21 @@ class Class(models.Model):
     def reset_code(self):
         return self.user.reset_code()
 
+    def approve_all_results(self):
+
+        enrolments = StudentClassEnrolment.objects.filter(class_id=self)
+
+        approve_all = True
+        for enrolment in enrolments:
+            if enrolment.has_pending_issues():
+                approve_all = False
+
+        if approve_all:
+            for enrolment in enrolments:
+                enrolment.approve_student_results()
+
+        return approve_all
+
     def enrol_student_safe(self, student_id, first_name, surname, gender, dob, enrolment_date):
         return StudentClassEnrolment.create_student_class_enrolment(class_id=self, student_id=student_id,
                                                                     first_name=first_name, surname=surname,
