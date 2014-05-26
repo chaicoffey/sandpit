@@ -8,6 +8,13 @@
     <div class="modal-body">
         {% csrf_token %}
         {% if form %}
+            {% if form.top_text_messages %}
+                <div class="help-block text-center">
+                    {% for top_text_message in form.top_text_messages %}
+                        {{ top_text_message }}<br>
+                    {% endfor %}
+                </div>
+            {% endif %}
             {{ form.non_field_errors }}
             {% for field in form %}
                 {% if field.is_hidden %}

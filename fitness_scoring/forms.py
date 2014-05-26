@@ -878,18 +878,22 @@ class ResolveIssuesPersonalForm(forms.Form):
     student_dob = forms.DateField(required=True, input_formats=['%d/%m/%Y'])
 
     def __init__(self, enrolment_pk, *args, **kwargs):
-            super(ResolveIssuesPersonalForm, self).__init__(*args, **kwargs)
+        super(ResolveIssuesPersonalForm, self).__init__(*args, **kwargs)
 
-            enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
+        enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
 
-            self.fields['enrolment_pk'].initial = enrolment_pk
-            self.fields['date_tests_performed'].initial = enrolment.enrolment_date.strftime('%d/%m/%Y')
-            self.fields['student_dob'].initial = enrolment.student_id.dob.strftime('%d/%m/%Y')
+        self.top_text_messages = ['The student age at the time the tests were performed is invalid',
+                                  'Please update the date the tests were performed and/or the student date of birth'
+                                  ' below:']
 
-            self.fields['date_tests_performed'].error_messages = {'required': 'Please Date Tests Performed',
-                                                                  'invalid': 'Date must be of form dd/mm/yyyy'}
-            self.fields['student_dob'].error_messages = {'required': 'Please Date of Birth',
-                                                         'invalid': 'Date must be of form dd/mm/yyyy'}
+        self.fields['enrolment_pk'].initial = enrolment_pk
+        self.fields['date_tests_performed'].initial = enrolment.enrolment_date.strftime('%d/%m/%Y')
+        self.fields['student_dob'].initial = enrolment.student_id.dob.strftime('%d/%m/%Y')
+
+        self.fields['date_tests_performed'].error_messages = {'required': 'Please Date Tests Performed',
+                                                              'invalid': 'Date must be of form dd/mm/yyyy'}
+        self.fields['student_dob'].error_messages = {'required': 'Please Date of Birth',
+                                                     'invalid': 'Date must be of form dd/mm/yyyy'}
 
     def clean(self):
         cleaned_data = super(ResolveIssuesPersonalForm, self).clean()
@@ -921,6 +925,41 @@ class ResolveIssuesPersonalForm(forms.Form):
             enrolment_age = enrolment.get_student_age_at_time_of_enrolment()
             enrolment.pending_issue_personal = not StudentClassEnrolment.check_enrolment_age(enrolment_age)
             enrolment.save()
+        return resolved
+
+
+class ResolveIssuesClassForm(forms.Form):
+    valid_results = forms.ChoiceField(required=True)
+
+    def __init__(self, enrolment_pk, *args, **kwargs):
+        super(ResolveIssuesClassForm, self).__init__(*args, **kwargs)
+
+        enrolment_clicked = StudentClassEnrolment.objects.get(pk=enrolment_pk)
+
+        self.top_text_messages = ['There are multiple result entries in this class for student ' +
+                                  str(enrolment_clicked.student_id),
+                                  'Please select the valid line of results below:',
+                                  'Warning: All the other result entries for this student will be deleted']
+
+        self.fields['valid_results'].choices = [('', '')]
+        for enrolment in StudentClassEnrolment.objects.filter(class_id=enrolment_clicked.class_id,
+                                                              student_id=enrolment_clicked.student_id):
+            results_string = ''
+            results = enrolment.get_test_results(text=True)
+            for result in results:
+                results_string += result + ', '
+            self.fields['valid_results'].choices.append((enrolment.pk, results_string))
+
+        self.fields['valid_results'].error_messages = {'required': 'Please Select An Enrolment To Keep'}
+
+    def resolve_issues(self):
+        resolved = self.is_valid()
+        if resolved:
+            enrolment_keeping = StudentClassEnrolment.objects.get(pk=self.cleaned_data['valid_results'])
+            enrolments = StudentClassEnrolment.objects.filter(class_id=enrolment_keeping.class_id,
+                                                              student_id=enrolment_keeping.student_id)
+            for enrolment in enrolments.exclude(pk=enrolment_keeping.pk):
+                enrolment.delete_student_class_enrolment_safe()
         return resolved
 
 
