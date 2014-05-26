@@ -924,7 +924,7 @@ class ResolveIssuesPersonalForm(forms.Form):
             tests = class_instance.get_tests()
             test_results = enrolment_old.get_test_results()
             student_old = enrolment_old.student_id
-            enrolment_old.delete()
+            enrolment_old.delete_student_class_enrolment_safe()
             enrolment = class_instance.enrol_student_safe(student_id=student_old.student_id,
                                                           first_name=student_old.first_name,
                                                           surname=student_old.surname, gender=student_old.gender,
