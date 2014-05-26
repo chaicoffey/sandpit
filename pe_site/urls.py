@@ -71,6 +71,8 @@ urlpatterns = patterns(
         name='class_enrolment_approve'),
     url(r'^class_enrolment/un_approve/(?P<enrolment_pk>\d+)', 'fitness_scoring.views.class_enrolment_un_approve',
         name='class_enrolment_un_approve'),
+    url(r'^class_enrolment/resolve_pending_issues/(?P<enrolment_pk>\d+)',
+        'fitness_scoring.views.class_enrolment_resolve_pending_issues', name='class_enrolment_resolve_pending_issues'),
     url(r'^class_enrolment/edit/(?P<enrolment_pk>\d+)', 'fitness_scoring.views.class_enrolment_edit',
         name='class_enrolment_edit'),
     url(r'^class_enrolment/delete/(?P<enrolment_pk>\d+)', 'fitness_scoring.views.class_enrolment_delete',

@@ -872,6 +872,58 @@ class EditTestForm(forms.Form):
         return test_edited
 
 
+class ResolveIssuesPersonalForm(forms.Form):
+    enrolment_pk = forms.CharField(widget=forms.HiddenInput())
+    date_tests_performed = forms.DateField(required=True, input_formats=['%d/%m/%Y'])
+    student_dob = forms.DateField(required=True, input_formats=['%d/%m/%Y'])
+
+    def __init__(self, enrolment_pk, *args, **kwargs):
+            super(ResolveIssuesPersonalForm, self).__init__(*args, **kwargs)
+
+            enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
+
+            self.fields['enrolment_pk'].initial = enrolment_pk
+            self.fields['date_tests_performed'].initial = enrolment.enrolment_date.strftime('%d/%m/%Y')
+            self.fields['student_dob'].initial = enrolment.student_id.dob.strftime('%d/%m/%Y')
+
+            self.fields['date_tests_performed'].error_messages = {'required': 'Please Date Tests Performed',
+                                                                  'invalid': 'Date must be of form dd/mm/yyyy'}
+            self.fields['student_dob'].error_messages = {'required': 'Please Date of Birth',
+                                                         'invalid': 'Date must be of form dd/mm/yyyy'}
+
+    def clean(self):
+        cleaned_data = super(ResolveIssuesPersonalForm, self).clean()
+        date_tests_performed = cleaned_data.get("date_tests_performed")
+        dob = cleaned_data.get("student_dob")
+
+        if date_tests_performed and dob:
+            enrolment_age = ((date_tests_performed.year - dob.year) -
+                             (1 if (date_tests_performed.month, date_tests_performed.day) < (dob.month, dob.day)
+                              else 0))
+            if not StudentClassEnrolment.check_enrolment_age(enrolment_age):
+                error_message = ('Invalid age at time tests were performed.  This would mean that the student was ' +
+                                 str(enrolment_age) + ' years old at the time of the test.')
+                self._errors["date_tests_performed"] = self.error_class([error_message])
+                self._errors["student_dob"] = self.error_class([error_message])
+                del cleaned_data["date_tests_performed"]
+                del cleaned_data["student_dob"]
+
+        return cleaned_data
+
+    def resolve_issues(self):
+        resolved = self.is_valid()
+        if resolved:
+            enrolment = StudentClassEnrolment.objects.get(pk=self.cleaned_data['enrolment_pk'])
+            enrolment.student_id.dob = self.cleaned_data['student_dob']
+            enrolment.student_id.save()
+            enrolment.enrolment_date = self.cleaned_data['date_tests_performed']
+            enrolment.save()
+            enrolment_age = enrolment.get_student_age_at_time_of_enrolment()
+            enrolment.pending_issue_personal = not StudentClassEnrolment.check_enrolment_age(enrolment_age)
+            enrolment.save()
+        return resolved
+
+
 class StudentEntryForm:
 
     def __init__(self, class_pk, data=None):

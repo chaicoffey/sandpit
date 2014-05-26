@@ -969,7 +969,7 @@ class StudentClassEnrolment(models.Model):
         student_enrolments = StudentClassEnrolment.objects.filter(student_id=self.student_id)
         for student_enrolment in student_enrolments:
             enrolment_age = student_enrolment.get_student_age_at_time_of_enrolment()
-            student_enrolment.pending_issue_personal = (enrolment_age < 11) or (enrolment_age > 19)
+            student_enrolment.pending_issue_personal = not StudentClassEnrolment.check_enrolment_age(enrolment_age)
             multiple_enrolments = (len(student_enrolments.filter(class_id=student_enrolment.class_id)) > 1)
             student_enrolment.pending_issue_other_class_member = multiple_enrolments
             student_enrolment.save()
@@ -990,6 +990,10 @@ class StudentClassEnrolment(models.Model):
             student.delete()
         self.update_pending_issue_flags(check_school_for_school_issue=True, check_self_for_school_issue=False)
         return True
+
+    @staticmethod
+    def check_enrolment_age(enrolment_age):
+        return (11 <= enrolment_age) and (enrolment_age <= 19)
 
     @staticmethod
     def create_student_class_enrolment(class_id, student_id, first_name, surname, gender, dob, enrolment_date):

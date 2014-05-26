@@ -11,6 +11,7 @@ from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFile
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, AddClassTeacherForm, EditClassTeacherForm
 from fitness_scoring.forms import AssignTestToClassForm, SaveClassTestsAsTestSetForm, LoadClassTestsFromTestSetForm
+from fitness_scoring.forms import ResolveIssuesPersonalForm
 from fitness_scoring.forms import StudentEntryForm, StudentEntryEditForm
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.mail import send_mail
@@ -1284,6 +1285,41 @@ def class_enrolment_un_approve(request, enrolment_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to remove a student result entry approval from this class")
+
+
+def class_enrolment_resolve_pending_issues(request, enrolment_pk):
+    enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
+    if user_authorised_for_class(request, enrolment.class_id.pk) and enrolment.has_pending_issues():
+        if request.POST:
+#            if enrolment.pending_issue_other_school_member:
+#                resolve_pending_issues_form = ResolveIssuesSchoolForm(enrolment_pk=enrolment_pk, data=request.POST)
+#            elif enrolment.pending_issue_other_class_member:
+#                resolve_pending_issues_form = ResolveIssuesClassForm(enrolment_pk=enrolment_pk, data=request.POST)
+#            else:
+            resolve_pending_issues_form = ResolveIssuesPersonalForm(enrolment_pk=enrolment_pk, data=request.POST)
+            if resolve_pending_issues_form.resolve_issues():
+                context = {'finish_title': 'Issue Resolved',
+                           'user_message': 'Issue Resolved Successfully'}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/class_enrolment/resolve_pending_issues/' + str(enrolment_pk),
+                           'functionality_name': 'Resolve Pending Issue',
+                           'form': resolve_pending_issues_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+ #           if enrolment.pending_issue_other_school_member:
+ #               resolve_pending_issues_form = ResolveIssuesSchoolForm(enrolment_pk=enrolment_pk)
+ #           elif enrolment.pending_issue_other_class_member:
+ #               resolve_pending_issues_form = ResolveIssuesClassForm(enrolment_pk=enrolment_pk)
+ #           else:
+            resolve_pending_issues_form = ResolveIssuesPersonalForm(enrolment_pk=enrolment_pk)
+            context = {'post_to_url': '/class_enrolment/resolve_pending_issues/' + str(enrolment_pk),
+                       'functionality_name': 'Resolve Pending Issue',
+                       'form': resolve_pending_issues_form}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("Either there is no issue to resolve or you are not authorised to resolve"
+                                     " a pending issue for this class")
 
 
 def class_enrolment_edit(request, enrolment_pk):
