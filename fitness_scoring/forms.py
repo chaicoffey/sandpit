@@ -917,14 +917,22 @@ class ResolveIssuesPersonalForm(forms.Form):
     def resolve_issues(self):
         resolved = self.is_valid()
         if resolved:
-            enrolment = StudentClassEnrolment.objects.get(pk=self.cleaned_data['enrolment_pk'])
-            enrolment.student_id.dob = self.cleaned_data['student_dob']
-            enrolment.student_id.save()
-            enrolment.enrolment_date = self.cleaned_data['date_tests_performed']
-            enrolment.save()
-            enrolment_age = enrolment.get_student_age_at_time_of_enrolment()
-            enrolment.pending_issue_personal = not StudentClassEnrolment.check_enrolment_age(enrolment_age)
-            enrolment.save()
+            student_dob = self.cleaned_data['student_dob']
+            date_tests_performed = self.cleaned_data['date_tests_performed']
+            enrolment_old = StudentClassEnrolment.objects.get(pk=self.cleaned_data['enrolment_pk'])
+            class_instance = enrolment_old.class_id
+            tests = class_instance.get_tests()
+            test_results = enrolment_old.get_test_results()
+            student_old = enrolment_old.student_id
+            enrolment_old.delete()
+            enrolment = class_instance.enrol_student_safe(student_id=student_old.student_id,
+                                                          first_name=student_old.first_name,
+                                                          surname=student_old.surname, gender=student_old.gender,
+                                                          dob=student_dob, enrolment_date=date_tests_performed)
+
+            for test_index in range(len(tests)):
+                if test_results[test_index]:
+                    enrolment.enter_result_safe(tests[test_index], test_results[test_index])
         return resolved
 
 
