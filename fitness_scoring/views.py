@@ -1291,7 +1291,7 @@ def class_enrolment_resolve_pending_issues(request, enrolment_pk):
     enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
     if user_authorised_for_class(request, enrolment.class_id.pk) and enrolment.has_pending_issues():
         if request.POST:
-#            if enrolment.pending_issue_other_school_member:
+#            if enrolment.student_id.has_pending_issues():
 #                resolve_pending_issues_form = ResolveIssuesSchoolForm(enrolment_pk=enrolment_pk, data=request.POST)
 #            elif
             if enrolment.pending_issue_other_class_member:
@@ -1308,7 +1308,7 @@ def class_enrolment_resolve_pending_issues(request, enrolment_pk):
                            'form': resolve_pending_issues_form}
                 return render(request, 'modal_form.html', RequestContext(request, context))
         else:
-#            if enrolment.pending_issue_other_school_member:
+#            if enrolment.student_id.has_pending_issues():
 #                resolve_pending_issues_form = ResolveIssuesSchoolForm(enrolment_pk=enrolment_pk)
 #            elif
             if enrolment.pending_issue_other_class_member:

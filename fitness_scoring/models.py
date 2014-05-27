@@ -306,6 +306,9 @@ class Student(models.Model):
         return ((today.year - dob.year) -
                 (1 if (today.month, today.day) < (dob.month, dob.day) else 0))
 
+    def has_pending_issues(self):
+        return StudentsSameID.student_has_same_id_issue(self) or StudentsSameName.student_has_same_name_issue(self)
+
     def delete_student_safe(self):
         student_not_used = not StudentClassEnrolment.objects.filter(student_id=self).exists()
         if student_not_used:
@@ -337,6 +340,9 @@ class Student(models.Model):
                                              student_id_lowercase=student_id_lowercase,
                                              first_name_lowercase=first_name_lowercase,
                                              surname_lowercase=surname_lowercase)
+            for other_student in Student.objects.filter(school_id=student.school_id).exclude(pk=student.pk):
+                StudentsSameID.create_students_same_id(student, other_student)
+                StudentsSameName.create_students_same_name(student, other_student)
         else:
             student = None
         return student
@@ -900,8 +906,6 @@ class StudentClassEnrolment(models.Model):
     approval_status = models.CharField(max_length=20, choices=APPROVAL_STATUS_CHOICES, default='UNAPPROVED')
     pending_issue_personal = models.BooleanField(default=False)
     pending_issue_other_class_member = models.BooleanField(default=False)
-    pending_issue_other_school_member = models.BooleanField(default=False)
-    pending_issue_other_school_member_student_name_approval = models.BooleanField(default=False)
 
     def __unicode__(self):
         return str(self.class_id) + ' : ' + str(self.student_id)
@@ -926,7 +930,7 @@ class StudentClassEnrolment(models.Model):
 
     def has_pending_issues(self):
         return (self.pending_issue_personal or self.pending_issue_other_class_member or
-                self.pending_issue_other_school_member)
+                self.student_id.has_pending_issues())
 
     def is_approved(self):
         return self.approval_status == 'APPROVED'
@@ -964,8 +968,7 @@ class StudentClassEnrolment(models.Model):
         return unapproved
 
     # There is a problem here!  Make sure to re get enrolment after calling this (see create_student_class_enrolment())
-    def update_pending_issue_flags(self, check_school_for_school_issue, check_self_for_school_issue):
-
+    def update_pending_issue_flags(self):
         student_enrolments = StudentClassEnrolment.objects.filter(student_id=self.student_id)
         for student_enrolment in student_enrolments:
             enrolment_age = student_enrolment.get_student_age_at_time_of_enrolment()
@@ -974,21 +977,12 @@ class StudentClassEnrolment(models.Model):
             student_enrolment.pending_issue_other_class_member = multiple_enrolments
             student_enrolment.save()
 
-        if check_school_for_school_issue:
-            for student in Student.objects.filter(school_id=self.class_id.school_id):
-                student_enrolments = StudentClassEnrolment.objects.filter(student_id=student)
-                if student_enrolments.exists() and student_enrolments[0].pending_issue_other_school_member:
-                    StudentClassEnrolment.update_pending_issue_other_school_member_flag(student=student)
-
-        if check_self_for_school_issue:
-            StudentClassEnrolment.update_pending_issue_other_school_member_flag(student=self.student_id)
-
     def delete_student_class_enrolment_safe(self):
         student = self.student_id
         self.delete()
         if not StudentClassEnrolment.objects.filter(student_id=student).exists():
             student.delete()
-        self.update_pending_issue_flags(check_school_for_school_issue=True, check_self_for_school_issue=False)
+        self.update_pending_issue_flags()
         return True
 
     @staticmethod
@@ -1007,41 +1001,9 @@ class StudentClassEnrolment(models.Model):
         enrolment = StudentClassEnrolment.objects.create(class_id=class_id, student_id=student,
                                                          student_gender_at_time_of_enrolment=gender,
                                                          enrolment_date=enrolment_date)
-        enrolment.update_pending_issue_flags(check_school_for_school_issue=False, check_self_for_school_issue=True)
+        enrolment.update_pending_issue_flags()
         enrolment = StudentClassEnrolment.objects.get(pk=enrolment.pk)  # Need to do this due to bug in updating flags
         return enrolment
-
-    @staticmethod
-    def update_pending_issue_other_school_member_flag(student):
-
-        def update_flag(student_to_update, flag, check_name_approval):
-            for student_enrolment in StudentClassEnrolment.objects.filter(student_id=student_to_update):
-                if check_name_approval:
-                    veto_approval = student_enrolment.pending_issue_other_school_member_student_name_approval
-                else:
-                    veto_approval = False
-                student_enrolment.pending_issue_other_school_member = flag and not veto_approval
-                student_enrolment.save()
-
-        student_issue = False
-        update_flag(student, student_issue, False)
-
-        if not student_issue:
-            same_ids = Student.objects.filter(school_id=student.school_id,
-                                              student_id_lowercase=student.student_id_lowercase)
-            if len(same_ids) > 1:
-                student_issue = True
-                for same_id in same_ids:
-                    update_flag(same_id, student_issue, False)
-
-        if not student_issue:
-            same_names = Student.objects.filter(school_id=student.school_id,
-                                                first_name_lowercase=student.first_name_lowercase,
-                                                surname_lowercase=student.surname_lowercase)
-            if len(same_names) > 1:
-                student_issue = True
-                for same_name in same_names:
-                    update_flag(same_name, student_issue, True)
 
 
 class ClassTest(models.Model):
@@ -1128,3 +1090,58 @@ class StudentClassTestResult(models.Model):
             StudentClassTestResult.objects.create(student_class_enrolment=student_class_enrolment, test=test,
                                                   result=result, percentile=percentile)
         return result_created
+
+
+class StudentsSameID(models.Model):
+    student_1 = models.ForeignKey(Student, related_name='students_same_id_1')
+    student_2 = models.ForeignKey(Student, related_name='students_same_id_2')
+
+    def __unicode__(self):
+        return str(self.student_1) + ' : ' + str(self.student_2)
+
+    @staticmethod
+    def student_has_same_id_issue(student):
+        return (StudentsSameID.objects.filter(student_1=student).exists() or
+                StudentsSameID.objects.filter(student_2=student).exists())
+
+    @staticmethod
+    def create_students_same_id(student_1, student_2):
+        if student_1.student_id_lowercase == student_2.student_id_lowercase:
+            return StudentsSameID.objects.create(student_1=student_1, student_2=student_2)
+        else:
+            return None
+
+
+class StudentsSameName(models.Model):
+    student_1 = models.ForeignKey(Student, related_name='students_same_name_1')
+    student_2 = models.ForeignKey(Student, related_name='students_same_name_2')
+    students_identified_as_individuals = models.BooleanField()
+
+    def __unicode__(self):
+        return str(self.student_1) + ' : ' + str(self.student_2) + ' : ' + str(self.students_identified_as_individuals)
+
+    def identified_as_individuals(self):
+        self.students_identified_as_individuals = True
+        self.save()
+
+    @staticmethod
+    def student_has_same_name_issue(student):
+        issue = False
+        student_same_names = StudentsSameName.objects.filter(student_1=student)
+        for student_same_name in student_same_names:
+            if not student_same_name.students_identified_as_individuals:
+                issue = True
+        student_same_names = StudentsSameName.objects.filter(student_2=student)
+        for student_same_name in student_same_names:
+            if not student_same_name.students_identified_as_individuals:
+                issue = True
+        return issue
+
+    @staticmethod
+    def create_students_same_name(student_1, student_2):
+        if ((student_1.first_name_lowercase == student_2.first_name_lowercase) and
+                (student_1.surname_lowercase == student_2.surname_lowercase)):
+            return StudentsSameName.objects.create(student_1=student_1, student_2=student_2,
+                                                   students_identified_as_individuals=False)
+        else:
+            return None
