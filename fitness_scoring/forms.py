@@ -937,7 +937,7 @@ class ResolveIssuesPersonalForm(forms.Form):
 
 
 class ResolveIssuesClassForm(forms.Form):
-    valid_results = forms.ChoiceField(required=True)
+    enrolment_results = forms.ChoiceField(required=True, widget=forms.RadioSelect)
 
     def __init__(self, enrolment_pk, *args, **kwargs):
         super(ResolveIssuesClassForm, self).__init__(*args, **kwargs)
@@ -946,24 +946,24 @@ class ResolveIssuesClassForm(forms.Form):
 
         self.top_text_messages = ['There are multiple result entries in this class for student ' +
                                   str(enrolment_clicked.student_id),
-                                  'Please select the valid line of results below:',
-                                  'Warning: All the other result entries for this student will be deleted']
+                                  'Please select the valid line of results below:']
+        self.bottom_text_messages = ['WARNING: All the other result entries for this student will be deleted']
 
-        self.fields['valid_results'].choices = [('', '')]
+        self.fields['enrolment_results'].choices = []
         for enrolment in StudentClassEnrolment.objects.filter(class_id=enrolment_clicked.class_id,
                                                               student_id=enrolment_clicked.student_id):
             results_string = ''
             results = enrolment.get_test_results(text=True)
             for result in results:
                 results_string += result + ', '
-            self.fields['valid_results'].choices.append((enrolment.pk, results_string))
+            self.fields['enrolment_results'].choices.append((enrolment.pk, results_string))
 
-        self.fields['valid_results'].error_messages = {'required': 'Please Select An Enrolment To Keep'}
+        self.fields['enrolment_results'].error_messages = {'required': 'Please Choose The Valid Enrolment'}
 
     def resolve_issues(self):
         resolved = self.is_valid()
         if resolved:
-            enrolment_keeping = StudentClassEnrolment.objects.get(pk=self.cleaned_data['valid_results'])
+            enrolment_keeping = StudentClassEnrolment.objects.get(pk=self.cleaned_data['enrolment_results'])
             enrolments = StudentClassEnrolment.objects.filter(class_id=enrolment_keeping.class_id,
                                                               student_id=enrolment_keeping.student_id)
             for enrolment in enrolments.exclude(pk=enrolment_keeping.pk):
