@@ -307,7 +307,13 @@ class Student(models.Model):
                 (1 if (today.month, today.day) < (dob.month, dob.day) else 0))
 
     def has_pending_issues(self):
-        return StudentsSameID.student_has_same_id_issue(self) or StudentsSameName.student_has_same_name_issue(self)
+        return self.has_pending_issues_id() or self.has_pending_issues_name()
+
+    def has_pending_issues_id(self):
+        return StudentsSameID.student_has_same_id_issue(self)
+
+    def has_pending_issues_name(self):
+        return StudentsSameName.student_has_same_name_issue(self)
 
     def delete_student_safe(self):
         student_not_used = not StudentClassEnrolment.objects.filter(student_id=self).exists()
