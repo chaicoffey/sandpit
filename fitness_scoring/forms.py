@@ -1008,14 +1008,14 @@ class ResolveIssuesSchoolIDForm(forms.Form):
         self.fields['resolution_options'].choices = [(choice_value, choice_text)]
         student_count = 2
         for enrolment in enrollment_same_ids:
+            choice_value = 'Change:' + str(enrolment.pk)
+            choice_text = ResolveIssuesSchoolIDForm.get_text_for_student_change(student_count)
+            self.fields['resolution_options'].choices.append((choice_value, choice_text))
             choice_text = ResolveIssuesSchoolIDForm.get_text_for_student_pair(student_count, True)
             choice_value = 'From:' + str(enrolment.pk)
             self.fields['resolution_options'].choices.append((choice_value, choice_text))
             choice_value = 'To:' + str(enrolment.pk)
             choice_text = ResolveIssuesSchoolIDForm.get_text_for_student_pair(student_count, False)
-            self.fields['resolution_options'].choices.append((choice_value, choice_text))
-            choice_value = 'Change:' + str(enrolment.pk)
-            choice_text = ResolveIssuesSchoolIDForm.get_text_for_student_change(student_count)
             self.fields['resolution_options'].choices.append((choice_value, choice_text))
             student_count += 1
 
