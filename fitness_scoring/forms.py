@@ -1021,6 +1021,8 @@ class ResolveIssuesSchoolIDForm(forms.Form):
 
         self.fields['resolution_options'].error_messages = {'required': 'Please Choose A Resolution Option'}
 
+        self.exclude_showing_label = True
+
     def resolve_issues(self):
         if self.is_valid():
             return self.cleaned_data['resolution_options']
