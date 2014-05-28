@@ -20,13 +20,15 @@
                 {% if field.is_hidden %}
                     <div class="form-group" style="display: none">{{ field }}</div>
                 {% elif form.exclude_showing_label %}
-                    {{ field }}
-                    {% if field.help_text %}
-                        <span class="form-field-help">{{ field.help_text }}</span>
-                    {% endif %}
-                    {% if field.errors %}
-                        <span class="help-block">{{ field.errors }}</span>
-                    {% endif %}
+                    <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
+                        {{ field }}
+                        {% if field.help_text %}
+                            <span class="form-field-help">{{ field.help_text }}</span>
+                        {% endif %}
+                        {% if field.errors %}
+                            <span class="help-block">{{ field.errors }}</span>
+                        {% endif %}
+                    </div>
                 {% else %}
                     <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
                         <div class="col-sm-4">{{ field.label_tag }}</div>

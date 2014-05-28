@@ -1295,7 +1295,9 @@ def class_enrolment_resolve_pending_issues(request, enrolment_pk):
                 resolve_pending_issues_form = ResolveIssuesSchoolIDForm(enrolment_pk=enrolment_pk, data=request.POST)
                 resolve_method = resolve_pending_issues_form.resolve_issues()
                 if resolve_method:
-                    pass
+                    context = {'finish_title': 'Issue Resolved',
+                               'user_message': resolve_method}
+                    return render(request, 'user_message.html', RequestContext(request, context))
 #            elif enrolment.student_id.has_pending_issues_name():
 #                resolve_pending_issues_form = ResolveIssuesSchoolNameForm(enrolment_pk=enrolment_pk, data=request.POST)
             elif enrolment.pending_issue_other_class_member:
