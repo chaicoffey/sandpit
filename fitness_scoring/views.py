@@ -1066,14 +1066,14 @@ def class_results_table(request, class_pk):
         for enrolment in StudentClassEnrolment.objects.filter(class_id=class_instance):
             if enrolment.has_pending_issues():
                 approval_option = ['class_results_modal_load_link', '/class_enrolment/resolve_pending_issues/',
-                                   'info-sign', 'student result entry has pending issues' + '\n' +
-                                                'click to resolve issues']
+                                   'exclamation-sign', 'student result entry has pending issues' + '\n' +
+                                                       'click to resolve issues']
             elif enrolment.is_approved():
                 approval_option = ['class_results_modal_load_link', '/class_enrolment/un_approve/',
-                                   'plus', 'student result entry approved' + '\n' + 'click to remove approval']
+                                   'check', 'student result entry approved' + '\n' + 'click to remove approval']
             else:
                 approval_option = ['class_results_modal_load_link', '/class_enrolment/approve/',
-                                   'remove', 'student result entry not yet approved' + '\n' + 'click to approve']
+                                   'unchecked', 'student result entry not yet approved' + '\n' + 'click to approve']
             student_test_results.append(([approval_option], enrolment.pk, enrolment.student_id,
                                          enrolment.student_gender_at_time_of_enrolment,
                                          enrolment.get_student_age_at_time_of_enrolment(),
@@ -1093,12 +1093,12 @@ def class_results_table(request, class_pk):
                 ['plus', [['class_results_modal_load_link', '/class/test/add/' + str(class_pk), 'Add Test To Class'],
                           ['class_results_modal_load_link', '/class/test_set/load/' + str(class_pk),
                            'Load Class Tests From A Test Set']]],
-                ['record', [['class_results_modal_load_link', '/class/test_set/save/' + str(class_pk),
-                             'Save Current Class Tests As A Test Set'],
-                            ['modal_load_link', '/class/get_new_code/' + str(class_pk),
-                             'Get New Class Login Password'],
-                            ['class_results_modal_load_link', '/class/approve_all/' + str(class_pk),
-                             'Approve All Student Result Entries For Class']]]
+                ['asterisk', [['class_results_modal_load_link', '/class/test_set/save/' + str(class_pk),
+                               'Save Current Class Tests As A Test Set'],
+                              ['modal_load_link', '/class/get_new_code/' + str(class_pk),
+                               'Get New Class Login Password'],
+                              ['class_results_modal_load_link', '/class/approve_all/' + str(class_pk),
+                               'Approve All Student Result Entries For Class']]]
             ],
             'student_test_results': student_test_results
         }
