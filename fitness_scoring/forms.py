@@ -970,7 +970,9 @@ class ResolveIssuesClassForm(forms.Form):
                 results_string += result + ', '
             self.fields['enrolment_results'].choices.append((enrolment.pk, results_string))
 
-        self.fields['enrolment_results'].error_messages = {'required': 'Please Choose The Valid Enrolment'}
+        self.fields['enrolment_results'].error_messages = {'required': 'Please Choose The Valid Set Of Results'}
+
+        self.exclude_showing_label = True
 
     def resolve_issues(self):
         resolved = self.is_valid()
