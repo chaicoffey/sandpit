@@ -11,7 +11,8 @@ from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFile
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, AddClassTeacherForm, EditClassTeacherForm
 from fitness_scoring.forms import AssignTestToClassForm, SaveClassTestsAsTestSetForm, LoadClassTestsFromTestSetForm
-from fitness_scoring.forms import ResolveIssuesPersonalForm, ResolveIssuesClassForm, ResolveIssuesSchoolIDForm
+from fitness_scoring.forms import ResolveIssuesPersonalForm, ResolveIssuesClassForm
+from fitness_scoring.forms import ResolveIssuesSchoolIDForm, ResolveIssuesSchoolNameForm
 from fitness_scoring.forms import StudentEntryForm, StudentEntryEditForm
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.mail import send_mail
@@ -1298,8 +1299,13 @@ def class_enrolment_resolve_pending_issues(request, enrolment_pk):
                     context = {'finish_title': 'Issue Resolved',
                                'user_message': resolve_method}
                     return render(request, 'user_message.html', RequestContext(request, context))
-#            elif enrolment.student_id.has_pending_issues_name():
-#                resolve_pending_issues_form = ResolveIssuesSchoolNameForm(enrolment_pk=enrolment_pk, data=request.POST)
+            elif enrolment.student_id.has_pending_issues_name():
+                resolve_pending_issues_form = ResolveIssuesSchoolNameForm(enrolment_pk=enrolment_pk, data=request.POST)
+                resolve_method = resolve_pending_issues_form.resolve_issues()
+                if resolve_method:
+                    context = {'finish_title': 'Issue Resolved',
+                               'user_message': resolve_method}
+                    return render(request, 'user_message.html', RequestContext(request, context))
             elif enrolment.pending_issue_other_class_member:
                 resolve_pending_issues_form = ResolveIssuesClassForm(enrolment_pk=enrolment_pk, data=request.POST)
             else:
@@ -1316,8 +1322,8 @@ def class_enrolment_resolve_pending_issues(request, enrolment_pk):
         else:
             if enrolment.student_id.has_pending_issues_id():
                 resolve_pending_issues_form = ResolveIssuesSchoolIDForm(enrolment_pk=enrolment_pk)
-#            elif enrolment.student_id.has_pending_issues_name():
-#                resolve_pending_issues_form = ResolveIssuesSchoolNameForm(enrolment_pk=enrolment_pk)
+            elif enrolment.student_id.has_pending_issues_name():
+                resolve_pending_issues_form = ResolveIssuesSchoolNameForm(enrolment_pk=enrolment_pk)
             elif enrolment.pending_issue_other_class_member:
                 resolve_pending_issues_form = ResolveIssuesClassForm(enrolment_pk=enrolment_pk)
             else:

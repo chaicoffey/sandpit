@@ -1003,25 +1003,28 @@ class ResolveIssuesSchoolIDForm(forms.Form):
             self.top_text_messages += ResolveIssuesSchoolIDForm.get_text_for_student(enrolment, student_count)
             student_count += 1
 
-        self.top_text_messages += ['', 'Please select from the following options to resolve this issue:']
+        self.top_text_messages += ['', 'Choose one of the following possible causes of this conflict:']
 
-        choice_value = 'Change:' + str(enrolment_clicked.pk)
+        self.bottom_text_messages = ['If none of these options are a cause of this conflict than you may need to edit'
+                                     ' the student result entry directly']
+
+        choice_value = 'ChangeID:' + str(enrolment_clicked.pk)
         choice_text = ResolveIssuesSchoolIDForm.get_text_for_student_change(1)
         self.fields['resolution_options'].choices = [(choice_value, choice_text)]
         student_count = 2
         for enrolment in enrollment_same_ids:
-            choice_value = 'Change:' + str(enrolment.pk)
+            choice_value = 'ChangeID:' + str(enrolment.pk)
             choice_text = ResolveIssuesSchoolIDForm.get_text_for_student_change(student_count)
             self.fields['resolution_options'].choices.append((choice_value, choice_text))
-            choice_text = ResolveIssuesSchoolIDForm.get_text_for_student_pair(student_count, True)
             choice_value = 'From:' + str(enrolment.pk)
+            choice_text = ResolveIssuesSchoolIDForm.get_text_for_student_pair(student_count, True)
             self.fields['resolution_options'].choices.append((choice_value, choice_text))
             choice_value = 'To:' + str(enrolment.pk)
             choice_text = ResolveIssuesSchoolIDForm.get_text_for_student_pair(student_count, False)
             self.fields['resolution_options'].choices.append((choice_value, choice_text))
             student_count += 1
 
-        self.fields['resolution_options'].error_messages = {'required': 'Please Choose A Resolution Option'}
+        self.fields['resolution_options'].error_messages = {'required': 'Please Choose A Cause Of Conflict'}
 
         self.exclude_showing_label = True
 
@@ -1054,6 +1057,88 @@ class ResolveIssuesSchoolIDForm(forms.Form):
         incorrect_student = 'Student ' + str(1 if other_correct else student_count_other)
         return (this_student + ' and ' + other_student + ' are the same person and ' + correct_student +
                 's details are correct and ' + incorrect_student + 's details are incorrect')
+
+
+class ResolveIssuesSchoolNameForm(forms.Form):
+    resolution_options = forms.ChoiceField(required=True, widget=forms.RadioSelect)
+
+    def __init__(self, enrolment_pk, *args, **kwargs):
+        super(ResolveIssuesSchoolNameForm, self).__init__(*args, **kwargs)
+
+        enrolment_clicked = StudentClassEnrolment.objects.get(pk=enrolment_pk)
+        enrollment_same_names = [StudentClassEnrolment.objects.filter(student_id=student)[0] for student in
+                                 enrolment_clicked.student_id.get_students_with_same_name_not_identified()]
+
+        self.top_text_messages = ['The following students have the same name (but differ in other details):']
+        self.top_text_messages += ResolveIssuesSchoolNameForm.get_text_for_student(enrolment_clicked, 1)
+        student_count = 2
+        for enrolment in enrollment_same_names:
+            self.top_text_messages += ResolveIssuesSchoolNameForm.get_text_for_student(enrolment, student_count)
+            student_count += 1
+
+        self.top_text_messages += ['', 'Choose one of the following options to resolve this:']
+
+        self.bottom_text_messages = ['If none of these options are reflect the cause of this conflict than you may need'
+                                     ' to edit the student result entry directly']
+
+        choice_value = 'ChangeName:' + str(enrolment_clicked.pk)
+        choice_text = ResolveIssuesSchoolNameForm.get_text_for_student_change(1)
+        self.fields['resolution_options'].choices = [(choice_value, choice_text)]
+        student_count = 2
+        for enrolment in enrollment_same_names:
+            choice_value = 'ChangeName:' + str(enrolment.pk)
+            choice_text = ResolveIssuesSchoolNameForm.get_text_for_student_change(student_count)
+            self.fields['resolution_options'].choices.append((choice_value, choice_text))
+            choice_value = 'MarkBothNameApproval:' + str(enrolment.pk)
+            choice_text = ResolveIssuesSchoolNameForm.get_text_for_student_pair_ok(student_count)
+            self.fields['resolution_options'].choices.append((choice_value, choice_text))
+            choice_value = 'From:' + str(enrolment.pk)
+            choice_text = ResolveIssuesSchoolNameForm.get_text_for_student_pair(student_count, True)
+            self.fields['resolution_options'].choices.append((choice_value, choice_text))
+            choice_value = 'To:' + str(enrolment.pk)
+            choice_text = ResolveIssuesSchoolNameForm.get_text_for_student_pair(student_count, False)
+            self.fields['resolution_options'].choices.append((choice_value, choice_text))
+            student_count += 1
+
+        self.fields['resolution_options'].error_messages = {'required': 'Please Choose A Resolution Option'}
+
+        self.exclude_showing_label = True
+
+    def resolve_issues(self):
+        if self.is_valid():
+            return self.cleaned_data['resolution_options']
+        else:
+            return None
+
+    @staticmethod
+    def get_text_for_student(enrolment, student_count):
+        student = enrolment.student_id
+        student_details = ('Student ' + str(student_count) + ':      ' + str(student) + ', ' + str(student.gender) +
+                           ', born ' + student.dob.strftime('%d/%m/%Y'))
+        class_instance = enrolment.class_id
+        teacher = TeacherClassAllocation.objects.get(class_id=class_instance).teacher_id
+        class_details = ('   (enrolled in ' + class_instance.class_name + ' (' + str(class_instance.year) +
+                         '), Teacher: ' + str(teacher) + ')')
+        return [student_details, class_details]
+
+    @staticmethod
+    def get_text_for_student_change(student_count):
+        return 'Student ' + str(student_count) + 's name was entered incorrectly'
+
+    @staticmethod
+    def get_text_for_student_pair(student_count_other, other_correct):
+        this_student = 'Student 1'
+        other_student = 'Student ' + str(student_count_other)
+        correct_student = 'Student ' + str(student_count_other if other_correct else 1)
+        incorrect_student = 'Student ' + str(1 if other_correct else student_count_other)
+        return (this_student + ' and ' + other_student + ' are the same person and ' + correct_student +
+                's details are correct and ' + incorrect_student + 's details are incorrect')
+
+    @staticmethod
+    def get_text_for_student_pair_ok(student_count_other):
+        this_student = 'Student 1'
+        other_student = 'Student ' + str(student_count_other)
+        return this_student + ' and ' + other_student + ' are different people and both there names are correct'
 
 
 class StudentEntryForm:
