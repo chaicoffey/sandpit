@@ -882,9 +882,12 @@ class ResolveIssuesPersonalForm(forms.Form):
 
         enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
 
-        self.top_text_messages = ['The student age at the time the tests were performed is invalid',
-                                  'Please update the date the tests were performed and/or the student date of birth'
-                                  ' below:']
+        self.top_text_messages = ['The student age at the time the tests were performed should be between 11 and 19'
+                                  ' years old', '',
+                                  'The calculated age for ' + str(enrolment.student_id) + ' at the time of the tests' +
+                                  ' is ' + str(enrolment.get_student_age_at_time_of_enrolment()), '',
+                                  'To resolve this issue please update the date the tests were performed and/or the'
+                                  ' student date of birth below:']
 
         self.fields['enrolment_pk'].initial = enrolment_pk
         self.fields['date_tests_performed'].initial = enrolment.enrolment_date.strftime('%d/%m/%Y')
@@ -952,7 +955,8 @@ class ResolveIssuesClassForm(forms.Form):
                                   str(len(multiple_enrolments)) + ' sets of results entered in class: ' +
                                   enrolment_clicked.class_id.class_name + ' (' + str(enrolment_clicked.class_id.year) +
                                   ')', '',
-                                  'Please select the valid set of results from the options below:']
+                                  'To resolve this issue please select the valid set of results from the options'
+                                  ' below:']
         self.bottom_text_messages = ['', 'WARNING: All result entries for this student other than the one selected will'
                                          ' be deleted',
                                      'If none are valid you will need to delete the last entry directly on the class'
