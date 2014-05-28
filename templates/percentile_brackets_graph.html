@@ -26,7 +26,7 @@
 
         var bracket_data = [
             {% for score in percentile_bracket_scores %}
-                [{{ score }}, {{ forloop.counter0 }}],
+                [{{ forloop.counter0 }}, {{ score }}],
             {% endfor %}
         ];
 
