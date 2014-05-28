@@ -14,6 +14,23 @@
 
 </div>
 
-<div id="percentile_brackets_graph">
+<!--div id="percentile_brackets_data">
     {{ percentile_bracket_scores }}
-</div>
+</div-->
+
+<div id="percentile_brackets_graph" style="width:600px;height:300px"></div>
+
+
+<script>
+	$(document).ready(function() {
+
+        var bracket_data = [
+            {% for score in percentile_bracket_scores %}
+                [{{ score }}, {{ forloop.counter0 }}],
+            {% endfor %}
+        ];
+
+        $.plot("#percentile_brackets_graph", [ bracket_data ]);
+
+	});
+</script>
