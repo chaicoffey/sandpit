@@ -11,7 +11,7 @@ from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFile
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, AddClassTeacherForm, EditClassTeacherForm
 from fitness_scoring.forms import AssignTestToClassForm, SaveClassTestsAsTestSetForm, LoadClassTestsFromTestSetForm
-from fitness_scoring.forms import ResolveIssuesPersonalForm, ResolveIssuesClassForm
+from fitness_scoring.forms import ResolveIssuesPersonalForm, ResolveIssuesClassForm, ResolveIssuesSchoolIDForm
 from fitness_scoring.forms import StudentEntryForm, StudentEntryEditForm
 from pe_site.settings import DEFAULT_FROM_EMAIL
 from django.core.mail import send_mail
@@ -1291,12 +1291,14 @@ def class_enrolment_resolve_pending_issues(request, enrolment_pk):
     enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
     if user_authorised_for_class(request, enrolment.class_id.pk) and enrolment.has_pending_issues():
         if request.POST:
-#            if enrolment.student_id.has_pending_issues_id():
-#                resolve_pending_issues_form = ResolveIssuesSchoolIDForm(enrolment_pk=enrolment_pk, data=request.POST)
+            if enrolment.student_id.has_pending_issues_id():
+                resolve_pending_issues_form = ResolveIssuesSchoolIDForm(enrolment_pk=enrolment_pk, data=request.POST)
+                resolve_method = resolve_pending_issues_form.resolve_issues()
+                if resolve_method:
+                    pass
 #            elif enrolment.student_id.has_pending_issues_name():
 #                resolve_pending_issues_form = ResolveIssuesSchoolNameForm(enrolment_pk=enrolment_pk, data=request.POST)
-#            elif
-            if enrolment.pending_issue_other_class_member:
+            elif enrolment.pending_issue_other_class_member:
                 resolve_pending_issues_form = ResolveIssuesClassForm(enrolment_pk=enrolment_pk, data=request.POST)
             else:
                 resolve_pending_issues_form = ResolveIssuesPersonalForm(enrolment_pk=enrolment_pk, data=request.POST)
@@ -1310,12 +1312,11 @@ def class_enrolment_resolve_pending_issues(request, enrolment_pk):
                            'form': resolve_pending_issues_form}
                 return render(request, 'modal_form.html', RequestContext(request, context))
         else:
-#            if enrolment.student_id.has_pending_issues_id():
-#                resolve_pending_issues_form = ResolveIssuesSchoolIDForm(enrolment_pk=enrolment_pk)
+            if enrolment.student_id.has_pending_issues_id():
+                resolve_pending_issues_form = ResolveIssuesSchoolIDForm(enrolment_pk=enrolment_pk)
 #            elif enrolment.student_id.has_pending_issues_name():
 #                resolve_pending_issues_form = ResolveIssuesSchoolNameForm(enrolment_pk=enrolment_pk)
-#            elif
-            if enrolment.pending_issue_other_class_member:
+            elif enrolment.pending_issue_other_class_member:
                 resolve_pending_issues_form = ResolveIssuesClassForm(enrolment_pk=enrolment_pk)
             else:
                 resolve_pending_issues_form = ResolveIssuesPersonalForm(enrolment_pk=enrolment_pk)

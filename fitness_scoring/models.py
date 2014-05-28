@@ -315,6 +315,12 @@ class Student(models.Model):
     def has_pending_issues_name(self):
         return StudentsSameName.student_has_same_name_issue(self)
 
+    def get_students_with_same_id(self):
+        return StudentsSameID.get_students_with_same_id(self)
+
+    def get_students_with_same_name_not_identified(self):
+        return StudentsSameName.get_students_with_same_name_not_identified(self)
+
     def delete_student_safe(self):
         student_not_used = not StudentClassEnrolment.objects.filter(student_id=self).exists()
         if student_not_used:
@@ -1111,6 +1117,12 @@ class StudentsSameID(models.Model):
                 StudentsSameID.objects.filter(student_2=student).exists())
 
     @staticmethod
+    def get_students_with_same_id(student):
+        students_1 = [student_pair.student_1 for student_pair in StudentsSameID.objects.filter(student_2=student)]
+        students_2 = [student_pair.student_2 for student_pair in StudentsSameID.objects.filter(student_1=student)]
+        return students_1 + students_2
+
+    @staticmethod
     def create_students_same_id(student_1, student_2):
         if student_1.student_id_lowercase == student_2.student_id_lowercase:
             return StudentsSameID.objects.create(student_1=student_1, student_2=student_2)
@@ -1142,6 +1154,16 @@ class StudentsSameName(models.Model):
             if not student_same_name.students_identified_as_individuals:
                 issue = True
         return issue
+
+    @staticmethod
+    def get_students_with_same_name_not_identified(student):
+        student_pairs_1 = StudentsSameName.objects.filter(student_2=student)
+        students_1 = [student_pair.student_1 for student_pair in
+                      student_pairs_1.exclude(students_identified_as_individuals=True)]
+        student_pairs_2 = StudentsSameName.objects.filter(student_1=student)
+        students_2 = [student_pair.student_2 for student_pair in
+                      student_pairs_2.exclude(students_identified_as_individuals=True)]
+        return students_1 + students_2
 
     @staticmethod
     def create_students_same_name(student_1, student_2):
