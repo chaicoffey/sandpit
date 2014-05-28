@@ -944,14 +944,22 @@ class ResolveIssuesClassForm(forms.Form):
 
         enrolment_clicked = StudentClassEnrolment.objects.get(pk=enrolment_pk)
 
-        self.top_text_messages = ['There are multiple result entries in this class for student ' +
-                                  str(enrolment_clicked.student_id),
-                                  'Please select the valid line of results below:']
-        self.bottom_text_messages = ['WARNING: All the other result entries for this student will be deleted']
+        multiple_enrolments = StudentClassEnrolment.objects.filter(class_id=enrolment_clicked.class_id,
+                                                                   student_id=enrolment_clicked.student_id)
+
+        self.top_text_messages = ['The same student cannot have multiple results for the one class', '',
+                                  'Student: ' + str(enrolment_clicked.student_id) + ' has ' +
+                                  str(len(multiple_enrolments)) + ' sets of results entered in class: ' +
+                                  enrolment_clicked.class_id.class_name + ' (' + str(enrolment_clicked.class_id.year) +
+                                  ')', '',
+                                  'Please select the valid set of results from the options below:']
+        self.bottom_text_messages = ['', 'WARNING: All result entries for this student other than the one selected will'
+                                         ' be deleted',
+                                     'If none are valid you will need to delete the last entry directly on the class'
+                                     ' page']
 
         self.fields['enrolment_results'].choices = []
-        for enrolment in StudentClassEnrolment.objects.filter(class_id=enrolment_clicked.class_id,
-                                                              student_id=enrolment_clicked.student_id):
+        for enrolment in multiple_enrolments:
             results_string = ''
             results = enrolment.get_test_results(text=True)
             for result in results:
