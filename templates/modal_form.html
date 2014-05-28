@@ -9,11 +9,11 @@
         {% csrf_token %}
         {% if form %}
             {% if form.top_text_messages %}
-                <div class="help-block text-center">
+                <h5>
                     {% for top_text_message in form.top_text_messages %}
                         {{ top_text_message }}<br>
                     {% endfor %}
-                </div>
+                </h5>
             {% endif %}
             {{ form.non_field_errors }}
             {% for field in form %}
@@ -30,6 +30,13 @@
                     </div>
                 {% endif %}
             {% endfor %}
+            {% if form.bottom_text_messages %}
+                <h5>
+                    {% for bottom_text_message in form.bottom_text_messages %}
+                        {{ bottom_text_message }}<br>
+                    {% endfor %}
+                </h5>
+            {% endif %}
         {% elif prompt_message %}
             {{ prompt_message }}
         {% elif prompt_messages %}

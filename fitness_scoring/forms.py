@@ -882,9 +882,12 @@ class ResolveIssuesPersonalForm(forms.Form):
 
         enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
 
-        self.top_text_messages = ['The student age at the time the tests were performed is invalid',
-                                  'Please update the date the tests were performed and/or the student date of birth'
-                                  ' below:']
+        self.top_text_messages = ['The student age at the time the tests were performed should be between 11 and 19'
+                                  ' years old', '',
+                                  'The calculated age for ' + str(enrolment.student_id) + ' at the time of the tests' +
+                                  ' is ' + str(enrolment.get_student_age_at_time_of_enrolment()), '',
+                                  'To resolve this issue please update the date the tests were performed and/or the'
+                                  ' student date of birth below:']
 
         self.fields['enrolment_pk'].initial = enrolment_pk
         self.fields['date_tests_performed'].initial = enrolment.enrolment_date.strftime('%d/%m/%Y')
@@ -937,33 +940,42 @@ class ResolveIssuesPersonalForm(forms.Form):
 
 
 class ResolveIssuesClassForm(forms.Form):
-    valid_results = forms.ChoiceField(required=True)
+    enrolment_results = forms.ChoiceField(required=True, widget=forms.RadioSelect)
 
     def __init__(self, enrolment_pk, *args, **kwargs):
         super(ResolveIssuesClassForm, self).__init__(*args, **kwargs)
 
         enrolment_clicked = StudentClassEnrolment.objects.get(pk=enrolment_pk)
 
-        self.top_text_messages = ['There are multiple result entries in this class for student ' +
-                                  str(enrolment_clicked.student_id),
-                                  'Please select the valid line of results below:',
-                                  'Warning: All the other result entries for this student will be deleted']
+        multiple_enrolments = StudentClassEnrolment.objects.filter(class_id=enrolment_clicked.class_id,
+                                                                   student_id=enrolment_clicked.student_id)
 
-        self.fields['valid_results'].choices = [('', '')]
-        for enrolment in StudentClassEnrolment.objects.filter(class_id=enrolment_clicked.class_id,
-                                                              student_id=enrolment_clicked.student_id):
+        self.top_text_messages = ['The same student cannot have multiple results for the one class', '',
+                                  'Student: ' + str(enrolment_clicked.student_id) + ' has ' +
+                                  str(len(multiple_enrolments)) + ' sets of results entered in class: ' +
+                                  enrolment_clicked.class_id.class_name + ' (' + str(enrolment_clicked.class_id.year) +
+                                  ')', '',
+                                  'To resolve this issue please select the valid set of results from the options'
+                                  ' below:']
+        self.bottom_text_messages = ['', 'WARNING: All result entries for this student other than the one selected will'
+                                         ' be deleted',
+                                     'If none are valid you will need to delete the last entry directly on the class'
+                                     ' page']
+
+        self.fields['enrolment_results'].choices = []
+        for enrolment in multiple_enrolments:
             results_string = ''
             results = enrolment.get_test_results(text=True)
             for result in results:
                 results_string += result + ', '
-            self.fields['valid_results'].choices.append((enrolment.pk, results_string))
+            self.fields['enrolment_results'].choices.append((enrolment.pk, results_string))
 
-        self.fields['valid_results'].error_messages = {'required': 'Please Select An Enrolment To Keep'}
+        self.fields['enrolment_results'].error_messages = {'required': 'Please Choose The Valid Enrolment'}
 
     def resolve_issues(self):
         resolved = self.is_valid()
         if resolved:
-            enrolment_keeping = StudentClassEnrolment.objects.get(pk=self.cleaned_data['valid_results'])
+            enrolment_keeping = StudentClassEnrolment.objects.get(pk=self.cleaned_data['enrolment_results'])
             enrolments = StudentClassEnrolment.objects.filter(class_id=enrolment_keeping.class_id,
                                                               student_id=enrolment_keeping.student_id)
             for enrolment in enrolments.exclude(pk=enrolment_keeping.pk):
