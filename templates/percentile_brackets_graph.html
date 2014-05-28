@@ -30,7 +30,22 @@
             {% endfor %}
         ];
 
-        $.plot("#percentile_brackets_graph", [ bracket_data ]);
+        var chart_options = {
+            axisLabels: {
+                show: true
+            },
+            xaxes: [{
+                axisLabel: 'Percentile',
+            }],
+            yaxes: [{
+                position: 'left',
+                axisLabel: 'Score',
+            }]
+         };
+
+        $.plot("#percentile_brackets_graph",
+                [{ label: "{{ test_label }}", data: bracket_data }],
+                chart_options);
 
 	});
 </script>
