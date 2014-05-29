@@ -28,7 +28,7 @@ class SchoolMethodTests(TestCase):
     def setUp(self):
         school = School.objects.create(name="Test School")
         adminuser = User.objects.create()
-        User.objects.create(username='testuser', password='testpword')
+        User.objects.create(username='testuser', encrypted_password='testpword')
         Administrator.objects.create(school_id=school, user=adminuser)
 
     def test_delete_school_safe_with_assigned_teachers(self):
@@ -47,7 +47,7 @@ class AdministratorViewTests(SessionTestCase):
     def setUp(self):
         super(AdministratorViewTests, self).setUp()
         school = School.objects.create(name="Test School")
-        adminuser = User.objects.create(username='adminuser', password='adminpword')
+        adminuser = User.objects.create(username='adminuser', encrypted_password='adminpword')
         Administrator.objects.create(school_id=school, user=adminuser)
 
     def test_administrator_view_without_authorisation(self):
@@ -82,7 +82,7 @@ class SchoolListViewTests(SessionTestCase):
     def setUp(self):
         super(SchoolListViewTests, self).setUp()
         school = School.objects.create(name="Test School")
-        adminuser = User.objects.create(username='adminuser', password='adminpword')
+        adminuser = User.objects.create(username='adminuser', encrypted_password='adminpword')
         Administrator.objects.create(school_id=school, user=adminuser)
 
     def test_school_list_view_without_authorisation(self):
@@ -115,7 +115,7 @@ class SchoolAddViewTests(SessionTestCase):
     def setUp(self):
         super(SchoolAddViewTests, self).setUp()
         school = School.objects.create(name="Test School")
-        adminuser = User.objects.create(username='adminuser', password='adminpword')
+        adminuser = User.objects.create(username='adminuser', encrypted_password='adminpword')
         Administrator.objects.create(school_id=school, user=adminuser)
 
     def test_school_add_view_without_authorisation(self):
@@ -187,7 +187,7 @@ class SchoolDeleteViewTests(SessionTestCase):
     def setUp(self):
         super(SchoolDeleteViewTests, self).setUp()
         school = School.objects.create(name="Test School")
-        adminuser = User.objects.create(username='adminuser', password='adminpword')
+        adminuser = User.objects.create(username='adminuser', encrypted_password='adminpword')
         Administrator.objects.create(school_id=school, user=adminuser)
 
     def test_school_delete_view_without_authorisation(self):
