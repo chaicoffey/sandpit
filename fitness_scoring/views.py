@@ -1292,46 +1292,28 @@ def class_enrolment_resolve_pending_issues(request, enrolment_pk):
     enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
     if user_authorised_for_class(request, enrolment.class_id.pk) and enrolment.has_pending_issues():
         if request.POST:
-            if enrolment.student_id.has_pending_issues_id():
-
-                if request.POST['resolver_type'] == 'find_solution':
+            if request.POST['resolver_type'] == 'find_solution':
+                if enrolment.student_id.has_pending_issues_id():
                     resolve_pending_issues_form = ResolveIssuesSchoolIDForm(enrolment_pk=enrolment_pk,
                                                                             data=request.POST)
-                    resolve_method = resolve_pending_issues_form.find_solution()
-                    if resolve_method:
-                        resolve_pending_issues_form = ResolveIssuesForm(enrolment_pk=enrolment_pk,
-                                                                        resolve_method=resolve_method)
                 else:
-                    resolve_pending_issues_form = ResolveIssuesForm(enrolment_pk=enrolment_pk, data=request.POST)
-                    if resolve_pending_issues_form.resolve_issues():
-                        context = {'finish_title': 'Issue Resolved', 'user_message': 'Issue Resolved Successfully'}
-                        return render(request, 'user_message.html', RequestContext(request, context))
-
-                context = {'post_to_url': '/class_enrolment/resolve_pending_issues/' + str(enrolment_pk),
-                           'functionality_name': 'Resolve Pending Issue',
-                           'form': resolve_pending_issues_form}
-                return render(request, 'modal_form.html', RequestContext(request, context))
-
-            elif enrolment.student_id.has_pending_issues_name():
-                resolve_pending_issues_form = ResolveIssuesSchoolNameForm(enrolment_pk=enrolment_pk, data=request.POST)
+                    resolve_pending_issues_form = ResolveIssuesSchoolNameForm(enrolment_pk=enrolment_pk,
+                                                                              data=request.POST)
                 resolve_method = resolve_pending_issues_form.find_solution()
                 if resolve_method:
-                    context = {'finish_title': 'Issue Resolved',
-                               'user_message': resolve_method}
+                    resolve_pending_issues_form = ResolveIssuesForm(enrolment_pk=enrolment_pk,
+                                                                    resolve_method=resolve_method)
+            else:
+                if enrolment.pending_issue_other_class_member:
+                    resolve_pending_issues_form = ResolveIssuesClassForm(enrolment_pk=enrolment_pk, data=request.POST)
+                elif enrolment.pending_issue_personal:
+                    resolve_pending_issues_form = ResolveIssuesPersonalForm(enrolment_pk=enrolment_pk,
+                                                                            data=request.POST)
+                else:
+                    resolve_pending_issues_form = ResolveIssuesForm(enrolment_pk=enrolment_pk, data=request.POST)
+                if resolve_pending_issues_form.resolve_issues():
+                    context = {'finish_title': 'Issue Resolved', 'user_message': 'Issue Resolved Successfully'}
                     return render(request, 'user_message.html', RequestContext(request, context))
-            elif enrolment.pending_issue_other_class_member:
-                resolve_pending_issues_form = ResolveIssuesClassForm(enrolment_pk=enrolment_pk, data=request.POST)
-            else:
-                resolve_pending_issues_form = ResolveIssuesPersonalForm(enrolment_pk=enrolment_pk, data=request.POST)
-            if resolve_pending_issues_form.resolve_issues():
-                context = {'finish_title': 'Issue Resolved',
-                           'user_message': 'Issue Resolved Successfully'}
-                return render(request, 'user_message.html', RequestContext(request, context))
-            else:
-                context = {'post_to_url': '/class_enrolment/resolve_pending_issues/' + str(enrolment_pk),
-                           'functionality_name': 'Resolve Pending Issue',
-                           'form': resolve_pending_issues_form}
-                return render(request, 'modal_form.html', RequestContext(request, context))
         else:
             if enrolment.student_id.has_pending_issues_id():
                 resolve_pending_issues_form = ResolveIssuesSchoolIDForm(enrolment_pk=enrolment_pk)
@@ -1341,10 +1323,11 @@ def class_enrolment_resolve_pending_issues(request, enrolment_pk):
                 resolve_pending_issues_form = ResolveIssuesClassForm(enrolment_pk=enrolment_pk)
             else:
                 resolve_pending_issues_form = ResolveIssuesPersonalForm(enrolment_pk=enrolment_pk)
-            context = {'post_to_url': '/class_enrolment/resolve_pending_issues/' + str(enrolment_pk),
-                       'functionality_name': 'Resolve Pending Issue',
-                       'form': resolve_pending_issues_form}
-            return render(request, 'modal_form.html', RequestContext(request, context))
+
+        context = {'post_to_url': '/class_enrolment/resolve_pending_issues/' + str(enrolment_pk),
+                   'functionality_name': 'Resolve Pending Issue',
+                   'form': resolve_pending_issues_form}
+        return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("Either there is no issue to resolve or you are not authorised to resolve"
                                      " a pending issue for this class")

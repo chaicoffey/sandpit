@@ -873,12 +873,15 @@ class EditTestForm(forms.Form):
 
 
 class ResolveIssuesPersonalForm(forms.Form):
+    resolver_type = forms.CharField(widget=forms.HiddenInput())
     enrolment_pk = forms.CharField(widget=forms.HiddenInput())
     date_tests_performed = forms.DateField(required=True, input_formats=['%d/%m/%Y'])
     student_dob = forms.DateField(required=True, input_formats=['%d/%m/%Y'])
 
     def __init__(self, enrolment_pk, *args, **kwargs):
         super(ResolveIssuesPersonalForm, self).__init__(*args, **kwargs)
+
+        self.fields['resolver_type'].initial = 'solver'
 
         enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
 
@@ -940,10 +943,13 @@ class ResolveIssuesPersonalForm(forms.Form):
 
 
 class ResolveIssuesClassForm(forms.Form):
+    resolver_type = forms.CharField(widget=forms.HiddenInput())
     enrolment_results = forms.ChoiceField(required=True, widget=forms.RadioSelect)
 
     def __init__(self, enrolment_pk, *args, **kwargs):
         super(ResolveIssuesClassForm, self).__init__(*args, **kwargs)
+
+        self.fields['resolver_type'].initial = 'solver'
 
         enrolment_clicked = StudentClassEnrolment.objects.get(pk=enrolment_pk)
 
