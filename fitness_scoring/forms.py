@@ -1163,20 +1163,54 @@ class ResolveIssuesForm(forms.Form):
         self.fields['resolver_type'].initial = 'solver'
         self.fields['resolve_method'].initial = resolve_method
 
-        method = ResolveIssuesForm.get_resolve_method_start(resolve_method)
-        action_enrolment_pk = int(resolve_method[len(method) + 1:])
+        method, action_enrolment_pk = ResolveIssuesForm.get_resolve_method_and_pk(resolve_method)
 
-        self.top_text_messages = [str(enrolment_pk) + ' ' + method + ' ' + str(action_enrolment_pk)]
+        if method == 'From':
+            self.top_text_messages = ['Not implemented yet, no change will occur']
+        elif method == 'To':
+            self.top_text_messages = ['Not implemented yet, no change will occur']
+        elif method == 'ChangeID':
+            self.top_text_messages = ['Not implemented yet, no change will occur']
+        elif method == 'ChangeName':
+            self.top_text_messages = ['Not implemented yet, no change will occur']
+        elif method == 'MarkBothNameApproval':
+            self.top_text_messages = ['Not implemented yet, no change will occur']
+        else:
+            self.top_text_messages = ['Not implemented yet, no change will occur (did not recognise method)']
 
     def resolve_issues(self):
-        return self.is_valid()
+        resolve_the_issue = self.is_valid()
+        if resolve_the_issue:
+
+            resolve_method = self.cleaned_data['resolve_method']
+            method, action_enrolment_pk = ResolveIssuesForm.get_resolve_method_and_pk(resolve_method)
+
+            if method == 'From':
+                pass
+            elif method == 'To':
+                pass
+            elif method == 'ChangeID':
+                pass
+            elif method == 'ChangeName':
+                pass
+            elif method == 'MarkBothNameApproval':
+                pass
+
+        return resolve_the_issue
 
     @staticmethod
-    def get_resolve_method_start(resolve_method):
+    def get_resolve_method_and_pk(resolve_method):
         char_index = 0
-        while resolve_method[char_index] != ':':
+        last_possible_index = len(resolve_method) - 2
+        while (resolve_method[char_index] != ':') and (char_index <= last_possible_index):
             char_index += 1
-        return resolve_method[0:char_index]
+        if char_index <= last_possible_index:
+            method = resolve_method[0:char_index]
+            action_enrolment_pk = int(resolve_method[len(method) + 1:])
+        else:
+            method = None
+            action_enrolment_pk = None
+        return method, action_enrolment_pk
 
 
 class StudentEntryForm:
