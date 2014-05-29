@@ -1155,14 +1155,28 @@ class ResolveIssuesSchoolNameForm(forms.Form):
 
 class ResolveIssuesForm(forms.Form):
     resolver_type = forms.CharField(widget=forms.HiddenInput())
+    resolve_method = forms.CharField(widget=forms.HiddenInput())
 
-    def __init__(self, enrolment_pk, resolve_method=None, *args, **kwargs):
+    def __init__(self, enrolment_pk, resolve_method, *args, **kwargs):
         super(ResolveIssuesForm, self).__init__(*args, **kwargs)
 
         self.fields['resolver_type'].initial = 'solver'
+        self.fields['resolve_method'].initial = resolve_method
+
+        method = ResolveIssuesForm.get_resolve_method_start(resolve_method)
+        action_enrolment_pk = int(resolve_method[len(method) + 1:])
+
+        self.top_text_messages = [str(enrolment_pk) + ' ' + method + ' ' + str(action_enrolment_pk)]
 
     def resolve_issues(self):
-        return True
+        return self.is_valid()
+
+    @staticmethod
+    def get_resolve_method_start(resolve_method):
+        char_index = 0
+        while resolve_method[char_index] != ':':
+            char_index += 1
+        return resolve_method[0:char_index]
 
 
 class StudentEntryForm:
