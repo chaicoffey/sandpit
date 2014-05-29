@@ -1158,10 +1158,37 @@ class ResolveIssuesForm(forms.Form):
         enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
         action_enrolment = StudentClassEnrolment.objects.get(pk=action_enrolment_pk)
 
-        if method == 'From':
-            self.top_text_messages = ['Not implemented yet, no change will occur']
-        elif method == 'To':
-            self.top_text_messages = ['Not implemented yet, no change will occur']
+        if (method == 'From') or (method == 'To'):
+            (enrolment_from, enrolment_to) = ((enrolment, action_enrolment) if (method == 'To')
+                                              else (action_enrolment, enrolment))
+            teacher = TeacherClassAllocation.objects.get(class_id=enrolment.class_id).teacher_id
+            self.top_text_messages = ['You have claimed that Student A and Student B should be the same person'
+                                      ' and the details of Student A are correct and the details of Student B are'
+                                      ' incorrect', '']
+            self.top_text_messages += ResolveIssuesSchoolIDForm.get_text_for_student(enrolment_from, 'A')
+            self.top_text_messages += ResolveIssuesSchoolIDForm.get_text_for_student(enrolment_to, 'B')
+            if TeacherClassAllocation.objects.filter(class_id=enrolment_to.class_id, teacher_id=teacher).exists():
+                self.top_text_messages += ['', 'If you go through with this action than Student Bs result entry details'
+                                               ' will be changed and replaced with Student As']
+                self.top_text_messages += ['', 'If you are sure you are sure you wish to take this action than click'
+                                               ' the "Resolve Pending Issue" button below otherwise click "Cancel"']
+                if ResolveIssuesForm.count_differences(enrolment_from.student_id, enrolment_to.student_id) >= 2:
+                    self.top_text_messages += ['', 'WARNING There are a number of differences between these two'
+                                                   ' students please ensure they are the same student before proceeding'
+                                                   ' with this action']
+                if enrolment_to.class_id != enrolment.class_id:
+                    self.top_text_messages += ['', 'WARNING Just to make you aware proceeding with this action will'
+                                                   ' change the details of a student result entry from another class'
+                                                   ' of yours (not the current class)']
+            else:
+                self.top_text_messages += ['', 'This issue cannot be resolved here as it involves changing the details'
+                                               ' of Student Bs result entry and not being the teacher of that class you'
+                                               ' are not authorised to alter the details',
+                                           'In order to resolve this issue you need to get the teacher of that class'
+                                           ' or the administrator to go to the relevant class page and make the change'
+                                           ' from there',
+                                           'No action will occur if you press either of the "Resolve Pending Issue" or'
+                                           ' "Cancel" buttons below']
         elif method == 'ChangeID':
             self.top_text_messages = ['Not implemented yet, no change will occur']
         elif method == 'ChangeName':
@@ -1185,10 +1212,27 @@ class ResolveIssuesForm(forms.Form):
             enrolment = StudentClassEnrolment.objects.get(pk=self.enrolment_pk)
             action_enrolment = StudentClassEnrolment.objects.get(pk=action_enrolment_pk)
 
-            if method == 'From':
-                pass
-            elif method == 'To':
-                pass
+            if (method == 'From') or (method == 'To'):
+                (enrolment_from, enrolment_to) = ((enrolment, action_enrolment) if (method == 'To')
+                                                  else (action_enrolment, enrolment))
+                teacher = TeacherClassAllocation.objects.get(class_id=enrolment.class_id).teacher_id
+                if TeacherClassAllocation.objects.filter(class_id=enrolment_to.class_id, teacher_id=teacher).exists():
+                    class_to = enrolment_to.class_id
+                    student_from = enrolment_from.student_id
+                    tests_to = class_to.get_tests()
+                    results_to = enrolment_to.get_test_results(text=True)
+                    new_enrolment_date = enrolment_to.enrolment_date
+
+                    enrolment_to.delete_student_class_enrolment_safe()
+                    enrolment_to = class_to.enrol_student_safe(student_id=student_from.student_id,
+                                                               first_name=student_from.first_name,
+                                                               surname=student_from.surname,
+                                                               gender=student_from.gender, dob=student_from.dob,
+                                                               enrolment_date=new_enrolment_date)
+
+                    for result_index in range(len(results_to)):
+                        if results_to[result_index]:
+                            enrolment_to.enter_result_safe(tests_to[result_index], results_to[result_index])
             elif method == 'ChangeID':
                 pass
             elif method == 'ChangeName':
@@ -1211,6 +1255,27 @@ class ResolveIssuesForm(forms.Form):
             method = None
             action_enrolment_pk = None
         return method, action_enrolment_pk
+
+    @staticmethod
+    def count_differences(student_1, student_2):
+        n_differences = 0
+        if student_1.student_id_lowercase != student_2.student_id_lowercase:
+            n_differences += 1
+        if student_1.gender != student_2.gender:
+            n_differences += 1
+        if student_1.dob != student_2.dob:
+            n_differences += 1
+        if not (((student_1.first_name_lowercase == student_2.first_name_lowercase)
+                 and (student_1.surname_lowercase == student_2.surname_lowercase))
+                or ((student_1.first_name_lowercase == student_2.surname_lowercase)
+                and (student_1.surname_lowercase == student_2.first_name_lowercase))):
+            n_differences += 1
+        if ((student_1.first_name_lowercase != student_2.first_name_lowercase)
+            and (student_1.surname_lowercase != student_2.surname_lowercase)
+            and (student_1.first_name_lowercase != student_2.surname_lowercase)
+           and (student_1.surname_lowercase != student_2.first_name_lowercase)):
+            n_differences += 1
+        return n_differences
 
 
 class StudentEntryForm:
