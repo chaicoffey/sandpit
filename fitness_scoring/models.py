@@ -1173,3 +1173,12 @@ class StudentsSameName(models.Model):
                                                    students_identified_as_individuals=False)
         else:
             return None
+
+    @staticmethod
+    def identified_as_individuals_static(student_1, student_2):
+        students_same_name = StudentsSameName.objects.filter(student_1=student_1, student_2=student_2)
+        if students_same_name.exists():
+            students_same_name[0].identified_as_individuals()
+        students_same_name = StudentsSameName.objects.filter(student_1=student_2, student_2=student_1)
+        if students_same_name.exists():
+            students_same_name[0].identified_as_individuals()

@@ -1,7 +1,7 @@
 from django import forms
 from fitness_scoring.models import School, Administrator, Class, Teacher, Student, TestCategory, Test, User
 from fitness_scoring.models import TeacherClassAllocation, ClassTest, TestSet, StudentClassEnrolment
-from fitness_scoring.models import StudentClassTestResult
+from fitness_scoring.models import StudentClassTestResult, StudentsSameName
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
 from fitness_scoring.validators import validate_new_test_name_unique
 from fitness_scoring.validators import validate_no_space, validate_file_size
@@ -1082,10 +1082,10 @@ class ResolveIssuesSchoolNameForm(forms.Form):
                                  enrolment_clicked.student_id.get_students_with_same_name_not_identified()]
 
         self.top_text_messages = ['The following students have the same name (but differ in other details):']
-        self.top_text_messages += ResolveIssuesSchoolNameForm.get_text_for_student(enrolment_clicked, 1)
+        self.top_text_messages += ResolveIssuesSchoolIDForm.get_text_for_student(enrolment_clicked, 1)
         student_count = 2
         for enrolment in enrollment_same_names:
-            self.top_text_messages += ResolveIssuesSchoolNameForm.get_text_for_student(enrolment, student_count)
+            self.top_text_messages += ResolveIssuesSchoolIDForm.get_text_for_student(enrolment, student_count)
             student_count += 1
 
         self.top_text_messages += ['', 'Choose one of the following options to resolve this:']
@@ -1123,17 +1123,6 @@ class ResolveIssuesSchoolNameForm(forms.Form):
             return None
 
     @staticmethod
-    def get_text_for_student(enrolment, student_count):
-        student = enrolment.student_id
-        student_details = ('Student ' + str(student_count) + ':      ' + str(student) + ', ' + str(student.gender) +
-                           ', born ' + student.dob.strftime('%d/%m/%Y'))
-        class_instance = enrolment.class_id
-        teacher = TeacherClassAllocation.objects.get(class_id=class_instance).teacher_id
-        class_details = ('   (enrolled in ' + class_instance.class_name + ' (' + str(class_instance.year) +
-                         '), Teacher: ' + str(teacher) + ')')
-        return [student_details, class_details]
-
-    @staticmethod
     def get_text_for_student_change(student_count):
         return 'Student ' + str(student_count) + 's name was entered incorrectly'
 
@@ -1160,10 +1149,14 @@ class ResolveIssuesForm(forms.Form):
     def __init__(self, enrolment_pk, resolve_method, *args, **kwargs):
         super(ResolveIssuesForm, self).__init__(*args, **kwargs)
 
+        self.enrolment_pk = enrolment_pk
+
         self.fields['resolver_type'].initial = 'solver'
         self.fields['resolve_method'].initial = resolve_method
 
         method, action_enrolment_pk = ResolveIssuesForm.get_resolve_method_and_pk(resolve_method)
+        enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
+        action_enrolment = StudentClassEnrolment.objects.get(pk=action_enrolment_pk)
 
         if method == 'From':
             self.top_text_messages = ['Not implemented yet, no change will occur']
@@ -1174,7 +1167,12 @@ class ResolveIssuesForm(forms.Form):
         elif method == 'ChangeName':
             self.top_text_messages = ['Not implemented yet, no change will occur']
         elif method == 'MarkBothNameApproval':
-            self.top_text_messages = ['Not implemented yet, no change will occur']
+            self.top_text_messages = ['You have claimed that the two students listed below are different people even'
+                                      ' though they have the same name', '']
+            self.top_text_messages += ResolveIssuesSchoolIDForm.get_text_for_student(enrolment, 'A')
+            self.top_text_messages += ResolveIssuesSchoolIDForm.get_text_for_student(action_enrolment, 'B')
+            self.top_text_messages += ['', 'If you are sure this is correct than click the "Resolve Pending Issue"'
+                                           ' button below otherwise click "Cancel"']
         else:
             self.top_text_messages = ['Not implemented yet, no change will occur (did not recognise method)']
 
@@ -1184,6 +1182,8 @@ class ResolveIssuesForm(forms.Form):
 
             resolve_method = self.cleaned_data['resolve_method']
             method, action_enrolment_pk = ResolveIssuesForm.get_resolve_method_and_pk(resolve_method)
+            enrolment = StudentClassEnrolment.objects.get(pk=self.enrolment_pk)
+            action_enrolment = StudentClassEnrolment.objects.get(pk=action_enrolment_pk)
 
             if method == 'From':
                 pass
@@ -1194,7 +1194,7 @@ class ResolveIssuesForm(forms.Form):
             elif method == 'ChangeName':
                 pass
             elif method == 'MarkBothNameApproval':
-                pass
+                StudentsSameName.identified_as_individuals_static(enrolment.student_id, action_enrolment.student_id)
 
         return resolve_the_issue
 
