@@ -1157,11 +1157,11 @@ class ResolveIssuesForm(forms.Form):
         method, action_enrolment_pk = ResolveIssuesForm.get_resolve_method_and_pk(resolve_method)
         enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
         action_enrolment = StudentClassEnrolment.objects.get(pk=action_enrolment_pk)
+        teacher = TeacherClassAllocation.objects.get(class_id=enrolment.class_id).teacher_id
 
         if (method == 'From') or (method == 'To'):
             (enrolment_from, enrolment_to) = ((enrolment, action_enrolment) if (method == 'To')
                                               else (action_enrolment, enrolment))
-            teacher = TeacherClassAllocation.objects.get(class_id=enrolment.class_id).teacher_id
             self.top_text_messages = ['You have claimed that Student A and Student B should be the same person'
                                       ' and the details of Student A are correct and the details of Student B are'
                                       ' incorrect', '']
@@ -1190,7 +1190,28 @@ class ResolveIssuesForm(forms.Form):
                                            'No action will occur if you press either of the "Resolve Pending Issue" or'
                                            ' "Cancel" buttons below']
         elif method == 'ChangeID':
-            self.top_text_messages = ['Not implemented yet, no change will occur']
+            self.top_text_messages = ['You have claimed that the student listed below has an incorrectly entered'
+                                      ' student id', '']
+            self.top_text_messages += ResolveIssuesSchoolIDForm.get_text_for_student(action_enrolment, 'A')
+            if TeacherClassAllocation.objects.filter(class_id=action_enrolment.class_id, teacher_id=teacher).exists():
+                self.top_text_messages += ['', 'Please enter the correct student id below and click'
+                                               ' "Resolve Pending Issue"']
+                self.fields['student_id'] = forms.CharField(max_length=30, required=True)
+                self.fields['student_id'].initial = action_enrolment.student_id.student_id
+                self.fields['student_id'].error_messages = {'required': 'Please Enter New Student ID'}
+                if action_enrolment.class_id != enrolment.class_id:
+                    self.bottom_text_messages = ['', 'WARNING Just to make you aware proceeding with this action will'
+                                                     ' change the details of a student result entry from another class'
+                                                     ' of yours (not the current class)']
+            else:
+                self.top_text_messages += ['', 'This issue cannot be resolved here as it involves changing the details'
+                                               ' of Student As result entry and not being the teacher of that class you'
+                                               ' are not authorised to alter the details',
+                                           'In order to resolve this issue you need to get the teacher of that class'
+                                           ' or the administrator to go to the relevant class page and make the change'
+                                           ' from there',
+                                           'No action will occur if you press either of the "Resolve Pending Issue" or'
+                                           ' "Cancel" buttons below']
         elif method == 'ChangeName':
             self.top_text_messages = ['Not implemented yet, no change will occur']
         elif method == 'MarkBothNameApproval':
@@ -1211,11 +1232,11 @@ class ResolveIssuesForm(forms.Form):
             method, action_enrolment_pk = ResolveIssuesForm.get_resolve_method_and_pk(resolve_method)
             enrolment = StudentClassEnrolment.objects.get(pk=self.enrolment_pk)
             action_enrolment = StudentClassEnrolment.objects.get(pk=action_enrolment_pk)
+            teacher = TeacherClassAllocation.objects.get(class_id=enrolment.class_id).teacher_id
 
             if (method == 'From') or (method == 'To'):
                 (enrolment_from, enrolment_to) = ((enrolment, action_enrolment) if (method == 'To')
                                                   else (action_enrolment, enrolment))
-                teacher = TeacherClassAllocation.objects.get(class_id=enrolment.class_id).teacher_id
                 if TeacherClassAllocation.objects.filter(class_id=enrolment_to.class_id, teacher_id=teacher).exists():
                     class_to = enrolment_to.class_id
                     student_from = enrolment_from.student_id
@@ -1233,8 +1254,28 @@ class ResolveIssuesForm(forms.Form):
                     for result_index in range(len(results_to)):
                         if results_to[result_index]:
                             enrolment_to.enter_result_safe(tests_to[result_index], results_to[result_index])
+
             elif method == 'ChangeID':
-                pass
+                teacher_allocation = TeacherClassAllocation.objects.filter(class_id=action_enrolment.class_id,
+                                                                           teacher_id=teacher)
+                if teacher_allocation.exists():
+                    class_instance = action_enrolment.class_id
+                    student = action_enrolment.student_id
+                    tests = class_instance.get_tests()
+                    results = action_enrolment.get_test_results(text=True)
+                    new_enrolment_date = action_enrolment.enrolment_date
+
+                    action_enrolment.delete_student_class_enrolment_safe()
+                    action_enrolment = class_instance.enrol_student_safe(student_id=self.cleaned_data['student_id'],
+                                                                         first_name=student.first_name,
+                                                                         surname=student.surname,
+                                                                         gender=student.gender, dob=student.dob,
+                                                                         enrolment_date=new_enrolment_date)
+
+                    for result_index in range(len(results)):
+                        if results[result_index]:
+                            action_enrolment.enter_result_safe(tests[result_index], results[result_index])
+
             elif method == 'ChangeName':
                 pass
             elif method == 'MarkBothNameApproval':
