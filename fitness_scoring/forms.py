@@ -1213,7 +1213,31 @@ class ResolveIssuesForm(forms.Form):
                                            'No action will occur if you press either of the "Resolve Pending Issue" or'
                                            ' "Cancel" buttons below']
         elif method == 'ChangeName':
-            self.top_text_messages = ['Not implemented yet, no change will occur']
+            self.top_text_messages = ['You have claimed that the student listed below has an incorrectly entered'
+                                      ' name', '']
+            self.top_text_messages += ResolveIssuesSchoolIDForm.get_text_for_student(action_enrolment, 'A')
+            if TeacherClassAllocation.objects.filter(class_id=action_enrolment.class_id, teacher_id=teacher).exists():
+                self.top_text_messages += ['', 'Please enter the correct student name below and click'
+                                               ' "Resolve Pending Issue"']
+                self.fields['first_name'] = forms.CharField(max_length=100, required=True)
+                self.fields['surname'] = forms.CharField(max_length=100, required=True)
+                self.fields['first_name'].initial = action_enrolment.student_id.first_name
+                self.fields['surname'].initial = action_enrolment.student_id.surname
+                self.fields['first_name'].error_messages = {'required': 'Please Enter New First Name'}
+                self.fields['surname'].error_messages = {'required': 'Please Enter New Surname'}
+                if action_enrolment.class_id != enrolment.class_id:
+                    self.bottom_text_messages = ['', 'WARNING Just to make you aware proceeding with this action will'
+                                                     ' change the details of a student result entry from another class'
+                                                     ' of yours (not the current class)']
+            else:
+                self.top_text_messages += ['', 'This issue cannot be resolved here as it involves changing the details'
+                                               ' of Student As result entry and not being the teacher of that class you'
+                                               ' are not authorised to alter the details',
+                                           'In order to resolve this issue you need to get the teacher of that class'
+                                           ' or the administrator to go to the relevant class page and make the change'
+                                           ' from there',
+                                           'No action will occur if you press either of the "Resolve Pending Issue" or'
+                                           ' "Cancel" buttons below']
         elif method == 'MarkBothNameApproval':
             self.top_text_messages = ['You have claimed that the two students listed below are different people even'
                                       ' though they have the same name', '']
@@ -1256,6 +1280,7 @@ class ResolveIssuesForm(forms.Form):
                             enrolment_to.enter_result_safe(tests_to[result_index], results_to[result_index])
 
             elif method == 'ChangeID':
+
                 teacher_allocation = TeacherClassAllocation.objects.filter(class_id=action_enrolment.class_id,
                                                                            teacher_id=teacher)
                 if teacher_allocation.exists():
@@ -1277,7 +1302,27 @@ class ResolveIssuesForm(forms.Form):
                             action_enrolment.enter_result_safe(tests[result_index], results[result_index])
 
             elif method == 'ChangeName':
-                pass
+
+                teacher_allocation = TeacherClassAllocation.objects.filter(class_id=action_enrolment.class_id,
+                                                                           teacher_id=teacher)
+                if teacher_allocation.exists():
+                    class_instance = action_enrolment.class_id
+                    student = action_enrolment.student_id
+                    tests = class_instance.get_tests()
+                    results = action_enrolment.get_test_results(text=True)
+                    new_enrolment_date = action_enrolment.enrolment_date
+
+                    action_enrolment.delete_student_class_enrolment_safe()
+                    action_enrolment = class_instance.enrol_student_safe(student_id=student.student_id,
+                                                                         first_name=self.cleaned_data['first_name'],
+                                                                         surname=self.cleaned_data['surname'],
+                                                                         gender=student.gender, dob=student.dob,
+                                                                         enrolment_date=new_enrolment_date)
+
+                    for result_index in range(len(results)):
+                        if results[result_index]:
+                            action_enrolment.enter_result_safe(tests[result_index], results[result_index])
+
             elif method == 'MarkBothNameApproval':
                 StudentsSameName.identified_as_individuals_static(enrolment.student_id, action_enrolment.student_id)
 
