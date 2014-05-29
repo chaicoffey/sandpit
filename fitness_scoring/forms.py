@@ -986,10 +986,13 @@ class ResolveIssuesClassForm(forms.Form):
 
 
 class ResolveIssuesSchoolIDForm(forms.Form):
+    resolver_type = forms.CharField(widget=forms.HiddenInput())
     resolution_options = forms.ChoiceField(required=True, widget=forms.RadioSelect)
 
     def __init__(self, enrolment_pk, *args, **kwargs):
         super(ResolveIssuesSchoolIDForm, self).__init__(*args, **kwargs)
+
+        self.fields['resolver_type'].initial = 'find_solution'
 
         enrolment_clicked = StudentClassEnrolment.objects.get(pk=enrolment_pk)
         enrollment_same_ids = [StudentClassEnrolment.objects.filter(student_id=student)[0]
@@ -1028,7 +1031,7 @@ class ResolveIssuesSchoolIDForm(forms.Form):
 
         self.exclude_showing_label = True
 
-    def resolve_issues(self):
+    def find_solution(self):
         if self.is_valid():
             return self.cleaned_data['resolution_options']
         else:
@@ -1060,10 +1063,13 @@ class ResolveIssuesSchoolIDForm(forms.Form):
 
 
 class ResolveIssuesSchoolNameForm(forms.Form):
+    resolver_type = forms.CharField(widget=forms.HiddenInput())
     resolution_options = forms.ChoiceField(required=True, widget=forms.RadioSelect)
 
     def __init__(self, enrolment_pk, *args, **kwargs):
         super(ResolveIssuesSchoolNameForm, self).__init__(*args, **kwargs)
+
+        self.fields['resolver_type'].initial = 'find_solution'
 
         enrolment_clicked = StudentClassEnrolment.objects.get(pk=enrolment_pk)
         enrollment_same_names = [StudentClassEnrolment.objects.filter(student_id=student)[0] for student in
@@ -1104,7 +1110,7 @@ class ResolveIssuesSchoolNameForm(forms.Form):
 
         self.exclude_showing_label = True
 
-    def resolve_issues(self):
+    def find_solution(self):
         if self.is_valid():
             return self.cleaned_data['resolution_options']
         else:
@@ -1139,6 +1145,18 @@ class ResolveIssuesSchoolNameForm(forms.Form):
         this_student = 'Student 1'
         other_student = 'Student ' + str(student_count_other)
         return this_student + ' and ' + other_student + ' are different people and both there names are correct'
+
+
+class ResolveIssuesForm(forms.Form):
+    resolver_type = forms.CharField(widget=forms.HiddenInput())
+
+    def __init__(self, enrolment_pk, resolve_method=None, *args, **kwargs):
+        super(ResolveIssuesForm, self).__init__(*args, **kwargs)
+
+        self.fields['resolver_type'].initial = 'solver'
+
+    def resolve_issues(self):
+        return True
 
 
 class StudentEntryForm:
