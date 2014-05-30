@@ -881,6 +881,7 @@ def class_list(request):
     user_type = request.session.get('user_type', None)
     if (user_type == 'Administrator') or (user_type == 'Teacher'):
         user = User.objects.get(username=request.session.get('username', None))
+        item_list_add_button_options = [['item_list_modal_load_link', '/class/add/', 'Add Class']]
         if user_type == 'Teacher':
             teacher = Teacher.objects.get(user=user)
             class_items = [(allocation.class_id, allocation.class_id.get_display_items_teacher())
@@ -891,13 +892,13 @@ def class_list(request):
             class_items = [(class_instance, class_instance.get_display_items()) for class_instance
                            in Class.objects.filter(school_id=school)]
             class_list_headings = Class.get_display_list_headings()
+            item_list_add_button_options.append(['item_list_modal_load_link', '/class/adds/', 'Add Classes'])
         context = {
             'item_list': class_items,
             'item_list_title': 'Class List',
             'item_list_table_headings': class_list_headings,
             'item_list_buttons': [
-                ['+', [['item_list_modal_load_link', '/class/add/', 'Add Class'],
-                       ['item_list_modal_load_link', '/class/adds/', 'Add Classes']]]
+                ['+', item_list_add_button_options]
             ],
             'item_list_options': [
                 ['item_list_modal_load_link', '/class/edit/', 'pencil', 'edit class'],
