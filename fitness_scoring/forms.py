@@ -925,20 +925,12 @@ class ResolveIssuesPersonalForm(forms.Form):
         if resolved:
             student_dob = self.cleaned_data['student_dob']
             date_tests_performed = self.cleaned_data['date_tests_performed']
-            enrolment_old = StudentClassEnrolment.objects.get(pk=self.cleaned_data['enrolment_pk'])
-            class_instance = enrolment_old.class_id
-            tests = class_instance.get_tests()
-            test_results = enrolment_old.get_test_results()
-            student_old = enrolment_old.student_id
-            enrolment_old.delete_student_class_enrolment_safe()
-            enrolment = class_instance.enrol_student_safe(student_id=student_old.student_id,
-                                                          first_name=student_old.first_name,
-                                                          surname=student_old.surname, gender=student_old.gender,
-                                                          dob=student_dob, enrolment_date=date_tests_performed)
-
-            for test_index in range(len(tests)):
-                if test_results[test_index]:
-                    enrolment.enter_result_safe(tests[test_index], test_results[test_index])
+            enrolment = StudentClassEnrolment.objects.get(pk=self.cleaned_data['enrolment_pk'])
+            student = enrolment.student_id
+            StudentClassEnrolment.edit_student_class_enrolment_safe(
+                enrolment, student_id=student.student_id, first_name=student.first_name, surname=student.surname,
+                gender=student.gender, dob=student_dob, enrolment_date=date_tests_performed
+            )
         return resolved
 
 
