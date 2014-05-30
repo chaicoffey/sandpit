@@ -159,17 +159,18 @@ def teacher_home(request):
 
         teacher = Teacher.objects.get(user=User.objects.get(username=request.session.get('username')))
 
-        steps = [('Add Classes For Year', 'teacher_add_classes'),
+        steps = [('Change Password', 'change_password'),
+                 ('Add Classes For Year', 'teacher_add_classes'),
                  ('Add Tests To Classes For The Year', 'teacher_add_tests'),
                  ('Run Tests (*temp* see my sheet for what instructions should contain *temp*)', 'teacher_run_tests'),
                  ('Get Students To Enter Results', 'teacher_student_enter_results'),
                  ('Approve Entries For Class', 'teacher_approve_entries'),
                  ('View Results', 'teacher_view_results')]
-        non_optional_steps = 6
+        non_optional_steps = 7
         steps_formatted = []
         for step_index in range(non_optional_steps):
             (step_text, instructions_name) = steps[step_index]
-            steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
+            steps_formatted.append(('Step ' + str(step_index) + ': ' + step_text,
                                     '/instructions_page/' + instructions_name))
 
         heading = teacher.first_name + ' ' + teacher.surname + ' (' + teacher.school_id.name + ')'
@@ -205,19 +206,20 @@ def administrator_home(request):
 
         administrator = Administrator.objects.get(user=User.objects.get(username=request.session.get('username')))
 
-        steps = [('Add Teachers', 'administrator_add_teacher'),
+        steps = [('Change Password', 'change_password'),
+                 ('Add Teachers', 'administrator_add_teacher'),
                  ('Add Classes For Teachers For The Year', 'administrator_add_classes'),
                  ('Add Tests To Classes For The Year', 'administrator_add_tests')]
-        non_optional_steps = 1
+        non_optional_steps = 2
         steps_formatted = []
         for step_index in range(non_optional_steps):
             (step_text, instructions_name) = steps[step_index]
-            steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
+            steps_formatted.append(('Step ' + str(step_index) + ': ' + step_text,
                                     '/instructions_page/' + instructions_name))
         steps_optional_formatted = []
         for step_index in range(non_optional_steps, len(steps)):
             (step_text, instructions_name) = steps[step_index]
-            steps_optional_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
+            steps_optional_formatted.append(('Step ' + str(step_index) + ': ' + step_text,
                                              '/instructions_page/' + instructions_name))
 
         context = {'user_home_page_title': 'Administrator: ' + administrator.school_id.name,
@@ -258,7 +260,9 @@ def superuser_home(request):
 
 def instructions_page(request, instructions_name):
     user_type = request.session.get('user_type', None)
-    if (instructions_name == 'administrator_add_teacher') and user_type == 'Administrator':
+    if (instructions_name == 'change_password') and (user_type in ('Administrator', 'Teacher')):
+        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+    elif (instructions_name == 'administrator_add_teacher') and user_type == 'Administrator':
         return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
     elif instructions_name == 'administrator_add_classes' and user_type == 'Administrator':
         return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
