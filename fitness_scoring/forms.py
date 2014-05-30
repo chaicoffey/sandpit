@@ -1245,6 +1245,9 @@ class ResolveIssuesForm(forms.Form):
             self.top_text_messages += ResolveIssuesSchoolIDForm.get_text_for_student(action_enrolment, 'B')
             self.top_text_messages += ['', 'If you are sure this is correct than click the "Resolve Pending Issue"'
                                            ' button below otherwise click "Cancel"']
+            if ResolveIssuesForm.count_differences(enrolment.student_id, action_enrolment.student_id) < 2:
+                    self.top_text_messages += ['', 'WARNING The two students are very similar. It seems unlikely that'
+                                                   ' they are different people']
         else:
             self.top_text_messages = ['Not implemented yet, no change will occur (did not recognise method)']
 
