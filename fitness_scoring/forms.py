@@ -1269,47 +1269,30 @@ class ResolveIssuesForm(forms.Form):
 
             elif method == 'ChangeID':
 
-                teacher_allocation = TeacherClassAllocation.objects.filter(class_id=action_enrolment.class_id,
-                                                                           teacher_id=teacher)
+                teacher_allocation = TeacherClassAllocation.objects.filter(
+                    class_id=action_enrolment.class_id, teacher_id=teacher)
                 if teacher_allocation.exists():
-                    class_instance = action_enrolment.class_id
                     student = action_enrolment.student_id
-                    tests = class_instance.get_tests()
-                    results = action_enrolment.get_test_results(text=True)
                     new_enrolment_date = action_enrolment.enrolment_date
-
-                    action_enrolment.delete_student_class_enrolment_safe()
-                    action_enrolment = class_instance.enrol_student_safe(student_id=self.cleaned_data['student_id'],
-                                                                         first_name=student.first_name,
-                                                                         surname=student.surname,
-                                                                         gender=student.gender, dob=student.dob,
-                                                                         enrolment_date=new_enrolment_date)
-
-                    for result_index in range(len(results)):
-                        if results[result_index]:
-                            action_enrolment.enter_result_safe(tests[result_index], results[result_index])
+                    StudentClassEnrolment.edit_student_class_enrolment_safe(
+                        action_enrolment, student_id=self.cleaned_data['student_id'], first_name=student.first_name,
+                        surname=student.surname, gender=student.gender, dob=student.dob,
+                        enrolment_date=new_enrolment_date
+                    )
 
             elif method == 'ChangeName':
 
-                teacher_allocation = TeacherClassAllocation.objects.filter(class_id=action_enrolment.class_id,
-                                                                           teacher_id=teacher)
+                teacher_allocation = TeacherClassAllocation.objects.filter(
+                    class_id=action_enrolment.class_id, teacher_id=teacher)
                 if teacher_allocation.exists():
-                    class_instance = action_enrolment.class_id
                     student = action_enrolment.student_id
-                    tests = class_instance.get_tests()
-                    results = action_enrolment.get_test_results(text=True)
                     new_enrolment_date = action_enrolment.enrolment_date
 
-                    action_enrolment.delete_student_class_enrolment_safe()
-                    action_enrolment = class_instance.enrol_student_safe(student_id=student.student_id,
-                                                                         first_name=self.cleaned_data['first_name'],
-                                                                         surname=self.cleaned_data['surname'],
-                                                                         gender=student.gender, dob=student.dob,
-                                                                         enrolment_date=new_enrolment_date)
-
-                    for result_index in range(len(results)):
-                        if results[result_index]:
-                            action_enrolment.enter_result_safe(tests[result_index], results[result_index])
+                    StudentClassEnrolment.edit_student_class_enrolment_safe(
+                        action_enrolment, student_id=student.student_id, first_name=self.cleaned_data['first_name'],
+                        surname=self.cleaned_data['surname'], gender=student.gender, dob=student.dob,
+                        enrolment_date=new_enrolment_date
+                    )
 
             elif method == 'MarkBothNameApproval':
                 StudentsSameName.identified_as_individuals_static(enrolment.student_id, action_enrolment.student_id)
