@@ -533,8 +533,11 @@ class Class(models.Model):
     def create_class_errors(year, class_name, school_id, teacher_id):
         error_message = None
 
-        if Class.objects.filter(year=year, class_name=class_name, school_id=school_id).exists():
-            error_message = "Class Already Exists"
+        class_instance = Class.objects.filter(year=year, class_name=class_name, school_id=school_id)
+        if class_instance.exists():
+            teacher = TeacherClassAllocation.objects.get(class_id=class_instance[0]).teacher_id
+            extra_message = ", Assigned To Teacher: " + str(teacher) if teacher != teacher_id else ''
+            error_message = class_name + " (" + str(year) + ") Already Exists" + extra_message
 
         if teacher_id.school_id != school_id:
             error_message = "Teacher is not in this school"
