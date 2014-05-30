@@ -1017,6 +1017,19 @@ class StudentClassEnrolment(models.Model):
         enrolment = StudentClassEnrolment.objects.get(pk=enrolment.pk)  # Need to do this due to bug in updating flags
         return enrolment
 
+    @staticmethod
+    def edit_student_class_enrolment_safe(enrolment, student_id, first_name, surname, gender, dob, enrolment_date):
+        class_instance = enrolment.class_id
+        tests = class_instance.get_tests()
+        results = enrolment.get_test_results()
+        enrolment.delete_student_class_enrolment_safe()
+        enrolment_new = class_instance.enrol_student_safe(student_id=student_id, first_name=first_name, surname=surname,
+                                                          gender=gender, dob=dob, enrolment_date=enrolment_date)
+        for test_index in range(len(tests)):
+            if results[test_index]:
+                enrolment_new.enter_result_safe(tests[test_index], results[test_index])
+        return enrolment_new
+
 
 class ClassTest(models.Model):
     class_id = models.ForeignKey(Class)

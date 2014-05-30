@@ -1602,7 +1602,7 @@ class StudentEntryEditForm:
                 is_valid = False
 
         if is_valid:
-            enrolment_old = StudentClassEnrolment.objects.get(pk=self.enrolment_pk)
+            enrolment = StudentClassEnrolment.objects.get(pk=self.enrolment_pk)
             student_id = None
             first_name = None
             surname = None
@@ -1620,34 +1620,29 @@ class StudentEntryEditForm:
                 elif field.name == 'DOB':
                     dob = datetime.datetime.strptime(self.data[field.name], '%d/%m/%Y').date()
 
-            class_instance = enrolment_old.class_id
-            student_old = enrolment_old.student_id
+            class_instance = enrolment.class_id
+            student_old = enrolment.student_id
             tests = class_instance.get_tests()
             new_enrolment_date = datetime.datetime.strptime(self.data['Date_Tests_Were_Performed'], '%d/%m/%Y').date()
+
             if ((student_old.student_id != student_id) or (student_old.first_name != first_name) or
                     (student_old.surname != surname) or (student_old.gender != gender) or (student_old.dob != dob) or
-                    (enrolment_old.enrolment_date != new_enrolment_date)):
-                enrolment_old.delete_student_class_enrolment_safe()
-                enrolment = class_instance.enrol_student_safe(student_id=student_id, first_name=first_name,
-                                                              surname=surname, gender=gender, dob=dob,
-                                                              enrolment_date=new_enrolment_date)
+                    (enrolment.enrolment_date != new_enrolment_date)):
 
-                for test in tests:
-                    data_label = StudentEntryForm.get_name(test.test_name)
-                    if self.data[data_label]:
+                enrolment = StudentClassEnrolment.edit_student_class_enrolment_safe(
+                    enrolment=enrolment, student_id=student_id, first_name=first_name, surname=surname, gender=gender,
+                    dob=dob, enrolment_date=new_enrolment_date
+                )
+
+            for test in tests:
+                data_label = StudentEntryForm.get_name(test.test_name)
+                result = self.data[data_label]
+                if result:
+                    test_result = StudentClassTestResult.objects.filter(student_class_enrolment=enrolment, test=test)
+                    if not test_result.exists():
                         enrolment.enter_result_safe(test, self.data[data_label])
-
-            else:
-                for test in tests:
-                    data_label = StudentEntryForm.get_name(test.test_name)
-                    result = self.data[data_label]
-                    if result:
-                        test_result = StudentClassTestResult.objects.filter(student_class_enrolment=enrolment_old,
-                                                                            test=test)
-                        if not test_result.exists():
-                            enrolment_old.enter_result_safe(test, self.data[data_label])
-                        elif test_result[0].result != result:
-                            enrolment_old.edit_result_safe(test, self.data[data_label])
+                    elif test_result[0].result != result:
+                        enrolment.edit_result_safe(test, self.data[data_label])
 
         return is_valid
 
