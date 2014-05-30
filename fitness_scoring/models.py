@@ -1022,9 +1022,12 @@ class StudentClassEnrolment(models.Model):
         class_instance = enrolment.class_id
         tests = class_instance.get_tests()
         results = enrolment.get_test_results()
+        approval_status = enrolment.approval_status
         enrolment.delete_student_class_enrolment_safe()
         enrolment_new = class_instance.enrol_student_safe(student_id=student_id, first_name=first_name, surname=surname,
                                                           gender=gender, dob=dob, enrolment_date=enrolment_date)
+        enrolment_new.approval_status = approval_status
+        enrolment_new.save()
         for test_index in range(len(tests)):
             if results[test_index]:
                 enrolment_new.enter_result_safe(tests[test_index], results[test_index])
