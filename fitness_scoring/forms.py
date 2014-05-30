@@ -1254,25 +1254,18 @@ class ResolveIssuesForm(forms.Form):
             teacher = TeacherClassAllocation.objects.get(class_id=enrolment.class_id).teacher_id
 
             if (method == 'From') or (method == 'To'):
-                (enrolment_from, enrolment_to) = ((enrolment, action_enrolment) if (method == 'To')
-                                                  else (action_enrolment, enrolment))
+
+                (enrolment_from, enrolment_to) = (
+                    (enrolment, action_enrolment) if (method == 'To') else (action_enrolment, enrolment)
+                )
                 if TeacherClassAllocation.objects.filter(class_id=enrolment_to.class_id, teacher_id=teacher).exists():
-                    class_to = enrolment_to.class_id
                     student_from = enrolment_from.student_id
-                    tests_to = class_to.get_tests()
-                    results_to = enrolment_to.get_test_results(text=True)
                     new_enrolment_date = enrolment_to.enrolment_date
-
-                    enrolment_to.delete_student_class_enrolment_safe()
-                    enrolment_to = class_to.enrol_student_safe(student_id=student_from.student_id,
-                                                               first_name=student_from.first_name,
-                                                               surname=student_from.surname,
-                                                               gender=student_from.gender, dob=student_from.dob,
-                                                               enrolment_date=new_enrolment_date)
-
-                    for result_index in range(len(results_to)):
-                        if results_to[result_index]:
-                            enrolment_to.enter_result_safe(tests_to[result_index], results_to[result_index])
+                    StudentClassEnrolment.edit_student_class_enrolment_safe(
+                        enrolment_to, student_id=student_from.student_id, first_name=student_from.first_name,
+                        surname=student_from.surname, gender=student_from.gender, dob=student_from.dob,
+                        enrolment_date=new_enrolment_date
+                    )
 
             elif method == 'ChangeID':
 
