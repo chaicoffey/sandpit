@@ -14,8 +14,7 @@ from fitness_scoring.forms import AssignTestToClassForm, SaveClassTestsAsTestSet
 from fitness_scoring.forms import ResolveIssuesPersonalForm, ResolveIssuesClassForm
 from fitness_scoring.forms import ResolveIssuesSchoolIDForm, ResolveIssuesSchoolNameForm, ResolveIssuesForm
 from fitness_scoring.forms import StudentEntryForm, StudentEntryEditForm
-from pe_site.settings import DEFAULT_FROM_EMAIL
-from django.core.mail import send_mail
+from fitness_scoring.user_emails import send_email_user_reset
 
 
 def login_user(request):
@@ -421,14 +420,7 @@ def school_reset_password(request, school_pk):
         administrator = Administrator.objects.get(school_id=School.objects.get(pk=school_pk))
         if request.POST:
             new_password = administrator.reset_password()
-            send_mail('Fitness Testing App - Administrator Password Reset',
-                      ('Hi,\n\n'
-                       'Your administrator password has been reset (details below)\n\n'
-                       'username: ' + administrator.user.username + '\n'
-                       'password: ' + new_password + '\n\n'
-                       'Regards,\n' +
-                       'Fitness testing app team\n'),
-                      DEFAULT_FROM_EMAIL, [administrator.email])
+            send_email_user_reset(administrator.email, administrator.user.username, new_password, False)
             context = {'finish_title': 'Password Reset',
                        'user_message': 'Password Reset For User: ' + str(administrator)}
             return render(request, 'user_message.html', RequestContext(request, context))
@@ -861,14 +853,7 @@ def teacher_reset_password(request, teacher_pk):
         teacher = Teacher.objects.get(pk=teacher_pk)
         if request.POST:
             new_password = teacher.reset_password()
-            send_mail('Fitness Testing App - Teacher Password Reset',
-                      ('Hi,\n\n'
-                       'Your password has been reset (details below)\n\n'
-                       'username: ' + teacher.user.username + '\n'
-                       'password: ' + new_password + '\n\n'
-                       'Regards,\n' +
-                       'Fitness testing app team\n'),
-                      DEFAULT_FROM_EMAIL, [teacher.email])
+            send_email_user_reset(teacher.email, teacher.user.username, new_password, True)
             context = {'finish_title': 'Password Reset',
                        'user_message': 'Password Reset For User: ' + str(teacher)}
             return render(request, 'user_message.html', RequestContext(request, context))
