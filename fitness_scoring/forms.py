@@ -747,7 +747,7 @@ class EditMajorTestCategoryForm(forms.Form):
             validate_new_major_test_category_name_unique(major_test_category_pk=major_test_category_pk)
         ]
 
-    def edit_test_category(self):
+    def edit_major_test_category(self):
         major_test_category_edited = self.is_valid()
         if major_test_category_edited:
             major_test_category_pk = self.cleaned_data['major_test_category_pk']

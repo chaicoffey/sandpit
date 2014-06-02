@@ -569,8 +569,8 @@ class MajorTestCategory(models.Model):
 
     def delete_major_test_category_errors(self):
         error_message = None
-        if Test.objects.filter(major_test_category_name=self).exists():
-            error_message = 'Test(s) Exist In This Major Category'
+        #if Test.objects.filter(major_test_category_name=self).exists():
+        #    error_message = 'Test(s) Exist In This Major Category'
         return error_message
 
     def delete_major_test_category_safe(self):

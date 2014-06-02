@@ -1,12 +1,13 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.template import RequestContext
-from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, TestCategory, Test, Class
-from fitness_scoring.models import PercentileBracketList
+from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, Class
+from fitness_scoring.models import TestCategory, MajorTestCategory, Test, PercentileBracketList
 from fitness_scoring.models import TeacherClassAllocation, ClassTest, StudentClassEnrolment, TestSet
 from fitness_scoring.forms import ChangePasswordFrom
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
+from fitness_scoring.forms import AddMajorTestCategoryForm, AddMajorTestCategoriesForm, EditMajorTestCategoryForm
 from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFileForm
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, AddClassTeacherForm, EditClassTeacherForm
@@ -240,7 +241,8 @@ def superuser_view(request):
                 ['Home', '/superuser_home/', 'user_home_page'],
                 ['Add/Update School List', '/school/list/', 'item_list:3'],
                 ['Add/Update Test List', '/test/list/', 'item_list:4'],
-                ['Add/Update Test Category List', '/test_category/list/', 'item_list:2']
+                ['Add/Update Test Category List', '/test_category/list/', 'item_list:2'],
+                ['Add/Update Major Test Category List', '/major_test_category/list/', 'item_list:2']
             ]
         }
 
@@ -564,6 +566,143 @@ def test_category_delete(request, test_category_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to delete a test category")
+
+
+def major_test_category_list(request):
+    if request.session.get('user_type', None) == 'SuperUser':
+        context = {
+            'item_list': [(major_test_category, major_test_category.get_display_items())
+                          for major_test_category in MajorTestCategory.objects.all()],
+            'item_list_title': 'Major Test Category List',
+            'item_list_table_headings': MajorTestCategory.get_display_list_headings(),
+            'item_list_buttons': [
+                ['+', [['item_list_modal_load_link', '/major_test_category/add/', 'Add Major Test Category'],
+                       ['item_list_modal_load_link', '/major_test_category/adds/', 'Add/Edit Major Test Categories From'
+                                                                                   ' .CSV']]]
+            ],
+            'item_list_options': [
+                ['item_list_modal_load_link', '/major_test_category/edit/', 'pencil', 'edit major test category'],
+                ['item_list_modal_load_link', '/major_test_category/delete/', 'remove', 'delete major test category']
+            ]
+        }
+        return render(request, 'item_list.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to view major test category list")
+
+
+def major_test_category_add(request):
+    if request.session.get('user_type', None) == 'SuperUser':
+        if request.POST:
+            major_test_category_add_form = AddMajorTestCategoryForm(request.POST)
+            if major_test_category_add_form.add_major_test_category():
+                context = {'finish_title': 'Major Test Category Added',
+                           'user_message': 'Major Test Category Added Successfully: '
+                                           + major_test_category_add_form.cleaned_data['major_test_category_name']}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/major_test_category/add/',
+                           'functionality_name': 'Add Major Test Category',
+                           'form': major_test_category_add_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/major_test_category/add/',
+                       'functionality_name': 'Add Major Test Category',
+                       'form': AddMajorTestCategoryForm()}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to add a major test category")
+
+
+def major_test_category_adds(request):
+    if request.session.get('user_type', None) == 'SuperUser':
+        if request.POST:
+            major_test_category_adds_form = AddMajorTestCategoriesForm(data=request.POST, files=request.FILES)
+            result = major_test_category_adds_form.add_major_test_categories(request)
+            if result:
+
+                (n_created, n_blank, major_test_category_already_exist, invalid_lines) = result
+
+                problem_types = [(major_test_category_already_exist, 'Test category already existed on the following'
+                                                                     ' lines:'),
+                                 (invalid_lines, 'Error reading data on the following lines:')]
+
+                result_message = [('Tests Categories Created: ' + str(n_created), True),
+                                  ('Lines With Blank Major Test Category: ' + str(n_blank), True)]
+                for problem_type, heading in problem_types:
+                    if len(problem_type) > 0:
+                        result_message.append((heading, True))
+                        for line in problem_type:
+                            result_message.append((line, False))
+
+                context = {'finish_title': 'Major Test Categories Added', 'user_messages': result_message}
+                return render(request, 'user_message.html', RequestContext(request, context))
+
+            elif result is None:
+                context = {'finish_title': 'Major Test Categories Not Added',
+                           'user_error_message': 'Major Test Categories Not Added: Error Reading File'}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/major_test_category/adds/',
+                           'functionality_name': 'Add Major Test Categories',
+                           'form': major_test_category_adds_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/major_test_category/adds/',
+                       'functionality_name': 'Add Major Test Categories',
+                       'form': AddMajorTestCategoriesForm()}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to add major test categories")
+
+
+def major_test_category_edit(request, major_test_category_pk):
+    if request.session.get('user_type', None) == 'SuperUser':
+        if request.POST:
+            major_test_category_edit_form = EditMajorTestCategoryForm(major_test_category_pk=major_test_category_pk,
+                                                                      data=request.POST)
+            if major_test_category_edit_form.edit_major_test_category():
+                context = {'finish_title': 'Major Test Category Edited',
+                           'user_message': 'Major Test Category Edited Successfully: '
+                                           + major_test_category_edit_form.cleaned_data['major_test_category_name']}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/major_test_category/edit/' + str(major_test_category_pk),
+                           'functionality_name': 'Edit Major Test Category',
+                           'form': major_test_category_edit_form}
+                return render(request, 'modal_form.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/major_test_category/edit/' + str(major_test_category_pk),
+                       'functionality_name': 'Edit Major Test Category',
+                       'form': EditMajorTestCategoryForm(major_test_category_pk=major_test_category_pk)}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to edit a major test category")
+
+
+def major_test_category_delete(request, major_test_category_pk):
+    if request.session.get('user_type', None) == 'SuperUser':
+        major_test_category_to_delete = MajorTestCategory.objects.get(pk=major_test_category_pk)
+        major_test_category_name = major_test_category_to_delete.major_test_category_name
+        if request.POST:
+            error_message = major_test_category_to_delete.delete_major_test_category_errors()
+            if error_message:
+                context = {'finish_title': 'Major Test Category Not Deleted',
+                           'user_error_message': 'Could Not Delete ' + major_test_category_name + ' (' + error_message +
+                                                 ')'}
+            elif major_test_category_to_delete.delete_major_test_category_safe():
+                context = {'finish_title': 'Major Test Category Deleted',
+                           'user_message': 'Major Test Category Deleted Successfully: ' + major_test_category_name}
+            else:
+                context = {'finish_title': 'Major Test Category Not Deleted',
+                           'user_error_message': 'Could Not Delete ' + major_test_category_name + ' (Delete Not Safe)'}
+            return render(request, 'user_message.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/major_test_category/delete/' + str(major_test_category_pk),
+                       'functionality_name': 'Delete Major Test Category',
+                       'prompt_message': 'Are You Sure You Wish To Delete ' + major_test_category_name + "?"}
+            return render(request, 'modal_form.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to delete a major test category")
 
 
 def test_list(request):
