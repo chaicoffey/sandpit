@@ -592,7 +592,7 @@ class MajorTestCategory(models.Model):
         return ['Major Test Category']
 
     @staticmethod
-    def create_test_category(major_test_category_name):
+    def create_major_test_category(major_test_category_name):
         major_test_category_name_unique = not MajorTestCategory.objects.filter(
             major_test_category_name=major_test_category_name).exists()
         if major_test_category_name_unique:

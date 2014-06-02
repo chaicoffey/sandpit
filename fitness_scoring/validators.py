@@ -1,5 +1,5 @@
 
-from fitness_scoring.models import School, TestCategory, Test, Student
+from fitness_scoring.models import School, TestCategory, MajorTestCategory, Test, Student
 from pe_site.settings import MAX_FILE_UPLOAD_SIZE_MB
 from django.core.exceptions import ValidationError
 import datetime
@@ -29,6 +29,22 @@ def validate_new_test_category_name_unique(test_category_pk):
             raise ValidationError('Test Category Name Already Exists: ' + test_category_name)
 
     return new_test_category_name_unique
+
+
+def validate_major_test_category_unique(major_test_category_name):
+    if MajorTestCategory.objects.filter(major_test_category_name=major_test_category_name).exists():
+        raise ValidationError('Major Test Category Already Exists: ' + major_test_category_name)
+
+
+def validate_new_major_test_category_name_unique(major_test_category_pk):
+
+    def new_major_test_category_name_unique(major_test_category_name):
+        major_test_category = MajorTestCategory.objects.get(pk=major_test_category_pk)
+        if (major_test_category.major_test_category_name != major_test_category_name) and\
+                (MajorTestCategory.objects.filter(major_test_category_name=major_test_category_name).exists()):
+            raise ValidationError('Major Test Category Name Already Exists: ' + major_test_category_name)
+
+    return new_major_test_category_name_unique
 
 
 def validate_new_test_name_unique(test_pk):

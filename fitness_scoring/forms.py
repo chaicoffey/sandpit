@@ -1,8 +1,9 @@
 from django import forms
-from fitness_scoring.models import School, Administrator, Class, Teacher, Student, TestCategory, Test, User
-from fitness_scoring.models import TeacherClassAllocation, ClassTest, TestSet, StudentClassEnrolment
+from fitness_scoring.models import School, Administrator, Class, Teacher, Student, MajorTestCategory, TestCategory, Test
+from fitness_scoring.models import User, TeacherClassAllocation, ClassTest, TestSet, StudentClassEnrolment
 from fitness_scoring.models import StudentClassTestResult, StudentsSameName
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
+from fitness_scoring.validators import validate_major_test_category_unique, validate_new_major_test_category_name_unique
 from fitness_scoring.validators import validate_new_test_name_unique
 from fitness_scoring.validators import validate_no_space, validate_file_size
 from fitness_scoring.validators import is_valid_email
@@ -674,6 +675,87 @@ class EditSchoolForm(forms.Form):
             school_edited = school_editing.edit_school_safe(name=name, state=state, subscription_paid=subscription_paid,
                                                             administrator_email=administrator_email)
         return school_edited
+
+
+class AddMajorTestCategoryForm(forms.Form):
+    major_test_category_name = forms.CharField(max_length=200, required=True,
+                                               validators=[validate_major_test_category_unique])
+
+    def __init__(self, *args, **kwargs):
+        super(AddMajorTestCategoryForm, self).__init__(*args, **kwargs)
+        self.fields['major_test_category_name'].error_messages = {'required': 'Please Enter Major Test Category Name'}
+
+    def add_major_test_category(self):
+        major_test_category_saved = self.is_valid()
+        if major_test_category_saved:
+            major_test_category_name = self.cleaned_data['major_test_category_name']
+            major_test_category_saved = MajorTestCategory.create_major_test_category(major_test_category_name)
+        return major_test_category_saved
+
+
+class AddMajorTestCategoriesForm(forms.Form):
+    add_major_test_categories_file = forms.FileField(required=True, validators=[validate_file_size])
+
+    def __init__(self, *args, **kwargs):
+        super(AddMajorTestCategoriesForm, self).__init__(*args, **kwargs)
+        self.fields['add_major_test_categories_file'].error_messages = {'required': 'Please Choose Add Major Test'
+                                                                                    ' Categories File'}
+
+    def add_major_test_categories(self, request):
+        if self.is_valid():
+            result = read_file_upload(uploaded_file=request.FILES['add_major_test_categories_file'],
+                                      headings=['major_test_category_name'])
+            if result:
+                (valid_lines, invalid_lines) = result
+                n_created = 0
+                n_blank = 0
+                major_test_category_already_exist = []
+
+                for line in valid_lines:
+
+                    [major_test_category_name] = line
+
+                    if (major_test_category_name is None) or (major_test_category_name == ''):
+                        n_blank += 1
+                    else:
+                        if MajorTestCategory.create_major_test_category(
+                                major_test_category_name=major_test_category_name):
+                            n_created += 1
+                        else:
+                            major_test_category_already_exist.append(major_test_category_name)
+
+                return n_created, n_blank, major_test_category_already_exist, invalid_lines
+            else:
+                return None
+        else:
+            return False
+
+
+class EditMajorTestCategoryForm(forms.Form):
+    major_test_category_pk = forms.CharField(widget=forms.HiddenInput())
+    major_test_category_name = forms.CharField(max_length=200, required=True)
+
+    def __init__(self, major_test_category_pk, *args, **kwargs):
+        super(EditMajorTestCategoryForm, self).__init__(*args, **kwargs)
+        self.fields['major_test_category_name'].error_messages = {'required': 'Please Enter Major Test Category Name'}
+
+        major_test_category = MajorTestCategory.objects.get(pk=major_test_category_pk)
+        self.fields['major_test_category_pk'].initial = major_test_category_pk
+        self.fields['major_test_category_name'].initial = major_test_category.major_test_category_name
+
+        self.fields['major_test_category_name'].validators = [
+            validate_new_major_test_category_name_unique(major_test_category_pk=major_test_category_pk)
+        ]
+
+    def edit_test_category(self):
+        major_test_category_edited = self.is_valid()
+        if major_test_category_edited:
+            major_test_category_pk = self.cleaned_data['major_test_category_pk']
+            major_test_category_name = self.cleaned_data['major_test_category_name']
+            major_test_category_editing = MajorTestCategory.objects.get(pk=major_test_category_pk)
+            major_test_category_edited = major_test_category_editing.edit_major_test_category_safe(
+                major_test_category_name=major_test_category_name)
+        return major_test_category_edited
 
 
 class AddTestCategoryForm(forms.Form):
