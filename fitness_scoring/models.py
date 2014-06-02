@@ -558,6 +558,48 @@ class Class(models.Model):
         return class_instance
 
 
+class MajorTestCategory(models.Model):
+    major_test_category_name = models.CharField(max_length=200, unique=True)
+
+    def __unicode__(self):
+        return self.major_test_category_name
+
+    def get_display_items(self):
+        return [self.major_test_category_name]
+
+    def delete_major_test_category_errors(self):
+        error_message = None
+        if Test.objects.filter(major_test_category_name=self).exists():
+            error_message = 'Test(s) Exist In This Major Category'
+        return error_message
+
+    def delete_major_test_category_safe(self):
+        major_test_category_not_used = not self.delete_major_test_category_errors()
+        if major_test_category_not_used:
+            self.delete()
+        return major_test_category_not_used
+
+    def edit_major_test_category_safe(self, major_test_category_name):
+        is_edit_safe = (self.major_test_category_name == major_test_category_name)\
+            or not MajorTestCategory.objects.filter(major_test_category_name=major_test_category_name).exists()
+        if is_edit_safe:
+            self.major_test_category_name = major_test_category_name
+            self.save()
+        return is_edit_safe
+
+    @staticmethod
+    def get_display_list_headings():
+        return ['Major Test Category']
+
+    @staticmethod
+    def create_test_category(major_test_category_name):
+        major_test_category_name_unique = not MajorTestCategory.objects.filter(
+            major_test_category_name=major_test_category_name).exists()
+        if major_test_category_name_unique:
+            MajorTestCategory.objects.create(major_test_category_name=major_test_category_name)
+        return major_test_category_name_unique
+
+
 class TestCategory(models.Model):
     test_category_name = models.CharField(max_length=200, unique=True)
 
