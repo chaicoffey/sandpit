@@ -859,7 +859,7 @@ class AddTestsForm(forms.Form):
                         problems_in_files.append((file_name, problems_in_data))
                     else:
                         (test_name, test_category, major_test_category, result_information) = test_information
-                        if Test.create_test(test_name, test_category, result_information):
+                        if Test.create_test(test_name, test_category, major_test_category, result_information):
                             n_created += 1
                         else:
                             test_name_already_exists.append(file_name + ' (' + test_name + ')')

@@ -569,8 +569,8 @@ class MajorTestCategory(models.Model):
 
     def delete_major_test_category_errors(self):
         error_message = None
-        #if Test.objects.filter(major_test_category_name=self).exists():
-        #    error_message = 'Test(s) Exist In This Major Category'
+        if Test.objects.filter(major_test_category=self).exists():
+            error_message = 'Test(s) Exist In This Major Category'
         return error_message
 
     def delete_major_test_category_safe(self):
@@ -889,13 +889,15 @@ class PercentileBracketList(models.Model):
 class Test(models.Model):
     test_name = models.CharField(max_length=200, unique=True)
     test_category = models.ForeignKey(TestCategory)
+    major_test_category = models.ForeignKey(MajorTestCategory)
     percentiles = models.ForeignKey(PercentileBracketSet)
 
     def __unicode__(self):
         return self.test_name + ' (' + self.test_category.test_category_name + ')'
 
     def get_display_items(self):
-        return [self.test_name, self.test_category.test_category_name]
+        return [self.test_name, self.test_category.test_category_name,
+                self.major_test_category.major_test_category_name]
 
     def delete_test_errors(self):
         error_message = None
@@ -921,14 +923,15 @@ class Test(models.Model):
 
     @staticmethod
     def get_display_list_headings():
-        return ['Test', 'Test Category']
+        return ['Test', 'Test Category', 'Major Test Category']
 
     @staticmethod
-    def create_test(test_name, test_category, result_information):
+    def create_test(test_name, test_category, major_test_category, result_information):
         test_name_unique = not Test.objects.filter(test_name=test_name).exists()
         if test_name_unique:
             percentiles = PercentileBracketSet.create_percentile_bracket_set(result_information)
-            test = Test.objects.create(test_name=test_name, test_category=test_category, percentiles=percentiles)
+            test = Test.objects.create(test_name=test_name, test_category=test_category,
+                                       major_test_category=major_test_category, percentiles=percentiles)
         else:
             test = None
         return test
