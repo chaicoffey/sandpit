@@ -1,7 +1,7 @@
 import csv
 import tempfile
 import os
-from fitness_scoring.models import TestCategory, Test
+from fitness_scoring.models import MajorTestCategory, TestCategory
 from fitness_scoring.models import PercentileBracketSet
 
 destination_directory = 'C:\\fitness_scoring_file_uploads\\'
@@ -59,21 +59,6 @@ def read_file(file_path_on_server, headings):
     return valid_lines, invalid_lines
 
 
-def update_test_from_file_upload(uploaded_file, test):
-    problems_in_data, test_information = read_test_information_from_file_upload(uploaded_file)
-    if test_information:
-        (test_name, test_category, result_information) = test_information
-        (result_type, is_upward_percentile_brackets,
-         percentile_score_conversion_type, percentile_scores) = result_information
-        if test.test_name == test_name:
-            test = Test.update_test(test_name, percentile_scores)
-        else:
-            test = None
-    else:
-        test = None
-    return test
-
-
 def read_test_information_from_file_upload(uploaded_file):
     file_path_on_server = save_file(uploaded_file)
     try:
@@ -98,10 +83,11 @@ def read_test_information_from_file(file_path_on_server):
 
         test_name = ''
         test_category_name = ''
+        major_test_category_name = ''
         result_type = ''
         is_upward_percentile_brackets = False
         percentile_score_conversion_type = ''
-        for line_counter in range(5):
+        for line_counter in range(6):
             try:
                 line = test_reader.next()
                 label = line[0]
@@ -110,6 +96,8 @@ def read_test_information_from_file(file_path_on_server):
                     test_name = value
                 elif label == 'test category name':
                     test_category_name = value
+                elif label == 'major test category name':
+                    major_test_category_name = value
                 elif label == 'result type':
                     result_type = value
                 elif label == 'is upward percentile brackets':
@@ -123,6 +111,8 @@ def read_test_information_from_file(file_path_on_server):
             problems_in_data.append('test name missing')
         if not TestCategory.objects.filter(test_category_name=test_category_name).exists():
             problems_in_data.append('test category name missing or not recognised')
+        if not MajorTestCategory.objects.filter(major_test_category_name=major_test_category_name).exists():
+            problems_in_data.append('major test category name missing or not recognised')
         if result_type not in [res_type for (res_type, text) in PercentileBracketSet.RESULT_TYPE_CHOICES]:
             problems_in_data.append('result type missing or not recognised')
         if percentile_score_conversion_type not in [con_type for (con_type, text) in
@@ -131,6 +121,7 @@ def read_test_information_from_file(file_path_on_server):
 
         if len(problems_in_data) == 0:
             test_category = TestCategory.objects.get(test_category_name=test_category_name)
+            major_test_category = MajorTestCategory.objects.get(major_test_category_name=major_test_category_name)
             try:
                 line = test_reader.next()
                 n_percentiles = len(line)
@@ -145,7 +136,7 @@ def read_test_information_from_file(file_path_on_server):
                 percentile_scores = (percentiles, age_genders, score_table)
                 result_information = (result_type, is_upward_percentile_brackets,
                                       percentile_score_conversion_type, percentile_scores)
-                test_information = (test_name, test_category, result_information)
+                test_information = (test_name, test_category, major_test_category, result_information)
             except:
                 problems_in_data.append('problem reading percentile data')
                 test_information = None

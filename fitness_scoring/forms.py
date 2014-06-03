@@ -858,7 +858,7 @@ class AddTestsForm(forms.Form):
                     if test_information is None:
                         problems_in_files.append((file_name, problems_in_data))
                     else:
-                        (test_name, test_category, result_information) = test_information
+                        (test_name, test_category, major_test_category, result_information) = test_information
                         if Test.create_test(test_name, test_category, result_information):
                             n_created += 1
                         else:
@@ -889,7 +889,7 @@ class UpdateTestFromFileForm(forms.Form):
                 error_line = None
                 if test_information:
                     test = Test.objects.get(pk=self.cleaned_data['test_pk'])
-                    (test_name, test_category, result_information) = test_information
+                    (test_name, test_category, major_test_category, result_information) = test_information
                     (result_type, is_upward_percentile_brackets,
                      percentile_score_conversion_type, percentile_scores) = result_information
                     if test.test_name == test_name:
