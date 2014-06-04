@@ -890,7 +890,7 @@ class UpdateTestFromFileForm(forms.Form):
                 if test_information:
                     test = Test.objects.get(pk=self.cleaned_data['test_pk'])
                     (test_name, test_category, major_test_category, result_information) = test_information
-                    (result_type, is_upward_percentile_brackets,
+                    (result_type, result_unit, is_upward_percentile_brackets,
                      percentile_score_conversion_type, percentile_scores) = result_information
                     if test.test_name == test_name:
                         Test.update_test(test_name, percentile_scores)

@@ -85,9 +85,10 @@ def read_test_information_from_file(file_path_on_server):
         test_category_name = ''
         major_test_category_name = ''
         result_type = ''
+        result_unit = ''
         is_upward_percentile_brackets = False
         percentile_score_conversion_type = ''
-        for line_counter in range(6):
+        for line_counter in range(7):
             try:
                 line = test_reader.next()
                 label = line[0]
@@ -100,6 +101,8 @@ def read_test_information_from_file(file_path_on_server):
                     major_test_category_name = value
                 elif label == 'result type':
                     result_type = value
+                elif label == 'result unit':
+                    result_unit = value
                 elif label == 'is upward percentile brackets':
                     is_upward_percentile_brackets = (value == 'Yes')
                 elif label == 'percentile score conversion type':
@@ -115,6 +118,8 @@ def read_test_information_from_file(file_path_on_server):
             problems_in_data.append('major test category name missing or not recognised')
         if result_type not in [res_type for (res_type, text) in PercentileBracketSet.RESULT_TYPE_CHOICES]:
             problems_in_data.append('result type missing or not recognised')
+        if result_unit == '':
+            problems_in_data.append('result unit missing')
         if percentile_score_conversion_type not in [con_type for (con_type, text) in
                                                     PercentileBracketSet.PERCENTILE_SCORE_CONVERSION_TYPE_CHOICES]:
             problems_in_data.append('percentile score conversion type missing or not recognised')
@@ -134,7 +139,7 @@ def read_test_information_from_file(file_path_on_server):
                     age_genders.append((int(line[0]), line[1]))
                     score_table.append(line[2:n_percentiles])
                 percentile_scores = (percentiles, age_genders, score_table)
-                result_information = (result_type, is_upward_percentile_brackets,
+                result_information = (result_type, result_unit, is_upward_percentile_brackets,
                                       percentile_score_conversion_type, percentile_scores)
                 test_information = (test_name, test_category, major_test_category, result_information)
             except:

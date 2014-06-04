@@ -736,7 +736,7 @@ def test_adds(request):
 
                 (n_created, test_name_already_exists, error_reading_file, problems_in_files) = result
 
-                problem_types = [(test_name_already_exists, 'Test name already exists for the following lines:'),
+                problem_types = [(test_name_already_exists, 'Test name already exists for the following files:'),
                                  (error_reading_file, 'Error reading the following files:')]
                 for file_name, problems_in_data in problems_in_files:
                     problem_types.append((problems_in_data,

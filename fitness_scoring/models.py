@@ -652,12 +652,16 @@ class PercentileBracketSet(models.Model):
         ('HIGH_MIDDLE', 'High Middle')
     )
     result_type = models.CharField(max_length=20, choices=RESULT_TYPE_CHOICES)
+    result_unit = models.CharField(max_length=50)
     is_upward_percentile_brackets = models.BooleanField()
     percentile_score_conversion_type = models.CharField(max_length=20, choices=PERCENTILE_SCORE_CONVERSION_TYPE_CHOICES)
 
     def __unicode__(self):
         test = Test.objects.get(percentiles=self)
         return test.test_name + ' (' + test.test_category.test_category_name + ')'
+
+    def get_result_unit_text(self):
+        return '' if self.result_unit == 'BLANK' else self.result_unit
 
     def valid_result(self, result):
         is_valid = True
@@ -711,11 +715,12 @@ class PercentileBracketSet(models.Model):
     @staticmethod
     def create_percentile_bracket_set(result_information):
 
-        (result_type, is_upward_percentile_brackets,
+        (result_type, result_unit, is_upward_percentile_brackets,
          percentile_score_conversion_type, percentile_scores) = result_information
 
         percentile_bracket_set = PercentileBracketSet.objects.create(
             result_type=result_type,
+            result_unit=result_unit,
             is_upward_percentile_brackets=is_upward_percentile_brackets,
             percentile_score_conversion_type=percentile_score_conversion_type
         )
