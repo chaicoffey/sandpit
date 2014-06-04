@@ -1372,7 +1372,8 @@ def remove_test_from_class(request, class_pk, test_pk):
         else:
             context = {'post_to_url': '/class/test/delete/' + str(class_pk) + '/' + str(test_pk),
                        'functionality_name': 'Remove Test',
-                       'prompt_message': 'Are You Sure You Wish To Remove Test From Class ' + str(test) + "?"}
+                       'prompt_message': "Are You Sure You Wish To Remove The Test '" + test.test_name +
+                                         "' From This Class?"}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to remove a test from this class")
