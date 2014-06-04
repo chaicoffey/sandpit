@@ -748,7 +748,7 @@ class PercentileBracketList(models.Model):
 
     def get_percentile(self, result):
         score = self.get_score(result, True)
-        if score:
+        if score is not None:
             scores = self.get_scores(True)
             if self.percentile_bracket_set.is_upward_percentile_brackets:
                 if score < scores[0]:
@@ -1082,7 +1082,7 @@ class StudentClassEnrolment(models.Model):
         enrolment_new.approval_status = approval_status
         enrolment_new.save()
         for test_index in range(len(tests)):
-            if results[test_index]:
+            if results[test_index] is not None:
                 enrolment_new.enter_result_safe(tests[test_index], results[test_index])
         return enrolment_new
 

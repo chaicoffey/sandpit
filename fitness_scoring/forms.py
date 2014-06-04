@@ -1456,7 +1456,7 @@ class StudentEntryForm:
             tests = class_instance.get_tests()
             for test in tests:
                 data_label = StudentEntryForm.get_name(test.test_name)
-                if self.data[data_label]:
+                if self.data[data_label] is not None:
                     enrolment.enter_result_safe(test, self.data[data_label])
 
         return is_valid
@@ -1660,12 +1660,12 @@ class StudentEntryEditForm:
             for test in tests:
                 data_label = StudentEntryForm.get_name(test.test_name)
                 result = self.data[data_label]
-                if result:
+                if result is not None:
                     test_result = StudentClassTestResult.objects.filter(student_class_enrolment=enrolment, test=test)
                     if not test_result.exists():
-                        enrolment.enter_result_safe(test, self.data[data_label])
+                        enrolment.enter_result_safe(test, result)
                     elif test_result[0].result != result:
-                        enrolment.edit_result_safe(test, self.data[data_label])
+                        enrolment.edit_result_safe(test, result)
 
         return is_valid
 
