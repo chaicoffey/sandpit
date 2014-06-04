@@ -1325,7 +1325,8 @@ def get_new_class_code(request, class_pk):
                        'modal_title': 'New Class Login Details',
                        'functionality_name': 'Done',
                        'prompt_messages': ['Username: ' + class_instance.user.username,
-                                           'Password: ' + class_instance.reset_code()]}
+                                           'Password: ' + class_instance.reset_code()],
+                       'hide_cancel_button': True}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to delete a teacher from this school")

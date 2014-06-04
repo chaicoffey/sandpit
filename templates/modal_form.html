@@ -61,7 +61,9 @@
     </div>
 
     <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        {% if not hide_cancel_button %}
+            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        {% endif %}
         <button type="submit" class="btn btn-primary" id='modal_submit_button'>{{ functionality_name }}</button>
     </div>
 
