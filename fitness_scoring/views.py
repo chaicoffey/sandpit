@@ -863,11 +863,13 @@ def test_percentile_brackets_graphs(request, percentile_bracket_list_pk, test_pk
         pk_local = (percentile_bracket_lists[0].pk
                     if (percentile_bracket_list_pk == 'None') and percentile_bracket_lists.exists()
                     else int(percentile_bracket_list_pk))
+        percentile_bracket_list = PercentileBracketList.objects.get(pk=pk_local)
         context = {'test_label': str(test),
+                   'result_unit': percentile_bracket_list.percentile_bracket_set.get_result_unit_text(),
                    'age_gender_options': [('/test/percentile_brackets_graphs/' + str(bracket.pk) + '/' + str(test_pk),
                                            '(' + str(bracket.age) + ', ' + bracket.gender + ')',
                                            bracket.pk == pk_local) for bracket in percentile_bracket_lists],
-                   'percentile_bracket_scores': PercentileBracketList.objects.get(pk=pk_local).get_scores(True)}
+                   'percentile_bracket_scores': percentile_bracket_list.get_scores(True)}
         return render(request, 'percentile_brackets_graph.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to view the percentile brackets for a test")

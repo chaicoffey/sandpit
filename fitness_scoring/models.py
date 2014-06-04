@@ -661,7 +661,7 @@ class PercentileBracketSet(models.Model):
         return test.test_name + ' (' + test.test_category.test_category_name + ')'
 
     def get_result_unit_text(self):
-        return '' if self.result_unit == 'BLANK' else self.result_unit
+        return '' if self.result_unit == 'BLANK' else '[' + self.result_unit + ']'
 
     def valid_result(self, result):
         is_valid = True
