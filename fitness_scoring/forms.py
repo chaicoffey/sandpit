@@ -1186,7 +1186,7 @@ class ResolveIssuesSchoolNameForm(forms.Form):
     def get_text_for_student_pair_ok(student_count_other):
         this_student = 'Student 1'
         other_student = 'Student ' + str(student_count_other)
-        return this_student + ' and ' + other_student + ' are different people and both there names are correct'
+        return this_student + ' and ' + other_student + ' are different people and both their names are correct'
 
 
 class ResolveIssuesForm(forms.Form):
