@@ -860,10 +860,10 @@ class PercentileBracketList(models.Model):
                 n_scores = len(scores_data)
                 for score_index in range(1, n_scores):
                     if percentile_bracket_set.is_upward_percentile_brackets:
-                        if not (scores_data[score_index] > scores_data[score_index - 1]):
+                        if not (scores_data[score_index] >= scores_data[score_index - 1]):
                             valid_data = False
                     else:
-                        if not (scores_data[score_index] < scores_data[score_index - 1]):
+                        if not (scores_data[score_index] <= scores_data[score_index - 1]):
                             valid_data = False
 
             if valid_data:
