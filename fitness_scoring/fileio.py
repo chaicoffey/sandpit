@@ -6,7 +6,7 @@ from fitness_scoring.models import MajorTestCategory, TestCategory
 from fitness_scoring.models import PercentileBracketSet
 
 
-destination_directory = BASE_DIR + '\\file_uploads\\'
+destination_directory = os.path.join(BASE_DIR, 'file_uploads')
 
 
 def save_file(f):
