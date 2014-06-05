@@ -91,7 +91,7 @@ def change_user_password(request, is_finished):
                                'modal_title': 'Password Changed',
                                'functionality_name': 'Done',
                                'prompt_message': 'Password Changed Successfully',
-                               'hide_cancel_button' : True}
+                               'hide_cancel_button': True}
                     return render(request, 'modal_form.html', RequestContext(request, context))
                 else:
                     context = {'post_to_url': '/change_password/not_finished',
