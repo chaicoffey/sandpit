@@ -1,11 +1,12 @@
 import csv
 import tempfile
 import os
+from pe_site.settings import BASE_DIR
 from fitness_scoring.models import MajorTestCategory, TestCategory
 from fitness_scoring.models import PercentileBracketSet
 
-destination_directory = 'C:\\fitness_scoring_file_uploads\\'
-#destination_directory = '/tmp/fitness_scoring_file_uploads'
+
+destination_directory = BASE_DIR + '\\file_uploads\\'
 
 
 def save_file(f):
