@@ -1438,15 +1438,16 @@ def class_enrolment_resolve_pending_issues(request, enrolment_pk):
                     resolve_pending_issues_form = ResolveIssuesForm(enrolment_pk=enrolment_pk,
                                                                     resolve_method=resolve_method)
             else:
-                if enrolment.pending_issue_other_class_member:
-                    resolve_pending_issues_form = ResolveIssuesClassForm(enrolment_pk=enrolment_pk, data=request.POST)
-                elif enrolment.pending_issue_personal:
-                    resolve_pending_issues_form = ResolveIssuesPersonalForm(enrolment_pk=enrolment_pk,
-                                                                            data=request.POST)
-                else:
+                if enrolment.student_id.has_pending_issues():
                     resolve_pending_issues_form = ResolveIssuesForm(enrolment_pk=enrolment_pk,
                                                                     resolve_method=request.POST['resolve_method'],
                                                                     data=request.POST)
+                elif enrolment.pending_issue_other_class_member:
+                    resolve_pending_issues_form = ResolveIssuesClassForm(enrolment_pk=enrolment_pk, data=request.POST)
+                else:
+                    resolve_pending_issues_form = ResolveIssuesPersonalForm(enrolment_pk=enrolment_pk,
+                                                                            data=request.POST)
+
                 if resolve_pending_issues_form.resolve_issues():
                     context = {'finish_title': 'Issue Resolved', 'user_message': 'Issue Resolved Successfully'}
                     return render(request, 'user_message.html', RequestContext(request, context))
