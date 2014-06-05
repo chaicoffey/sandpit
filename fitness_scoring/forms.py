@@ -1003,13 +1003,17 @@ class ResolveIssuesClassForm(forms.Form):
         multiple_enrolments = StudentClassEnrolment.objects.filter(class_id=enrolment_clicked.class_id,
                                                                    student_id=enrolment_clicked.student_id)
 
+        tests_string = 'Tests: '
+        for test in enrolment_clicked.class_id.get_tests():
+            tests_string += test.test_name + ', '
         self.top_text_messages = ['The same student cannot have multiple results for the one class', '',
                                   'Student: ' + str(enrolment_clicked.student_id) + ' has ' +
                                   str(len(multiple_enrolments)) + ' sets of results entered in class: ' +
                                   enrolment_clicked.class_id.class_name + ' (' + str(enrolment_clicked.class_id.year) +
                                   ')', '',
                                   'To resolve this issue please select the valid set of results from the options'
-                                  ' below:']
+                                  ' below:', '',
+                                  tests_string]
         self.bottom_text_messages = ['', 'WARNING: All result entries for this student other than the one selected will'
                                          ' be deleted',
                                      'If none are valid you will need to delete the last entry directly on the class'
