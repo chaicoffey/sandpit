@@ -103,6 +103,7 @@ $(document).on('submit', '#modalForm', function(formEvent) {
 
     var form = $('#modalForm');
     var button_value = $('#modal_submit_button').attr('value');
+    $("#progress-bar").removeClass('hide');
 
     var options = {
         url: form.attr('action'),
