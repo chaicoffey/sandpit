@@ -23,3 +23,7 @@ select {
 }
 
 ul {list-style:none}
+
+#results_div {
+    overflow: auto;
+}
