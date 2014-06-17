@@ -1,3 +1,4 @@
+import threading
 from django.core.mail import send_mail
 from pe_site.settings import DEFAULT_FROM_EMAIL
 
@@ -12,7 +13,11 @@ web_address = 'www.not_sure_yet.com'
 
 
 def send_email(email, subject, text):
-    send_mail(subject_start + subject, text + sign_off, DEFAULT_FROM_EMAIL, [email])
+    t = threading.Thread(target=send_mail,
+                         args=[subject_start + subject, text + sign_off, DEFAULT_FROM_EMAIL, [email]],
+                         kwargs={'fail_silently': True})
+    t.setDaemon(True)
+    t.start()
 
 
 def send_group_email(emails, subject, text):
