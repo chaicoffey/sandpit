@@ -13,15 +13,15 @@ web_address = 'www.not_sure_yet.com'
 
 
 def send_email(email, subject, text):
-    t = threading.Thread(target=send_mail,
-                         args=[subject_start + subject, text + sign_off, DEFAULT_FROM_EMAIL, [email]],
-                         kwargs={'fail_silently': True})
-    t.setDaemon(True)
-    t.start()
+    send_group_email([email], subject, text)
 
 
 def send_group_email(emails, subject, text):
-    send_mail(subject_start + subject, text + sign_off, DEFAULT_FROM_EMAIL, emails)
+    t = threading.Thread(target=send_mail,
+                         args=[subject_start + subject, text + sign_off, DEFAULT_FROM_EMAIL, emails],
+                         kwargs={'fail_silently': True})
+    t.setDaemon(True)
+    t.start()
 
 
 def send_email_user_reset(email, username, password, teacher_or_admin):
