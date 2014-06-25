@@ -4,6 +4,7 @@ from django.template import RequestContext
 from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, Class
 from fitness_scoring.models import TestCategory, MajorTestCategory, Test, PercentileBracketList
 from fitness_scoring.models import TeacherClassAllocation, ClassTest, StudentClassEnrolment, TestSet
+from fitness_scoring.models import StudentClassTestResult
 from fitness_scoring.forms import ChangePasswordFrom
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
 from fitness_scoring.forms import AddTestCategoryForm, AddTestCategoriesForm, EditTestCategoryForm
@@ -133,6 +134,24 @@ def class_student_view(request):
             return render(request, 'student_entry_form.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
+
+
+def class_student_results_view(request, enrolment_pk):
+    enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
+    test_results = StudentClassTestResult.objects.filter(student_class_enrolment=enrolment)
+    major_test_categories = set([str(a.test.major_test_category).replace(" ", "_") for a in test_results])
+    results_for_context = [(str(result.test.major_test_category).replace(" ", "_"),
+                            result.test.test_category,
+                            result.test.test_name,
+                            result.percentile,
+                            result.result) for result in test_results]
+
+    context = {'student_name': enrolment.student_id,
+               'gender': enrolment.student_gender_at_time_of_enrolment,
+               'major_test_categories': major_test_categories,
+               'results': results_for_context
+               }
+    return render(request, 'class_student_results.html', RequestContext(request, context))
 
 
 def teacher_view(request):

@@ -18,6 +18,8 @@ urlpatterns = patterns(
     url(r'^teacher_view/', 'fitness_scoring.views.teacher_view', name='teacher_view'),
     url(r'^teacher_home/', 'fitness_scoring.views.teacher_home', name='teacher_home'),
     url(r'^class_student_view/', 'fitness_scoring.views.class_student_view', name='class_student_view'),
+    url(r'^class_student_results_view/(?P<enrolment_pk>\d+)', 'fitness_scoring.views.class_student_results_view',
+        name='class_student_results_view'),
     url(r'^school/list/', 'fitness_scoring.views.school_list', name='school_list'),
     url(r'^instructions_page/(?P<instructions_name>\w+)', 'fitness_scoring.views.instructions_page',
         name='instructions_page'),
