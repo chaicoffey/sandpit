@@ -149,7 +149,7 @@ def class_student_results_view(request, enrolment_pk):
     context = {'student_name': enrolment.student_id,
                'gender': enrolment.student_gender_at_time_of_enrolment,
                'major_test_categories': major_test_categories,
-               'results': results_for_context
+               'results': sorted(results_for_context)
                }
     return render(request, 'class_student_results.html', RequestContext(request, context))
 
