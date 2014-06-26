@@ -140,8 +140,10 @@ def class_student_results_view(request, enrolment_pk):
     enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
     test_results = StudentClassTestResult.objects.filter(student_class_enrolment=enrolment)
     major_test_categories = set([str(a.test.major_test_category).replace(" ", "_") for a in test_results])
+    mtc_tc = set([(str(a.test.major_test_category).replace(" ", "_"),
+                  str(a.test.test_category).replace(" ", "_")) for a in test_results])
     results_for_context = [(str(result.test.major_test_category).replace(" ", "_"),
-                            result.test.test_category,
+                            str(result.test.test_category).replace(" ", "_"),
                             result.test.test_name,
                             result.percentile,
                             result.result) for result in test_results]
@@ -149,6 +151,7 @@ def class_student_results_view(request, enrolment_pk):
     context = {'student_name': enrolment.student_id,
                'gender': enrolment.student_gender_at_time_of_enrolment,
                'major_test_categories': major_test_categories,
+               'mtc_tc': mtc_tc,
                'results': sorted(results_for_context)
                }
     return render(request, 'class_student_results.html', RequestContext(request, context))

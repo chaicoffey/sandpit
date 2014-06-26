@@ -21,15 +21,17 @@
     <script>
         $(document).ready(function() {
 
-            {% for mtc in major_test_categories %}
-                var {{ mtc }}_data = [
-                    {% for inner_mtc, cat, test_name, percentile, result in results %}
-                        {% if inner_mtc == mtc %}
+            {% for mtc, tc in mtc_tc %}
+                var {{ mtc }}_{{ tc }}_data = [
+                    {% for inner_mtc, inner_tc, test_name, percentile, result in results %}
+                        {% if inner_mtc == mtc and inner_tc == tc %}
                             [{{ forloop.counter0 }}, {{ percentile }}],
                         {% endif %}
                     {% endfor %}
                 ];
+            {% endfor %}
 
+            {% for mtc in major_test_categories %}
                 var {{ mtc }}_ticks = [
                     {% for inner_mtc, cat, test_name, percentile, result in results %}
                         {% if inner_mtc == mtc %}
@@ -61,7 +63,13 @@
                     }
                  };
 
-                var {{ mtc }}_dataset = [{ label: "All tests", data: {{ mtc }}_data, color: "#5482FF"}];
+                var {{ mtc }}_dataset = [
+                    {% for inner_mtc, inner_tc in mtc_tc %}
+                        {% if inner_mtc == mtc %}
+                                { label: "{{ inner_tc }}", data: {{ mtc }}_{{ inner_tc }}_data },
+                        {% endif %}
+                    {% endfor %}
+                ];
 
                 $.plot("#{{ mtc }}_chart",
                         {{ mtc }}_dataset,
