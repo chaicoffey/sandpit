@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.hashers import make_password, check_password
 import datetime
 import time
 import collections
@@ -7,8 +8,6 @@ from datetime import date
 from time import time as time_seed
 from itertools import chain
 from random import seed, choice, sample
-import random
-from hashlib import sha1
 
 
 class School(models.Model):
@@ -90,8 +89,7 @@ class User(models.Model):
         return self.username
 
     def authenticate_user(self, password):
-        salt, hsh = self.encrypted_password.split('$')
-        return hsh == sha1('%s%s' % (salt, password)).hexdigest()
+        return check_password(password, self.encrypted_password)
 
     def reset_code(self):
         password = User.get_random_code()
@@ -175,9 +173,7 @@ class User(models.Model):
 
     @staticmethod
     def encrypt_password(password):
-        salt = sha1('%s%s' % (str(random.random()), str(random.random()))).hexdigest()[:5]
-        hsh = sha1('%s%s' % (salt, password)).hexdigest()
-        return '%s$%s' % (salt, hsh)
+        return make_password(password=password, hasher='pbkdf2_sha256')
 
 
 class SuperUser(models.Model):
