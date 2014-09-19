@@ -299,7 +299,20 @@ def instructions_page(request, instructions_name):
                    ]
                    }
     elif (instructions_name == 'administrator_add_teacher') and user_type == 'Administrator':
-        context = {'heading': 'Add Teacher'}
+        context = {'heading': 'Add Teacher',
+                   'reason': 'You need to add the PE teachers that will be using this program',
+                   'instructions': [
+                       [['Click the "Add/Update Teacher List" tab at the left of the screen', 'add_teachers_A.png']],
+                       [
+                           ['Click the "+" button at the top of the "Teacher List" table', 'add_teachers_B.png'],
+                           ['Then Select the "Add Teacher" option', 'add_teachers_C.png']
+                       ],
+                       [['Enter the details for the teacher', 'add_teachers_D.png'],
+                        ["Then click the button at the bottom of the form.  The teacher will be added and an email "
+                        "with the teacher's login details will be sent to the email address you entered."]
+                       ],
+                       [['Repeat from step 2 for all the remaining teachers you wish to add and you are done!']]
+                   ]}
     elif instructions_name == 'administrator_add_classes' and user_type == 'Administrator':
         context = {'heading': 'Add Classes'}
     elif instructions_name == 'administrator_add_tests' and user_type == 'Administrator':
@@ -319,7 +332,7 @@ def instructions_page(request, instructions_name):
     else:
         context = {'heading': 'No Heading Given'}
 
-    return render(request, 'instructions/user_instructions.html', RequestContext(request, context))
+    return render(request, 'user_instructions.html', RequestContext(request, context))
 
 
 def school_list(request):
