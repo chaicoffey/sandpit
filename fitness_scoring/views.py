@@ -285,27 +285,41 @@ def superuser_home(request):
 def instructions_page(request, instructions_name):
     user_type = request.session.get('user_type', None)
     if (instructions_name == 'change_password') and (user_type in ('Administrator', 'Teacher')):
-        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+        context = {'heading': 'Change Password',
+                   'reason': 'The first time you log in it is a good idea to '
+                             'change your password to one that you want.',
+                   'instructions': [
+                       [['Click "Change Password" in the top right hand corner of the screen',
+                         'change_password_A.png']],
+                       [
+                           ['Enter the details for your new password into the form that pops up',
+                            'change_password_B.png'],
+                           ['Then click the button at the bottom of the form and you are done!']
+                       ]
+                   ]
+                   }
     elif (instructions_name == 'administrator_add_teacher') and user_type == 'Administrator':
-        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+        context = {'heading': 'Add Teacher'}
     elif instructions_name == 'administrator_add_classes' and user_type == 'Administrator':
-        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+        context = {'heading': 'Add Classes'}
     elif instructions_name == 'administrator_add_tests' and user_type == 'Administrator':
-        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+        context = {'heading': 'Add Tests'}
     elif instructions_name == 'teacher_add_classes' and user_type == 'Teacher':
-        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+        context = {'heading': 'Add Classes'}
     elif instructions_name == 'teacher_add_tests' and user_type == 'Teacher':
-        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+        context = {'heading': 'Add Tests'}
     elif instructions_name == 'teacher_run_tests' and user_type == 'Teacher':
-        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+        context = {'heading': 'Run Tests'}
     elif instructions_name == 'teacher_student_enter_results' and user_type == 'Teacher':
-        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+        context = {'heading': 'Entering Results'}
     elif instructions_name == 'teacher_approve_entries' and user_type == 'Teacher':
-        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+        context = {'heading': 'Approve Entries'}
     elif instructions_name == 'teacher_view_results' and user_type == 'Teacher':
-        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+        context = {'heading': 'View Results'}
     else:
-        return render(request, 'instructions/no_instructions.html', RequestContext(request, {}))
+        context = {'heading': 'No Heading Given'}
+
+    return render(request, 'instructions/user_instructions.html', RequestContext(request, context))
 
 
 def school_list(request):
