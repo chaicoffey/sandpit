@@ -231,8 +231,8 @@ def administrator_home(request):
 
         steps = [('Change Password', 'change_password'),
                  ('Add Teachers', 'administrator_add_teacher'),
-                 ('Add Classes For Teachers For The Year', 'administrator_add_classes'),
-                 ('Add Tests To Classes For The Year', 'administrator_add_tests')]
+                 ('Add Tests To Classes For The Year', 'administrator_add_tests'),
+                 ('Add Classes For Teachers For The Year', 'administrator_add_classes')]
         non_optional_steps = 2
         steps_formatted = []
         for step_index in range(non_optional_steps):
@@ -289,12 +289,12 @@ def instructions_page(request, instructions_name):
                    'reason': 'The first time you log in it is a good idea to '
                              'change your password to one that you want.',
                    'instructions': [
-                       [['Click "Change Password" in the top right hand corner of the screen',
-                         'change_password_A.png']],
+                       [('Click "Change Password" in the top right hand corner of the screen',
+                         'change_password_A.png')],
                        [
-                           ['Enter the details for your new password into the form that pops up',
-                            'change_password_B.png'],
-                           ['Then click the button at the bottom of the form and you are done!']
+                           ('Enter the details for your new password into the form that pops up',
+                            'change_password_B.png'),
+                           ('Then click the button at the bottom of the form and you are done!', None)
                        ]
                    ]
                    }
@@ -302,25 +302,163 @@ def instructions_page(request, instructions_name):
         context = {'heading': 'Add Teacher',
                    'reason': 'You need to add the PE teachers that will be using this program',
                    'instructions': [
-                       [['Click the "Add/Update Teacher List" tab at the left of the screen', 'add_teachers_A.png']],
+                       [('Click the "Add/Update Teacher List" tab at the left of the screen', 'add_teachers_A.png')],
                        [
-                           ['Click the "+" button at the top of the "Teacher List" table', 'add_teachers_B.png'],
-                           ['Then Select the "Add Teacher" option', 'add_teachers_C.png']
+                           ('Click the "+" button at the top of the "Teacher List" table', 'add_teachers_B.png'),
+                           ('Then Select the "Add Teacher" option', 'add_teachers_C.png')
                        ],
-                       [['Enter the details for the teacher', 'add_teachers_D.png'],
-                        ["Then click the button at the bottom of the form.  The teacher will be added and an email "
-                        "with the teacher's login details will be sent to the email address you entered."]
+                       [
+                           ('Enter the details for the teacher', 'add_teachers_D.png'),
+                           ("Then click the button at the bottom of the form.  The teacher will be added and an email "
+                            "with the teacher's login details will be sent to the email address you entered.", None)
                        ],
-                       [['Repeat from step 2 for all the remaining teachers you wish to add and you are done!']]
+                       [('Repeat from point 2. for all the remaining teachers you wish to add and you are done!', None)]
                    ]}
     elif instructions_name == 'administrator_add_classes' and user_type == 'Administrator':
-        context = {'heading': 'Add Classes'}
+        context = {'heading': 'Add Classes',
+                   'reason': 'After the teachers have been added you may wish to assign some or all of the classes for '
+                             'the teachers.  Alternatively the teacher may add their own classes themselves when they '
+                             'login.  This decision is up to you (it is fairly simple for either of you to do it).',
+                   'instructions': [
+                       [('Click the "Add/Update Class List" tab at the left of the screen',
+                         'administrator_add_classes_A.png')],
+                       [
+                           ('Click the "+" button at the top of the "Class List" table',
+                            'administrator_add_classes_B.png'),
+                           ('Now you have the option to select to add classes individually or to add a number of'
+                            ' classes from a file.  To add classes individually select the "Add Class" option then see'
+                            ' point 3.  To add classes from a file select the "Add Classes" option then see point 4.',
+                            'administrator_add_classes_C.png')
+                       ],
+                       [
+                           ('Enter the details for the class.  You must choose a class name e.g. "Class 7A Term 1").  '
+                            'The drop down has a list of the teachers that you have already added.  If the teacher for '
+                            'this class is not available then you must add them from the "Add/Update Teacher List" tab '
+                            '(see instructions)', 'administrator_add_classes_D.png'),
+                           ('Then click the button at the bottom of the form', None),
+                           ('Repeat from point 2. for all the remaining classes you wish to add and you are done!',
+                            None)
+                       ],
+                       [
+                           ('To add multiple classes from a file you must first make a classes CSV file.'
+                            '  ** No explanation for making the CSV file is given yet. **', None),
+                           ('Then browse and select the classes CSV file from the add classes form',
+                            'administrator_add_classes_E.png'),
+                           ('Then click the button at the bottom of the form and you are done!', None)
+                       ]
+                   ]}
     elif instructions_name == 'administrator_add_tests' and user_type == 'Administrator':
-        context = {'heading': 'Add Tests'}
+        context = {'heading': 'Add Tests',
+                   'reason': 'A set of exercises needs to be assigned to each class to test the students.  '
+                             'These can be added individually for each class.  Or if many classes will be using the '
+                             'same set of exercises then "standard test sets" can be made.  You can choose to make '
+                             'some or all of the "standard test sets" to be used.  Alternatively the "standard test '
+                             'sets" can be created by the teachers themselves or no "standard test sets" need to be '
+                             'created at all.',
+                   'instructions': [
+                       [('To create a class test set you will firstly need to create a temporary class.  See the'
+                         ' instructions for doing this and name the class something like "Temp Class"', None)],
+                       [('In the "Class List" table click on the "class home page" symbol for the temporary class you '
+                         'created', 'administrator_add_tests_A.png')],
+                       [
+                           ('Click the "+" button at the top of the "Class Results" table',
+                            'administrator_add_tests_B.png'),
+                           ('Then Select the "Add Test To Class" option', 'administrator_add_tests_C.png')
+                       ],
+                       [
+                           ('On the "Add Test To Class" form choose one of the tests for the test set you are creating',
+                            'administrator_add_tests_D.png'),
+                           ('Then press the button at the bottom of the form', None),
+                           ('Repeat from step 3. for all the remaining tests you wish to add to the test set', None)
+                       ],
+                       [
+                           ('Click the "*" button at the top of the "Class Results" table',
+                            'administrator_add_tests_E.png'),
+                           ('Then Select the "Save Current Class As A Test Set" option',
+                            'administrator_add_tests_F.png')
+                       ],
+                       [
+                           ('On the form enter the name you wish to give to your test set',
+                            'administrator_add_tests_G.png'),
+                           ('Then click the button at the bottom of the form', None)
+                       ],
+                       [
+                           ('If you wish to create more test sets then repeat the process from step 3 (and also delete '
+                            'any tests that you do not want for the new test set by clicking the cross next to the '
+                            'tests in the "Class Results" table).  If you do not wish to create any more test sets '
+                            'then now you should delete the temporary class you created', None),
+                           ('To delete it first click the "Add/Update Class List" tab at the left of the screen',
+                            'administrator_add_classes_A.png'),
+                           ('Then in the "Class List" table click the "delete" symbol next to the temporary class.',
+                            'administrator_add_tests_H.png'),
+                           ('Now you are done!  The teachers will be able to add tests to their classes from the'
+                            ' standard test sets you have created.', None)
+                       ]
+                   ]}
     elif instructions_name == 'teacher_add_classes' and user_type == 'Teacher':
-        context = {'heading': 'Add Classes'}
+        context = {'heading': 'Add Classes',
+                   'reason': 'If the administrator has not already assigned your classes for the year than you will '
+                             'need to do so yourself',
+                   'instructions': [
+                       [('Click the "Add/Update Class List" tab at the left of the screen',
+                         'teacher_add_classes_A.png')],
+                       [
+                           ('Click the "+" button at the top of the "Class List" table',
+                            'teacher_add_classes_B.png'),
+                           ('Then Select the "Add Class" option', 'teacher_add_classes_C.png')
+                       ],
+                       [
+                           ('Enter the details for the class.  You must choose a class name e.g. "Class 7A Term 1"',
+                            'teacher_add_classes_D.png'),
+                           ('Then click the button at the bottom of the form', None)
+                       ],
+                       [('Repeat from point 2. for all your remaining classes and you are done!', None)]
+                   ]}
     elif instructions_name == 'teacher_add_tests' and user_type == 'Teacher':
-        context = {'heading': 'Add Tests'}
+        context = {'heading': 'Add Tests',
+                   'reason': 'Once you have classes assigned you will need to decide which exercises you want to test '
+                             'your class on (if the administrator has not already done so for you)',
+                   'instructions': [
+                       [
+                           ('Click the "Add/Update Class List" tab at the left of the screen',
+                            'teacher_add_classes_A.png'),
+                           ('Then in the "Class List" table click on the "class home page" symbol for the temporary '
+                            'class you created', 'teacher_add_test_A.png')
+                       ],
+                       [
+                           ('Click the "+" button at the top of the "Class List" table', 'teacher_add_test_B.png'),
+                           ('Now you will need to either load the class tests from a "standard test set" or add each '
+                            'test individually.  If you or the administrator has already created a "standard test set" '
+                            'that is intended for use in this class then select the "Load Class Tests From A Test Set" '
+                            'option and go to point 3.  If there is no "standard test set" already created that is '
+                            'intended for this class then select the "Add Test To Class" option and go to point 4.  If '
+                            'you are unsure than try from point 3. to see if there is one.', 'teacher_add_test_C.png')
+                       ],
+                       [
+                           ('On the "Load Test Set" form select the test set that you wish to load from the names '
+                            'available', 'teacher_add_test_D.png'),
+                           ('Then click the button at the bottom of the form and you are done!  You can repeat this '
+                            'for all your remaining classes.', None),
+                           ('If there is no test set available that you wish to load then you will need to add the '
+                            'tests individually (go back to point 2.).  If you have already loaded undesired tests '
+                            'then you will need to remove them by clicking on the cross next to each test in the '
+                            '"Class Results" table', None)
+                       ],
+                       [
+                           ('On the "Add Test To Class" form select a test that you wish to add to the class',
+                            'teacher_add_test_E.png'),
+                           ('Then repeat to add all the tests you want for this class', None),
+                           ('If you want to reuse this set of tests for other classes then you can save this set of '
+                            'tests as a "standard test set".  To do this first Click the "*" button at the top of the '
+                            '"Class Results" table', 'teacher_add_test_F.png'),
+                           ('Then select the "Save Current Class As A Test Set" option', 'teacher_add_test_G.png'),
+                           ('Next on the form enter the name you wish to give to your test set',
+                            'teacher_add_test_H.png'),
+                           ('Then click the button at the bottom of the test set has been saved.  Now you and other '
+                            'teachers will be able to load this "standard test set" to other classes', None),
+                           ('Make sure to add tests to all of your remaining classes', None)
+                       ]
+                   ]}
     elif instructions_name == 'teacher_run_tests' and user_type == 'Teacher':
         context = {'heading': 'Run Tests'}
     elif instructions_name == 'teacher_student_enter_results' and user_type == 'Teacher':
