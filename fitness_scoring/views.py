@@ -1063,17 +1063,31 @@ def test_percentile_brackets_graphs(request, percentile_bracket_list_pk, test_pk
         return HttpResponseForbidden("You are not authorised to view the percentile brackets for a test")
 
 
-def test_instructions(request, test_name):
+def test_instructions(request, test_pk):
     user_type = request.session.get('user_type', None)
     if (user_type == 'Administrator') or (user_type == 'Teacher'):
-        if test_name == 'Jump 20m':
-            return render(request, 'test_instructions/no_test_instructions.html', RequestContext(request, {}))
-        elif test_name == 'Run 20m':
-            return render(request, 'test_instructions/no_test_instructions.html', RequestContext(request, {}))
-        elif test_name == 'Throw 20m':
-            return render(request, 'test_instructions/no_test_instructions.html', RequestContext(request, {}))
+        test_name = Test.objects.get(pk=test_pk).test_name
+        if test_name == 'Agility Run':
+            context = {'heading': 'Illinois Agility Test',
+                       'objective': "The objective of the Illinois Agility Run Test (as described in a paper by "
+                                    "Getchell in 1979) is to monitor the development of the athlete's agility.",
+                       'resources': ['Flat non-slip surface', '8 cones', 'Stopwatch', 'Assistant'],
+                       'instructions': [
+                           ['This test requires the athlete to run the red line route (see diagram below) as fast as '
+                            'possible.'],
+                           ['The athlete warms up for 10 minutes',
+                            'The assistant sets up the course as detailed in the diagram',
+                            'The athlete lies face down on the floor at the "Start" cone',
+                            'The assistant gives the command "GO" and starts the stopwatch',
+                            'The athlete jumps to his/her feet and negotiates the course around the cones following '
+                            'the red line route shown in the diagram to the finish',
+                            'The assistant stops the stopwatch and records the time when the athlete passes the '
+                            '"Finish" cone']
+                       ],
+                       'diagram': 'agility_run.png'}
         else:
-            return render(request, 'test_instructions/no_test_instructions.html', RequestContext(request, {}))
+            context = {'heading': 'Test Instructions Not Found'}
+        return render(request, 'test_instructions.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to view instructions for a test")
 

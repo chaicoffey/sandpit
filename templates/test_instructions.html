@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ heading }}</title>
+</head>
+<body>
+
+    <div class="text-info">
+        <h1>{{ heading }}</h1>
+
+        <hr>
+        <h3>Objective</h3>
+            {% if objective %}
+                {{ objective }}
+            {% else %}
+                No objective described
+            {% endif %}
+
+        <hr>
+        <h3>Required Resources</h3>
+            {% if resources %}
+                To undertake this test you will require:
+                <ul>
+                    {% for resource in resources %}
+                        <li>{{ resource }}</li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                No resources have been detailed
+            {% endif %}
+
+        <hr>
+        <h3>How to conduct the test</h3>
+            {% if instructions %}
+            {% for instruction in instructions %}
+                {% if instruction|length > 1 %}
+                    <ul>
+                        {% for instruction_point in instruction %}
+                            <li>{{ instruction_point }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    {% for instruction_point in instruction %}
+                        {{ instruction_point }}
+                    {% endfor %}
+                {% endif %}
+            {% endfor %}
+            {% else %}
+                No instructions detailed
+            {% endif %}
+
+        {% if diagram %}
+            <hr>
+            <h3>Diagram</h3>
+                <img src="/static/images/test_instructions/{{ diagram }}"/>
+        {% endif %}
+    </div>
+
+</body>
+</html>
