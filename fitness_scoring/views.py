@@ -1066,7 +1066,8 @@ def test_percentile_brackets_graphs(request, percentile_bracket_list_pk, test_pk
 def test_instructions(request, test_pk):
     user_type = request.session.get('user_type', None)
     if (user_type == 'Administrator') or (user_type == 'Teacher'):
-        test_name = Test.objects.get(pk=test_pk).test_name
+        test = Test.objects.get(pk=test_pk)
+        test_name = test.test_name
         if test_name == 'Agility Run':
             context = {'heading': 'Illinois Agility Test',
                        'objective': "The objective of the Illinois Agility Run Test (as described in a paper by "
@@ -1087,6 +1088,7 @@ def test_instructions(request, test_pk):
                        'diagram': 'agility_run.png'}
         else:
             context = {'heading': 'Test Instructions Not Found'}
+        context['test'] = test
         return render(request, 'test_instructions.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to view instructions for a test")
