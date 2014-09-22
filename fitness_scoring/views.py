@@ -1068,7 +1068,26 @@ def test_instructions(request, test_pk):
     if (user_type == 'Administrator') or (user_type == 'Teacher'):
         test = Test.objects.get(pk=test_pk)
         test_name = test.test_name
-        if test_name == 'Agility Run':
+        if test_name == 'Sit and Reach':
+            context = {'heading': 'Sit and Reach Test',
+                       'objective': "The objective of this test is to monitor the development of the athlete's hip and"
+                                    " trunk flexibility.",
+                       'resources': ['Wall', 'Box', 'Tape', 'Metre Ruler', 'Assistant'],
+                       'instructions': [[
+                           'The athlete warms up for 10 minutes and then removes their shoes',
+                           'The assistant secures the ruler to the box top with the tape so that the front edge of '
+                           'the box lines up with the zero mark on the ruler and the zero end of the ruler points '
+                           'towards the athlete',
+                           'The athlete sits on the floor with their legs fully extended with the bottom of their bare '
+                           'feet against the box',
+                           'The athlete places one hand on top of the other, slowly bends forward and reaches along '
+                           'the top of the ruler as far as possible holding the stretch for two seconds',
+                           "The assistant records the distance reached by the athlete's finger tips",
+                           'The athlete performs the test three times',
+                           'The assistant calculates and records the average of the three distances'
+                       ]],
+                       'diagram': 'sit_and_reach.png'}
+        elif test_name == 'Agility Run':
             context = {'heading': 'Illinois Agility Test',
                        'objective': "The objective of the Illinois Agility Run Test (as described in a paper by "
                                     "Getchell in 1979) is to monitor the development of the athlete's agility.",
