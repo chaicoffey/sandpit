@@ -1087,6 +1087,93 @@ def test_instructions(request, test_pk):
                            'The assistant calculates and records the average of the three distances'
                        ]],
                        'diagram': 'sit_and_reach.png'}
+        elif test_name == 'Abdominal Test':
+            context = {'heading': '8 Stage Abdominal Test',
+                       'objective': 'The 8-level sit up test measures abdominal strength, which is important in back '
+                                    'support and core stability.',
+                       'resources': ['Flat surface', '5 lb (2.5 kg)', '10 lb (5 kg) weight',
+                                     'recording sheet and pen.'],
+                       'instructions': [
+                            ['The subject lies on their back, with their knees at right angles and feet flat on the '
+                             'floor.',
+                             'The subject then attempts to perform one complete sit-up for each level in the '
+                             'prescribed manner (see diagram below), starting with level 1. Each level is achieved if '
+                             'a single sit up is performed in the prescribed manner, without the feet coming off the '
+                             'floor. Three attempts can be made at each level. Failure on the fourth attempt, results '
+                             'in the previous level being recorded as the result.']
+                       ],
+                       'diagram': 'abdominal_test.png'}
+        elif test_name == 'Sit Ups 60sec':
+            context = {'heading': '60sec Sit Up Test',
+                       'objective': "The objective of this test is to monitor the muscular endurance of the athlete's "
+                                    "abdominals.",
+                       'resources': ['Non-slip surface', 'Exercise mat', 'Stopwatch', 'Assistant'],
+                       'instructions': [
+                           ['This test requires the athlete to perform as many sit-ups as possible in 60 seconds.'],
+                           [
+                               'The athlete warms up for 10 minutes',
+                               'The athlete lies on the mat with the knees bent, feet flat on the floor and their '
+                               'hands on their ears where they must stay throughout the test',
+                               "The assistant holds the athlete's feet on the ground",
+                               'The assistant gives the command "GO" and starts the stopwatch',
+                               'he athlete sits up touching the knees with their elbows, then returns back to the '
+                               'floor and continues to perform as many sit-ups as possible in 60 seconds',
+                               'The assistant keeps the athlete informed of the time remaining',
+                               "The assistant counts and records the number of correct sit-ups completed in the 60 "
+                               "seconds and uses this recorded value to assess the athlete's performance"
+                           ]
+                       ]}
+        elif test_name == 'Push Ups':
+            context = {'heading': '30sec Push Up Test',
+                       'objective': "The objective of the 30sec Press Up test is to assess the muscular endurance of "
+                                    "the athlete's upper body muscles.",
+                       'resources': ['Non-slip surface', 'Assistant'],
+                       'instructions': [[
+                           'The athlete warms up for 10 minutes',
+                           'The athlete lies on the ground, places their hands by the shoulders and straightens their '
+                           'arms (see Figure 1 below)',
+                           'The athlete lowers the body until the elbows reach 90 degrees (see Figure 2 below) and '
+                           'then extends the arms to return to the start position',
+                           'The athlete continuous this press-up action, with no rest for 30 seconds',
+                           'The assistant counts and records the number of correctly completed press-ups'
+                       ]],
+                       'diagrams': ['push_ups1.png', 'push_ups2.png']}
+        elif test_name == 'Beep Test':
+            context = {'heading': 'Beep Test',
+                       'objective': "The objective of the Multi-Stage Fitness Test (MSFT) (as described in a paper by "
+                                    "Leger & Lambert in 1982), is to monitor the development of the athlete's "
+                                    "cardiovascular endurance and their maximum oxygen uptake (VO2max).",
+                       'resources': ['Flat non-slip surface', '30 metre tape measure', 'Marking cones',
+                                     'The Multi-Stage Fitness Test CD', 'CD Player', 'Recording sheets', 'Assistant'],
+                       'instructions': [
+                           ['This test requires the athlete to run 20m in time with a beep from a CD recording. The '
+                            'athlete must place one foot on or beyond the 20m marker at the end of each shuttle.'],
+                           ['The athlete warms up for 10 minutes',
+                            'The assistant measures out a 20 metre section and marks each end with marker cones',
+                            'If the athlete arrives at the end of a shuttle before the beep, the athlete must wait for '
+                            'the beep and then resume running',
+                            'If the athlete fails to reach the end of the shuttle before the beep they should be '
+                            'allowed 2 further shuttles to attempt to regain the required pace before being withdrawn',
+                            'The assistant records the level and number of shuttles completed at that level by the '
+                            'athlete when they are withdrawn']
+                       ]}
+        elif test_name == 'Flexed Arm Hang':
+            context = {'heading': 'Flexed Arm Hang',
+                       'objective': "The objective of this test is to monitor the muscular endurance of the athlete's "
+                                    "arms and back.",
+                       'resources': ['Bar above head height', 'Stopwatch', 'Assistant'],
+                       'instructions': [
+                           ['This test requires the athlete to perform and hold a chin up position, using a bar above '
+                            'head height, for as long as possible.'],
+                           ['The athlete warms up for 10 minutes',
+                            'The athlete uses a flexed arm hang position with the palms of the hand facing them',
+                            'Using their arms the athlete raises their chin above the bar to the "start position"',
+                            'Once the athlete is in the "start position" the assistant starts the stopwatch',
+                            'The athlete is to maintain the "start position" for as long as possible',
+                            "The assistant stops the stopwatch when the athlete's chin drops below the top of the bar",
+                            'The assistant records the time the "start position" was held for']
+                       ],
+                       'diagram': 'flexed_arm_hang.png'}
         elif test_name == 'Agility Run':
             context = {'heading': 'Illinois Agility Test',
                        'objective': "The objective of the Illinois Agility Run Test (as described in a paper by "

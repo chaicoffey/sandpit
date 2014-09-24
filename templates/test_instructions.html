@@ -54,6 +54,14 @@
             <hr>
             <h3>Diagram</h3>
                 <img src="/static/images/test_instructions/{{ diagram }}"/>
+        {% elif diagrams %}
+            <hr>
+            <h3>Diagrams</h3>
+                <ol>
+                    {% for diagram in diagrams %}
+                        <li><img src="/static/images/test_instructions/{{ diagram }}"/></li>
+                    {% endfor %}
+                </ol>
         {% endif %}
     </div>
 
