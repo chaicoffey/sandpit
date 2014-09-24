@@ -1093,15 +1093,15 @@ def test_instructions(request, test_pk):
                                     'support and core stability.',
                        'resources': ['Flat surface', '5 lb (2.5 kg)', '10 lb (5 kg) weight',
                                      'recording sheet and pen.'],
-                       'instructions': [
-                            ['The subject lies on their back, with their knees at right angles and feet flat on the '
-                             'floor.',
-                             'The subject then attempts to perform one complete sit-up for each level in the '
-                             'prescribed manner (see diagram below), starting with level 1. Each level is achieved if '
-                             'a single sit up is performed in the prescribed manner, without the feet coming off the '
-                             'floor. Three attempts can be made at each level. Failure on the fourth attempt, results '
-                             'in the previous level being recorded as the result.']
-                       ],
+                       'instructions': [[
+                           'The subject lies on their back, with their knees at right angles and feet flat on the '
+                           'floor.',
+                           'The subject then attempts to perform one complete sit-up for each level in the '
+                           'prescribed manner (see diagram below), starting with level 1. Each level is achieved if '
+                           'a single sit up is performed in the prescribed manner, without the feet coming off the '
+                           'floor. Three attempts can be made at each level. Failure on the fourth attempt, results '
+                           'in the previous level being recorded as the result.'
+                       ]],
                        'diagram': 'abdominal_test.png'}
         elif test_name == 'Sit Ups 60sec':
             context = {'heading': '60sec Sit Up Test',
@@ -1192,6 +1192,116 @@ def test_instructions(request, test_pk):
                             '"Finish" cone']
                        ],
                        'diagram': 'agility_run.png'}
+        elif test_name == 'Standing Stork':
+            context = {'heading': 'Standing Stork Test',
+                       'objective': "To monitor the development of the athlete's ability to maintain a state of "
+                                    "equilibrium (balance).",
+                       'resources': ['Warm dry location - gym', 'Stopwatch', 'Assistant'],
+                       'instructions': [[
+                           'The athlete stands comfortably on both feet with their hands on their hips',
+                           'The athlete lifts the right leg and places the sole of the right foot against the side of '
+                           'the left kneecap',
+                           'The assistant gives the command "GO", starts the stopwatch and the athlete raises the heel '
+                           'of the left foot to stand on their toes',
+                           'The athlete is to hold this position for as long as possible',
+                           "The assistant stops the stopwatch when the athlete's left heel touches the ground or the "
+                           "right foot moves away from the left knee",
+                           'The assistance records the time',
+                           'The athlete rests for 1 minute',
+                           'The athlete stands comfortably on both feet with their hands on their hips',
+                           'The athlete lifts the left leg and places the sole of the left foot against the side of '
+                           'the right kneecap',
+                           'The assistant gives the command "GO", starts the stopwatch and the athlete raises the heel '
+                           'of the right foot to stand on their toes',
+                           'The athlete is to hold this position for as long as possible',
+                           "The assistant stops the stopwatch when the athlete's right heel touches the ground or the "
+                           "left foot moves away from the right kneecap",
+                           'The assistant records the time',
+                           'Left and right standing position times are then averaged out with average time recorded on '
+                           'the results sheet'
+                       ]],
+                       'diagram': 'standing_stork.png'}
+        elif test_name == 'Ruler Drop':
+            context = {'heading': 'Ruler Drop Test',
+                       'objective': "The objective of this test is to monitor the athlete's reaction time",
+                       'resources': ['Metre ruler', 'Assistant', 'A bench or platform'],
+                       'instructions': [[
+                           "The ruler is held by the assistant between the outstretched index finger and thumb of the "
+                           "athlete's dominant hand, so that the top of the athlete's thumb and index finger is level "
+                           "with the 50 centimetre line on the ruler.",
+                           'The assistant instructs the athlete to press their fingers together as soon as possible '
+                           'after the ruler has been released',
+                           'The assistant releases the ruler and the athlete clamps down on the ruler between their '
+                           'index finger and thumb as quick as possible',
+                           "The assistant is to record the distance between the 50cm mark on the ruler and the top of "
+                           "the athlete's thumb where the ruler has been caught",
+                           'The test is repeated 2 more times and the average value is recorded'
+                       ]]}
+        elif test_name == 'Catch':
+            context = {'heading': 'Tennis Ball Test',
+                       'objective': "The objective of the test is to monitor the athlete's Hand Eye coordination.",
+                       'resources': ['Tennis Ball', 'Stopwatch', 'Smooth Wall', 'Assistant'],
+                       'instructions': [
+                           ['This test requires the athlete to throw and catch a tennis ball off a wall.'],
+                           ['The athlete stands two metres away from a smooth wall',
+                            'The assistant gives the command "GO" and starts the stopwatch',
+                            'The athlete throws a tennis ball with their right hand against the wall and catches it '
+                            'with the left hand, throws the ball with the left hand and catches it with the right '
+                            'hand. This cycle of throwing and catching is repeated for 30 seconds',
+                            'The assistant counts the number of catches and stops the test after 30 seconds',
+                            'The assistant records the number of catches',
+                            'Once instructions are given, allow the athlete to practice for 2minutes prior to the test']
+                       ]}
+        elif test_name == 'Sprint 20m':
+            context = {'heading': '20 metre Sprint Test',
+                       'objective': "The objective of this test is to monitor the development of the athlete's ability "
+                                    "to effectively and efficiently build up acceleration, from a standing start to "
+                                    "maximum speed.",
+                       'resources': ['Measuring Tape', 'Cones', 'Flat non-slip surface', 'Stopwatch', 'Assistant'],
+                       'instructions': [
+                           ['This test requires the athlete to sprint as fast as possible over 20 metres'],
+                           ['The athlete warms up for 5 minutes',
+                            'The assistant marks out a 20 metre straight section with cones from a wall or tag line',
+                            "The athlete starts running slowly towards wall/ tag line, the stopwatch is started when "
+                            "the athlete turns and their hand comes off the wall or the tag is taken. The stopwatch "
+                            "stops when the athlete's torso crosses the finish line.",
+                            'The test is conducted 3 times',
+                            "The assistant uses the fastest recorded time to assess the athlete's performance"]
+                       ]}
+        elif test_name == 'Vertical Jump':
+            context = {'heading': 'Vertical Jump Test',
+                       'objective': "To monitor the development of the athlete's power, through the legs.",
+                       'resources': ['Wall', 'Tape measure', 'Step Ladder', 'Chalk', 'Assistant'],
+                       'instructions': [
+                           ['The athlete warms up for 10 minutes',
+                            'The athlete chalks the end of his/her finger tips',
+                            "The athlete stands side onto the wall, keeping both feet remaining on the ground, reaches "
+                            "up as high as possible with one hand and marks the wall with the tips of the fingers "
+                            "(M1 - See diagram below)",
+                            'The athlete from a static position jumps as high as possible and marks the wall with the '
+                            'chalk on his/ her fingers (M2 - See diagram below)',
+                            "The assistant measures and records the distance between M1 and M2",
+                            'The athlete repeats the test 3 times',
+                            "The assistant calculates the average of the recorded distances and uses this value to "
+                            "assess the athlete's performance"]
+                       ],
+                       'diagram': 'vertical_jump.png'}
+        elif test_name == 'Basketball Throw':
+            context = {'heading': 'Basketball Wall Throw Test',
+                       'objective': "This test measures upper body (arm) power. By keeping the back in contact with "
+                                    "the wall the strength of the arms are tested.",
+                       'resources': ['Wall', 'Tape measure', 'Basketball (size 7 boys) (size 6 Girls)', 'Assistant'],
+                       'instructions': [
+                           ['The athlete sits on the floor with his/ her legs fully extended and their back against a '
+                            'wall',
+                            'The ball is held with the hands on the side and slightly behind the centre of the ball',
+                            "The athlete then presses their hands up against their chest",
+                            'With the forearms positioned parallel to the ground',
+                            "The athlete then throws the basketball as firmly as they can, as far as they can straight "
+                            "forward, while maintaining their back against the wall",
+                            'The distance thrown is then recorded by the assistant',
+                            "The test is repeated 3 times, with the best result recorded"]
+                       ]}
         else:
             context = {'heading': 'Test Instructions Not Found'}
         context['test'] = test
