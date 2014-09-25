@@ -16,9 +16,9 @@
         <h4>Student: {{ student_name }}</h4>
         <h4>Age/Gender: {{ age }}/{{ gender }}</h4>
 
-        {% for mtc in major_test_categories %}
-            <h3>{{ mtc }}</h3>
-            <div id="{{ mtc }}_chart" style="width:600px;height:300px"></div>
+        {% for major_category, major_category_text, categories in results %}
+            <h3>{{ major_category_text }}</h3>
+            <div class="student_result_view" id="{{ major_category }}_chart" style="width:600px;height:300px"></div>
         {% endfor %}
 
         <input type="submit" class="btn btn-primary" name='results_done_button' value="Done">
@@ -28,33 +28,35 @@
     <script>
         $(document).ready(function() {
 
-            {% for mtc, tc in mtc_tc %}
-                var {{ mtc }}_{{ tc }}_data = [
-                    {% for inner_mtc, inner_tc, test_name, percentile, result in results %}
-                        {% if inner_mtc == mtc and inner_tc == tc %}
-                            [{{ forloop.counter0 }}, {{ percentile }}],
-                        {% endif %}
-                    {% endfor %}
-                ];
+            {% for major_category, major_category_text, categories in results %}
+                {% for category, category_text, tests in categories %}
+                    var {{ major_category }}_{{ category }}_data = [
+                        {% for count, test, test_text, percentile in tests %}
+                            [{{ count }}, {{ percentile }}],
+                        {% endfor %}
+                    ];
+                {% endfor %}
             {% endfor %}
 
-            {% for mtc in major_test_categories %}
-                var {{ mtc }}_ticks = [
-                    {% for inner_mtc, cat, test_name, percentile, result in results %}
-                        {% if inner_mtc == mtc %}
-                            [{{ forloop.counter0 }}, "{{ test_name }}"],
-                        {% endif %}
+            {% for major_category, major_category_text, categories in results %}
+
+                var {{ major_category }}_ticks = [
+                    {% for category, category_text, tests in categories %}
+                        {% for count, test, test_text, percentile in tests %}
+                            [{{ count }}, "{{ test_text }}"],
+                        {% endfor %}
                     {% endfor %}
                 ];
 
-                var {{ mtc }}_chart_options = {
+                var {{ major_category }}_chart_options = {
                     axisLabels: {
                         show: true
                     },
                     xaxis: {
-                        axisLabel: 'Test',
-                        ticks: {{ mtc }}_ticks,
-                        min: 0
+                        axisLabel: '',
+                        ticks: {{ major_category }}_ticks,
+                        min: -0.7,
+                        tickLength: 0
                     },
                     yaxis: {
                         position: 'left',
@@ -74,17 +76,16 @@
                     }
                  };
 
-                var {{ mtc }}_dataset = [
-                    {% for inner_mtc, inner_tc in mtc_tc %}
-                        {% if inner_mtc == mtc %}
-                                { label: "{{ inner_tc }}", data: {{ mtc }}_{{ inner_tc }}_data },
-                        {% endif %}
+                var {{ major_category }}_dataset = [
+                    {% for category, category_text, tests in categories %}
+                        { label: "{{ category_text }}", data: {{ major_category }}_{{ category }}_data },
                     {% endfor %}
                 ];
 
-                $.plot("#{{ mtc }}_chart",
-                        {{ mtc }}_dataset,
-                        {{ mtc }}_chart_options);
+                $.plot("#{{ major_category }}_chart",
+                        {{ major_category }}_dataset,
+                        {{ major_category }}_chart_options);
+
             {% endfor %}
 
         });
