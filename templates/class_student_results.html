@@ -53,11 +53,15 @@
                     },
                     xaxis: {
                         axisLabel: 'Test',
-                        ticks: {{ mtc }}_ticks
+                        ticks: {{ mtc }}_ticks,
+                        min: 0
                     },
                     yaxis: {
                         position: 'left',
-                        axisLabel: 'Percentile'
+                        axisLabel: 'Percentile',
+                        min: 0,
+                        max: 100,
+                        tickSize: 10
                     },
                     series: {
                         bars: {
@@ -66,7 +70,7 @@
                     },
                     bars: {
                         align: "center",
-                        barWidth: 1
+                        barWidth: 0.6
                     }
                  };
 
