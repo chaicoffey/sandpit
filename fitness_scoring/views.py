@@ -123,9 +123,9 @@ def class_student_view(request):
                 return render(request, 'student_entry_form.html', RequestContext(request, context))
             else:
                 form = StudentEntryForm(class_pk=class_instance.pk, data=request.POST)
-                if form.save_student_entry():
-                    context['user_message'] = 'Your results have been entered'
-                    return render(request, 'student_entry_form.html', RequestContext(request, context))
+                enrolment = form.save_student_entry()
+                if enrolment:
+                    return redirect('fitness_scoring.views.class_student_results_view', enrolment_pk=enrolment.pk)
                 else:
                     context['form'] = form
                     return render(request, 'student_entry_form.html', RequestContext(request, context))
@@ -137,24 +137,33 @@ def class_student_view(request):
 
 
 def class_student_results_view(request, enrolment_pk):
-    enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
-    test_results = StudentClassTestResult.objects.filter(student_class_enrolment=enrolment)
-    major_test_categories = set([str(a.test.major_test_category).replace(" ", "_") for a in test_results])
-    mtc_tc = set([(str(a.test.major_test_category).replace(" ", "_"),
-                  str(a.test.test_category).replace(" ", "_")) for a in test_results])
-    results_for_context = [(str(result.test.major_test_category).replace(" ", "_"),
-                            str(result.test.test_category).replace(" ", "_"),
-                            result.test.test_name,
-                            result.percentile,
-                            result.result) for result in test_results]
+    if request.session.get('user_type', None) == 'Class':
+        class_instance = Class.objects.get(user=User.objects.get(username=request.session.get('username', None)))
+        enrolment = StudentClassEnrolment.objects.get(pk=enrolment_pk)
+        if enrolment.class_id == class_instance:
 
-    context = {'student_name': enrolment.student_id,
-               'gender': enrolment.student_gender_at_time_of_enrolment,
-               'major_test_categories': major_test_categories,
-               'mtc_tc': mtc_tc,
-               'results': sorted(results_for_context)
-               }
-    return render(request, 'class_student_results.html', RequestContext(request, context))
+            test_results = StudentClassTestResult.objects.filter(student_class_enrolment=enrolment)
+            major_test_categories = set([str(a.test.major_test_category).replace(" ", "_") for a in test_results])
+            mtc_tc = set([(str(a.test.major_test_category).replace(" ", "_"),
+                          str(a.test.test_category).replace(" ", "_")) for a in test_results])
+            results_for_context = [(str(result.test.major_test_category).replace(" ", "_"),
+                                    str(result.test.test_category).replace(" ", "_"),
+                                    result.test.test_name,
+                                    result.percentile,
+                                    result.result) for result in test_results]
+
+            context = {'post_to_url': '/logout/',
+                       'student_name': enrolment.student_id,
+                       'gender': enrolment.student_gender_at_time_of_enrolment,
+                       'major_test_categories': major_test_categories,
+                       'mtc_tc': mtc_tc,
+                       'results': sorted(results_for_context)}
+            return render(request, 'class_student_results.html', RequestContext(request, context))
+
+        else:
+            return HttpResponseForbidden("You are not authorised to view these results")
+    else:
+        return HttpResponseForbidden("You are not authorised to view these results")
 
 
 def teacher_view(request):

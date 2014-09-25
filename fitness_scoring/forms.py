@@ -1463,7 +1463,9 @@ class StudentEntryForm:
                 if self.data[data_label] is not None:
                     enrolment.enter_result_safe(test, self.data[data_label])
 
-        return is_valid
+            return enrolment
+
+        return None
 
     @staticmethod
     def get_name(label):

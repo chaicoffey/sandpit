@@ -2,21 +2,28 @@
 
 {% block content_fitness_testing_base  %}
 
-    <!-- Fixed navbar -->
-    <div class="navbar navbar-default navbar-fixed-top">
-        <div class="navbar-header">
-            <div class="navbar-brand">Fitness Testing App - Results Page</div><br>
+    <form method="POST" enctype="multipart/form-data" action="{{ post_to_url }}" class="form-horizontal" id="doneForm">
+    {% csrf_token %}
+
+        <!-- Fixed navbar -->
+        <div class="navbar navbar-default navbar-fixed-top">
+            <div class="navbar-header">
+                <div class="navbar-brand">Fitness Testing App - Results Page</div><br>
+            </div>
         </div>
-    </div>
-    <!-- Fixed navbar -->
+        <!-- Fixed navbar -->
 
-    Student: {{ student_name }}
-    Gender: {{ gender }}
+        Student: {{ student_name }}
+        Gender: {{ gender }}
 
-    {% for mtc in major_test_categories %}
-        {{ mtc }}
-        <div id="{{ mtc }}_chart" style="width:600px;height:300px"></div>
-    {% endfor %}
+        {% for mtc in major_test_categories %}
+            {{ mtc }}
+            <div id="{{ mtc }}_chart" style="width:600px;height:300px"></div>
+        {% endfor %}
+
+        <input type="submit" class="btn btn-primary" name='results_done_button' value="Done">
+
+    </form>
 
     <script>
         $(document).ready(function() {
