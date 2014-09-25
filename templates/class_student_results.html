@@ -13,11 +13,11 @@
         </div>
         <!-- Fixed navbar -->
 
-        Student: {{ student_name }}
-        Gender: {{ gender }}
+        <h4>Student: {{ student_name }}</h4>
+        <h4>Age/Gender: {{ age }}/{{ gender }}</h4>
 
         {% for mtc in major_test_categories %}
-            {{ mtc }}
+            <h3>{{ mtc }}</h3>
             <div id="{{ mtc }}_chart" style="width:600px;height:300px"></div>
         {% endfor %}
 

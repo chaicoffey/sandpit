@@ -155,6 +155,7 @@ def class_student_results_view(request, enrolment_pk):
             context = {'post_to_url': '/logout/',
                        'student_name': enrolment.student_id,
                        'gender': enrolment.student_gender_at_time_of_enrolment,
+                       'age': enrolment.get_student_age_at_time_of_enrolment(),
                        'major_test_categories': major_test_categories,
                        'mtc_tc': mtc_tc,
                        'results': sorted(results_for_context)}
