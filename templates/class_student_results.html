@@ -16,10 +16,20 @@
         <h4>Student: {{ student_name }}</h4>
         <h4>Age/Gender: {{ age }}/{{ gender }}</h4>
 
-        {% for major_category, major_category_text, categories in results %}
+        {% for major_category, major_category_text, major_category_score, categories in results %}
             <h3>{{ major_category_text }}</h3>
             <div class="student_result_view" id="{{ major_category }}_chart" style="width:600px;height:300px"></div>
         {% endfor %}
+
+        <table>
+            {% for major_category, major_category_text, major_category_score, categories in results %}
+                <tr>
+                    <td><h3>{{ major_category_text }} Overall Score: &nbsp</h3></td>
+                    <td><h3>{{ major_category_score }}</h3></td>
+                </tr>
+            {% endfor %}
+            <tr><td><h3>Overall Fitness Testing Score: &nbsp</h3></td><td><h3>{{ overall_score }}</h3></td></tr>
+        </table>
 
         <input type="submit" class="btn btn-primary" name='results_done_button' value="Done">
 
@@ -28,7 +38,7 @@
     <script>
         $(document).ready(function() {
 
-            {% for major_category, major_category_text, categories in results %}
+            {% for major_category, major_category_text, major_category_score, categories in results %}
                 {% for category, category_text, tests in categories %}
                     var {{ major_category }}_{{ category }}_data = [
                         {% for count, test, test_text, percentile in tests %}
@@ -38,7 +48,7 @@
                 {% endfor %}
             {% endfor %}
 
-            {% for major_category, major_category_text, categories in results %}
+            {% for major_category, major_category_text, major_category_score, categories in results %}
 
                 var {{ major_category }}_ticks = [
                     {% for category, category_text, tests in categories %}
@@ -61,9 +71,16 @@
                     yaxis: {
                         position: 'left',
                         axisLabel: 'Percentile',
+                        axisLabelFontSizePixels: 18,
                         min: 0,
                         max: 100,
-                        tickSize: 10
+                        tickSize: 10,
+                        font: {
+                            size: 14,
+                            weight: "bold",
+                            variant: "small-caps",
+                            color: "#000000"
+                        }
                     },
                     series: {
                         bars: {
@@ -73,6 +90,9 @@
                     bars: {
                         align: "center",
                         barWidth: 0.6
+                    },
+                    legend: {
+                        backgroundOpacity: 0.5
                     }
                  };
 

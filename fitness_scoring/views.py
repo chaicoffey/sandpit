@@ -154,22 +154,39 @@ def class_student_results_view(request, enrolment_pk):
                                                                                result.percentile))
 
             all_results = []
+            overall_total = 0.0
+            overall_count = 0
             for major_category_name in results_dictionary.keys():
                 major_category_results = []
+                major_category_total = 0.0
+                major_category_count = 0
                 count = 0
                 for category_name in results_dictionary[major_category_name].keys():
                     category_results = []
+                    category_total = 0
+                    category_count = 0
                     for test_name, percentile in results_dictionary[major_category_name][category_name]:
                         category_results.append((count, test_name.replace(" ", "_"), test_name, percentile))
+                        category_total += percentile
+                        category_count += 1
                         count += 1
+                    category_score = float(category_total)/float(category_count)
+                    major_category_total += category_score
+                    major_category_count += 1
                     major_category_results.append((category_name.replace(" ", "_"), category_name, category_results))
-                all_results.append((major_category_name.replace(" ", "_"), major_category_name, major_category_results))
+                major_category_score = major_category_total/float(major_category_count)
+                overall_total += major_category_score
+                overall_count += 1
+                all_results.append((major_category_name.replace(" ", "_"), major_category_name,
+                                    int(round(major_category_score)), major_category_results))
+            overall_score = overall_total/float(overall_count)
 
             context = {'post_to_url': '/logout/',
                        'student_name': enrolment.student_id,
                        'gender': enrolment.student_gender_at_time_of_enrolment,
                        'age': enrolment.get_student_age_at_time_of_enrolment(),
-                       'results': all_results}
+                       'results': all_results,
+                       'overall_score': int(round(overall_score))}
             return render(request, 'class_student_results.html', RequestContext(request, context))
 
         else:
