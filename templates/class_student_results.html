@@ -41,7 +41,7 @@
             {% for major_category, major_category_text, major_category_score, categories in results %}
                 {% for category, category_text, tests in categories %}
                     var {{ major_category }}_{{ category }}_data = [
-                        {% for count, test, test_text, percentile in tests %}
+                        {% for count, test, test_text, score, percentile in tests %}
                             [{{ count }}, {{ percentile }}],
                         {% endfor %}
                     ];
@@ -52,8 +52,8 @@
 
                 var {{ major_category }}_ticks = [
                     {% for category, category_text, tests in categories %}
-                        {% for count, test, test_text, percentile in tests %}
-                            [{{ count }}, "{{ test_text }}"],
+                        {% for count, test, test_text, score, percentile in tests %}
+                            [{{ count }}, "{{ test_text }} ({{ score }})"],
                         {% endfor %}
                     {% endfor %}
                 ];

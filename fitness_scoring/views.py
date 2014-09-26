@@ -150,7 +150,7 @@ def class_student_results_view(request, enrolment_pk):
                     results_dictionary[major_category_name] = {}
                 if not category_name in results_dictionary[major_category_name]:
                     results_dictionary[major_category_name][category_name] = []
-                results_dictionary[major_category_name][category_name].append((result.test.test_name,
+                results_dictionary[major_category_name][category_name].append((result.test.test_name, result.result,
                                                                                result.percentile))
 
             all_results = []
@@ -165,8 +165,8 @@ def class_student_results_view(request, enrolment_pk):
                     category_results = []
                     category_total = 0
                     category_count = 0
-                    for test_name, percentile in results_dictionary[major_category_name][category_name]:
-                        category_results.append((count, test_name.replace(" ", "_"), test_name, percentile))
+                    for test_name, score, percentile in results_dictionary[major_category_name][category_name]:
+                        category_results.append((count, test_name.replace(" ", "_"), test_name, score, percentile))
                         category_total += percentile
                         category_count += 1
                         count += 1
