@@ -1,2 +1,10 @@
-GRAPHS
-{{ mark }}
+<h2>{{ title }}</h2>
+
+{% for selection_number, selection_option in selection_options %}
+    <select id="graph_selections_{{ selection_number }}">
+        <option value=""></option>
+        {% for item, selected in selection_option %}
+            <option value="{{ item.pk }}" {% if selected %}selected{% endif %}>{{ item }}</option>
+        {% endfor %}
+    </select>
+{% endfor %}

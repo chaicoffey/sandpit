@@ -1980,7 +1980,13 @@ def class_enrolment_delete(request, enrolment_pk):
 def class_results_graphs_tests(request, class_pk, test_pk=None):
     if user_authorised_for_class(request, class_pk):
         if (test_pk is None) or ClassTest.objects.filter(class_id=class_pk, test_name=test_pk).exists():
-            context = {'mark': 'graphs 1'}
+            context = {
+                'title': 'Class Results For A Test',
+                'selection_options': [
+                    (1, [(class_test.test_name, class_test.test_name.pk == test_pk)
+                         for class_test in ClassTest.objects.filter(class_id=class_pk)])
+                ]
+            }
             return render(request, 'class_results_graphs.html', RequestContext(request, context))
         else:
             return HttpResponseForbidden("Test and class does not match")
@@ -1992,7 +1998,11 @@ def class_results_graphs_students(request, class_pk, student_pk=None):
     if user_authorised_for_class(request, class_pk):
         if (student_pk is None) or StudentClassEnrolment.objects.filter(class_id=class_pk,
                                                                         student_id=student_pk).exists():
-            context = {'mark': 'graphs 2'}
+            context = {'title': 'Student Results',
+                       'selection_options': [
+                           (1, [(enrolment.student_id, enrolment.student_id.pk == student_pk)
+                                for enrolment in StudentClassEnrolment.objects.filter(class_id=class_pk)])
+                       ]}
             return render(request, 'class_results_graphs.html', RequestContext(request, context))
         else:
             return HttpResponseForbidden("Test and class does not match")
