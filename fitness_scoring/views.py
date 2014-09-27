@@ -1644,7 +1644,9 @@ def class_class(request, class_pk):
             'class_pk': str(class_pk),
             'class_tabs': [
                 ('Results Table', '/class/results_table/' + str(class_pk), 'class_result_edit_page_load_link'),
-                ('Tests Graphs', '/class/results_table/' + str(class_pk), 'class_result_edit_page_load_link')
+                ('Tests Graphs', '/class/results_graphs/tests/' + str(class_pk), 'class_result_edit_page_load_link'),
+                ('Students Graphs', '/class/results_graphs/students/' + str(class_pk),
+                 'class_result_edit_page_load_link')
             ]
         }
         return render(request, 'class.html', RequestContext(request, context))
@@ -1973,6 +1975,29 @@ def class_enrolment_delete(request, enrolment_pk):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to delete a student result entry from this class")
+
+
+def class_results_graphs_tests(request, class_pk, test_pk=None):
+    if user_authorised_for_class(request, class_pk):
+        if (test_pk is None) or ClassTest.objects.filter(class_id=class_pk, test_name=test_pk).exists():
+            context = {'mark': 'graphs 1'}
+            return render(request, 'class_results_graphs.html', RequestContext(request, context))
+        else:
+            return HttpResponseForbidden("Test and class does not match")
+    else:
+        return HttpResponseForbidden("You are not authorised to view results for this class")
+
+
+def class_results_graphs_students(request, class_pk, student_pk=None):
+    if user_authorised_for_class(request, class_pk):
+        if (student_pk is None) or StudentClassEnrolment.objects.filter(class_id=class_pk,
+                                                                        student_id=student_pk).exists():
+            context = {'mark': 'graphs 2'}
+            return render(request, 'class_results_graphs.html', RequestContext(request, context))
+        else:
+            return HttpResponseForbidden("Test and class does not match")
+    else:
+        return HttpResponseForbidden("You are not authorised to view results for this class")
 
 
 def user_authorised_for_teacher(request, teacher_pk):
