@@ -1641,7 +1641,11 @@ def class_class(request, class_pk):
         display_items = Class.objects.get(pk=class_pk).get_display_items()
         context = {
             'class_title': display_items[1] + ' (' + str(display_items[0]) + ') : ' + str(display_items[2]),
-            'class_pk': str(class_pk)
+            'class_pk': str(class_pk),
+            'class_tabs': [
+                ('Results Table', '/class/results_table/' + str(class_pk), 'class_result_edit_page_load_link'),
+                ('Tests Graphs', '/class/results_table/' + str(class_pk), 'class_result_edit_page_load_link')
+            ]
         }
         return render(request, 'class.html', RequestContext(request, context))
     else:
