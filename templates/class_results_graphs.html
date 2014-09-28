@@ -15,10 +15,82 @@
 </div>
 
 {% if graphs %}
-    {% for graph_info, yAxisLabel, yAxisMin, yAxisMax in graphs %}
-        {{ yAxisLabel }} {{ yAxisMin }} {{ yAxisMax }}
-        {% for xAxisLabel, yAxisValue in graph_info %}
-            {{ xAxisLabel }} {{ yAxisValue }}
-        {% endfor %}
+
+    {% for graph_info, graph_title, y_axis_label, y_axis_min, y_axis_max in graphs %}
+        <h3>{{ graph_title }}</h3>
+        <div class="class_result_view" id="graph_{{ forloop.counter0 }}" style="width:600px;height:300px"></div>
     {% endfor %}
+
+    <script>
+        $(document).ready(function() {
+
+            {% for graph_info, graph_title, y_axis_label, y_axis_min, y_axis_max, y_axis_tick_size in graphs %}
+                var graph_{{ forloop.counter0 }}_data = [
+                    {% for count, label, value in graph_info %}
+                        [{{ count }}, {{ value }}],
+                    {% endfor %}
+                ];
+            {% endfor %}
+
+            {% for graph_info, graph_title, y_axis_label, y_axis_min, y_axis_max, y_axis_tick_size in graphs %}
+
+                var graph_{{ forloop.counter0 }}_ticks = [
+                    {% for count, label, value in graph_info %}
+                        [{{ count }}, "{{ label }}"],
+                    {% endfor %}
+                ];
+
+                var graph_{{ forloop.counter0 }}_chart_options = {
+                    axisLabels: {
+                        show: true
+                    },
+                    xaxis: {
+                        axisLabel: '',
+                        ticks: graph_{{ forloop.counter0 }}_ticks,
+                        min: -0.7,
+                        tickLength: 0
+                    },
+                    yaxis: {
+                        position: 'left',
+                        axisLabel: '{{ y_axis_label }}',
+                        axisLabelFontSizePixels: 18,
+                        min: {{ y_axis_min }},
+                        max: {{ y_axis_max }},
+                        tickSize: {{ y_axis_tick_size }},
+                        font: {
+                            size: 14,
+                            weight: "bold",
+                            variant: "small-caps",
+                            color: "#000000"
+                        }
+                    },
+                    series: {
+                        bars: {
+                            show: true
+                        }
+                    },
+                    bars: {
+                        align: "center",
+                        barWidth: 0.6
+                    },
+                    legend: {
+                        backgroundOpacity: 0.5
+                    }
+                 };
+
+                var graph_{{ forloop.counter0 }}_dataset = [
+                    { label: "{{ graph_title }}", data: graph_{{ forloop.counter0 }}_data },
+                ];
+
+                $.plot("#graph_{{ forloop.counter0 }}",
+                        graph_{{ forloop.counter0 }}_dataset,
+                        graph_{{ forloop.counter0 }}_chart_options);
+
+            {% endfor %}
+
+        });
+    </script>
+
+{% else %}
+    <h4>{{ not_selected_text }}</h4>
 {% endif %}
