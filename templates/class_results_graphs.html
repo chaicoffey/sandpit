@@ -1,10 +1,24 @@
-<h2>{{ title }}</h2>
 
-{% for selection_number, selection_option in selection_options %}
-    <select id="graph_selections_{{ selection_number }}">
-        <option value=""></option>
-        {% for item, selected in selection_option %}
-            <option value="{{ item.pk }}" {% if selected %}selected{% endif %}>{{ item }}</option>
+<div id="class_results_graph_header">
+
+    <h2>{{ title }}</h2>
+
+    {% for selection_option in selection_options %}
+        <select class="graph_selection">
+            <option value=""></option>
+            {% for value, item, selected in selection_option %}
+                <option value="{{ value }}" {% if selected %}selected{% endif %}>{{ item }}</option>
+            {% endfor %}
+        </select>
+    {% endfor %}
+
+</div>
+
+{% if graphs %}
+    {% for graph_info, yAxisLabel, yAxisMin, yAxisMax in graphs %}
+        {{ yAxisLabel }} {{ yAxisMin }} {{ yAxisMax }}
+        {% for xAxisLabel, yAxisValue in graph_info %}
+            {{ xAxisLabel }} {{ yAxisValue }}
         {% endfor %}
-    </select>
-{% endfor %}
+    {% endfor %}
+{% endif %}

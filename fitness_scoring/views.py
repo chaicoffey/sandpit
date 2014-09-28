@@ -1983,10 +1983,19 @@ def class_results_graphs_tests(request, class_pk, test_pk=None):
             context = {
                 'title': 'Class Results For A Test',
                 'selection_options': [
-                    (1, [(class_test.test_name, class_test.test_name.pk == test_pk)
-                         for class_test in ClassTest.objects.filter(class_id=class_pk)])
+                    [("/class/results_graphs/tests/" + str(class_pk) + "/" + str(class_test.test_name.pk),
+                      class_test.test_name, str(class_test.test_name.pk) == str(test_pk))
+                     for class_test in ClassTest.objects.filter(class_id=class_pk)]
                 ]
             }
+            if test_pk:
+                enrolments = StudentClassEnrolment.objects.filter(class_id=class_pk)
+                results_for_test = [StudentClassTestResult.objects.get(test=test_pk, student_class_enrolment=enrolment)
+                                    for enrolment in enrolments]
+                context['graphs'] = [
+                    ([(result.student_class_enrolment.student_id, result.percentile) for result in results_for_test],
+                     'Percentile', 0, 100)
+                ]
             return render(request, 'class_results_graphs.html', RequestContext(request, context))
         else:
             return HttpResponseForbidden("Test and class does not match")
@@ -2000,8 +2009,8 @@ def class_results_graphs_students(request, class_pk, student_pk=None):
                                                                         student_id=student_pk).exists():
             context = {'title': 'Student Results',
                        'selection_options': [
-                           (1, [(enrolment.student_id, enrolment.student_id.pk == student_pk)
-                                for enrolment in StudentClassEnrolment.objects.filter(class_id=class_pk)])
+                           [(enrolment.student_id, str(enrolment.student_id.pk) == str(student_pk)) for enrolment in
+                            StudentClassEnrolment.objects.filter(class_id=class_pk)]
                        ]}
             return render(request, 'class_results_graphs.html', RequestContext(request, context))
         else:

@@ -75,6 +75,14 @@ $(document).on('change', '#age_gender_selection', function(event){
     percentile_load_link_clicked_event($('#age_gender_selection').val());
 });
 
+//for loading class result graphs load links on graph_selection change
+$(document).on('change', '.graph_selection', function(event){
+    if($(this).val() != '') {
+        event.preventDefault();
+        class_result_graphs_load_link_clicked_event($(this).val());
+    }
+});
+
 //for loading from a load in class page form submit to class page
 $(document).on('submit', '.load_in_class_page', function(formEvent) {
 

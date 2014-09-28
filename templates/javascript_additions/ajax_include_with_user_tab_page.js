@@ -19,6 +19,12 @@ function percentile_load_link_clicked_event(link_url, do_after_load_method) {
     load_link_clicked_event(link_url, do_after_load_method)
 }
 
+//load graph to main window when a class result graph load link in clicked
+function class_result_graphs_load_link_clicked_event(link_url, do_after_load_method) {
+    base_url = window.location.protocol + "//" + window.location.host;
+    $('#class_results').load(base_url + link_url, do_after_load_method)
+}
+
 function load_link_clicked_event(link_url, do_after_load_method) {
      base_url = window.location.protocol + "//" + window.location.host;
     $('#main_view').load(base_url + link_url, do_after_load_method)
