@@ -16,7 +16,8 @@
 
 {% if graphs %}
 
-    {% for graph_info, graph_title, y_axis_label, y_axis_min, y_axis_max in graphs %}
+    {% for graph_info, graph_title, y_axis_label, y_axis_min, y_axis_max, n_items_less_one in graphs %}
+        <hr>
         <h3>{{ graph_title }}</h3>
         <div class="class_result_view" id="graph_{{ forloop.counter0 }}" style="width:600px;height:300px"></div>
     {% endfor %}
@@ -24,7 +25,7 @@
     <script>
         $(document).ready(function() {
 
-            {% for graph_info, graph_title, y_axis_label, y_axis_min, y_axis_max, y_axis_tick_size in graphs %}
+            {% for graph_info, graph_title, y_axis_label, y_axis_min, y_axis_max, y_axis_tick_size, n_items in graphs %}
                 var graph_{{ forloop.counter0 }}_data = [
                     {% for count, label, value in graph_info %}
                         [{{ count }}, {{ value }}],
@@ -32,7 +33,7 @@
                 ];
             {% endfor %}
 
-            {% for graph_info, graph_title, y_axis_label, y_axis_min, y_axis_max, y_axis_tick_size in graphs %}
+            {% for graph_info, graph_title, y_axis_label, y_axis_min, y_axis_max, y_axis_tick_size, n_items in graphs %}
 
                 var graph_{{ forloop.counter0 }}_ticks = [
                     {% for count, label, value in graph_info %}
@@ -48,6 +49,7 @@
                         axisLabel: '',
                         ticks: graph_{{ forloop.counter0 }}_ticks,
                         min: -0.7,
+                        max: {{ n_items }}.7,
                         tickLength: 0
                     },
                     yaxis: {
@@ -74,7 +76,8 @@
                         barWidth: 0.6
                     },
                     legend: {
-                        backgroundOpacity: 0.5
+                        backgroundOpacity: 0.5,
+                        show: false
                     }
                  };
 
@@ -92,5 +95,6 @@
     </script>
 
 {% else %}
+    <hr>
     <h4>{{ not_selected_text }}</h4>
 {% endif %}

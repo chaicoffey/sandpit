@@ -1981,7 +1981,7 @@ def class_results_graphs_tests(request, class_pk, test_pk=None):
     if user_authorised_for_class(request, class_pk):
         if (test_pk is None) or ClassTest.objects.filter(class_id=class_pk, test_name=test_pk).exists():
             context = {
-                'title': 'Class Results For A Test',
+                'title': 'Tests',
                 'not_selected_text': 'Please Select A Test To View Graph',
                 'selection_options': [
                     [("/class/results_graphs/tests/" + str(class_pk) + "/" + str(class_test.test_name.pk),
@@ -1996,10 +1996,13 @@ def class_results_graphs_tests(request, class_pk, test_pk=None):
                 graph_info = []
                 counter = 0
                 for result in results_for_test:
-                    graph_info.append((counter, result.student_class_enrolment.student_id, result.percentile))
+                    graph_info.append((counter,
+                                       str(result.student_class_enrolment.student_id) + " (" + result.result + ")",
+                                       result.percentile))
                     counter += 1
+                test_name = Test.objects.get(pk=test_pk).test_name
                 context['graphs'] = [
-                    (graph_info, 'Class Test Results', 'Percentile', 0, 100, 10)
+                    (graph_info, 'Class Results: ' + test_name, 'Percentile', 0, 100, 10, len(graph_info) - 1)
                 ]
             return render(request, 'class_results_graphs.html', RequestContext(request, context))
         else:
