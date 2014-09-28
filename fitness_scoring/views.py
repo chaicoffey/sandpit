@@ -2015,14 +2015,33 @@ def class_results_graphs_students(request, class_pk, student_pk=None):
     if user_authorised_for_class(request, class_pk):
         if (student_pk is None) or StudentClassEnrolment.objects.filter(class_id=class_pk,
                                                                         student_id=student_pk).exists():
-            context = {'title': 'Student Results',
-                       'selection_options': [
-                           [(enrolment.student_id, str(enrolment.student_id.pk) == str(student_pk)) for enrolment in
-                            StudentClassEnrolment.objects.filter(class_id=class_pk)]
-                       ]}
+            context = {
+                'title': 'Students',
+                'not_selected_text': 'Please Select A Student To View Graph',
+                'selection_options': [
+                    [("/class/results_graphs/students/" + str(class_pk) + "/" + str(enrolment.student_id.pk),
+                      enrolment.student_id, str(enrolment.student_id.pk) == str(student_pk))
+                     for enrolment in StudentClassEnrolment.objects.filter(class_id=class_pk)]
+                ]
+            }
+            if student_pk:
+                enrolment = StudentClassEnrolment.objects.get(class_id=class_pk, student_id=student_pk)
+                results_for_student = StudentClassTestResult.objects.filter(student_class_enrolment=enrolment)
+                graph_info = {}
+                for result in results_for_student:
+                    major_category = result.test.major_test_category.major_test_category_name
+                    if major_category not in graph_info.keys():
+                        graph_info[major_category] = []
+                    graph_info[major_category].append((len(graph_info[major_category]),
+                                                       str(result.test.test_name) + " (" + result.result + ")",
+                                                       result.percentile))
+                context['graphs'] = []
+                for major_category in graph_info.keys():
+                    context['graphs'].append((graph_info[major_category], major_category, 'Percentile', 0, 100, 10,
+                                              len(graph_info[major_category]) - 1))
             return render(request, 'class_results_graphs.html', RequestContext(request, context))
         else:
-            return HttpResponseForbidden("Test and class does not match")
+            return HttpResponseForbidden("Student and class does not match")
     else:
         return HttpResponseForbidden("You are not authorised to view results for this class")
 
