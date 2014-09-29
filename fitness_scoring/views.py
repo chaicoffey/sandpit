@@ -2093,18 +2093,24 @@ def class_results_graphs_previous(request, class_pk, student_pk=None, test_pk=No
                     result = StudentClassTestResult.objects.filter(test=test_pk, student_class_enrolment=enrolment)
                     if result.exists():
                         results_for_test.append(result[0])
-                graph_info = []
+                graph_info = {}
                 counter = 0
                 for result in results_for_test:
-                    graph_info.append((counter,
-                                       result.student_class_enrolment.class_id.class_name + " (" +
-                                       str(result.student_class_enrolment.class_id.year) + ") (" + result.result + ")",
-                                       result.percentile))
+                    year = str(result.student_class_enrolment.class_id.year)
+                    if year not in graph_info.keys():
+                        graph_info[year] = []
+                    graph_info[year].append((
+                        counter,
+                        result.student_class_enrolment.class_id.class_name + " (" + result.result + ")",
+                        result.percentile
+                    ))
                     counter += 1
+                graph_data = []
+                for year in graph_info.keys():
+                    graph_data.append((year.replace(" ", "_"), year, graph_info[year]))
                 test_name = Test.objects.get(pk=test_pk).test_name
-                graph_data = [(test_name.replace(" ", "_"), test_name, graph_info)]
                 context['graphs'] = [("Class_Results", str(Student.objects.get(pk=student_pk)) + ' - ' + test_name,
-                                      graph_data, 'Percentile', 0, 100, 10, counter - 1, False)]
+                                      graph_data, 'Percentile', 0, 100, 10, counter - 1, True)]
             return render(request, 'class_results_graphs.html', RequestContext(request, context))
         else:
             return HttpResponseForbidden("Student and class does not match")
