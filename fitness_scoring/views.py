@@ -150,7 +150,10 @@ def class_student_results_view(request, enrolment_pk):
                     results_dictionary[major_category_name] = {}
                 if not category_name in results_dictionary[major_category_name]:
                     results_dictionary[major_category_name][category_name] = []
-                results_dictionary[major_category_name][category_name].append((result.test.test_name, result.result,
+                unit = result.test.percentiles.get_result_unit_text()
+                unit = "" if unit == "" else " " + unit
+                results_dictionary[major_category_name][category_name].append((result.test.test_name,
+                                                                               result.result + unit,
                                                                                result.percentile,
                                                                                result.get_converted_percentile()))
 
@@ -2000,9 +2003,13 @@ def class_results_graphs_tests(request, class_pk, test_pk=None):
                 graph_info = []
                 counter = 0
                 for result in results_for_test:
-                    graph_info.append((counter,
-                                       str(result.student_class_enrolment.student_id) + " (" + result.result + ")",
-                                       result.percentile))
+                    unit = result.test.percentiles.get_result_unit_text()
+                    unit = "" if unit == "" else " " + unit
+                    graph_info.append((
+                        counter,
+                        str(result.student_class_enrolment.student_id) + " (" + result.result + unit + ")",
+                        result.percentile)
+                    )
                     counter += 1
                 test_name = Test.objects.get(pk=test_pk).test_name
                 graph_data = [(test_name.replace(" ", "_"), test_name, graph_info)]
@@ -2041,9 +2048,11 @@ def class_results_graphs_students(request, class_pk, student_pk=None):
                         major_category_counter[major_category] = 0
                     if category not in graph_info[major_category].keys():
                         graph_info[major_category][category] = []
+                    unit = result.test.percentiles.get_result_unit_text()
+                    unit = "" if unit == "" else " " + unit
                     graph_info[major_category][category].append((
                         major_category_counter[major_category],
-                        str(result.test.test_name) + " (" + result.result + ")",
+                        str(result.test.test_name) + " (" + result.result + unit + ")",
                         result.percentile
                     ))
                     major_category_counter[major_category] += 1
@@ -2098,8 +2107,10 @@ def class_results_graphs_previous(request, class_pk, student_pk=None, test_pk=No
                     year = str(result.student_class_enrolment.class_id.year)
                     if year not in graph_info.keys():
                         graph_info[year] = []
+                    unit = result.test.percentiles.get_result_unit_text()
+                    unit = "" if unit == "" else " " + unit
                     graph_info[year].append((
-                        result.student_class_enrolment.class_id.class_name + " (" + result.result + ")",
+                        result.student_class_enrolment.class_id.class_name + " (" + result.result + unit + ")",
                         result.percentile
                     ))
 
