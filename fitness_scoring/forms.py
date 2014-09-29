@@ -1536,6 +1536,8 @@ class StudentEntryForm:
                 self.html += ' placeholder="' + self.place_holder + '"'
             self.html = '<' + self.html + '>'
 
+            self.unit_text = test.percentiles.get_result_unit_text()
+
             if check_for_errors:
                 if value == '':
                     self.errors = 'Please enter result for ' + test.test_name
