@@ -16,49 +16,53 @@
 
 {% if graphs %}
 
-    {% for graph_info, graph_title, y_axis_label, y_axis_min, y_axis_max, n_items_less_one in graphs %}
+    {% for title, title_text in graphs %}
         <hr>
-        <h3>{{ graph_title }}</h3>
-        <div class="class_result_view" id="graph_{{ forloop.counter0 }}" style="width:600px;height:300px"></div>
+        <h3>{{ title_text }}</h3>
+        <div class="class_result_view" id="graph_{{ title }}" style="width:600px;height:300px"></div>
     {% endfor %}
 
     <script>
         $(document).ready(function() {
 
-            {% for graph_info, graph_title, y_axis_label, y_axis_min, y_axis_max, y_axis_tick_size, n_items in graphs %}
-                var graph_{{ forloop.counter0 }}_data = [
-                    {% for count, label, value in graph_info %}
-                        [{{ count }}, {{ value }}],
-                    {% endfor %}
-                ];
+            {% for title, title_text, graph_data in graphs %}
+                {% for category, category_text, category_data in graph_data %}
+                    var graph_{{ title }}_{{ category }}_data = [
+                        {% for count, label, value in category_data %}
+                            [{{ count }}, {{ value }}],
+                        {% endfor %}
+                    ];
+                {% endfor %}
             {% endfor %}
 
-            {% for graph_info, graph_title, y_axis_label, y_axis_min, y_axis_max, y_axis_tick_size, n_items in graphs %}
+            {% for title, title_text, graph_data, y_label, y_min, y_max, y_inc, n_items, show_legend in graphs %}
 
-                var graph_{{ forloop.counter0 }}_ticks = [
-                    {% for count, label, value in graph_info %}
-                        [{{ count }}, "{{ label }}"],
+                var graph_{{ title }}_ticks = [
+                    {% for category, category_text, category_data in graph_data %}
+                        {% for count, label, value in category_data %}
+                            [{{ count }}, "{{ label }}"],
+                        {% endfor %}
                     {% endfor %}
                 ];
 
-                var graph_{{ forloop.counter0 }}_chart_options = {
+                var graph_{{ title }}_chart_options = {
                     axisLabels: {
                         show: true
                     },
                     xaxis: {
                         axisLabel: '',
-                        ticks: graph_{{ forloop.counter0 }}_ticks,
+                        ticks: graph_{{ title }}_ticks,
                         min: -0.7,
                         max: {{ n_items }}.7,
                         tickLength: 0
                     },
                     yaxis: {
                         position: 'left',
-                        axisLabel: '{{ y_axis_label }}',
+                        axisLabel: '{{ y_label }}',
                         axisLabelFontSizePixels: 18,
-                        min: {{ y_axis_min }},
-                        max: {{ y_axis_max }},
-                        tickSize: {{ y_axis_tick_size }},
+                        min: {{ y_min }},
+                        max: {{ y_max }},
+                        tickSize: {{ y_inc }},
                         font: {
                             size: 14,
                             weight: "bold",
@@ -77,17 +81,19 @@
                     },
                     legend: {
                         backgroundOpacity: 0.5,
-                        show: false
+                        show: {% if show_legend %} true {% else %} false {% endif %}
                     }
                  };
 
-                var graph_{{ forloop.counter0 }}_dataset = [
-                    { label: "{{ graph_title }}", data: graph_{{ forloop.counter0 }}_data },
+                var graph_{{ title }}_dataset = [
+                    {% for category, category_text, category_data in graph_data %}
+                        { label: "{{ category_text }}", data: graph_{{ title }}_{{ category }}_data },
+                    {% endfor %}
                 ];
 
-                $.plot("#graph_{{ forloop.counter0 }}",
-                        graph_{{ forloop.counter0 }}_dataset,
-                        graph_{{ forloop.counter0 }}_chart_options);
+                $.plot("#graph_{{ title }}",
+                        graph_{{ title }}_dataset,
+                        graph_{{ title }}_chart_options);
 
             {% endfor %}
 

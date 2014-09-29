@@ -2001,9 +2001,9 @@ def class_results_graphs_tests(request, class_pk, test_pk=None):
                                        result.percentile))
                     counter += 1
                 test_name = Test.objects.get(pk=test_pk).test_name
-                context['graphs'] = [
-                    (graph_info, 'Class Results: ' + test_name, 'Percentile', 0, 100, 10, len(graph_info) - 1)
-                ]
+                graph_data = [(test_name.replace(" ", "_"), test_name, graph_info)]
+                context['graphs'] = [("Class_Results", 'Class Results: ' + test_name, graph_data, 'Percentile',
+                                      0, 100, 10, counter - 1, False)]
             return render(request, 'class_results_graphs.html', RequestContext(request, context))
         else:
             return HttpResponseForbidden("Test and class does not match")
@@ -2028,17 +2028,29 @@ def class_results_graphs_students(request, class_pk, student_pk=None):
                 enrolment = StudentClassEnrolment.objects.get(class_id=class_pk, student_id=student_pk)
                 results_for_student = StudentClassTestResult.objects.filter(student_class_enrolment=enrolment)
                 graph_info = {}
+                major_category_counter = {}
                 for result in results_for_student:
                     major_category = result.test.major_test_category.major_test_category_name
+                    category = result.test.test_category.test_category_name
                     if major_category not in graph_info.keys():
-                        graph_info[major_category] = []
-                    graph_info[major_category].append((len(graph_info[major_category]),
-                                                       str(result.test.test_name) + " (" + result.result + ")",
-                                                       result.percentile))
+                        graph_info[major_category] = {}
+                        major_category_counter[major_category] = 0
+                    if category not in graph_info[major_category].keys():
+                        graph_info[major_category][category] = []
+                    graph_info[major_category][category].append((
+                        major_category_counter[major_category],
+                        str(result.test.test_name) + " (" + result.result + ")",
+                        result.percentile
+                    ))
+                    major_category_counter[major_category] += 1
                 context['graphs'] = []
                 for major_category in graph_info.keys():
-                    context['graphs'].append((graph_info[major_category], major_category, 'Percentile', 0, 100, 10,
-                                              len(graph_info[major_category]) - 1))
+                    graph_data = []
+                    for category in graph_info[major_category].keys():
+                        graph_data.append((category.replace(" ", "_"), category, graph_info[major_category][category]))
+                    context['graphs'].append((major_category.replace(" ", "_"), major_category, graph_data,
+                                              'Percentile', 0, 100, 10, major_category_counter[major_category] - 1,
+                                              True))
             return render(request, 'class_results_graphs.html', RequestContext(request, context))
         else:
             return HttpResponseForbidden("Student and class does not match")
