@@ -1157,6 +1157,16 @@ class StudentClassTestResult(models.Model):
             self.save()
         return result_edited
 
+    def get_converted_percentile(self):
+        if self.test.percentiles.percentile_score_conversion_type == 'HIGH_MIDDLE':
+            if self.percentile == 0:
+                converted_percentile = 0
+            else:
+                converted_percentile = 99 - 2*int(abs(50 - self.percentile))
+        else:
+            converted_percentile = self.percentile
+        return converted_percentile
+
     @staticmethod
     def create_student_class_test_result(student_class_enrolment, test, result):
         student = student_class_enrolment.student_id
