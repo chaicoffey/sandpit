@@ -2094,20 +2094,29 @@ def class_results_graphs_previous(request, class_pk, student_pk=None, test_pk=No
                     if result.exists():
                         results_for_test.append(result[0])
                 graph_info = {}
-                counter = 0
                 for result in results_for_test:
                     year = str(result.student_class_enrolment.class_id.year)
                     if year not in graph_info.keys():
                         graph_info[year] = []
                     graph_info[year].append((
-                        counter,
                         result.student_class_enrolment.class_id.class_name + " (" + result.result + ")",
                         result.percentile
                     ))
-                    counter += 1
+
+                graph_info_keys_sorted = graph_info.keys()
+                graph_info_keys_sorted.sort()
+                graph_info_sorted = {}
+                counter = 0
+                for year in graph_info_keys_sorted:
+                    graph_info[year].sort()
+                    graph_info_sorted[year] = []
+                    for label, percentile in graph_info[year]:
+                        graph_info_sorted[year].append((counter, label, percentile))
+                        counter += 1
+
                 graph_data = []
-                for year in graph_info.keys():
-                    graph_data.append((year.replace(" ", "_"), year, graph_info[year]))
+                for year in graph_info_keys_sorted:
+                    graph_data.append((year.replace(" ", "_"), year, graph_info_sorted[year]))
                 test_name = Test.objects.get(pk=test_pk).test_name
                 context['graphs'] = [("Class_Results", str(Student.objects.get(pk=student_pk)) + ' - ' + test_name,
                                       graph_data, 'Percentile', 0, 100, 10, counter - 1, True)]
