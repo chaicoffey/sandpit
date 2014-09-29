@@ -1158,7 +1158,7 @@ class StudentClassTestResult(models.Model):
         return result_edited
 
     def get_converted_percentile(self):
-        if self.test.percentiles.percentile_score_conversion_type == 'HIGH_MIDDLE':
+        if (self.test.percentiles.percentile_score_conversion_type == 'HIGH_MIDDLE') and (self.percentile is not None):
             if self.percentile == 0:
                 converted_percentile = 0
             else:

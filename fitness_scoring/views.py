@@ -152,10 +152,16 @@ def class_student_results_view(request, enrolment_pk):
                     results_dictionary[major_category_name][category_name] = []
                 unit = result.test.percentiles.get_result_unit_text()
                 unit = "" if unit == "" else " " + unit
+                if result.percentile:
+                    percentile = result.percentile
+                    converted_percentile = result.get_converted_percentile()
+                else:
+                    percentile = 0
+                    converted_percentile = 0
                 results_dictionary[major_category_name][category_name].append((result.test.test_name,
                                                                                result.result + unit,
-                                                                               result.percentile,
-                                                                               result.get_converted_percentile()))
+                                                                               percentile,
+                                                                               converted_percentile))
 
             all_results = []
             overall_total = 0.0
@@ -2005,11 +2011,12 @@ def class_results_graphs_tests(request, class_pk, test_pk=None):
                 for result in results_for_test:
                     unit = result.test.percentiles.get_result_unit_text()
                     unit = "" if unit == "" else " " + unit
+                    percentile = result.percentile if result.percentile else 0
                     graph_info.append((
                         counter,
                         str(result.student_class_enrolment.student_id) + " (" + result.result + unit + ")",
-                        result.percentile)
-                    )
+                        percentile
+                    ))
                     counter += 1
                 test_name = Test.objects.get(pk=test_pk).test_name
                 graph_data = [(test_name.replace(" ", "_"), test_name, graph_info)]
@@ -2050,10 +2057,11 @@ def class_results_graphs_students(request, class_pk, student_pk=None):
                         graph_info[major_category][category] = []
                     unit = result.test.percentiles.get_result_unit_text()
                     unit = "" if unit == "" else " " + unit
+                    percentile = result.percentile if result.percentile else 0
                     graph_info[major_category][category].append((
                         major_category_counter[major_category],
                         str(result.test.test_name) + " (" + result.result + unit + ")",
-                        result.percentile
+                        percentile
                     ))
                     major_category_counter[major_category] += 1
                 context['graphs'] = []
@@ -2109,9 +2117,10 @@ def class_results_graphs_previous(request, class_pk, student_pk=None, test_pk=No
                         graph_info[year] = []
                     unit = result.test.percentiles.get_result_unit_text()
                     unit = "" if unit == "" else " " + unit
+                    percentile = result.percentile if result.percentile else 0
                     graph_info[year].append((
                         result.student_class_enrolment.class_id.class_name + " (" + result.result + unit + ")",
-                        result.percentile
+                        percentile
                     ))
 
                 graph_info_keys_sorted = graph_info.keys()
