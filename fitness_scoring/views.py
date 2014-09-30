@@ -509,7 +509,24 @@ def instructions_page(request, instructions_name):
                        ]
                    ]}
     elif instructions_name == 'teacher_run_tests' and user_type == 'Teacher':
-        context = {'heading': 'Run Tests'}
+        context = {'heading': 'Run Tests',
+                   'reason': 'Once you have classes assigned this program will provide aides for running the tests',
+                   'instructions': [
+                       [
+                           ('Click the "Add/Update Class List" tab at the left of the screen',
+                            'teacher_add_classes_A.png'),
+                           ('Then in the "Class List" table click on the "class home page" symbol for the class that '
+                            'you want to run tests for', 'teacher_add_test_A.png')
+                       ],
+                       [
+                           ('You can get instructions for each of the tests.  First click on each of the information '
+                            'symbols next to each test.', 'run_tests_A.png'),
+                           ('If there are a lot of tests you may need to scroll the table to the right to see them all',
+                            'run_tests_B.png'),
+                           ('A new tab or new window should have popped up for each test that contains the test '
+                            'information', 'run_tests_C.png')
+                       ]
+                   ]}
     elif instructions_name == 'teacher_student_enter_results' and user_type == 'Teacher':
         context = {'heading': 'Entering Results',
                    'reason': 'Once the students have completed the tests and noted their results they will need to '
