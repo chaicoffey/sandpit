@@ -234,7 +234,7 @@ def teacher_home(request):
         steps = [('Change Password', 'change_password'),
                  ('Add Classes For Year', 'teacher_add_classes'),
                  ('Add Tests To Classes For The Year', 'teacher_add_tests'),
-                 ('Run Tests (*temp* see my sheet for what instructions should contain *temp*)', 'teacher_run_tests'),
+                 ('Run Tests', 'teacher_run_tests'),
                  ('Get Students To Enter Results', 'teacher_student_enter_results'),
                  ('Approve Entries For Class', 'teacher_approve_entries'),
                  ('View Results', 'teacher_view_results')]
@@ -442,6 +442,13 @@ def instructions_page(request, instructions_name):
                             'administrator_add_tests_H.png'),
                            ('Now you are done!  The teachers will be able to add tests to their classes from the'
                             ' standard test sets you have created.', None)
+                       ],
+                       [
+                           ('There is a recommended set of tests to be used (this set of tests comes with a lesson '
+                            'plan)', None),
+                           ('The recommended set of tests is: NOT LISTED YET', None),
+                           ('If the this recommended set of tests is not used than it is recommended that the '
+                            'following test categories be included: NOT LISTED YET', None)
                        ]
                    ]}
     elif instructions_name == 'teacher_add_classes' and user_type == 'Teacher':
@@ -506,6 +513,13 @@ def instructions_page(request, instructions_name):
                            ('Then click the button at the bottom of the test set has been saved.  Now you and other '
                             'teachers will be able to load this "standard test set" to other classes', None),
                            ('Make sure to add tests to all of your remaining classes', None)
+                       ],
+                       [
+                           ('There is a recommended set of tests to be used (this set of tests comes with a lesson '
+                            'plan)', None),
+                           ('The recommended set of tests is: NOT LISTED YET', None),
+                           ('If the this recommended set of tests is not used than it is recommended that the '
+                            'following test categories be included: NOT LISTED YET', None)
                        ]
                    ]}
     elif instructions_name == 'teacher_run_tests' and user_type == 'Teacher':
@@ -525,6 +539,14 @@ def instructions_page(request, instructions_name):
                             'run_tests_B.png'),
                            ('A new tab or new window should have popped up for each test that contains the test '
                             'information', 'run_tests_C.png')
+                       ],
+                       [
+                           ("When running the tests be sure that the student's or an assistant notes down their "
+                            "results", None)
+                       ],
+                       [
+                           ('If you are using the "recommended" set of tests then a lesson plan is provided.  below is '
+                            'the equipment you will require and the lesson plan:', 'run_tests_D.png')
                        ]
                    ]}
     elif instructions_name == 'teacher_student_enter_results' and user_type == 'Teacher':
