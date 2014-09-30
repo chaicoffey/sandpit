@@ -384,8 +384,9 @@ def instructions_page(request, instructions_name):
                             'this class is not available then you must add them from the "Add/Update Teacher List" tab '
                             '(see instructions)', 'administrator_add_classes_D.png'),
                            ('Then click the button at the bottom of the form', None),
-                           ('Repeat from point 2. for all the remaining classes you wish to add and you are done!',
-                            None)
+                           ('Repeat from point 2. for all the remaining classes you wish to add and you are done!  '
+                            'Note that you will need to add a new "class" for every term you intend to run the tests '
+                            'in.', None)
                        ],
                        [
                            ('To add multiple classes from a file you must first make a classes CSV file.'
@@ -393,7 +394,8 @@ def instructions_page(request, instructions_name):
                            ('Then browse and select the classes CSV file from the add classes form',
                             'administrator_add_classes_E.png'),
                            ('Then click the button at the bottom of the form and you are done!  The classes should now '
-                            'show up in the "Class List" table.', None)
+                            'show up in the "Class List" table.  Note that you will need to add a new "class" for '
+                            'every term you intend to run the tests in.', None)
                        ],
                        [
                            ('To make a classes CSV file first you must open up a new excel document.', None),
@@ -487,7 +489,8 @@ def instructions_page(request, instructions_name):
                             'teacher_add_classes_D.png'),
                            ('Then click the button at the bottom of the form', None)
                        ],
-                       [('Repeat from point 2. for all your remaining classes and you are done!', None)]
+                       [('Repeat from point 2. for all your remaining classes and you are done!.  Note that you will '
+                         'need to add a new "class" for every term you intend to run the tests in.', None)]
                    ]}
     elif instructions_name == 'teacher_add_tests' and user_type == 'Teacher':
         context = {'heading': 'Add Tests',
