@@ -511,11 +511,95 @@ def instructions_page(request, instructions_name):
     elif instructions_name == 'teacher_run_tests' and user_type == 'Teacher':
         context = {'heading': 'Run Tests'}
     elif instructions_name == 'teacher_student_enter_results' and user_type == 'Teacher':
-        context = {'heading': 'Entering Results'}
+        context = {'heading': 'Entering Results',
+                   'reason': 'Once the students have completed the tests and noted their results they will need to '
+                             'enter them into the system.  Each of the students will need access to a computer for '
+                             'doing this.',
+                   'instructions': [
+                       [
+                           ('First you will need to get the class log in details for the students.', None),
+                           ('To do this Click the "Add/Update Class List" tab at the left of the screen',
+                            'teacher_add_classes_A.png'),
+                           ('Then in the "Class List" table click on the "class home page" symbol for the class that '
+                            'is entering the results', 'teacher_add_test_A.png'),
+                           ('Then click the "*" button at the top of the "Class List" table', 'teacher_add_test_F.png'),
+                           ('Then select the "Get New Class Login Password" option', 'enter_results_A.png'),
+                           ('Then note down the login and password that is displayed', 'enter_results_B.png'),
+                           ('If at a later time you forget the login/password or you want to reset the password then '
+                            'you can repeat point 1.  Each time you repeat it you will reset the password to a new '
+                            'one.', None)
+                       ],
+                       [
+                           ('Now the students can login.  To do this get each of the students to go to the login '
+                            'screen and enter the login and password obtained in point 1', 'enter_results_C.png'),
+                           ('If you are using the one computer than you will first need to logout', None)
+                       ],
+                       [
+                           ('Now each student can enter their results.  First they should fill in the student '
+                            'details.', 'enter_results_D.png'),
+                           ('Then the results', 'enter_results_E.png'),
+                           ('Make sure the results are entered with the units given next to each result entry box',
+                            'enter_results_F.png')
+                       ],
+                       [
+                           ('After the results have been entered click the "Save Results" button at the bottom of the '
+                            'screen', 'enter_results_G.png'),
+                           ('If all the results have been entered correctly than the student should now see graphs of '
+                            'their results.  If they wish they can take a screen shot of the results.  Once they '
+                            'click "Done" at the bottom of the screen they will be logged out.', 'enter_results_H.png'),
+                           ('If the results were not all entered correctly than there will be some red text next to '
+                            'the boxes that need to be amended', 'enter_results_I.png'),
+                           ('If the graphs show up as all 0 than it may be that the student has entered in the '
+                            'wrong age (and so there is no percentile information for that age)', None)
+                       ]
+                   ]}
     elif instructions_name == 'teacher_approve_entries' and user_type == 'Teacher':
         context = {'heading': 'Approve Entries'}
     elif instructions_name == 'teacher_view_results' and user_type == 'Teacher':
-        context = {'heading': 'View Results'}
+        context = {'heading': 'View Results',
+                   'reason': 'After the student results have been entered and approved you can view these results '
+                             'in different forms',
+                   'instructions': [
+                       [
+                           ('Click the "Add/Update Class List" tab at the left of the screen',
+                            'teacher_add_classes_A.png'),
+                           ('Then in the "Class List" table click on the "class home page" symbol for the class that '
+                            'the class that you wish to view results for', 'teacher_add_test_A.png'),
+                           ('There are 4 different formats that you can view the data listed in the following 3 '
+                            'points', None)
+                       ],
+                       [
+                           ('Initially you will see the "Class results table', 'view_results_B.png'),
+                           ('This can also be accessed by clicking the "Results Table" class panel option',
+                            'view_results_A.png'),
+                           ('If there are a lot of tests in the table you may need to scroll right on the table to see '
+                            'all of the results', 'view_results_C.png')
+                       ],
+                       [
+                           ('A graph of the results of the class for a given test can be viewed by first clicking the '
+                            '"Tests Graphs" class panel option', 'view_results_D.png'),
+                           ('Next select the test you want to view results for', 'view_results_E.png'),
+                           ('The resulting graph will show percentiles rankings for each of the students for that '
+                            'test.  Note that 2 students with the same result on a test may have a different '
+                            'percentile ranking if they are different ages', 'view_results_F.png')
+                       ],
+                       [
+                           ('A graph of the results for a student can be viewed by first clicking the "Students '
+                            'Graphs" class panel option', 'view_results_G.png'),
+                           ('Next select the student you want to view results for', 'view_results_H.png'),
+                           ('The resulting graph(s) will show percentiles rankings for the student for the different '
+                            'tests.  There will be one graph per major test category.  The color of the bars in each '
+                            'graph represents a minor test category', 'view_results_I.png')
+                       ],
+                       [
+                           ('Previous results for a student for given tests can be viewed by clicking the "Previous '
+                            'Graphs" class panel option.  This is only useful if a student has results entered into '
+                            'the system from previous classes', 'view_results_J.png'),
+                           ('Next select the student and the test you want to view results for', 'view_results_K.png'),
+                           ('The resulting graph(s) will show the percentiles rankings from previous classes for the '
+                            'chosen student and test.  The color of the bars represents a year.', 'view_results_L.png')
+                       ]
+                   ]}
     else:
         context = {'heading': 'No Heading Given'}
 
