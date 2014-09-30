@@ -345,8 +345,7 @@ def instructions_page(request, instructions_name):
                             'change_password_B.png'),
                            ('Then click the button at the bottom of the form and you are done!', None)
                        ]
-                   ]
-                   }
+                   ]}
     elif (instructions_name == 'administrator_add_teacher') and user_type == 'Administrator':
         context = {'heading': 'Add Teacher',
                    'reason': 'You need to add the PE teachers that will be using this program',
@@ -390,10 +389,30 @@ def instructions_page(request, instructions_name):
                        ],
                        [
                            ('To add multiple classes from a file you must first make a classes CSV file.'
-                            '  ** No explanation for making the CSV file is given yet. **', None),
+                            '  See the next point for how to make a classes CSV file.', None),
                            ('Then browse and select the classes CSV file from the add classes form',
                             'administrator_add_classes_E.png'),
-                           ('Then click the button at the bottom of the form and you are done!', None)
+                           ('Then click the button at the bottom of the form and you are done!  The classes should now '
+                            'show up in the "Class List" table.', None)
+                       ],
+                       [
+                           ('To make a classes CSV file first you must open up a new excel document.', None),
+                           ('Next put the following into the first cells of the excel sheet.',
+                            'administrator_add_classes_F.png'),
+                           ('Then put the details for the classes you are adding under the headings  (an example is '
+                            ' below).  If there is no test set that you want the class to default with than you can '
+                            'leave that column blank (but still include the heading)',
+                            'administrator_add_classes_G.png'),
+                           ('Next you will need to save or export the excel document as a .CSV file.  If you do not '
+                            'know how to do this then you will need to look up how on line.  Be sure to make the "field '
+                            'delimiter" a comma (,) and the "text delimiter" a double quote (").  Also be sure choose '
+                            'the "quote all text cells option".  The options window may look something like this',
+                            'administrator_add_classes_H.png'),
+                           ('After you have saved the file you can open it in Notepad or WordPad to check it.  It '
+                            'should look something like the example below.', 'administrator_add_classes_I.png'),
+                           ('Check that there are double quotes around all of the text (everything except for the '
+                            'year)', None),
+                           ('If everything looks good you are now ready to upload the file (see point 4.)', None)
                        ]
                    ]}
     elif instructions_name == 'administrator_add_tests' and user_type == 'Administrator':
