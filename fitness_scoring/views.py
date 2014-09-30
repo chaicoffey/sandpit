@@ -554,7 +554,66 @@ def instructions_page(request, instructions_name):
                        ]
                    ]}
     elif instructions_name == 'teacher_approve_entries' and user_type == 'Teacher':
-        context = {'heading': 'Approve Entries'}
+        context = {'heading': 'Approve Entries',
+                   'reason': 'After the students have entered their results you must check that they have entered '
+                             'them correctly.  This can also be done while the students are entering there results if '
+                             'you have a separate computer.',
+                   'instructions': [
+                       [
+                           ('Click the "Add/Update Class List" tab at the left of the screen',
+                            'teacher_add_classes_A.png'),
+                           ('Then in the "Class List" table click on the "class home page" symbol for the class that '
+                            'the class that you wish to approve results for', 'teacher_add_test_A.png')
+                       ],
+                       [
+                           ('You should see the "Class Results" table with some results in it.  If you notice an "!" '
+                            'next to any of the names then there are some pending issues to resolve.  Pending issues '
+                            'can arise from different causes (mainly due to a student entering in the wrong details).  '
+                            'The system will detect for instance if the same student has entered results twice, if two '
+                            'students enter the same student number, if a student already in the database has very '
+                            'similar details but one is different or if the student age is outside the normal age for '
+                            'a high school student.  To resolve the issue click on the "!" symbol next to the student.',
+                            'approve_results_A.png'),
+                           ('You will then see a pop up dialog.  Make sure to read it carefully before going onto the '
+                            'next step', 'approve_results_B.png'),
+                           ("Hopefully the dialog can help you to resolve the issue but if not you can edit the "
+                            "results directly by clicking the pencil symbol to the right of the student's results.  "
+                            "If there are a lot of tests you may need to scroll the table to the right to see the "
+                            "pencil symbol.  You can also delete a student entry (and perhaps get them to re-enter it) "
+                            "by clicking the cross symbol next to the pencil", 'approve_results_C.png')
+                       ],
+                       [
+                           ('Once the pending issues for a student have been resolved (or there were none to start '
+                            'with) you should check their results to make sure they were entered correctly (the '
+                            'student may have made a mistake or tried to make their results look more flattering).  '
+                            'If there are a lot of tests you may need to scroll the table to the right to see them '
+                            'all.  If you need to amend anything you can do so by clicking the pencil symbol to the '
+                            'right of the results (again you may need to scroll).  You can also delete the whole '
+                            'entry (and perhaps get the student to re-enter the results) by clicking the cross symbol '
+                            'next to the pencil.', 'approve_results_C.png'),
+                           ('If you do edit the results than make sure to save the results at the end by clicking the '
+                            '"Save Results" button at the bottom of the form.', None)
+                       ],
+                       [
+                           ("Once you are satisfied that a student's results are entered correctly you can approve the "
+                            "student.  To do this click the empty check box next to the student's name",
+                            'approve_results_D.png'),
+                           ('Then click the "Approve Student Result Entry" button of the form that pops up',
+                            'approve_results_E.png'),
+                           ('You should now see a tick in the check box.  If you have made a mistake and you want to '
+                            'un-approve the student you can click on this symbol.', 'approve_results_F.png')
+                       ],
+                       [
+                           ('You can also approve all the students at once instead of clicking on each of the check '
+                            'boxes individually.  However before you do this make sure that you are satisfied that all '
+                            'the results are correct.  To approve all at once first click the "*" button at the top of '
+                            'the "Class List" table', 'teacher_add_test_F.png'),
+                           ('Then select the "Approve All Student Result Entries For Class" option',
+                            'teacher_add_test_G.png'),
+                           ('Then click the "Approve All Student Entry Results" in the dialog that pops up',
+                            'teacher_add_test_H.png')
+                       ]
+                   ]}
     elif instructions_name == 'teacher_view_results' and user_type == 'Teacher':
         context = {'heading': 'View Results',
                    'reason': 'After the student results have been entered and approved you can view these results '
