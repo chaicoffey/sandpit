@@ -560,7 +560,8 @@ def instructions_page(request, instructions_name):
                              'you have a separate computer.',
                    'instructions': [
                        [
-                           ('Click the "Add/Update Class List" tab at the left of the screen',
+                           ('First make sure you are logged in as a teacher', None),
+                           ('Then click the "Add/Update Class List" tab at the left of the screen',
                             'teacher_add_classes_A.png'),
                            ('Then in the "Class List" table click on the "class home page" symbol for the class that '
                             'the class that you wish to approve results for', 'teacher_add_test_A.png')
