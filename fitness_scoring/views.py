@@ -229,22 +229,25 @@ def teacher_view(request):
 def teacher_home(request):
     if request.session.get('user_type', None) == 'Teacher':
 
-        steps = [('Change Password', 'change_password'),
-                 ('Add Classes For Year', 'teacher_add_classes'),
+        steps = [('Add Classes For Year', 'teacher_add_classes'),
                  ('Add Tests To Classes For The Year', 'teacher_add_tests'),
                  ('Run Tests', 'teacher_run_tests'),
                  ('Get Students To Enter Results', 'teacher_student_enter_results'),
                  ('Approve Entries For Class', 'teacher_approve_entries'),
                  ('View Results', 'teacher_view_results')]
-        non_optional_steps = 7
+        non_optional_steps = 6
         steps_formatted = []
         for step_index in range(non_optional_steps):
             (step_text, instructions_name) = steps[step_index]
-            steps_formatted.append(('Step ' + str(step_index) + ': ' + step_text,
+            steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
                                     '/instructions_page/' + instructions_name))
 
-        context = {'intro_text': 'Welcome to the FitApp program!  To start click on the "instructions" link next to '
-                                 "step 0 below and follow the instructions.",
+        context = {'intro_text': 'Welcome to the FitApp program!  As a teacher first you will need to add classes to '
+                                 'your class list.  After you have done this the program can provide resources for you '
+                                 'to run tests on the students for the year.  After you have run these tests ypu can '
+                                 'get the students to enter their results into the system and then you can view these '
+                                 'results and use the program to help you write reports. Anyway to get started click '
+                                 'on the "instructions" link next to step 1 below.',
                    'steps': steps_formatted}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
@@ -274,24 +277,24 @@ def administrator_view(request):
 def administrator_home(request):
     if request.session.get('user_type', None) == 'Administrator':
 
-        steps = [('Change Password', 'change_password'),
-                 ('Add Teachers', 'administrator_add_teacher'),
+        steps = [('Add Teachers', 'administrator_add_teacher'),
                  ('Add Tests To Classes For The Year', 'administrator_add_tests'),
                  ('Add Classes For Teachers For The Year', 'administrator_add_classes')]
-        non_optional_steps = 2
+        non_optional_steps = 1
         steps_formatted = []
         for step_index in range(non_optional_steps):
             (step_text, instructions_name) = steps[step_index]
-            steps_formatted.append(('Step ' + str(step_index) + ': ' + step_text,
+            steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
                                     '/instructions_page/' + instructions_name))
         steps_optional_formatted = []
         for step_index in range(non_optional_steps, len(steps)):
             (step_text, instructions_name) = steps[step_index]
-            steps_optional_formatted.append(('Step ' + str(step_index) + ': ' + step_text,
+            steps_optional_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
                                              '/instructions_page/' + instructions_name))
 
-        context = {'intro_text': 'Welcome to the FitApp program!  To start click on the "instructions" link next to '
-                                 "step 0 below and follow the instructions. It won't take long!",
+        context = {'intro_text': 'Welcome to the FitApp program!  As an administrator you will need to add teachers to '
+                                 'the teacher list.  As an optional extra you can also add classes for the teachers.  '
+                                 'Anyway to get started click on the "instructions" link next to step 1 below.',
                    'steps': steps_formatted,
                    'steps_optional': steps_optional_formatted}
         return render(request, 'user_home_page.html', RequestContext(request, context))
