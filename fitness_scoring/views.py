@@ -217,7 +217,7 @@ def teacher_view(request):
             'user_tab_page_title': heading,
             'user_tabs': [
                 ['Home', '/teacher_home/', 'user_home_page'],
-                ['Add/Update Class List', '/class/list/', 'item_list:2']
+                ['Classes', '/class/list/', 'item_list:2']
             ]
         }
 
@@ -242,13 +242,16 @@ def teacher_home(request):
             steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
                                     '/instructions_page/' + instructions_name))
 
-        context = {'intro_text': 'Welcome to the FitApp program!  As a teacher first you will need to add classes to '
-                                 'your class list.  After you have done this the program can provide resources for you '
-                                 'to run tests on the students for the year.  After you have run these tests ypu can '
-                                 'get the students to enter their results into the system and then you can view these '
-                                 'results and use the program to help you write reports. Anyway to get started click '
-                                 'on the "instructions" link next to step 1 below.',
-                   'steps': steps_formatted}
+        context = {
+            'intro_text': [
+                "This program provides resources for sessions in which you test your students' fitness, including "
+                "instructions on how to run tests and lesson plans.",
+                "It will also give you feedback on the students' nation wide percentile rankings and help you write "
+                'reports.',
+                'To use all these facilities you will need to follow the steps below.  Click on the "instructions" '
+                'link next to step 1 to get started.'
+            ],
+            'steps': steps_formatted}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
@@ -264,8 +267,8 @@ def administrator_view(request):
             'user_tab_page_title': 'Administrator: ' + administrator.school_id.name,
             'user_tabs': [
                 ['Home', '/administrator_home/', 'user_home_page'],
-                ['Add/Update Teacher List', '/teacher/list/', 'item_list:3'],
-                ['Add/Update Class List', '/class/list/', 'item_list:3']
+                ['Teachers', '/teacher/list/', 'item_list:3'],
+                ['Classes', '/class/list/', 'item_list:3']
             ]
         }
 
@@ -292,11 +295,13 @@ def administrator_home(request):
             steps_optional_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
                                              '/instructions_page/' + instructions_name))
 
-        context = {'intro_text': 'Welcome to the FitApp program!  As an administrator you will need to add teachers to '
-                                 'the teacher list.  As an optional extra you can also add classes for the teachers.  '
-                                 'Anyway to get started click on the "instructions" link next to step 1 below.',
-                   'steps': steps_formatted,
-                   'steps_optional': steps_optional_formatted}
+        context = {
+            'intro_text': [
+                'As an administrator you will need to add teachers to the teacher list.',
+                'To get started click on the "instructions" link next to step 1 below.'
+            ],
+            'steps': steps_formatted,
+            'steps_optional': steps_optional_formatted}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
@@ -325,7 +330,7 @@ def superuser_view(request):
 
 def superuser_home(request):
     if request.session.get('user_type', None) == 'SuperUser':
-        context = {'intro_text': 'Super User'}
+        context = {'intro_text': ['Super User']}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
@@ -1571,7 +1576,7 @@ def teacher_list(request):
         context = {
             'item_list': [(teacher, teacher.get_display_items())
                           for teacher in Teacher.objects.filter(school_id=school)],
-            'item_list_title': 'Teacher List',
+            'item_list_title': 'Add Teacher',
             'item_list_table_headings': Teacher.get_display_list_headings(),
             'item_list_buttons': [
                 ['+', [['item_list_modal_load_link', '/teacher/add/', 'Add Teacher']]]
@@ -1699,7 +1704,7 @@ def class_list(request):
             item_list_add_button_options.append(['item_list_modal_load_link', '/class/adds/', 'Add Classes'])
         context = {
             'item_list': class_items,
-            'item_list_title': 'Class List',
+            'item_list_title': 'Add Class(es)',
             'item_list_table_headings': class_list_headings,
             'item_list_buttons': [
                 ['+', item_list_add_button_options]

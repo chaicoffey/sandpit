@@ -1,6 +1,13 @@
 
 <div class="text-info">
-    {{ intro_text }}
+    <h1>
+        <div class="user-home-page-intro">Welcome to the FitApp program!</div>
+    </h1>
+    <div class="user-home-page-intro">
+        {% for text in intro_text %}
+            {{ text }}<br>
+        {% endfor %}
+    </div>
 </div>
 
 <div class="text-info">
