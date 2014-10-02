@@ -1,10 +1,11 @@
 
-<div class="modal-header">
-    {{ user_home_page_title }}
+<div class="text-info">
+    {{ intro_text }}
 </div>
 
 <div class="text-info">
     {% if steps %}
+        <hr>
         <h4>Steps</h4>
         {% for step_text, step_link in steps %}
             {{ step_text }}

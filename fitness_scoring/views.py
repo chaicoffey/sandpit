@@ -229,8 +229,6 @@ def teacher_view(request):
 def teacher_home(request):
     if request.session.get('user_type', None) == 'Teacher':
 
-        teacher = Teacher.objects.get(user=User.objects.get(username=request.session.get('username')))
-
         steps = [('Change Password', 'change_password'),
                  ('Add Classes For Year', 'teacher_add_classes'),
                  ('Add Tests To Classes For The Year', 'teacher_add_tests'),
@@ -245,8 +243,8 @@ def teacher_home(request):
             steps_formatted.append(('Step ' + str(step_index) + ': ' + step_text,
                                     '/instructions_page/' + instructions_name))
 
-        heading = teacher.first_name + ' ' + teacher.surname + ' (' + teacher.school_id.name + ')'
-        context = {'user_home_page_title': heading,
+        context = {'intro_text': 'Welcome to the FitApp program!  To start click on the "instructions" link next to '
+                                 "step 0 below and follow the instructions.",
                    'steps': steps_formatted}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
@@ -276,8 +274,6 @@ def administrator_view(request):
 def administrator_home(request):
     if request.session.get('user_type', None) == 'Administrator':
 
-        administrator = Administrator.objects.get(user=User.objects.get(username=request.session.get('username')))
-
         steps = [('Change Password', 'change_password'),
                  ('Add Teachers', 'administrator_add_teacher'),
                  ('Add Tests To Classes For The Year', 'administrator_add_tests'),
@@ -294,7 +290,8 @@ def administrator_home(request):
             steps_optional_formatted.append(('Step ' + str(step_index) + ': ' + step_text,
                                              '/instructions_page/' + instructions_name))
 
-        context = {'user_home_page_title': 'Administrator: ' + administrator.school_id.name,
+        context = {'intro_text': 'Welcome to the FitApp program!  To start click on the "instructions" link next to '
+                                 "step 0 below and follow the instructions. It won't take long!",
                    'steps': steps_formatted,
                    'steps_optional': steps_optional_formatted}
         return render(request, 'user_home_page.html', RequestContext(request, context))
@@ -325,7 +322,7 @@ def superuser_view(request):
 
 def superuser_home(request):
     if request.session.get('user_type', None) == 'SuperUser':
-        context = {'user_home_page_title': 'Super User'}
+        context = {'intro_text': 'Super User'}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
