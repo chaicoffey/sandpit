@@ -229,18 +229,23 @@ def teacher_view(request):
 def teacher_home(request):
     if request.session.get('user_type', None) == 'Teacher':
 
-        steps = [('Add Classes For Year', 'teacher_add_classes'),
-                 ('Add Tests To Classes For The Year', 'teacher_add_tests'),
-                 ('Run Tests', 'teacher_run_tests'),
-                 ('Get Students To Enter Results', 'teacher_student_enter_results'),
-                 ('Approve Entries For Class', 'teacher_approve_entries'),
-                 ('View Results', 'teacher_view_results')]
+        steps = [
+            ('Add Classes For Year', 'teacher_add_classes', [
+                ('teacher_add_classes_A.png', None), ('administrator_add_classes_B.png', None),
+                ('teacher_add_classes_C.png', None), ('teacher_add_classes_DD.png', None)
+            ]),
+            ('Add Tests To Classes For The Year', 'teacher_add_tests', None),
+            ('Run Tests', 'teacher_run_tests', None),
+            ('Get Students To Enter Results', 'teacher_student_enter_results', None),
+            ('Approve Entries For Class', 'teacher_approve_entries', None),
+            ('View Results', 'teacher_view_results', None)
+        ]
         non_optional_steps = 6
         steps_formatted = []
         for step_index in range(non_optional_steps):
-            (step_text, instructions_name) = steps[step_index]
+            (step_text, instructions_name, images) = steps[step_index]
             steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
-                                    '/instructions_page/' + instructions_name))
+                                    '/instructions_page/' + instructions_name, images))
 
         context = {
             'intro_text': [
@@ -248,10 +253,10 @@ def teacher_home(request):
                 "instructions on how to run tests and lesson plans.",
                 "It will also give you feedback on the students' nation wide percentile rankings and help you write "
                 'reports.',
-                'To use all these facilities you will need to follow the steps below.  Click on the "instructions" '
-                'link next to step 1 to get started.'
+                'To use all these facilities you will need to follow the steps below.'
             ],
-            'steps': steps_formatted}
+            'steps': steps_formatted,
+            'steps_text': 'Follow these steps'}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
@@ -287,7 +292,7 @@ def administrator_home(request):
             ]),
             ('Add Classes For Teachers For The Year', 'administrator_add_classes', [
                 ('administrator_add_classes_A.png', None), ('administrator_add_classes_B.png', None),
-                ('administrator_add_classes_C.png', None), ('administrator_add_classes_D.png', None)
+                ('administrator_add_classes_C.png', None), ('teacher_add_classes_DD.png', None)
             ]),
             ('Add Tests To Classes For The Year', 'administrator_add_tests', [
                 ('administrator_add_tests_A.png', None), ('administrator_add_classes_A.png', None),
@@ -403,7 +408,7 @@ def instructions_page(request, instructions_name):
                            ('Enter the details for the class.  You must choose a class name e.g. "Class 7A Term 1").  '
                             'The drop down has a list of the teachers that you have already added.  If the teacher for '
                             'this class is not available then you must add them from the "Add/Update Teacher List" tab '
-                            '(see instructions)', 'administrator_add_classes_D.png'),
+                            '(see instructions)', 'teacher_add_classes_DD.png'),
                            ('Then click the button at the bottom of the form', None),
                            ('Repeat from point 2. for all the remaining classes you wish to add and you are done!  '
                             'Note that you will need to add a new "class" for every term you intend to run the tests '
@@ -507,7 +512,7 @@ def instructions_page(request, instructions_name):
                        ],
                        [
                            ('Enter the details for the class.  You must choose a class name e.g. "Class 7A Term 1"',
-                            'teacher_add_classes_D.png'),
+                            'teacher_add_classes_DD.png'),
                            ('Then click the button at the bottom of the form', None)
                        ],
                        [('Repeat from point 2. for all your remaining classes and you are done!.  Note that you will '
