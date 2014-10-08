@@ -376,13 +376,13 @@ def instructions_page(request, instructions_name):
         context = {'heading': 'Add Teacher',
                    'reason': 'You need to add the PE teachers that will be using this program',
                    'instructions': [
-                       [('Click the "Add/Update Teacher List" tab at the left of the screen', 'add_teachers_AAAA.png')],
+                       [('Click the "Add/Update Teacher List" tab at the left of the screen', 'add_teachers_A.png')],
                        [
-                           ('Click the "+" button at the top of the "Teacher List" table', 'add_teachers_BBBB.png'),
-                           ('Then Select the "Add Teacher" option', 'add_teachers_CCCC.png')
+                           ('Click the "+" button at the top of the "Teacher List" table', 'add_teachers_B.png'),
+                           ('Then Select the "Add Teacher" option', 'add_teachers_C.png')
                        ],
                        [
-                           ('Enter the details for the teacher', 'add_teachers_AAAA.png'),
+                           ('Enter the details for the teacher', 'add_teachers_A.png'),
                            ("Then click the button at the bottom of the form.  The teacher will be added and an email "
                             "with the teacher's login details will be sent to the email address you entered.", None)
                        ],
@@ -408,7 +408,7 @@ def instructions_page(request, instructions_name):
                            ('Enter the details for the class.  You must choose a class name e.g. "Class 7A Term 1").  '
                             'The drop down has a list of the teachers that you have already added.  If the teacher for '
                             'this class is not available then you must add them from the "Add/Update Teacher List" tab '
-                            '(see instructions)', 'teacher_add_classes_DD.png'),
+                            '(see instructions)', 'administrator_add_classes_D.png'),
                            ('Then click the button at the bottom of the form', None),
                            ('Repeat from point 2. for all the remaining classes you wish to add and you are done!  '
                             'Note that you will need to add a new "class" for every term you intend to run the tests '
@@ -512,7 +512,7 @@ def instructions_page(request, instructions_name):
                        ],
                        [
                            ('Enter the details for the class.  You must choose a class name e.g. "Class 7A Term 1"',
-                            'teacher_add_classes_DD.png'),
+                            'teacher_add_classes_D.png'),
                            ('Then click the button at the bottom of the form', None)
                        ],
                        [('Repeat from point 2. for all your remaining classes and you are done!.  Note that you will '
