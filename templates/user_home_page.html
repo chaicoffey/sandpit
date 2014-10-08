@@ -33,7 +33,7 @@
                         {% for image, text in images %}
                             <img src="/static/images/instructions_quick/{{ image }}" style="border:1px solid black"/>
                             {% if not forloop.last %}
-                                <img src="/static/images/instructions_quick/arrow2.png"/>
+                                <img src="/static/images/instructions_quick/arrow3.png"/>
                             {% endif %}
                         {% endfor %}
                     {% endif %}
@@ -59,9 +59,10 @@
                     </h3>
                     {% if images %}
                         {% for image, text in images %}
-                            <img src="/static/images/instructions_quick/{{ image }}" style="border:1px solid black"/>
+                            <img src="/static/images/instructions_quick/{{ image }}"
+                                 style="border:1px solid black"/>
                             {% if not forloop.last %}
-                                <img src="/static/images/instructions_quick/arrow2.png"/>
+                                <img src="/static/images/instructions_quick/arrow3.png"/>
                             {% endif %}
                         {% endfor %}
                     {% endif %}

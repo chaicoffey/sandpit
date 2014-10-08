@@ -285,10 +285,15 @@ def administrator_home(request):
                 ('add_teachers_AAAA.png', None), ('add_teachers_BBBB.png', None),
                 ('add_teachers_CCCC.png', None), ('add_teachers_DDDD.png', None)
             ]),
-            ('Add Tests To Classes For The Year', 'administrator_add_tests', None),
             ('Add Classes For Teachers For The Year', 'administrator_add_classes', [
                 ('administrator_add_classes_A.png', None), ('administrator_add_classes_B.png', None),
                 ('administrator_add_classes_C.png', None), ('administrator_add_classes_D.png', None)
+            ]),
+            ('Add Tests To Classes For The Year', 'administrator_add_tests', [
+                ('administrator_add_tests_A.png', None), ('administrator_add_classes_A.png', None),
+                ('administrator_add_tests_C.png', None), ('administrator_add_tests_D.png', None),
+                ('administrator_add_tests_E.png', None), ('administrator_add_tests_FFF.png', None),
+                ('administrator_add_tests_G.png', None)
             ])
         ]
         non_optional_steps = 1
@@ -311,7 +316,8 @@ def administrator_home(request):
             'steps': steps_formatted,
             'steps_text': 'Follow this step to add teachers for the year',
             'steps_optional': steps_optional_formatted,
-            'optional_steps_text': 'Optional Steps - You can leave these for the teachers to do themselves'}
+            'optional_steps_text': 'Optional Steps - You can do either of these steps or leave them for the teachers '
+                                   'to do themselves'}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
@@ -460,11 +466,11 @@ def instructions_page(request, instructions_name):
                            ('Click the "*" button at the top of the "Class Results" table',
                             'administrator_add_tests_E.png'),
                            ('Then Select the "Save Current Class As A Test Set" option',
-                            'administrator_add_tests_F.png')
+                            'administrator_add_tests_FFF.png')
                        ],
                        [
                            ('On the form enter the name you wish to give to your test set',
-                            'administrator_add_tests_G.png'),
+                            'administrator_add_tests_FFF.png'),
                            ('Then click the button at the bottom of the form', None)
                        ],
                        [
@@ -516,7 +522,7 @@ def instructions_page(request, instructions_name):
                            ('Click the "Add/Update Class List" tab at the left of the screen',
                             'teacher_add_classes_A.png'),
                            ('Then in the "Class List" table click on the "class home page" symbol for the temporary '
-                            'class you created', 'teacher_add_test_A.png')
+                            'class you created', 'administrator_add_tests_C.png')
                        ],
                        [
                            ('Click the "+" button at the top of the "Class List" table', 'teacher_add_test_B.png'),
@@ -567,7 +573,7 @@ def instructions_page(request, instructions_name):
                            ('Click the "Add/Update Class List" tab at the left of the screen',
                             'teacher_add_classes_A.png'),
                            ('Then in the "Class List" table click on the "class home page" symbol for the class that '
-                            'you want to run tests for', 'teacher_add_test_A.png')
+                            'you want to run tests for', 'administrator_add_tests_C.png')
                        ],
                        [
                            ('You can get instructions for each of the tests.  First click on each of the information '
@@ -597,7 +603,7 @@ def instructions_page(request, instructions_name):
                            ('To do this Click the "Add/Update Class List" tab at the left of the screen',
                             'teacher_add_classes_A.png'),
                            ('Then in the "Class List" table click on the "class home page" symbol for the class that '
-                            'is entering the results', 'teacher_add_test_A.png'),
+                            'is entering the results', 'administrator_add_tests_C.png'),
                            ('Then click the "*" button at the top of the "Class List" table', 'teacher_add_test_F.png'),
                            ('Then select the "Get New Class Login Password" option', 'enter_results_A.png'),
                            ('Then note down the login and password that is displayed', 'enter_results_B.png'),
@@ -640,7 +646,7 @@ def instructions_page(request, instructions_name):
                            ('Then click the "Add/Update Class List" tab at the left of the screen',
                             'teacher_add_classes_A.png'),
                            ('Then in the "Class List" table click on the "class home page" symbol for the class that '
-                            'the class that you wish to approve results for', 'teacher_add_test_A.png')
+                            'the class that you wish to approve results for', 'administrator_add_tests_C.png')
                        ],
                        [
                            ('You should see the "Class Results" table with some results in it.  If you notice an "!" '
@@ -700,7 +706,7 @@ def instructions_page(request, instructions_name):
                            ('Click the "Add/Update Class List" tab at the left of the screen',
                             'teacher_add_classes_A.png'),
                            ('Then in the "Class List" table click on the "class home page" symbol for the class that '
-                            'the class that you wish to view results for', 'teacher_add_test_A.png'),
+                            'the class that you wish to view results for', 'administrator_add_tests_C.png'),
                            ('There are 4 different formats that you can view the data listed in the following 3 '
                             'points', None)
                        ],
