@@ -234,18 +234,44 @@ def teacher_home(request):
                 ('teacher_add_classes_A.png', None), ('administrator_add_classes_B.png', None),
                 ('teacher_add_classes_C.png', None), ('teacher_add_classes_DD.png', None)
             ]),
-            ('Add Tests To Classes For The Year', 'teacher_add_tests', None),
-            ('Run Tests', 'teacher_run_tests', None),
-            ('Get Students To Enter Results', 'teacher_student_enter_results', None),
-            ('Approve Entries For Class', 'teacher_approve_entries', None),
-            ('View Results', 'teacher_view_results', None)
+            ('Add Tests To First Class For The Year', 'teacher_add_tests', [
+                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                ('administrator_add_tests_D.png', None), ('administrator_add_tests_E.png', None),
+                ('administrator_add_tests_FFF.png', None), ('administrator_add_tests_G.png', None)
+            ]),
+            ('Add Tests To Remaining Classes For The Year', 'teacher_add_tests2', [
+                ('teacher_add_classes_A.png', None), ('teacher_add_tests_B.png', None)
+            ]),
+            ('Run Tests', 'teacher_run_tests', [
+                ('teacher_add_classes_A.png', None)
+            ]),
+            ('Get Students To Enter Results', 'teacher_student_enter_results', [
+                ('teacher_add_classes_A.png', None)
+            ]),
+            ('Approve Entries For Class', 'teacher_approve_entries', [
+                ('teacher_add_classes_A.png', None)
+            ]),
+            ('View Results', 'teacher_view_results', [
+                ('teacher_add_classes_A.png', None)
+            ])
         ]
-        non_optional_steps = 6
-        steps_formatted = []
-        for step_index in range(non_optional_steps):
-            (step_text, instructions_name, images) = steps[step_index]
-            steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
-                                    '/instructions_page/' + instructions_name, images))
+        step_divisions = [
+            (2, 'Do these steps before running tests for the term (unless they have already been done by the '
+                'administrator for you)'),
+            (3, 'Running the tests'),
+            (6, 'Do these steps after running tests')
+        ]
+
+        step_sets = []
+        step_index = 0
+        for step_index_to, steps_text in step_divisions:
+            steps_formatted = []
+            while step_index < step_index_to:
+                (step_text, instructions_name, images) = steps[step_index]
+                steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
+                                        '/instructions_page/' + instructions_name, images))
+                step_index += 1
+            step_sets.append((steps_formatted, steps_text))
 
         context = {
             'intro_text': [
@@ -255,8 +281,8 @@ def teacher_home(request):
                 'reports.',
                 'To use all these facilities you will need to follow the steps below.'
             ],
-            'steps': steps_formatted,
-            'steps_text': 'Follow these steps'}
+            'step_sets': step_sets
+        }
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
@@ -318,11 +344,10 @@ def administrator_home(request):
                 'As an administrator you will need to add teachers to the teacher list.',
                 'To get started follow step 1 below.'
             ],
-            'steps': steps_formatted,
-            'steps_text': 'Follow this step to add teachers for the year',
-            'steps_optional': steps_optional_formatted,
-            'optional_steps_text': 'Optional Steps - You can do either of these steps or leave them for the teachers '
-                                   'to do themselves'}
+            'step_sets': [(steps_formatted, 'Follow this step to add teachers for the year'),
+                          (steps_optional_formatted, 'Optional Steps - You can do either of these steps or leave them '
+                                                     'for the teachers to do themselves')]
+        }
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
