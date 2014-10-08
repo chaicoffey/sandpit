@@ -1,8 +1,10 @@
 
 <div class="text-info">
-    <h1>
-        <div class="user-home-page-intro">Welcome to the FitApp program!</div>
-    </h1>
+    <div class="user-home-page-intro">
+        <h1>
+            Welcome to the FitApp program!
+        </h1>
+    </div>
     <div class="user-home-page-intro">
         {% for text in intro_text %}
             {{ text }}<br>
@@ -13,19 +15,59 @@
 <div class="text-info">
     {% if steps %}
         <hr>
-        <h4>Steps</h4>
-        {% for step_text, step_link in steps %}
-            {{ step_text }}
-            (<a href="{{ step_link }}" target="_blank">instructions</a>)<br>
-        {% endfor %}
+        <div style="height: 1px; background-color: black; text-align: left; padding-left: 30px">
+            <span style="color: grey; background-color: white; position: relative; top: -0.5em">
+                &nbsp {{ steps_text }} &nbsp
+            </span>
+        </div>
+        <div style="border:1px solid black">
+            {% for step_text, step_link, images in steps %}
+                <div style="padding-left: 20px; padding-bottom: 20px">
+                    <h3 style="color: green">
+                        {{ step_text }}
+                        <a href="{{ step_link }}" target="_blank" style="color: red; font-size: 15px">
+                            (click here for more detailed instructions)
+                        </a>
+                    </h3>
+                    {% if images %}
+                        {% for image, text in images %}
+                            <img src="/static/images/instructions_quick/{{ image }}" style="border:1px solid black"/>
+                            {% if not forloop.last %}
+                                <img src="/static/images/instructions_quick/arrow2.png"/>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
     {% if steps_optional %}
         <hr>
-        <h4>Optional Steps</h4>
-        {% for step_text, step_link in steps_optional %}
-            {{ step_text }}
-            (<a href="{{ step_link }}" target="_blank">instructions</a>)<br>
-        {% endfor %}
+        <div style="height: 1px; background-color: black; text-align: left; padding-left: 30px">
+            <span style="color: grey; background-color: white; position: relative; top: -0.5em">
+                &nbsp {{ optional_steps_text }} &nbsp
+            </span>
+        </div>
+        <div style="border:1px solid black">
+            {% for step_text, step_link, images in steps_optional %}
+                <div style="padding-left: 20px; padding-bottom: 20px">
+                    <h3 style="color: green">
+                        {{ step_text }}
+                        <a href="{{ step_link }}" target="_blank" style="color: red; font-size: 15px">
+                            (click here for more detailed instructions)
+                        </a>
+                    </h3>
+                    {% if images %}
+                        {% for image, text in images %}
+                            <img src="/static/images/instructions_quick/{{ image }}" style="border:1px solid black"/>
+                            {% if not forloop.last %}
+                                <img src="/static/images/instructions_quick/arrow2.png"/>
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            {% endfor %}
+        </div>
     {% endif %}
     {% if not steps and not steps_optional %}
         <hr>

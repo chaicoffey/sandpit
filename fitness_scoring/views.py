@@ -280,28 +280,38 @@ def administrator_view(request):
 def administrator_home(request):
     if request.session.get('user_type', None) == 'Administrator':
 
-        steps = [('Add Teachers', 'administrator_add_teacher'),
-                 ('Add Tests To Classes For The Year', 'administrator_add_tests'),
-                 ('Add Classes For Teachers For The Year', 'administrator_add_classes')]
+        steps = [
+            ('Add Teachers', 'administrator_add_teacher', [
+                ('add_teachers_AAAA.png', None), ('add_teachers_BBBB.png', None),
+                ('add_teachers_CCCC.png', None), ('add_teachers_DDDD.png', None)
+            ]),
+            ('Add Tests To Classes For The Year', 'administrator_add_tests', None),
+            ('Add Classes For Teachers For The Year', 'administrator_add_classes', [
+                ('administrator_add_classes_A.png', None), ('administrator_add_classes_B.png', None),
+                ('administrator_add_classes_C.png', None), ('administrator_add_classes_D.png', None)
+            ])
+        ]
         non_optional_steps = 1
         steps_formatted = []
         for step_index in range(non_optional_steps):
-            (step_text, instructions_name) = steps[step_index]
+            (step_text, instructions_name, images) = steps[step_index]
             steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
-                                    '/instructions_page/' + instructions_name))
+                                    '/instructions_page/' + instructions_name, images))
         steps_optional_formatted = []
         for step_index in range(non_optional_steps, len(steps)):
-            (step_text, instructions_name) = steps[step_index]
+            (step_text, instructions_name, images) = steps[step_index]
             steps_optional_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
-                                             '/instructions_page/' + instructions_name))
+                                             '/instructions_page/' + instructions_name, images))
 
         context = {
             'intro_text': [
                 'As an administrator you will need to add teachers to the teacher list.',
-                'To get started click on the "instructions" link next to step 1 below.'
+                'To get started follow step 1 below.'
             ],
             'steps': steps_formatted,
-            'steps_optional': steps_optional_formatted}
+            'steps_text': 'Follow this step to add teachers for the year',
+            'steps_optional': steps_optional_formatted,
+            'optional_steps_text': 'Optional Steps - You can leave these for the teachers to do themselves'}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
@@ -355,13 +365,13 @@ def instructions_page(request, instructions_name):
         context = {'heading': 'Add Teacher',
                    'reason': 'You need to add the PE teachers that will be using this program',
                    'instructions': [
-                       [('Click the "Add/Update Teacher List" tab at the left of the screen', 'add_teachers_A.png')],
+                       [('Click the "Add/Update Teacher List" tab at the left of the screen', 'add_teachers_AAAA.png')],
                        [
-                           ('Click the "+" button at the top of the "Teacher List" table', 'add_teachers_B.png'),
-                           ('Then Select the "Add Teacher" option', 'add_teachers_C.png')
+                           ('Click the "+" button at the top of the "Teacher List" table', 'add_teachers_BBBB.png'),
+                           ('Then Select the "Add Teacher" option', 'add_teachers_CCCC.png')
                        ],
                        [
-                           ('Enter the details for the teacher', 'add_teachers_D.png'),
+                           ('Enter the details for the teacher', 'add_teachers_AAAA.png'),
                            ("Then click the button at the bottom of the form.  The teacher will be added and an email "
                             "with the teacher's login details will be sent to the email address you entered.", None)
                        ],
@@ -411,10 +421,10 @@ def instructions_page(request, instructions_name):
                             'leave that column blank (but still include the heading)',
                             'administrator_add_classes_G.png'),
                            ('Next you will need to save or export the excel document as a .CSV file.  If you do not '
-                            'know how to do this then you will need to look up how on line.  Be sure to make the "field '
-                            'delimiter" a comma (,) and the "text delimiter" a double quote (").  Also be sure choose '
-                            'the "quote all text cells option".  The options window may look something like this',
-                            'administrator_add_classes_H.png'),
+                            'know how to do this then you will need to look up how on line.  Be sure to make the '
+                            '"field delimiter" a comma (,) and the "text delimiter" a double quote (").  Also be sure '
+                            'choose the "quote all text cells option".  The options window may look something like '
+                            'this', 'administrator_add_classes_H.png'),
                            ('After you have saved the file you can open it in Notepad or WordPad to check it.  It '
                             'should look something like the example below.', 'administrator_add_classes_I.png'),
                            ('Check that there are double quotes around all of the text (everything except for the '
