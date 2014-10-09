@@ -236,12 +236,12 @@ def teacher_home(request):
             ]),
             ('Add Tests To First Class For The Term', 'teacher_add_tests', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('administrator_add_tests_D.png', None), ('administrator_add_tests_E.png', None),
+                ('administrator_add_tests_DD.png', None), ('administrator_add_tests_E.png', None),
                 ('administrator_add_tests_FFF.png', None), ('administrator_add_tests_G.png', None)
             ]),
             ('Add Tests To Remaining Classes For The Term', 'teacher_add_tests2', [
                 ('teacher_add_classes_A.png', None), ('teacher_add_tests_B.png', None),
-                ('administrator_add_tests_D.png', None), ('teacher_add_tests_DD.png', None),
+                ('administrator_add_tests_DD.png', None), ('teacher_add_tests_DD.png', None),
                 ('teacher_add_classes_DDD.png', None)
             ]),
             ('Run Tests', 'teacher_run_tests', [
@@ -319,17 +319,15 @@ def administrator_home(request):
 
         steps = [
             ('Add Teachers', 'administrator_add_teacher', [
-                ('add_teachers_AAAA.png', None), ('add_teachers_BBBB.png', None),
-                ('add_teachers_CCCC.png', None), ('add_teachers_DDDD.png', None)
+                ('add_teachers_AAAA.png', None), ('add_teachers_BBB.png', None), ('add_teachers_CCCCC.png', None)
             ]),
-            ('Add Classes For Teachers For The Year', 'administrator_add_classes', [
-                ('administrator_add_classes_A.png', None), ('administrator_add_classes_B.png', None),
-                ('administrator_add_classes_C.png', None), ('teacher_add_classes_DDD.png', None)
+            ('Add Classes For Teachers For The Term', 'administrator_add_classes', [
+                ('administrator_add_classes_A.png', None), ('administrator_add_classes_BB.png', None),
+                ('administrator_add_classes_CCC.png', None)
             ]),
-            ('Add Tests To Classes For The Year', 'administrator_add_tests', [
-                ('administrator_add_tests_A.png', None), ('administrator_add_classes_A.png', None),
-                ('administrator_add_tests_C.png', None), ('administrator_add_tests_D.png', None),
-                ('administrator_add_tests_E.png', None), ('administrator_add_tests_FFF.png', None),
+            ('Add Tests To First Class For The Term', 'administrator_add_tests', [
+                ('administrator_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
                 ('administrator_add_tests_G.png', None)
             ])
         ]
@@ -439,7 +437,7 @@ def instructions_page(request, instructions_name):
                            ('Enter the details for the class.  You must choose a class name e.g. "Class 7A Term 1").  '
                             'The drop down has a list of the teachers that you have already added.  If the teacher for '
                             'this class is not available then you must add them from the "Add/Update Teacher List" tab '
-                            '(see instructions)', 'administrator_add_classes_D.png'),
+                            '(see instructions)', 'administrator_add_classes_CCC.png'),
                            ('Then click the button at the bottom of the form', None),
                            ('Repeat from point 2. for all the remaining classes you wish to add and you are done!  '
                             'Note that you will need to add a new "class" for every term you intend to run the tests '
@@ -494,7 +492,7 @@ def instructions_page(request, instructions_name):
                        ],
                        [
                            ('On the "Add Test To Class" form choose one of the tests for the test set you are creating',
-                            'administrator_add_tests_D.png'),
+                            'administrator_add_tests_DD.png'),
                            ('Then press the button at the bottom of the form', None),
                            ('Repeat from step 3. for all the remaining tests you wish to add to the test set', None)
                        ],
