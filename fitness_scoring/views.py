@@ -249,11 +249,12 @@ def teacher_home(request):
             ]),
             ('Get Students To Enter Results', 'get_class_login', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('enter_results_C.png', None), ('enter_results_D.png', None)
+                ('enter_results_C.png', None), ('enter_results_DD.png', None)
             ]),
             ('Approve Entries For Class', 'teacher_approve_entries', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('approve_results_C.png', 'DO FOR ALL PENDING ISSUES'), ('approve_results_D.png', 'DO FOR ALL STUDENTS')
+                ('approve_results_C.png', 'RESOLVE PENDING ISSUES'),
+                ('approve_results_D.png', 'TICK FOR APPROVED RESULTS')
             ]),
             ('View Results', 'teacher_view_results', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
@@ -656,7 +657,7 @@ def instructions_page(request, instructions_name):
                        ],
                        [
                            ('Now each student can enter their results.  First they should fill in the student '
-                            'details.', 'enter_results_D.png'),
+                            'details.', 'enter_results_DD.png'),
                            ('Then the results', 'enter_results_E.png'),
                            ('Make sure the results are entered with the units given next to each result entry box',
                             'enter_results_F.png')
