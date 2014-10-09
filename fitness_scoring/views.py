@@ -240,7 +240,7 @@ def teacher_home(request):
                 ('administrator_add_tests_FFF.png', None), ('administrator_add_tests_EE.png', None)
             ]),
             ('Add Tests To Remaining Classes For The Term', 'teacher_add_tests2', [
-                ('teacher_add_classes_A.png', None), ('teacher_add_tests_B.png', None),
+                ('teacher_add_classes_A.png', None), ('administrator_add_tests2_B.png', None),
                 ('administrator_add_tests_DD.png', None), ('teacher_add_tests_DD.png', None),
                 ('teacher_add_classes_DDD.png', None)
             ]),
@@ -330,6 +330,10 @@ def administrator_home(request):
                 ('administrator_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
                 ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
                 ('administrator_add_tests_EE.png', None)
+            ]),
+            ('Add Tests To Remaining Classes For The Term', 'administrator_add_tests2', [
+                ('administrator_add_classes_A.png', None), ('administrator_add_tests2_B.png', None),
+                ('administrator_add_tests2_C.png', None), ('administrator_add_classes_D.png', None)
             ])
         ]
         non_optional_steps = 1
