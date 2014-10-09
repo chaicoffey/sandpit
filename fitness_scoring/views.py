@@ -237,7 +237,7 @@ def teacher_home(request):
             ('Add Tests To First Class For The Term', 'teacher_add_tests', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
                 ('administrator_add_tests_DD.png', None), ('administrator_add_tests_E.png', None),
-                ('administrator_add_tests_FFF.png', None), ('administrator_add_tests_G.png', None)
+                ('administrator_add_tests_FFF.png', None), ('administrator_add_tests_EE.png', None)
             ]),
             ('Add Tests To Remaining Classes For The Term', 'teacher_add_tests2', [
                 ('teacher_add_classes_A.png', None), ('teacher_add_tests_B.png', None),
@@ -319,16 +319,17 @@ def administrator_home(request):
 
         steps = [
             ('Add Teachers', 'administrator_add_teacher', [
-                ('add_teachers_AAAA.png', None), ('add_teachers_BBB.png', None), ('add_teachers_CCCCC.png', None)
+                ('add_teachers_AAAA.png', None), ('add_teachers_BBB.png', None),
+                ('add_teachers_CC.png', None), ('add_teachers_D.png', None)
             ]),
             ('Add Classes For Teachers For The Term', 'administrator_add_classes', [
                 ('administrator_add_classes_A.png', None), ('administrator_add_classes_BB.png', None),
-                ('administrator_add_classes_CCC.png', None)
+                ('administrator_add_classes_C.png', None), ('administrator_add_classes_D.png', None)
             ]),
             ('Add Tests To First Class For The Term', 'administrator_add_tests', [
                 ('administrator_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
                 ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
-                ('administrator_add_tests_G.png', None)
+                ('administrator_add_tests_EE.png', None)
             ])
         ]
         non_optional_steps = 1
@@ -408,7 +409,7 @@ def instructions_page(request, instructions_name):
                        [('Click the "Add/Update Teacher List" tab at the left of the screen', 'add_teachers_A.png')],
                        [
                            ('Click the "+" button at the top of the "Teacher List" table', 'add_teachers_B.png'),
-                           ('Then Select the "Add Teacher" option', 'add_teachers_C.png')
+                           ('Then Select the "Add Teacher" option', 'add_teachers_D.png')
                        ],
                        [
                            ('Enter the details for the teacher', 'add_teachers_A.png'),
@@ -437,7 +438,7 @@ def instructions_page(request, instructions_name):
                            ('Enter the details for the class.  You must choose a class name e.g. "Class 7A Term 1").  '
                             'The drop down has a list of the teachers that you have already added.  If the teacher for '
                             'this class is not available then you must add them from the "Add/Update Teacher List" tab '
-                            '(see instructions)', 'administrator_add_classes_CCC.png'),
+                            '(see instructions)', 'administrator_add_classes_D.png'),
                            ('Then click the button at the bottom of the form', None),
                            ('Repeat from point 2. for all the remaining classes you wish to add and you are done!  '
                             'Note that you will need to add a new "class" for every term you intend to run the tests '
