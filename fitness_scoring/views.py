@@ -257,7 +257,8 @@ def teacher_home(request):
                 ('approve_results_C.png', 'DO FOR ALL PENDING ISSUES'), ('approve_results_D.png', 'DO FOR ALL STUDENTS')
             ]),
             ('View Results', 'teacher_view_results', [
-                ('teacher_add_classes_A.png', None)
+                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                ('view_results_C.png', None)
             ])
         ]
         step_divisions = [
