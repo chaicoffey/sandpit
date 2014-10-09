@@ -24,7 +24,8 @@
                             {% for instruction_line, image in instruction %}
                                 {{ instruction_line }}<br><br>
                                 {% if image %}
-                                    <img src="/static/images/instructions/{{ image }}"/><br><br>
+                                    <img src="/static/images/instructions/{{ image }}" style="border:1px solid black"/>
+                                    <br><br>
                                 {% endif %}
                             {% endfor %}
                         </li>
