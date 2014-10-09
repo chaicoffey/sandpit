@@ -230,36 +230,41 @@ def teacher_home(request):
     if request.session.get('user_type', None) == 'Teacher':
 
         steps = [
-            ('Add Classes For Year', 'teacher_add_classes', [
+            ('Add Classes For Term', 'teacher_add_classes', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_classes_B.png', None),
-                ('teacher_add_classes_C.png', None), ('teacher_add_classes_DD.png', None)
+                ('teacher_add_classes_C.png', None), ('teacher_add_classes_DDD.png', None)
             ]),
-            ('Add Tests To First Class For The Year', 'teacher_add_tests', [
+            ('Add Tests To First Class For The Term', 'teacher_add_tests', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
                 ('administrator_add_tests_D.png', None), ('administrator_add_tests_E.png', None),
                 ('administrator_add_tests_FFF.png', None), ('administrator_add_tests_G.png', None)
             ]),
-            ('Add Tests To Remaining Classes For The Year', 'teacher_add_tests2', [
-                ('teacher_add_classes_A.png', None), ('teacher_add_tests_B.png', None)
+            ('Add Tests To Remaining Classes For The Term', 'teacher_add_tests2', [
+                ('teacher_add_classes_A.png', None), ('teacher_add_tests_B.png', None),
+                ('administrator_add_tests_D.png', None), ('teacher_add_tests_DD.png', None),
+                ('teacher_add_classes_DDD.png', None)
             ]),
             ('Run Tests', 'teacher_run_tests', [
-                ('teacher_add_classes_A.png', None)
+                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                ('run_tests_C.png', None), ('run_tests_DD.png', None), ('run_tests_E.png', None)
             ]),
-            ('Get Students To Enter Results', 'teacher_student_enter_results', [
-                ('teacher_add_classes_A.png', None)
+            ('Get Students To Enter Results', 'get_class_login', [
+                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                ('enter_results_C.png', None), ('enter_results_D.png', None)
             ]),
             ('Approve Entries For Class', 'teacher_approve_entries', [
-                ('teacher_add_classes_A.png', None)
+                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                ('approve_results_C.png', 'DO FOR ALL PENDING ISSUES'), ('approve_results_D.png', 'DO FOR ALL STUDENTS')
             ]),
             ('View Results', 'teacher_view_results', [
                 ('teacher_add_classes_A.png', None)
             ])
         ]
         step_divisions = [
-            (2, 'Do these steps before running tests for the term (unless they have already been done by the '
+            (3, 'Do these steps before running tests for the term (unless they have already been done by the '
                 'administrator for you)'),
-            (3, 'Running the tests'),
-            (6, 'Do these steps after running tests')
+            (4, 'Running the tests'),
+            (7, 'Do these steps after running tests')
         ]
 
         step_sets = []
@@ -318,7 +323,7 @@ def administrator_home(request):
             ]),
             ('Add Classes For Teachers For The Year', 'administrator_add_classes', [
                 ('administrator_add_classes_A.png', None), ('administrator_add_classes_B.png', None),
-                ('administrator_add_classes_C.png', None), ('teacher_add_classes_DD.png', None)
+                ('administrator_add_classes_C.png', None), ('teacher_add_classes_DDD.png', None)
             ]),
             ('Add Tests To Classes For The Year', 'administrator_add_tests', [
                 ('administrator_add_tests_A.png', None), ('administrator_add_classes_A.png', None),
@@ -619,7 +624,7 @@ def instructions_page(request, instructions_name):
                        ],
                        [
                            ('If you are using the "recommended" set of tests then a lesson plan is provided.  below is '
-                            'the equipment you will require and the lesson plan:', 'run_tests_D.png')
+                            'the equipment you will require and the lesson plan:', 'run_tests_DD.png')
                        ]
                    ]}
     elif instructions_name == 'teacher_student_enter_results' and user_type == 'Teacher':
