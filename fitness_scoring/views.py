@@ -237,7 +237,7 @@ def teacher_home(request):
             ('Add Tests To First Class For The Term', 'teacher_add_tests', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
                 ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
-                ('administrator_add_tests_EE.png', None)
+                ('administrator_add_tests_EEE.png', None)
             ]),
             ('Add Tests To Remaining Classes For The Term', 'teacher_add_tests2', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_tests2_B.png', None),
@@ -328,7 +328,7 @@ def administrator_home(request):
             ('Add Tests To First Class For The Term', 'administrator_add_tests', [
                 ('administrator_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
                 ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
-                ('administrator_add_tests_EE.png', None)
+                ('administrator_add_tests_EEE.png', None)
             ]),
             ('Add Tests To Remaining Classes For The Term', 'administrator_add_tests2', [
                 ('administrator_add_classes_A.png', None), ('administrator_add_tests2_B.png', None),
