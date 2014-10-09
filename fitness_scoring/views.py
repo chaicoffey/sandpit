@@ -231,22 +231,21 @@ def teacher_home(request):
 
         steps = [
             ('Add Classes For Term', 'teacher_add_classes', [
-                ('teacher_add_classes_A.png', None), ('administrator_add_classes_B.png', None),
-                ('teacher_add_classes_C.png', None), ('teacher_add_classes_DDD.png', None)
+                ('teacher_add_classes_A.png', None), ('administrator_add_classes_BB.png', None),
+                ('teacher_add_classes_CC.png', None), ('teacher_add_classes_DDD.png', None)
             ]),
             ('Add Tests To First Class For The Term', 'teacher_add_tests', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('administrator_add_tests_DD.png', None), ('administrator_add_tests_E.png', None),
-                ('administrator_add_tests_FFF.png', None), ('administrator_add_tests_EE.png', None)
+                ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
+                ('administrator_add_tests_EE.png', None)
             ]),
             ('Add Tests To Remaining Classes For The Term', 'teacher_add_tests2', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_tests2_B.png', None),
-                ('administrator_add_tests_DD.png', None), ('teacher_add_tests_DD.png', None),
-                ('teacher_add_classes_DDD.png', None)
+                ('administrator_add_tests2_C.png', None), ('teacher_add_classes_DDD.png', None)
             ]),
             ('Run Tests', 'teacher_run_tests', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('run_tests_C.png', None), ('run_tests_DD.png', None), ('run_tests_E.png', None)
+                ('run_tests_C.png', 'INSTRUCTIONS FOR TESTS'), ('run_tests_E.png', None)
             ]),
             ('Get Students To Enter Results', 'get_class_login', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
@@ -258,7 +257,7 @@ def teacher_home(request):
             ]),
             ('View Results', 'teacher_view_results', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('view_results_C.png', None)
+                ('view_results_C.png', 'VIEW RESULTS YOU WISH')
             ])
         ]
         step_divisions = [
@@ -542,7 +541,7 @@ def instructions_page(request, instructions_name):
                        [
                            ('Click the "+" button at the top of the "Class List" table',
                             'teacher_add_classes_B.png'),
-                           ('Then Select the "Add Class" option', 'teacher_add_classes_C.png')
+                           ('Then Select the "Add Class" option', 'teacher_add_classes_CC.png')
                        ],
                        [
                            ('Enter the details for the class.  You must choose a class name e.g. "Class 7A Term 1"',
