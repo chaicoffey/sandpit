@@ -412,7 +412,7 @@ def instructions_page(request, instructions_name):
                    'instructions': [
                        [('Click the "Teachers" tab at the left of the screen', 'add_teachers_AA.png')],
                        [
-                           ('Click the "Add Teacher" button at the top of the Teachers table and select the '
+                           ('Go to the "Add Teacher" menu at the top of the Teachers table and select the '
                             '"Add Teacher" option', 'add_teachers_BB.png')
                        ],
                        [
