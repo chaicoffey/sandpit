@@ -2,6 +2,8 @@
 
 {% block content_fitness_testing_base  %}
 
+    <div align="center">
+
     <form method="POST" enctype="multipart/form-data" action="{{ post_to_url }}" class="form-horizontal" id="doneForm">
     {% csrf_token %}
 
@@ -13,27 +15,40 @@
         </div>
         <!-- Fixed navbar -->
 
-        <h4>Student: {{ student_name }}</h4>
-        <h4>Age/Gender: {{ age }}/{{ gender }}</h4>
+        <h4 style="font-weight: bold; font-size: 40px">{{ student_name }}</h4>
+        <h4  style="font-weight: bold">Age/Gender: {{ age }}/{{ gender }}</h4>
 
         {% for major_category, major_category_text, major_category_score, categories in results %}
-            <h3>{{ major_category_text }}</h3>
+            <h3 style="font-weight: bold; font-size: 30px; color: red">{{ major_category_text }}</h3>
             <div class="student_result_view" id="{{ major_category }}_chart" style="width:600px;height:300px"></div>
         {% endfor %}
 
         <table>
             {% for major_category, major_category_text, major_category_score, categories in results %}
                 <tr>
-                    <td><h3>{{ major_category_text }} Overall Score: &nbsp</h3></td>
-                    <td><h3>{{ major_category_score }}</h3></td>
+                    <td><h3 style="font-weight: bold; font-size: 20px; color: red">
+                        {{ major_category_text }} Overall Score: &nbsp
+                    </h3></td>
+                    <td><h3 style="font-weight: bold; font-size: 20px; color: red">
+                        {{ major_category_score }}
+                    </h3></td>
                 </tr>
             {% endfor %}
-            <tr><td><h3>Overall Fitness Testing Score: &nbsp</h3></td><td><h3>{{ overall_score }}</h3></td></tr>
+            <tr>
+                <td><h3 style="font-weight: bold; font-size: 30px; color: black">
+                    Overall Fitness Testing Score: &nbsp
+                </h3></td>
+                <td><h3 style="font-weight: bold; font-size: 30px; color: black">
+                    {{ overall_score }}
+                </h3></td>
+            </tr>
         </table>
 
         <input type="submit" class="btn btn-primary" name='results_done_button' value="Done">
 
     </form>
+
+    </div>
 
     <script>
         $(document).ready(function() {
