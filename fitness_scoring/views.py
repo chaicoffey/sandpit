@@ -228,7 +228,23 @@ def teacher_view(request):
 
 def teacher_home(request):
     if request.session.get('user_type', None) == 'Teacher':
+        context = {
+            'user_type': 'teacher',
+            'intro_text': [
+                "This program provides resources for sessions in which you test your students' fitness, including "
+                "instructions on how to run tests and lesson plans.",
+                "It will also give you feedback on the students' nation wide percentile rankings and help you write "
+                'reports.',
+                'To use all these facilities you will need to follow the steps below.'
+            ]
+        }
+        return render(request, 'user_home_page.html', RequestContext(request, context))
+    else:
+        return redirect('fitness_scoring.views.login_user')
 
+
+def teacher_short_instructions(request):
+    if request.session.get('user_type', None) == 'Teacher':
         steps = [
             ('Add Classes For Term', 'teacher_add_classes', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_classes_BB.png', None),
@@ -279,19 +295,10 @@ def teacher_home(request):
                 step_index += 1
             step_sets.append((steps_formatted, steps_text))
 
-        context = {
-            'intro_text': [
-                "This program provides resources for sessions in which you test your students' fitness, including "
-                "instructions on how to run tests and lesson plans.",
-                "It will also give you feedback on the students' nation wide percentile rankings and help you write "
-                'reports.',
-                'To use all these facilities you will need to follow the steps below.'
-            ],
-            'step_sets': step_sets
-        }
-        return render(request, 'user_home_page.html', RequestContext(request, context))
+        context = {'step_sets': step_sets}
+        return render(request, 'user_short_instructions.html', RequestContext(request, context))
     else:
-        return redirect('fitness_scoring.views.login_user')
+        return HttpResponseForbidden("You are not authorised to view the teacher instructions")
 
 
 def administrator_view(request):
@@ -316,7 +323,20 @@ def administrator_view(request):
 
 def administrator_home(request):
     if request.session.get('user_type', None) == 'Administrator':
+        context = {
+            'user_type': 'administrator',
+            'intro_text': [
+                'As an administrator you will need to add teachers to the teacher list.',
+                'To get started follow step 1 below.'
+            ]
+        }
+        return render(request, 'user_home_page.html', RequestContext(request, context))
+    else:
+        return redirect('fitness_scoring.views.login_user')
 
+
+def administrator_short_instructions(request):
+    if request.session.get('user_type', None) == 'Administrator':
         steps = [
             ('Add Teachers', 'administrator_add_teacher', [
                 ('add_teachers_AAAA.png', None), ('add_teachers_BBB.png', None),
@@ -348,18 +368,12 @@ def administrator_home(request):
             steps_optional_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
                                              '/instructions_page/' + instructions_name, images))
 
-        context = {
-            'intro_text': [
-                'As an administrator you will need to add teachers to the teacher list.',
-                'To get started follow step 1 below.'
-            ],
-            'step_sets': [(steps_formatted, 'Follow this step to add teachers for the year'),
-                          (steps_optional_formatted, 'Optional Steps - You can do either of these steps or leave them '
-                                                     'for the teachers to do themselves')]
-        }
-        return render(request, 'user_home_page.html', RequestContext(request, context))
+        context = {'step_sets': [(steps_formatted, 'Follow this step to add teachers for the year'),
+                                 (steps_optional_formatted, 'Optional Steps - You can do either of these steps or '
+                                                            'leave them for the teachers to do themselves')]}
+        return render(request, 'user_short_instructions.html', RequestContext(request, context))
     else:
-        return redirect('fitness_scoring.views.login_user')
+        return HttpResponseForbidden("You are not authorised to view the administrator instructions")
 
 
 def superuser_view(request):
@@ -385,10 +399,18 @@ def superuser_view(request):
 
 def superuser_home(request):
     if request.session.get('user_type', None) == 'SuperUser':
-        context = {'intro_text': ['Super User']}
+        context = {'user_type': 'superuser', 'intro_text': ['Super User']}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
+
+
+def superuser_short_instructions(request):
+    if request.session.get('user_type', None) == 'SuperUser':
+        context = {}
+        return render(request, 'user_short_instructions.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to view the superuser instructions")
 
 
 def instructions_page(request, instructions_name):

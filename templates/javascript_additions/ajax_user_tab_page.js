@@ -33,7 +33,9 @@ function load_main_view() {
     else {
         base_url = window.location.protocol + "//" + window.location.host;
         list_url = $('#main_view_links li.active a').attr('href');
-        $('#main_view').load(base_url + list_url);
+        $('#main_view').load(base_url + list_url, function(){
+            $('#short_instructions').load(base_url + $('#short_instructions').attr('href'));
+        });
     }
 }
 
