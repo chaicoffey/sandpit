@@ -60,9 +60,9 @@
                 {% if step_sets %}
                     {% for steps, steps_text in step_sets %}
                         {% for step_text, step_link, images in steps %}
-                            <div style="padding-left: 20px; padding-bottom: 20px; border: 1px solid #000000;
-                             display: none"
+                            <div style="padding-top: 20px; padding-bottom: 20px; display: none"
                                  id="short_step_instruction_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}">
+                            <div style="padding-left: 20px; padding-bottom: 20px; border: 1px solid #000000">
                                 <h3 style="color: green">
                                     {{ step_text }}
                                     <a href="{{ step_link }}" target="_blank" style="color: red; font-size: 15px">
@@ -94,6 +94,7 @@
                                         {% endfor %}
                                     </tr></table>
                                 {% endif %}
+                            </div>
                             </div>
                         {% endfor %}
                     {% endfor %}
