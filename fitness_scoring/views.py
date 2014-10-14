@@ -211,6 +211,56 @@ def teacher_view(request):
 
         teacher = Teacher.objects.get(user=User.objects.get(username=request.session.get('username')))
         heading = teacher.first_name + ' ' + teacher.surname + ' (' + teacher.school_id.name + ')'
+
+        steps = [
+            ('Add Classes For Term', 'teacher_add_classes', [
+                ('teacher_add_classes_A.png', None), ('administrator_add_classes_BB.png', None),
+                ('teacher_add_classes_CC.png', None), ('teacher_add_classes_DDD.png', None)
+            ]),
+            ('Add Tests To First Class For Term', 'teacher_add_tests', [
+                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
+                ('administrator_add_tests_EEE.png', None)
+            ]),
+            ('Add Tests To Other Classes For Term', 'teacher_add_tests2', [
+                ('teacher_add_classes_A.png', None), ('administrator_add_tests2_B.png', None),
+                ('administrator_add_tests2_C.png', None), ('teacher_add_classes_DDD.png', None)
+            ]),
+            ('Run Tests', 'teacher_run_tests', [
+                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                ('run_tests_C.png', 'INSTRUCTIONS FOR TESTS'), ('run_tests_E.png', None)
+            ]),
+            ('Get Students To Enter Results', 'get_class_login', [
+                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                ('enter_results_C.png', None), ('enter_results_DD.png', None)
+            ]),
+            ('Approve Entries For Class', 'teacher_approve_entries', [
+                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                ('approve_results_C.png', 'RESOLVE PENDING ISSUES'),
+                ('approve_results_D.png', 'TICK FOR APPROVED RESULTS')
+            ]),
+            ('View Results', 'teacher_view_results', [
+                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                ('view_results_C.png', 'VIEW RESULTS YOU WISH')
+            ])
+        ]
+        step_divisions = [
+            (3, 'Do these (unless already done by admin)'),
+            (4, 'Running the tests'),
+            (7, 'Do these steps after running tests')
+        ]
+
+        step_sets = []
+        step_index = 0
+        for step_index_to, steps_text in step_divisions:
+            steps_formatted = []
+            while step_index < step_index_to:
+                (step_text, instructions_name, images) = steps[step_index]
+                steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
+                                        '/instructions_page/' + instructions_name, images))
+                step_index += 1
+            step_sets.append((steps_formatted, steps_text))
+
         context = {
             'logged_in_heading': heading,
             'user_name': request.session.get('username'),
@@ -218,7 +268,8 @@ def teacher_view(request):
             'user_tabs': [
                 ['Home', '/teacher_home/', 'user_home_page'],
                 ['Classes', '/class/list/', 'item_list:2']
-            ]
+            ],
+            'step_sets': step_sets
         }
 
         return render(request, 'user_tab_page.html', RequestContext(request, context))
@@ -243,68 +294,42 @@ def teacher_home(request):
         return redirect('fitness_scoring.views.login_user')
 
 
-def teacher_short_instructions(request):
-    if request.session.get('user_type', None) == 'Teacher':
-        steps = [
-            ('Add Classes For Term', 'teacher_add_classes', [
-                ('teacher_add_classes_A.png', None), ('administrator_add_classes_BB.png', None),
-                ('teacher_add_classes_CC.png', None), ('teacher_add_classes_DDD.png', None)
-            ]),
-            ('Add Tests To First Class For The Term', 'teacher_add_tests', [
-                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
-                ('administrator_add_tests_EEE.png', None)
-            ]),
-            ('Add Tests To Remaining Classes For The Term', 'teacher_add_tests2', [
-                ('teacher_add_classes_A.png', None), ('administrator_add_tests2_B.png', None),
-                ('administrator_add_tests2_C.png', None), ('teacher_add_classes_DDD.png', None)
-            ]),
-            ('Run Tests', 'teacher_run_tests', [
-                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('run_tests_C.png', 'INSTRUCTIONS FOR TESTS'), ('run_tests_E.png', None)
-            ]),
-            ('Get Students To Enter Results', 'get_class_login', [
-                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('enter_results_C.png', None), ('enter_results_DD.png', None)
-            ]),
-            ('Approve Entries For Class', 'teacher_approve_entries', [
-                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('approve_results_C.png', 'RESOLVE PENDING ISSUES'),
-                ('approve_results_D.png', 'TICK FOR APPROVED RESULTS')
-            ]),
-            ('View Results', 'teacher_view_results', [
-                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('view_results_C.png', 'VIEW RESULTS YOU WISH')
-            ])
-        ]
-        step_divisions = [
-            (3, 'Do these steps before running tests for the term (unless they have already been done by the '
-                'administrator for you)'),
-            (4, 'Running the tests'),
-            (7, 'Do these steps after running tests')
-        ]
-
-        step_sets = []
-        step_index = 0
-        for step_index_to, steps_text in step_divisions:
-            steps_formatted = []
-            while step_index < step_index_to:
-                (step_text, instructions_name, images) = steps[step_index]
-                steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
-                                        '/instructions_page/' + instructions_name, images))
-                step_index += 1
-            step_sets.append((steps_formatted, steps_text))
-
-        context = {'step_sets': step_sets}
-        return render(request, 'user_short_instructions.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to view the teacher instructions")
-
-
 def administrator_view(request):
     if request.session.get('user_type', None) == 'Administrator':
 
         administrator = Administrator.objects.get(user=User.objects.get(username=request.session.get('username')))
+
+        steps = [
+            ('Add Teachers', 'administrator_add_teacher', [
+                ('add_teachers_AAAA.png', None), ('add_teachers_BBB.png', None),
+                ('add_teachers_CC.png', None), ('add_teachers_D.png', None)
+            ]),
+            ('Add Classes For Teachers For Term', 'administrator_add_classes', [
+                ('administrator_add_classes_A.png', None), ('administrator_add_classes_BB.png', None),
+                ('administrator_add_classes_C.png', None), ('administrator_add_classes_D.png', None)
+            ]),
+            ('Add Tests To First Class For Term', 'administrator_add_tests', [
+                ('administrator_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
+                ('administrator_add_tests_EEE.png', None)
+            ]),
+            ('Add Tests To Other Classes For Term', 'administrator_add_tests2', [
+                ('administrator_add_classes_A.png', None), ('administrator_add_tests2_B.png', None),
+                ('administrator_add_tests2_C.png', None), ('administrator_add_classes_D.png', None)
+            ])
+        ]
+        non_optional_steps = 1
+        steps_formatted = []
+        for step_index in range(non_optional_steps):
+            (step_text, instructions_name, images) = steps[step_index]
+            steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
+                                    '/instructions_page/' + instructions_name, images))
+        steps_optional_formatted = []
+        for step_index in range(non_optional_steps, len(steps)):
+            (step_text, instructions_name, images) = steps[step_index]
+            steps_optional_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
+                                             '/instructions_page/' + instructions_name, images))
+
         context = {
             'logged_in_heading': 'Administrator: ' + administrator.school_id.name,
             'user_name': request.session.get('username'),
@@ -313,7 +338,9 @@ def administrator_view(request):
                 ['Home', '/administrator_home/', 'user_home_page'],
                 ['Teachers', '/teacher/list/', 'item_list:3'],
                 ['Classes', '/class/list/', 'item_list:3']
-            ]
+            ],
+            'step_sets': [(steps_formatted, 'Follow this step to add teachers for the year'),
+                          (steps_optional_formatted, 'Optional Steps')]
         }
 
         return render(request, 'user_tab_page.html', RequestContext(request, context))
@@ -333,47 +360,6 @@ def administrator_home(request):
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
-
-
-def administrator_short_instructions(request):
-    if request.session.get('user_type', None) == 'Administrator':
-        steps = [
-            ('Add Teachers', 'administrator_add_teacher', [
-                ('add_teachers_AAAA.png', None), ('add_teachers_BBB.png', None),
-                ('add_teachers_CC.png', None), ('add_teachers_D.png', None)
-            ]),
-            ('Add Classes For Teachers For The Term', 'administrator_add_classes', [
-                ('administrator_add_classes_A.png', None), ('administrator_add_classes_BB.png', None),
-                ('administrator_add_classes_C.png', None), ('administrator_add_classes_D.png', None)
-            ]),
-            ('Add Tests To First Class For The Term', 'administrator_add_tests', [
-                ('administrator_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
-                ('administrator_add_tests_EEE.png', None)
-            ]),
-            ('Add Tests To Remaining Classes For The Term', 'administrator_add_tests2', [
-                ('administrator_add_classes_A.png', None), ('administrator_add_tests2_B.png', None),
-                ('administrator_add_tests2_C.png', None), ('administrator_add_classes_D.png', None)
-            ])
-        ]
-        non_optional_steps = 1
-        steps_formatted = []
-        for step_index in range(non_optional_steps):
-            (step_text, instructions_name, images) = steps[step_index]
-            steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
-                                    '/instructions_page/' + instructions_name, images))
-        steps_optional_formatted = []
-        for step_index in range(non_optional_steps, len(steps)):
-            (step_text, instructions_name, images) = steps[step_index]
-            steps_optional_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
-                                             '/instructions_page/' + instructions_name, images))
-
-        context = {'step_sets': [(steps_formatted, 'Follow this step to add teachers for the year'),
-                                 (steps_optional_formatted, 'Optional Steps - You can do either of these steps or '
-                                                            'leave them for the teachers to do themselves')]}
-        return render(request, 'user_short_instructions.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to view the administrator instructions")
 
 
 def superuser_view(request):
@@ -403,14 +389,6 @@ def superuser_home(request):
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
-
-
-def superuser_short_instructions(request):
-    if request.session.get('user_type', None) == 'SuperUser':
-        context = {}
-        return render(request, 'user_short_instructions.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to view the superuser instructions")
 
 
 def instructions_page(request, instructions_name):

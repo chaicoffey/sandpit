@@ -30,12 +30,16 @@ function load_main_view() {
     load_type = $('#main_view_links li.active').attr('load_type');
     if(string_starts_with(load_type, 'item_list'))
         items_in_list_updated_event();
-    else {
+    else if(string_starts_with(load_type, 'user_home_page')){
         base_url = window.location.protocol + "//" + window.location.host;
         list_url = $('#main_view_links li.active a').attr('href');
-        $('#main_view').load(base_url + list_url, function(){
-            $('#short_instructions').load(base_url + $('#short_instructions').attr('href'));
-        });
+        $('#main_view_top').load(base_url + list_url);
+        $('#main_view_bottom').empty();
+    } else {
+        base_url = window.location.protocol + "//" + window.location.host;
+        list_url = $('#main_view_links li.active a').attr('href');
+        $('#main_view_bottom').load(base_url + list_url);
+        $('#main_view_top').empty();
     }
 }
 
