@@ -307,7 +307,7 @@ def teacher_view(request):
 def teacher_home(request):
     if request.session.get('user_type', None) == 'Teacher':
         context = {
-            'user_type': 'teacher',
+            'instructions_url': '/teacher_short_instructions/',
             'intro_text': [
                 "This program provides resources for sessions in which you test your students' fitness, including "
                 "instructions on how to run tests and lesson plans.",
@@ -378,7 +378,7 @@ def administrator_view(request):
 def administrator_home(request):
     if request.session.get('user_type', None) == 'Administrator':
         context = {
-            'user_type': 'administrator',
+            'instructions_url': '/administrator_short_instructions/',
             'intro_text': [
                 'As an administrator you will need to add teachers to the teacher list.',
                 'To get started follow step 1 below.'
@@ -412,7 +412,7 @@ def superuser_view(request):
 
 def superuser_home(request):
     if request.session.get('user_type', None) == 'SuperUser':
-        context = {'user_type': 'superuser', 'intro_text': ['Super User']}
+        context = {'instructions_url': '/superuser_short_instructions/', 'intro_text': ['Super User']}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
         return redirect('fitness_scoring.views.login_user')
