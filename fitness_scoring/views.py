@@ -28,20 +28,20 @@ def login_user(request):
         user = User.get_authenticated_user(username=username, password=password)
         if user:
             if SuperUser.objects.filter(user=user).exists():
-                user_type = 'SuperUser'
+                user_type = 'Licencing'
             elif Administrator.objects.filter(user=user).exists():
                 if Administrator.objects.get(user=user).school_id.subscription_paid:
-                    user_type = 'Administrator'
+                    user_type = 'Licencing'
                 else:
                     user_type = 'Unpaid'
             elif Teacher.objects.filter(user=user).exists():
                 if Teacher.objects.get(user=user).school_id.subscription_paid:
-                    user_type = 'Teacher'
+                    user_type = 'Licencing'
                 else:
                     user_type = 'Unpaid'
             elif Class.objects.filter(user=user).exists():
                 if Class.objects.get(user=user).school_id.subscription_paid:
-                    user_type = 'Class'
+                    user_type = 'Licencing'
                 else:
                     user_type = 'Unpaid'
             else:
@@ -52,14 +52,8 @@ def login_user(request):
         request.session['user_type'] = user_type   
         request.session['username'] = username
 
-        if user_type == 'SuperUser':
-            return redirect('fitness_scoring.views.superuser_view')
-        elif user_type == 'Administrator':
-            return redirect('fitness_scoring.views.administrator_view')
-        elif user_type == 'Teacher':
-            return redirect('fitness_scoring.views.teacher_view')
-        elif user_type == 'Class':
-            return redirect('fitness_scoring.views.class_student_view')
+        if user_type == 'Licencing':
+            return redirect('fitness_scoring.views.licencing_check')
         elif user_type == 'Unpaid':
             state = "Subscription fee has not been paid for your school."
             return render(request, 'authentication.html', RequestContext(request, {'state': state,
@@ -70,6 +64,39 @@ def login_user(request):
                                                                                    'username': username}))
     else:
         return render(request, 'authentication.html', RequestContext(request, {'state': '', 'username': ''}))
+
+
+def licencing_check(request):
+    user_type = request.session.get('user_type', None)
+    if user_type == 'Licencing':
+        user = User.objects.get(username=request.session.get('username'))
+        if request.POST:
+            if 'agree_button' in request.POST.keys():
+                user.set_read_agreement()
+                return redirect('fitness_scoring.views.licencing_check')
+            else:
+                return redirect('fitness_scoring.views.login_user')
+        else:
+            if user.read_agreement:
+                if SuperUser.objects.filter(user=user).exists():
+                    request.session['user_type'] = 'SuperUser'
+                    return redirect('fitness_scoring.views.superuser_view')
+                elif Administrator.objects.filter(user=user).exists():
+                    request.session['user_type'] = 'Administrator'
+                    return redirect('fitness_scoring.views.administrator_view')
+                elif Teacher.objects.filter(user=user).exists():
+                    request.session['user_type'] = 'Teacher'
+                    return redirect('fitness_scoring.views.teacher_view')
+                elif Class.objects.filter(user=user).exists():
+                    request.session['user_type'] = 'Class'
+                    return redirect('fitness_scoring.views.class_student_view')
+                else:
+                    return HttpResponseForbidden("Unrecognised User")
+            else:
+                return render(request, 'licencing_agreement.html', RequestContext(request,
+                                                                                  {'post_to_url': '/licencing_check/'}))
+    else:
+        return HttpResponseForbidden("You are not authorised to read the agreement")
 
 
 def logout_user(request):

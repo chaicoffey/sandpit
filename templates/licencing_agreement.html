@@ -1,0 +1,44 @@
+<html>
+<head>
+    <title>Licencing Agreement</title>
+</head>
+<body>
+
+<form action="{{ post_to_url }}" method="post">
+
+    {% csrf_token %}
+
+    Licencing Agreement
+    <ul>
+        <li>You Will Not Copy Program</li>
+        <li>You Will Not Misuse Program</li>
+        <li>You Are Part Of A School</li>
+    </ul>
+
+    Privacy
+    <ul>
+        <li>We Will Only Use Meta Data</li>
+    </ul>
+
+    <input type="checkbox" id="agree_check" value="agree" onchange="read_terms()">
+    I have read the terms and conditions and I agree<br>
+
+    <input type="submit" id="cancel_button" name="cancel_button" value="Cancel">
+    <input type="submit" id="agree_button" name="agree_button" value="I Agree" disabled>
+
+</form>
+
+</body>
+
+<script>
+    function read_terms()
+    {
+        var agree_button = document.getElementById('agree_button');
+        if(document.getElementById('agree_check').checked)
+            agree_button.disabled = false;
+        else
+            agree_button.disabled = true;
+    }
+</script>
+
+</html>

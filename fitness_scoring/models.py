@@ -84,6 +84,7 @@ class School(models.Model):
 class User(models.Model):
     username = models.CharField(max_length=100, unique=True)
     encrypted_password = models.CharField(max_length=1024)
+    read_agreement = models.BooleanField()
 
     def __unicode__(self):
         return self.username
@@ -107,6 +108,10 @@ class User(models.Model):
         self.encrypted_password = User.encrypt_password(password)
         self.save()
 
+    def set_read_agreement(self):
+        self.read_agreement = True
+        self.save()
+
     @staticmethod
     def get_authenticated_user(username, password):
         user = User.objects.filter(username=username)
@@ -120,7 +125,8 @@ class User(models.Model):
     def create_user(base_username):
         username = User.get_valid_username(base_username)
         password = User.get_random_password()
-        return User.objects.create(username=username, encrypted_password=User.encrypt_password(password)), password
+        return User.objects.create(username=username, encrypted_password=User.encrypt_password(password),
+                                   read_agreement=False), password
 
     @staticmethod
     def get_valid_username(base_username):
@@ -546,6 +552,7 @@ class Class(models.Model):
         error_message = Class.create_class_errors(year, class_name, school_id, teacher_id)
         if not error_message:
             (user, password) = User.create_user(str(year) + "_" + class_name)
+            user.set_read_agreement()
             class_instance = Class.objects.create(year=year, class_name=class_name, school_id=school_id, user=user)
             TeacherClassAllocation.objects.create(class_id=class_instance, teacher_id=teacher_id)
         else:

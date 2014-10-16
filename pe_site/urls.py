@@ -8,6 +8,7 @@ urlpatterns = patterns(
     '', url(r'^admin/', include(admin.site.urls)),
     url(r'^$', 'fitness_scoring.views.login_user'),
     url(r'^login', 'fitness_scoring.views.login_user', name='login'),
+    url(r'^licencing_check', 'fitness_scoring.views.licencing_check', name='licencing_check'),
     url(r'^logout/', 'fitness_scoring.views.logout_user', name='logout'),
     url(r'^change_password/(?P<is_finished>\w+)', 'fitness_scoring.views.change_user_password',
         name='change_user_password'),
