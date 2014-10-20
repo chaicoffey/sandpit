@@ -381,7 +381,7 @@ def administrator_home(request):
             'instructions_url': '/administrator_short_instructions/',
             'intro_text': [
                 'As an administrator you will need to add teachers to the teacher list.',
-                'To get started follow step 1 below.'
+                'Click step 1 to the bottom left to see how to add teachers.'
             ]
         }
         return render(request, 'user_home_page.html', RequestContext(request, context))
