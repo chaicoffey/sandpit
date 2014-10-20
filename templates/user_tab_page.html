@@ -19,9 +19,8 @@
                 <hr style="border-color: purple">
                 {% if step_sets %}
 
-                    <h3 style="color: purple">Show Instructions</h3>
+                    <h3 style="color: purple" align="center">Show Instructions</h3>
                     <ul class="nav nav-sidebar" id="short_instructions_links">
-                        <li><a href="" value="-1:-1">Show No Instructions</a>
                         {% for steps, steps_text in step_sets %}
                             <div style="padding-left: 20px; padding-right: 20px"><hr style="border-color: purple"></div>
                             <div style="color: purple; background-color: transparent; text-align: left; padding-left: 10px">
@@ -50,6 +49,10 @@
                                 {% endfor %}
                             {% endfor %}
                         }
+
+                        function close_short_instructions() {
+                            show_short_step(-1, -1);
+                        }
                     </script>
                 {% endif %}
             </div>
@@ -68,37 +71,46 @@
                                 </span>
                             </div>
                             <div style="padding-left: 20px; padding-bottom: 20px; border: 1px solid #000000">
-                                <h3 style="color: green">
-                                    {{ step_text }}
-                                    <a href="{{ step_link }}" target="_blank" style="color: red; font-size: 15px">
-                                        (click here for more detailed instructions)
-                                    </a>
-                                </h3>
-                                {% if images %}
-                                    <table><tr>
-                                        {% for image, text in images %}
-                                            <td>
-                                                {% if text %}
-                                                    <div style="height: 1px; background-color: transparent;
-                                                    text-align: center">
-                                                        <span style="color: purple; font-size: 10px; font-weight: bold;
-                                                         background-color: transparent; position: relative;
-                                                         top: -1.5em">
-                                                            &nbsp {{ text }} &nbsp
-                                                        </span>
-                                                    </div>
-                                                {% endif %}
-                                                <img src="/static/images/instructions_quick/{{ image }}"
-                                                     style="border:1px solid black"/>
-                                            </td>
-                                            {% if not forloop.last %}
+                                <table><tr>
+                                    <td>
+                                    <h3 style="color: green">
+                                        {{ step_text }}
+                                        <a href="{{ step_link }}" target="_blank" style="color: red; font-size: 15px">
+                                            (click here for more detailed instructions)
+                                        </a>
+                                    </h3>
+                                    {% if images %}
+                                        <table><tr>
+                                            {% for image, text in images %}
                                                 <td>
-                                                    <img src="/static/images/instructions_quick/arrow3.png"/>
+                                                    {% if text %}
+                                                        <div style="height: 1px; background-color: transparent;
+                                                        text-align: center">
+                                                            <span style="color: purple; font-size: 10px; font-weight: bold;
+                                                             background-color: transparent; position: relative;
+                                                             top: -1.5em">
+                                                                &nbsp {{ text }} &nbsp
+                                                            </span>
+                                                        </div>
+                                                    {% endif %}
+                                                    <img src="/static/images/instructions_quick/{{ image }}"
+                                                         style="border:1px solid black"/>
                                                 </td>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </tr></table>
-                                {% endif %}
+                                                {% if not forloop.last %}
+                                                    <td>
+                                                        <img src="/static/images/instructions_quick/arrow3.png"/>
+                                                    </td>
+                                                {% endif %}
+                                            {% endfor %}
+                                        </tr></table>
+                                    {% endif %}
+                                    </td>
+                                    <td height="100%" width="100%" style="vertical-align: top">
+                                        <button type="button" style="float: right" onclick="close_short_instructions()">
+                                            x
+                                        </button>
+                                    </td>
+                                </tr></table>
                             </div>
                             </div>
                         {% endfor %}
