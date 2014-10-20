@@ -19,22 +19,22 @@
                 <hr>
                 {% if step_sets %}
 
-                    <input type="radio" value="-1:-1" name="short_instructions_radio"
-                           onChange="show_short_step(-1, -1)"> Show No Instructions<br>
-                    {% for steps, steps_text in step_sets %}
-                        <div style="height: 1px; background-color: transparent; text-align: left; padding-left: 10px">
-                            <span style="color: grey; background-color: white; position: relative; top: 1.0em">
-                                &nbsp {{ steps_text }} &nbsp
-                            </span>
-                        </div>
-                        <hr>
-                        {% for step_text, step_link, images in steps %}
-                            <input type="radio" value="{{ forloop.parentloop.counter0 }}:{{ forloop.counter0 }}"
-                                   name="short_instructions_radio"
-                                   onChange="show_short_step({{ forloop.parentloop.counter0 }}, {{ forloop.counter0 }})">
-                            {{ step_text }}<br>
+                    <ul class="nav nav-sidebar" id="short_instructions_links">
+                        <li><a href="" value="-1:-1">Show No Instructions</a>
+                        {% for steps, steps_text in step_sets %}
+                            <div style="height: 1px; background-color: transparent; text-align: left; padding-left: 10px">
+                                <span style="color: grey; background-color: white; position: relative; top: 1.0em">
+                                    &nbsp {{ steps_text }} &nbsp
+                                </span>
+                            </div>
+                            <hr>
+                            {% for step_text, step_link, images in steps %}
+                                <li><a href="" value="{{ forloop.parentloop.counter0 }}:{{ forloop.counter0 }}">
+                                    {{ step_text }}
+                                </a></li>
+                            {% endfor %}
                         {% endfor %}
-                    {% endfor %}
+                    </ul>
 
                     <script>
                         function show_short_step(outer_loop_count_show, inner_loop_count_show) {
