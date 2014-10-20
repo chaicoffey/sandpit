@@ -244,12 +244,12 @@ def teacher_view(request):
                 ('teacher_add_classes_A.png', None), ('administrator_add_classes_BB.png', None),
                 ('teacher_add_classes_CC.png', None), ('teacher_add_classes_DDD.png', None)
             ]),
-            ('Add Tests To First Class For Term', 'teacher_add_tests', [
+            ('Add Tests To First Class', 'teacher_add_tests', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
                 ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
                 ('administrator_add_tests_EEE.png', None)
             ]),
-            ('Add Tests To Other Classes For Term', 'teacher_add_tests2', [
+            ('Add Tests To Other Classes', 'teacher_add_tests2', [
                 ('teacher_add_classes_A.png', None), ('administrator_add_tests2_B.png', None),
                 ('administrator_add_tests2_C.png', None), ('teacher_add_classes_DDD.png', None)
             ]),
@@ -331,16 +331,16 @@ def administrator_view(request):
                 ('add_teachers_AAAA.png', None), ('add_teachers_BBB.png', None),
                 ('add_teachers_CC.png', None), ('add_teachers_D.png', None)
             ]),
-            ('Add Classes For Teachers For Term', 'administrator_add_classes', [
+            ('Add Classes For Term', 'administrator_add_classes', [
                 ('administrator_add_classes_A.png', None), ('administrator_add_classes_BB.png', None),
                 ('administrator_add_classes_C.png', None), ('administrator_add_classes_D.png', None)
             ]),
-            ('Add Tests To First Class For Term', 'administrator_add_tests', [
+            ('Add Tests To First Class', 'administrator_add_tests', [
                 ('administrator_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
                 ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
                 ('administrator_add_tests_EEE.png', None)
             ]),
-            ('Add Tests To Other Classes For Term', 'administrator_add_tests2', [
+            ('Add Tests To Other Classes', 'administrator_add_tests2', [
                 ('administrator_add_classes_A.png', None), ('administrator_add_tests2_B.png', None),
                 ('administrator_add_tests2_C.png', None), ('administrator_add_classes_D.png', None)
             ])
@@ -367,7 +367,7 @@ def administrator_view(request):
                 ['Classes', '/class/list/', 'item_list:3']
             ],
             'step_sets': [(steps_formatted, 'Follow this step to add teachers for the year'),
-                          (steps_optional_formatted, 'Optional Steps')]
+                          (steps_optional_formatted, 'Optional Steps (Can Leave For Teachers)')]
         }
 
         return render(request, 'user_tab_page.html', RequestContext(request, context))

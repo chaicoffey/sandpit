@@ -16,18 +16,17 @@
                         </li>
                     {% endfor %}
                 </ul>
-                <hr>
+                <hr style="border-color: purple">
                 {% if step_sets %}
 
+                    <h3 style="color: purple">Show Instructions</h3>
                     <ul class="nav nav-sidebar" id="short_instructions_links">
                         <li><a href="" value="-1:-1">Show No Instructions</a>
                         {% for steps, steps_text in step_sets %}
-                            <div style="height: 1px; background-color: transparent; text-align: left; padding-left: 10px">
-                                <span style="color: grey; background-color: white; position: relative; top: 1.0em">
-                                    &nbsp {{ steps_text }} &nbsp
-                                </span>
+                            <div style="padding-left: 20px; padding-right: 20px"><hr style="border-color: purple"></div>
+                            <div style="color: purple; background-color: transparent; text-align: left; padding-left: 10px">
+                                {{ steps_text }}
                             </div>
-                            <hr>
                             {% for step_text, step_link, images in steps %}
                                 <li><a href="" value="{{ forloop.parentloop.counter0 }}:{{ forloop.counter0 }}">
                                     {{ step_text }}
