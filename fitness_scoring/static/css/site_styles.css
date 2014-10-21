@@ -73,6 +73,11 @@ ul {list-style:none}
     color: blue;
 }
 
+.panel-item_list
+{
+    border: 2px solid #303030;
+}
+
 .table_page_select
 {
     float: left;
@@ -85,14 +90,38 @@ ul {list-style:none}
     padding-right: 2px;
 }
 
-.dataTable > thead > tr > th
+.item_list_table > thead > tr > th
 {
-    border-left: 1px solid #e0e0e0;
-    border-right: 1px solid #e0e0e0;
+    border-top: 1px solid #303030;
+    border-right: 1px solid #303030;
+
+    background-color: #a0a0a0;
+    color: #303030;
 }
 
-.dataTable > tbody > tr > td
+.item_list_table thead th.sorting_asc
 {
-    border-left: 1px solid #e0e0e0;
-    border-right: 1px solid #e0e0e0;
+    border-top: 1px solid #303030;
+    border-right: 1px solid #303030;
+
+    background-color: #a0a0a0;
+    color: #303030;
+}
+
+.item_list_table thead th.sorting_desc
+{
+    border-top: 1px solid #303030;
+    border-right: 1px solid #303030;
+
+    background-color: #a0a0a0;
+    color: #303030;
+}
+
+.item_list_table thead th.sorting
+{
+    border-top: 1px solid #303030;
+    border-right: 1px solid #303030;
+
+    background-color: #a0a0a0;
+    color: #303030;
 }
