@@ -31,8 +31,8 @@
                         {% for heading in item_list_table_headings %}
                             <th>{{ heading }}</th>
                         {% endfor %}
-                        {%  for heading in item_list_options %}
-                            <th></th>
+                        {%  for link_type, option_link, option_glyph_icon, hover_message in item_list_options %}
+                            <th><span class="glyphicon glyphicon-{{ option_glyph_icon }}"></span></th>
                         {% endfor %}
                     </tr>
                 </thead>
