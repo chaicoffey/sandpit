@@ -72,3 +72,15 @@ ul {list-style:none}
     font-size: 20;
     color: blue;
 }
+
+.table_page_select
+{
+    float: left;
+    padding-left: 2px;
+}
+
+.table_search
+{
+    padding-top: 2px;
+    padding-right: 2px;
+}

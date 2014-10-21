@@ -9,7 +9,10 @@ function load_data_table(parent_id, item_list_url, n_headings_to_exclude, do_aft
     for (var back_index = 0; back_index < n_headings_to_exclude; back_index++)
         exclude_headings[back_index] = -n_headings_to_exclude + back_index;
     $('#' + parent_id).load(item_list_url, function(){
-        $('#' + parent_id + ' .item_list_table').dataTable({"aoColumnDefs": [{ 'bSortable': false, 'aTargets': exclude_headings }]});
+        $('#' + parent_id + ' .item_list_table').dataTable({
+            "aoColumnDefs": [{ 'bSortable': false, 'aTargets': exclude_headings }],
+            "dom": '<"table_page_select"p><"table_search"f>rt'
+        });
         if(!(typeof do_after_load_method === "undefined"))
             do_after_load_method();
     });
