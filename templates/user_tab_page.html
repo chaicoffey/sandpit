@@ -8,31 +8,36 @@
 
     <div class="container-fluid">
         <div class="row">
-            <div class="col-sm-4 col-md-3 sidebar">
-                <ul class="nav nav-sidebar" id="main_view_links">
-                    {% for link_label, link_url, load_type in user_tabs %}
-                        <li load_type="{{ load_type }}">
-                            <a href="{{ link_url }}">{{ link_label }}</a>
-                        </li>
-                    {% endfor %}
-                </ul>
-                <hr style="border-color: purple">
-                {% if step_sets %}
-
-                    <h3 style="color: purple" align="center">Show Instructions</h3>
-                    <ul class="nav nav-sidebar" id="short_instructions_links">
-                        {% for steps, steps_text in step_sets %}
-                            <div style="padding-left: 20px; padding-right: 20px"><hr style="border-color: purple"></div>
-                            <div style="color: purple; background-color: transparent; text-align: left; padding-left: 10px">
-                                {{ steps_text }}
-                            </div>
-                            {% for step_text, step_link, images in steps %}
-                                <li><a href="" value="{{ forloop.parentloop.counter0 }}:{{ forloop.counter0 }}">
-                                    {{ step_text }}
-                                </a></li>
-                            {% endfor %}
+            <div class="col-sm-4 col-md-3 sidebar" style="padding-top: 2px">
+                <div style="border: 2px solid black">
+                    <ul class="nav nav-sidebar" id="main_view_links">
+                        {% for link_label, link_url, load_type in user_tabs %}
+                            <li load_type="{{ load_type }}">
+                                <a href="{{ link_url }}">{{ link_label }}</a>
+                            </li>
                         {% endfor %}
                     </ul>
+                </div>
+
+                {% if step_sets %}
+                    <br>
+                    <div style="border: 2px solid purple">
+                        <h3 style="color: purple" align="center">Steps</h3>
+                        <div style="color: purple" align="center">(Click a step to show instructions)</div>
+                        <ul class="nav nav-sidebar" id="short_instructions_links">
+                            {% for steps, steps_text in step_sets %}
+                                <div style="padding-left: 20px; padding-right: 20px"><hr style="border-color: purple"></div>
+                                <div style="color: purple; background-color: transparent; text-align: left; padding-left: 10px">
+                                    {{ steps_text }}
+                                </div>
+                                {% for step_text, step_link, images in steps %}
+                                    <li><a href="" value="{{ forloop.parentloop.counter0 }}:{{ forloop.counter0 }}">
+                                        {{ step_text }}
+                                    </a></li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
 
                     <script>
                         function show_short_step(outer_loop_count_show, inner_loop_count_show) {
@@ -65,12 +70,12 @@
                             <div style="padding-top: 20px; padding-bottom: 20px; display: none"
                                  id="short_step_instruction_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}">
                                 <div style="height: 1px; background-color: transparent; text-align: left; padding-left: 10px">
-                                    <span style="color: black; background-color: white; position: relative; top: -0.6em;
-                                     font-size: 20px">
+                                    <span style="color: #808080; background-color: white; position: relative;
+                                     top: -0.6em; font-size: 20px">
                                         &nbsp Instructions &nbsp
                                     </span>
                                 </div>
-                                <div style="padding-left: 20px; padding-bottom: 20px; border: 1px solid #000000">
+                                <div style="padding-left: 20px; padding-bottom: 20px; border: 2px solid #808080">
                                     <table><tr>
                                         <td>
                                         <h3 style="color: green">

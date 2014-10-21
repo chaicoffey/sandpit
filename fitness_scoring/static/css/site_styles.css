@@ -9,8 +9,13 @@ select {
     font-family:'Courier New','Courier','monospace';
 }
 
+.navbar-fixed-top {
+    border-bottom: 1px solid #e0e0e0;
+}
+
 .sidebar {
     background-color: #f5f5f5;
+    border-right: 1px solid #e0e0e0;
 }
 
 .nav-sidebar .active > a {
@@ -65,5 +70,5 @@ ul {list-style:none}
 .user-home-page-intro
 {
     font-size: 20;
-    color: #a21a77;
+    color: blue;
 }

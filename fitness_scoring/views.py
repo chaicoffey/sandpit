@@ -313,7 +313,8 @@ def teacher_home(request):
                 "instructions on how to run tests and lesson plans.",
                 "It will also give you feedback on the students' nation wide percentile rankings and help you write "
                 'reports.',
-                'To use all these facilities you will need to follow the steps below.'
+                'To use all these facilities you will need to follow the steps to the bottom left.  Click on each step '
+                'to bring up instructions.'
             ]
         }
         return render(request, 'user_home_page.html', RequestContext(request, context))
