@@ -294,7 +294,7 @@ def teacher_view(request):
             'user_tab_page_title': heading,
             'user_tabs': [
                 ['Home', '/teacher_home/', 'user_home_page'],
-                ['Classes', '/class/list/', 'item_list:2']
+                ['Classes', '/class/list/', 'item_list:3']
             ],
             'step_sets': step_sets
         }
