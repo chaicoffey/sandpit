@@ -294,7 +294,7 @@ def teacher_view(request):
             'user_tab_page_title': heading,
             'user_tabs': [
                 ['Home', '/teacher_home/', 'user_home_page'],
-                ['Classes', '/class/list/', 'item_list:3']
+                ['Classes', '/class/list/', 'item_list:1']
             ],
             'step_sets': step_sets
         }
@@ -364,8 +364,8 @@ def administrator_view(request):
             'user_tab_page_title': 'Administrator: ' + administrator.school_id.name,
             'user_tabs': [
                 ['Home', '/administrator_home/', 'user_home_page'],
-                ['Teachers', '/teacher/list/', 'item_list:3'],
-                ['Classes', '/class/list/', 'item_list:3']
+                ['Teachers', '/teacher/list/', 'item_list:1'],
+                ['Classes', '/class/list/', 'item_list:1']
             ],
             'step_sets': [(steps_formatted, 'Follow this step to add teachers for the year'),
                           (steps_optional_formatted, 'Optional Steps (Can Leave For Teachers)')]
@@ -399,10 +399,10 @@ def superuser_view(request):
             'user_tab_page_title': 'Super User',
             'user_tabs': [
                 ['Home', '/superuser_home/', 'user_home_page'],
-                ['Add/Update School List', '/school/list/', 'item_list:3'],
-                ['Add/Update Test List', '/test/list/', 'item_list:4'],
-                ['Add/Update Test Category List', '/test_category/list/', 'item_list:2'],
-                ['Add/Update Major Test Category List', '/major_test_category/list/', 'item_list:2']
+                ['Add/Update School List', '/school/list/', 'item_list:1'],
+                ['Add/Update Test List', '/test/list/', 'item_list:1'],
+                ['Add/Update Test Category List', '/test_category/list/', 'item_list:1'],
+                ['Add/Update Major Test Category List', '/major_test_category/list/', 'item_list:1']
             ]
         }
 

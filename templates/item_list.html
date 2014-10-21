@@ -31,9 +31,9 @@
                         {% for heading in item_list_table_headings %}
                             <th>{{ heading }}</th>
                         {% endfor %}
-                        {%  for link_type, option_link, option_glyph_icon, hover_message in item_list_options %}
-                            <th><span class="glyphicon glyphicon-{{ option_glyph_icon }}"></span></th>
-                        {% endfor %}
+                    `   <th>
+                            Options
+                        </th>
                     </tr>
                 </thead>
                 {% for item, display_items in item_list %}
@@ -41,13 +41,15 @@
                         {% for display_item in display_items %}
                             <td>{{ display_item }}</td>
                         {% endfor %}
-                        {% for link_type, option_link, option_glyph_icon, hover_message in item_list_options %}
-                            <td class="{{ link_type }}">
-                                <a href="{{ option_link }}{{ item.pk }}" title="{{ hover_message }}">
-                                    <span class="glyphicon glyphicon-{{ option_glyph_icon }}"></span>
-                                </a>
-                            </td>
-                        {% endfor %}
+                        <td><table><tr>
+                            {% for link_type, option_link, option_glyph_icon, hover_message in item_list_options %}
+                                <td class="{{ link_type }}">
+                                    <a href="{{ option_link }}{{ item.pk }}" title="{{ hover_message }}">
+                                        <span class="glyphicon glyphicon-{{ option_glyph_icon }}"></span>
+                                    </a>
+                                </td>
+                            {% endfor %}
+                        </tr></table></td>
                     </tr>
                 {% endfor %}
             </table>
