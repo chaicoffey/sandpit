@@ -367,7 +367,7 @@ def administrator_view(request):
                 ['Teachers', '/teacher/list/', 'item_list:1'],
                 ['Classes', '/class/list/', 'item_list:1']
             ],
-            'step_sets': [(steps_formatted, 'Follow this step to add teachers for the year'),
+            'step_sets': [(steps_formatted, 'Follow this step to add teachers for year'),
                           (steps_optional_formatted, 'Optional Steps (Can Leave For Teachers)')]
         }
 

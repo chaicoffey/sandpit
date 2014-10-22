@@ -26,9 +26,9 @@ $('#main_view_links li a').click(function(event){
 
 });
 
-$('#short_instructions_links li a').click(function(event){
+$('.short_instructions_links li a').click(function(event){
 
-    var children = $('#short_instructions_links').children('li');
+    var children = $('.short_instructions_links').children('li');
     children.each(function(index){
         $(this).removeClass('active');
     });
