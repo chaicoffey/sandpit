@@ -48,9 +48,9 @@
                     <script>
                         function show_short_step(outer_loop_count_show, inner_loop_count_show) {
                             {% for steps, steps_text in step_sets %}
-                                var outer_loop_count = {{ forloop.counter0 }}
+                                var outer_loop_count = {{ forloop.counter0 }};
                                 {% for step_text, step_link, images in steps %}
-                                    var inner_loop_count = {{ forloop.counter0 }}
+                                    var inner_loop_count = {{ forloop.counter0 }};
                                     var instruction_id = "short_step_instruction_" + outer_loop_count + "_" + inner_loop_count;
                                     var instruction_to_show = document.getElementById(instruction_id);
                                     if((outer_loop_count == outer_loop_count_show) && (inner_loop_count == inner_loop_count_show))
