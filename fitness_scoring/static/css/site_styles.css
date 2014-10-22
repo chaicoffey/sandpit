@@ -130,12 +130,14 @@ ul {list-style:none}
 {
     color: #303030;
     font-weight: bold;
+    border-color: #303030;
 }
 
 .lighter_color
 {
     color: #808080;
     font-weight: bold;
+    border-color: #808080;
 }
 
 .standard_blue
@@ -151,4 +153,12 @@ ul {list-style:none}
 .light_attention_color
 {
     color: orangered;
+}
+
+.close_button
+{
+    background-color: #808080;
+    border-style: none;
+    color: white;
+    float: right;
 }

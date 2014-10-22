@@ -20,8 +20,8 @@
                 </div>
 
                 {% if step_sets %}
-
-                    <div class="lighter_color" style="padding-top: 80px; padding-bottom: 20px">
+                    <div class="lighter_color" style="padding-top: 60px; padding-bottom: 20px">
+                        <hr class="darker_color">
                         <div class="standard_blue" style="font-weight: bold; font-size: 15px" align="center">
                             Click a step below to show instructions
                         </div>
@@ -104,7 +104,8 @@
                                                             {% endif %}
                                                             {% if text %}
                                                                 <div class="attention_color"
-                                                                     style="border: 3px solid; padding: 8px">
+                                                                     style="border: 3px solid; border-radius: 8px;
+                                                                      padding: 8px">
                                                             {% endif %}
                                                             <img src="/static/images/instructions_quick/{{ image }}"
                                                                  style="border:1px solid black"/>
@@ -126,9 +127,8 @@
                                             </a>
                                         </td>
                                         <td height="100%" width="100%" style="vertical-align: top">
-                                            <button type="button" style="float: right" onclick="close_short_instructions()">
-                                                x
-                                            </button>
+                                            <button class="close_button" type="button"
+                                                    onclick="close_short_instructions()">x</button>
                                         </td>
                                     </tr></table>
                                 </div>
