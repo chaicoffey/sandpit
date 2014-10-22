@@ -125,3 +125,28 @@ ul {list-style:none}
     background-color: #a0a0a0;
     color: #303030;
 }
+
+.darker_color
+{
+    color: #303030;
+}
+
+.lighter_color
+{
+    color: #808080;
+}
+
+.standard_blue
+{
+    color: #428bca;
+}
+
+.attention_color
+{
+    color: red;
+}
+
+.light_attention_color
+{
+    color: orangered;
+}
