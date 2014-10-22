@@ -29,12 +29,12 @@
                             {% for steps, steps_text in step_sets %}
                                 <br>
                                 <div style="height: 1px; background-color: transparent; text-align: left; padding-left: 10px">
-                                    <span style="font-weight: bold; background-color: white;
-                                     position: relative; top: -0.6em">
+                                    <span style="background-color: white; position: relative; top: -0.6em">
                                         {{ steps_text }}
                                     </span>
                                 </div>
-                                <div class="nav nav-sidebar short_instructions_links" style="border: 2px solid; padding-top: 10px; padding-bottom: 10px">
+                                <div class="nav nav-sidebar short_instructions_links" style="border: 2px solid;
+                                 padding-top: 10px; padding-bottom: 10px; font-weight: normal">
                                     {% for step_text, step_link, images in steps %}
                                         <li><a href="" value="{{ forloop.parentloop.counter0 }}:{{ forloop.counter0 }}">
                                             {{ step_text }}
@@ -121,7 +121,7 @@
                                                 </tr></table></div>
                                             {% endif %}
                                             <a class="light_attention_color" href="{{ step_link }}" target="_blank"
-                                               style="font-size: 15px">
+                                               style="font-size: 15px; font-weight: normal">
                                                 Click here for more detailed instructions (will open in a new tab)
                                             </a>
                                         </td>

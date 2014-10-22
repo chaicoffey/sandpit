@@ -9,19 +9,24 @@
     <div class="panel panel-default panel-item_list">
 
         <div class="panel-heading">
-            {{ item_list_title }}
-            {% for button_label, button_options in item_list_buttons %}
-                <div class="btn-group">
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                        {{ button_label }}
-                    </button>
-                    <ul class="dropdown-menu" role="menu">
-                        {% for link_type, link_url, label in button_options %}
-                            <li class="{{ link_type }}"><a href="{{ link_url }}">{{ label }}</a></li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            {% endfor %}
+            <div class="lighter_color">
+                {{ item_list_title }}
+                {% for button_label, button_options in item_list_buttons %}
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle darker_color"
+                                data-toggle="dropdown">
+                            {{ button_label }}
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            {% for link_type, link_url, label in button_options %}
+                                <li class="{{ link_type }}"><a href="{{ link_url }}"><div class="darker_color">
+                                    {{ label }}
+                                </div></a></li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% endfor %}
+            </div>
         </div>
 
         <div class="table-responsive">

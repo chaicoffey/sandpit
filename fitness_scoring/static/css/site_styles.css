@@ -129,11 +129,13 @@ ul {list-style:none}
 .darker_color
 {
     color: #303030;
+    font-weight: bold;
 }
 
 .lighter_color
 {
     color: #808080;
+    font-weight: bold;
 }
 
 .standard_blue
