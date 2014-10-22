@@ -84,10 +84,22 @@ ul {list-style:none}
     padding-left: 2px;
 }
 
+.table_page_select > div > ul > li
+{
+    font-weight: bold;
+    color: #808080;
+}
+
 .table_search
 {
     padding-top: 2px;
     padding-right: 2px;
+}
+
+.table_search > div > label
+{
+    font-weight: bold;
+    color: #808080;
 }
 
 .item_list_table > thead > tr > th
