@@ -8,7 +8,7 @@
 
     <div class="container-fluid">
         <div class="row">
-            <div class="col-sm-4 col-md-3 sidebar" style="padding-top: 2px">
+            <div class="col-sm-4 col-md-3 sidebar" style="padding-top: 20px">
                 <div style="border: 2px solid black">
                     <ul class="nav nav-sidebar" id="main_view_links">
                         {% for link_label, link_url, load_type in user_tabs %}
@@ -21,11 +21,9 @@
 
                 {% if step_sets %}
 
-                    <br>
-                    <div style="color: #808080">
-                        <h3 align="center">Steps</h3>
-                        <div style="font-weight: bold" align="center">
-                            (Click a step below to show instructions)
+                    <div style="color: #808080; padding-top: 80px; padding-bottom: 20px">
+                        <div style="font-weight: bold; font-size: 15px; color: #428bca" align="center">
+                            Click a step below to show instructions
                         </div>
                         <ul class="nav nav-sidebar" id="short_instructions_links">
                             {% for steps, steps_text in step_sets %}
@@ -36,7 +34,7 @@
                                         {{ steps_text }}
                                     </span>
                                 </div>
-                                <div class="nav nav-sidebar short_instructions_links" style="border: 2px solid; padding: 10px">
+                                <div class="nav nav-sidebar short_instructions_links" style="border: 2px solid; padding-top: 10px; padding-bottom: 10px">
                                     {% for step_text, step_link, images in steps %}
                                         <li><a href="" value="{{ forloop.parentloop.counter0 }}:{{ forloop.counter0 }}">
                                             {{ step_text }}
