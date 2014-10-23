@@ -9,13 +9,13 @@
     <div class="panel panel-default panel-item_list">
 
         <div class="panel-heading">
-            <div class="lighter_color">
+            <div class="light_attention_color" style="font-weight: bold; font-size: 15px">
                 {{ item_list_title }}
                 {% for button_label, button_options in item_list_buttons %}
                     <div class="btn-group">
                         <button type="button" class="btn btn-default dropdown-toggle darker_color"
-                                data-toggle="dropdown">
-                            {{ button_label }}
+                                style="border-width: 2px; padding: 1px; height: 35px; width: 35px" data-toggle="dropdown">
+                            <div class="light_attention_color" style="font-size: 20px">{{ button_label }}</div>
                         </button>
                         <ul class="dropdown-menu" role="menu">
                             {% for link_type, link_url, label in button_options %}
