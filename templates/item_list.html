@@ -50,7 +50,8 @@
                             {% for link_type, option_link, option_glyph_icon, hover_message in item_list_options %}
                                 <td class="{{ link_type }}">
                                     <a href="{{ option_link }}{{ item.pk }}" title="{{ hover_message }}">
-                                        <span class="glyphicon glyphicon-{{ option_glyph_icon }}"></span>
+                                        <span class="glyphicon glyphicon-{{ option_glyph_icon }} light_attention_color">
+                                        </span>
                                     </a>
                                 </td>
                             {% endfor %}

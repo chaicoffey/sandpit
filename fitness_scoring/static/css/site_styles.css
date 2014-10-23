@@ -23,6 +23,18 @@ select {
     color: #ffffff;
 }
 
+.table_page_select > div > ul > li > a
+{
+    color: #a0a0a0;
+}
+
+.table_page_select .active > a
+{
+    background-color: #a0a0a0;
+    border-color: #a0a0a0;
+    color: #ffffff;
+}
+
 .form-field-help {
     color: #888888
 }
@@ -87,7 +99,7 @@ ul {list-style:none}
 .table_page_select > div > ul > li
 {
     font-weight: bold;
-    color: #808080;
+    color: #a0a0a0;
 }
 
 .table_search
@@ -99,7 +111,7 @@ ul {list-style:none}
 .table_search > div > label
 {
     font-weight: bold;
-    color: #808080;
+    color: #a0a0a0;
 }
 
 .item_list_table > thead > tr > th
@@ -147,9 +159,9 @@ ul {list-style:none}
 
 .lighter_color
 {
-    color: #808080;
+    color: #a0a0a0;
     font-weight: bold;
-    border-color: #808080;
+    border-color: #a0a0a0;
 }
 
 .standard_blue
@@ -169,7 +181,7 @@ ul {list-style:none}
 
 .close_button
 {
-    background-color: #808080;
+    background-color: #a0a0a0;
     border-style: none;
     color: white;
     float: right;
