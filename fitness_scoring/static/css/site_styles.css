@@ -240,3 +240,8 @@ ul {list-style:none}
     color: white;
     float: right;
 }
+
+.btn-primary {
+    border-color: orangered;
+    background-color: orangered;
+}
