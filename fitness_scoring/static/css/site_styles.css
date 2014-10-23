@@ -245,3 +245,8 @@ ul {list-style:none}
     border-color: orangered;
     background-color: orangered;
 }
+
+.btn-primary:hover {
+    border-color: orangered;
+    background-color: orangered;
+}
