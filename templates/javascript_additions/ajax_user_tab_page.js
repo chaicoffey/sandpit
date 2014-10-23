@@ -54,8 +54,8 @@ function load_main_view() {
     else if(string_starts_with(load_type, 'user_home_page')){
         base_url = window.location.protocol + "//" + window.location.host;
         list_url = $('#main_view_links li.active a').attr('href');
-        $('#main_view_top').load(base_url + list_url);
-        $('#main_view_bottom').empty();
+        $('#main_view_bottom').load(base_url + list_url);
+        $('#main_view_top').empty();
     } else {
         base_url = window.location.protocol + "//" + window.location.host;
         list_url = $('#main_view_links li.active a').attr('href');
