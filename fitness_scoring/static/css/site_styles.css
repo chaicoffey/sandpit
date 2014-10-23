@@ -250,3 +250,8 @@ ul {list-style:none}
     border-color: orangered;
     background-color: orangered;
 }
+
+.btn-primary:focus {
+    border-color: orangered;
+    background-color: orangered;
+}
