@@ -10,22 +10,28 @@
 
         <div class="panel-heading">
             <div class="light_attention_color" style="font-weight: bold; font-size: 15px">
-                {{ item_list_title }}
-                {% for button_label, button_options in item_list_buttons %}
-                    <div class="btn-group">
-                        <button type="button" class="btn btn-default dropdown-toggle darker_color"
-                                style="border-width: 2px; padding: 1px; height: 35px; width: 35px" data-toggle="dropdown">
-                            <div class="light_attention_color" style="font-size: 20px">{{ button_label }}</div>
-                        </button>
-                        <ul class="dropdown-menu" role="menu">
-                            {% for link_type, link_url, label in button_options %}
-                                <li class="{{ link_type }}"><a href="{{ link_url }}"><div class="darker_color">
-                                    {{ label }}
-                                </div></a></li>
-                            {% endfor %}
-                        </ul>
-                    </div>
-                {% endfor %}
+                <table style="width: 100%"><tr>
+                    <td style="width: 40%">
+                        {{ menu_label }}
+                        {% for button_label, button_options in item_list_buttons %}
+                            <div class="btn-group">
+                                <button type="button" class="btn btn-default dropdown-toggle darker_color"
+                                        style="border-width: 2px; padding: 1px; height: 35px; width: 35px"
+                                        data-toggle="dropdown">
+                                    <div class="light_attention_color" style="font-size: 20px">{{ button_label }}</div>
+                                </button>
+                                <ul class="dropdown-menu" role="menu">
+                                    {% for link_type, link_url, label in button_options %}
+                                        <li class="{{ link_type }}"><a href="{{ link_url }}"><div class="darker_color">
+                                            {{ label }}
+                                        </div></a></li>
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endfor %}
+                    </td>
+                    <td><div class="darker_color">{{ item_list_title }}</div></td>
+                </tr></table>
             </div>
         </div>
 

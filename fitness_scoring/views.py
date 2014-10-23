@@ -383,8 +383,8 @@ def administrator_home(request):
             'intro_text': [
                 'As an administrator you will need to:',
                 '&nbsp&nbsp&nbsp&nbsp&nbsp 1. &nbsp&nbsp Add teachers to the teacher list',
-                '&nbsp&nbsp&nbsp&nbsp&nbsp 2. &nbsp&nbsp Add classes for the teachers for the term (this step is optional and can be left to '
-                'the teachers to do themselves)',
+                '&nbsp&nbsp&nbsp&nbsp&nbsp 2. &nbsp&nbsp Add classes for the teachers for the term (this step is '
+                'optional and can be left to the teachers to do themselves)',
                 '<br>',
                 'To display instructions click on a step to the bottom left of screen'
             ]
@@ -823,7 +823,8 @@ def school_list(request):
     if request.session.get('user_type', None) == 'SuperUser':
         context = {
             'item_list': [(school, school.get_display_items()) for school in School.objects.all()],
-            'item_list_title': 'School List',
+            'item_list_title': 'Schools',
+            'menu_label': 'Add School',
             'item_list_table_headings': School.get_display_list_headings(),
             'item_list_buttons': [
                 ['+', [['item_list_modal_load_link', '/school/add/', 'Add School'],
@@ -974,7 +975,8 @@ def test_category_list(request):
         context = {
             'item_list': [(test_category, test_category.get_display_items())
                           for test_category in TestCategory.objects.all()],
-            'item_list_title': 'Test Category List',
+            'item_list_title': 'Test Categories',
+            'menu_label': 'Add Test Category',
             'item_list_table_headings': TestCategory.get_display_list_headings(),
             'item_list_buttons': [
                 ['+', [['item_list_modal_load_link', '/test_category/add/', 'Add Test Category'],
@@ -1107,7 +1109,8 @@ def major_test_category_list(request):
         context = {
             'item_list': [(major_test_category, major_test_category.get_display_items())
                           for major_test_category in MajorTestCategory.objects.all()],
-            'item_list_title': 'Major Test Category List',
+            'item_list_title': 'Major Test Categories',
+            'menu_label': 'Add Major Test Category',
             'item_list_table_headings': MajorTestCategory.get_display_list_headings(),
             'item_list_buttons': [
                 ['+', [['item_list_modal_load_link', '/major_test_category/add/', 'Add Major Test Category'],
@@ -1244,7 +1247,8 @@ def test_list(request):
         context = {
             'item_list': [(test, test.get_display_items())
                           for test in Test.objects.all()],
-            'item_list_title': 'Test List',
+            'item_list_title': 'Tests',
+            'menu_label': 'Add Test',
             'item_list_table_headings': Test.get_display_list_headings(),
             'item_list_buttons': [
                 ['+', [['item_list_modal_load_link', '/test/adds/', 'Add Tests From .CSVs']]]
@@ -1663,7 +1667,8 @@ def teacher_list(request):
         context = {
             'item_list': [(teacher, teacher.get_display_items())
                           for teacher in Teacher.objects.filter(school_id=school)],
-            'item_list_title': 'Add Teacher',
+            'item_list_title': 'Teachers',
+            'menu_label': 'Add Teacher',
             'item_list_table_headings': Teacher.get_display_list_headings(),
             'item_list_buttons': [
                 ['+', [['item_list_modal_load_link', '/teacher/add/', 'Add Teacher']]]
@@ -1791,7 +1796,8 @@ def class_list(request):
             item_list_add_button_options.append(['item_list_modal_load_link', '/class/adds/', 'Add Classes'])
         context = {
             'item_list': class_items,
-            'item_list_title': 'Add Class(es)',
+            'item_list_title': 'Classes',
+            'menu_label': 'Add Class(es)',
             'item_list_table_headings': class_list_headings,
             'item_list_buttons': [
                 ['+', item_list_add_button_options]
