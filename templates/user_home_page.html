@@ -1,15 +1,15 @@
 
 <div class="text-info" style="padding-top: 1px">
-    <div class="darker_color" style="border: 2px solid; border-radius: 4px; padding-bottom: 20px; padding-left: 20px; padding-right: 20px">
-        <div class="user-home-page-intro">
+    <div class="user-home-page-intro">
+        <div style="border: 2px solid; border-radius: 4px; padding-bottom: 20px; padding-left: 20px; padding-right: 20px">
             <h1 style="text-align: center">
                 Welcome to FitTest!
             </h1>
-        </div>
-        <div class="user-home-page-intro" style="text-align: justify">
-            {% for text in intro_text %}
-                {{ text }}<br>
-            {% endfor %}
+            <ul>
+                {% for text in intro_text %}
+                    <li>{{ text }}</li>
+                {% endfor %}
+            </ul>
         </div>
     </div>
 </div>
