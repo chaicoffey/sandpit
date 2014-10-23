@@ -41,6 +41,21 @@ $('.short_instructions_links li a').click(function(event){
 
 });
 
+function show_short_step(outer_loop_count_show, inner_loop_count_show) {
+
+    $('.Short_Instructions_Showing').each(function(){
+        $(this).removeClass('Short_Instructions_Showing');
+        $(this).css('display', 'none');
+    })
+
+    var element = $("#short_step_instruction_" + outer_loop_count_show + "_" + inner_loop_count_show);
+    if(element) {
+        element.addClass('Short_Instructions_Showing');
+        element.css('display', 'inherit');
+    }
+
+}
+
 function close_short_instructions() {
     $('.short_instructions_links').children('li.active').removeClass('active');
     show_short_step(-1, -1);
