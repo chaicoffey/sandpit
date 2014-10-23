@@ -13,10 +13,7 @@ $(document).ready(function(){
 //for loading from side bar links into main window
 $('#main_view_links li a').click(function(event){
 
-    var children = $('#main_view_links').children('li');
-    children.each(function(index){
-        $(this).removeClass('active');
-    });
+    $('#main_view_links').children('li.active').removeClass('active');
     $(this).parent('li').addClass('active');
     $(this).blur();
 
@@ -28,10 +25,7 @@ $('#main_view_links li a').click(function(event){
 
 $('.short_instructions_links li a').click(function(event){
 
-    var children = $('.short_instructions_links').children('li');
-    children.each(function(index){
-        $(this).removeClass('active');
-    });
+    $('.short_instructions_links').children('li.active').removeClass('active');
     $(this).parent('li').addClass('active');
     $(this).blur();
 
@@ -46,6 +40,12 @@ $('.short_instructions_links li a').click(function(event){
     show_short_step(outer_loop_count_show, inner_loop_count_show);
 
 });
+
+function close_short_instructions() {
+    $('.short_instructions_links').children('li.active').removeClass('active');
+    show_short_step(-1, -1);
+
+}
 
 function load_main_view() {
     load_type = $('#main_view_links li.active').attr('load_type');
