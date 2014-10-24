@@ -64,8 +64,25 @@
                                     <table><tr>
                                         <td>
                                             <h3 class="standard_blue">
-                                                Step {{ step_number }}: {{ step_heading }}
+                                                Step {{ step_number }}
+                                                <button type="button" style="padding: 0px"
+                                                        {% if forloop.parentloop.first and forloop.first %}
+                                                            disabled
+                                                        {% endif %}
+                                                        onclick="show_previous_short_step({{ step_number }})">
+                                                    <
+                                                </button>
+                                                of
+                                                <button type="button" style="padding: 0px"
+                                                        {% if forloop.parentloop.last and forloop.last %}
+                                                            disabled
+                                                        {% endif %}
+                                                        onclick="show_next_short_step({{ step_number }})">
+                                                    >
+                                                </button>
+                                                {{ total_steps }} : {{ step_heading }}
                                             </h3>
+
                                             {% if step_text %}
                                                 <div class="darker_color" style="padding-bottom: 10px">{{ step_text }}</div>
                                             {% endif %}
@@ -110,27 +127,6 @@
                                                      click here for more detailed instructions
                                                 </a>
                                                 (will open in a new tab)
-                                            </div>
-                                        </td>
-                                        <td height="100%" width="100%" style="vertical-align: top">
-                                            <div style="float: right; padding-right: 2px">
-                                                <div>
-                                                    <button type="button" style="padding: 0px"
-                                                            {% if forloop.parentloop.first and forloop.first %}
-                                                                disabled
-                                                            {% endif %}
-                                                            onclick="show_previous_short_step({{ step_number }})">
-                                                        <
-                                                    </button>
-                                                    <button type="button" style="padding: 0px"
-                                                            {% if forloop.parentloop.last and forloop.last %}
-                                                                disabled
-                                                            {% endif %}
-                                                            onclick="show_next_short_step({{ step_number }})">
-                                                        >
-                                                    </button>
-                                                </div>
-                                                Step {{ step_number }} of {{ total_steps }}
                                             </div>
                                         </td>
                                         <td height="100%" width="100%" style="vertical-align: top">
