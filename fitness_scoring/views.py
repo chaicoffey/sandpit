@@ -393,7 +393,7 @@ def administrator_view(request):
             ],
             'step_sets': [(steps_formatted, 'Follow this step to add teachers for year'),
                           (steps_optional_formatted, 'Optional Steps (Can Leave For Teachers)')],
-            'total_steps': step_index
+            'total_steps': step_index + 1
         }
 
         return render(request, 'user_tab_page.html', RequestContext(request, context))
