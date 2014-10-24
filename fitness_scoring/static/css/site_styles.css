@@ -275,3 +275,55 @@ ul {list-style:none}
     text-align: center;
     font-size: 20px;
 }
+
+.arrow-up {
+	width: 0;
+	height: 0;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+
+	border-bottom: 5px solid #000000;
+}
+
+.arrow-down {
+	width: 0;
+	height: 0;
+	border-left: 5px solid transparent;
+	border-right: 5px solid transparent;
+
+	border-top: 5px solid #000000;
+}
+
+.arrow-right {
+	width: 0;
+	height: 0;
+	border-top: 5px solid transparent;
+	border-bottom: 5px solid transparent;
+
+	border-left: 5px solid #000000;
+}
+
+.arrow-left {
+	width: 0;
+	height: 0;
+	border-top: 5px solid transparent;
+	border-bottom: 5px solid transparent;
+
+	border-right:5px solid #000000;
+}
+
+.arrow-up.disabled {
+	border-bottom: 5px solid #a0a0a0;
+}
+
+.arrow-down.disabled {
+	border-top: 5px solid #a0a0a0;
+}
+
+.arrow-right.disabled {
+	border-left: 5px solid #a0a0a0;
+}
+
+.arrow-left.disabled {
+	border-right:5px solid #a0a0a0;
+}
