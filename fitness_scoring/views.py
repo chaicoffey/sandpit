@@ -240,36 +240,50 @@ def teacher_view(request):
         heading = teacher.first_name + ' ' + teacher.surname + ' (' + teacher.school_id.name + ')'
 
         steps = [
-            ('Add Classes For Term', 'teacher_add_classes', [
-                ('teacher_add_classes_A.png', None), ('administrator_add_classes_BB.png', None),
-                ('teacher_add_classes_CC.png', None), ('teacher_add_classes_DDD.png', None)
-            ]),
-            ('Add Tests To First Class', 'teacher_add_tests', [
-                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
-                ('administrator_add_tests_EEE.png', None)
-            ]),
-            ('Add Tests To Other Classes', 'teacher_add_tests2', [
-                ('teacher_add_classes_A.png', None), ('administrator_add_tests2_B.png', None),
-                ('administrator_add_tests2_C.png', None), ('teacher_add_classes_DDD.png', None)
-            ]),
-            ('Run Tests', 'teacher_run_tests', [
-                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('run_tests_C.png', 'INSTRUCTIONS FOR TESTS'), ('run_tests_E.png', None)
-            ]),
-            ('Get Students To Enter Results', 'get_class_login', [
-                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('enter_results_C.png', None), ('enter_results_DD.png', None)
-            ]),
-            ('Approve Entries For Class', 'teacher_approve_entries', [
-                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('approve_results_C.png', 'RESOLVE PENDING ISSUES'),
-                ('approve_results_D.png', 'TICK FOR APPROVED RESULTS')
-            ]),
-            ('View Results', 'teacher_view_results', [
-                ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('view_results_C.png', 'VIEW RESULTS YOU WISH')
-            ])
+            ('Add Classes For Term', 'teacher_add_classes',
+             None,
+             [
+                 ('teacher_add_classes_A.png', None), ('administrator_add_classes_BB.png', None),
+                 ('teacher_add_classes_CC.png', None), ('teacher_add_classes_DDD.png', None)
+             ]),
+            ('Add Tests To First Class', 'teacher_add_tests',
+             None,
+             [
+                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                 ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
+                 ('administrator_add_tests_EEE.png', None)
+             ]),
+            ('Add Tests To Other Classes', 'teacher_add_tests2',
+             None,
+             [
+                 ('teacher_add_classes_A.png', None), ('administrator_add_tests2_B.png', None),
+                 ('administrator_add_tests2_C.png', None), ('teacher_add_classes_DDD.png', None)
+             ]),
+            ('Run Tests', 'teacher_run_tests',
+             None,
+             [
+                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                 ('run_tests_C.png', 'INSTRUCTIONS FOR TESTS'), ('run_tests_E.png', None)
+             ]),
+            ('Get Students To Enter Results', 'get_class_login',
+             None,
+             [
+                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                 ('enter_results_C.png', None), ('enter_results_DD.png', None)
+             ]),
+            ('Approve Entries For Class', 'teacher_approve_entries',
+             None,
+             [
+                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                 ('approve_results_C.png', 'RESOLVE PENDING ISSUES'),
+                 ('approve_results_D.png', 'TICK FOR APPROVED RESULTS')
+             ]),
+            ('View Results', 'teacher_view_results',
+             None,
+             [
+                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                 ('view_results_C.png', 'VIEW RESULTS YOU WISH')
+             ])
         ]
         step_divisions = [
             (3, 'Do these (unless already done by admin)'),
@@ -282,8 +296,8 @@ def teacher_view(request):
         for step_index_to, steps_text in step_divisions:
             steps_formatted = []
             while step_index < step_index_to:
-                (step_text, instructions_name, images) = steps[step_index]
-                steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
+                (step_heading, instructions_name, step_text, images) = steps[step_index]
+                steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_heading, step_text,
                                         '/instructions_page/' + instructions_name, images))
                 step_index += 1
             step_sets.append((steps_formatted, steps_text))
@@ -328,34 +342,42 @@ def administrator_view(request):
         administrator = Administrator.objects.get(user=User.objects.get(username=request.session.get('username')))
 
         steps = [
-            ('Add Teachers', 'administrator_add_teacher', [
-                ('add_teachers_AAAA.png', None), ('add_teachers_BBB.png', None),
-                ('add_teachers_CC.png', None), ('add_teachers_D.png', None)
-            ]),
-            ('Add Classes For Term', 'administrator_add_classes', [
-                ('administrator_add_classes_A.png', None), ('administrator_add_classes_BB.png', None),
-                ('administrator_add_classes_C.png', None), ('administrator_add_classes_D.png', None)
-            ]),
-            ('Add Tests To First Class', 'administrator_add_tests', [
-                ('administrator_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
-                ('administrator_add_tests_EEE.png', None)
-            ]),
-            ('Add Tests To Other Classes', 'administrator_add_tests2', [
-                ('administrator_add_classes_A.png', None), ('administrator_add_tests2_B.png', None),
-                ('administrator_add_tests2_C.png', None), ('administrator_add_classes_D.png', None)
-            ])
+            ('Add Teachers', 'administrator_add_teacher',
+             None,
+             [
+                 ('add_teachers_AAAA.png', None), ('add_teachers_BBB.png', None),
+                 ('add_teachers_CC.png', None), ('add_teachers_D.png', None)
+             ]),
+            ('Add Classes For Term', 'administrator_add_classes',
+             None,
+             [
+                 ('administrator_add_classes_A.png', None), ('administrator_add_classes_BB.png', None),
+                 ('administrator_add_classes_C.png', None), ('administrator_add_classes_D.png', None)
+             ]),
+            ('Add Tests To First Class', 'administrator_add_tests',
+             None,
+             [
+                 ('administrator_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
+                 ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
+                 ('administrator_add_tests_EEE.png', None)
+             ]),
+            ('Add Tests To Other Classes', 'administrator_add_tests2',
+             None,
+             [
+                 ('administrator_add_classes_A.png', None), ('administrator_add_tests2_B.png', None),
+                 ('administrator_add_tests2_C.png', None), ('administrator_add_classes_D.png', None)
+             ])
         ]
         non_optional_steps = 1
         steps_formatted = []
         for step_index in range(non_optional_steps):
-            (step_text, instructions_name, images) = steps[step_index]
-            steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
+            (step_heading, instructions_name, step_text, images) = steps[step_index]
+            steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_heading, step_text,
                                     '/instructions_page/' + instructions_name, images))
         steps_optional_formatted = []
         for step_index in range(non_optional_steps, len(steps)):
-            (step_text, instructions_name, images) = steps[step_index]
-            steps_optional_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_text,
+            (step_heading, instructions_name, step_text, images) = steps[step_index]
+            steps_optional_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_heading, step_text,
                                              '/instructions_page/' + instructions_name, images))
 
         context = {
