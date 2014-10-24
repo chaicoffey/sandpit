@@ -297,7 +297,7 @@ def teacher_view(request):
             steps_formatted = []
             while step_index < step_index_to:
                 (step_heading, instructions_name, step_text, images) = steps[step_index]
-                steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_heading, step_text,
+                steps_formatted.append((step_index + 1, step_heading, step_text,
                                         '/instructions_page/' + instructions_name, images))
                 step_index += 1
             step_sets.append((steps_formatted, steps_text))
@@ -373,12 +373,12 @@ def administrator_view(request):
         steps_formatted = []
         for step_index in range(non_optional_steps):
             (step_heading, instructions_name, step_text, images) = steps[step_index]
-            steps_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_heading, step_text,
-                                    '/instructions_page/' + instructions_name, images))
+            steps_formatted.append((step_index + 1, step_heading, step_text, '/instructions_page/' + instructions_name,
+                                    images))
         steps_optional_formatted = []
         for step_index in range(non_optional_steps, len(steps)):
             (step_heading, instructions_name, step_text, images) = steps[step_index]
-            steps_optional_formatted.append(('Step ' + str(step_index + 1) + ': ' + step_heading, step_text,
+            steps_optional_formatted.append((step_index + 1, step_heading, step_text,
                                              '/instructions_page/' + instructions_name, images))
 
         context = {

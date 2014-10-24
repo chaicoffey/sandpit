@@ -35,9 +35,9 @@
                                 </div>
                                 <div class="nav nav-sidebar short_instructions_links" style="border: 2px solid;
                                  padding-top: 10px; padding-bottom: 10px; font-weight: normal">
-                                    {% for step_heading, step_text, step_link, images in steps %}
+                                    {% for step_number, step_heading, step_text, step_link, images in steps %}
                                         <li><a href="" value="{{ forloop.parentloop.counter0 }}:{{ forloop.counter0 }}">
-                                            {{ step_heading }}
+                                            Step {{ step_number }}: {{ step_heading }}
                                         </a></li>
                                     {% endfor %}
                                 </div>
@@ -51,7 +51,7 @@
                 <div id="main_view_middle">
                 {% if step_sets %}
                     {% for steps, steps_text in step_sets %}
-                        {% for step_heading, step_text, step_link, images in steps %}
+                        {% for step_number, step_heading, step_text, step_link, images in steps %}
                             <div style="padding-top: 20px; padding-bottom: 20px; display: none"
                                  id="short_step_instruction_{{ forloop.parentloop.counter0 }}_{{ forloop.counter0 }}">
                                 <div style="height: 1px; background-color: transparent; text-align: left; padding-left: 10px">
@@ -64,7 +64,7 @@
                                     <table><tr>
                                         <td>
                                             <h3 class="standard_blue">
-                                                {{ step_heading }}
+                                                Step {{ step_number }}: {{ step_heading }}
                                             </h3>
                                             {% if step_text %}
                                                 <div class="darker_color" style="padding-bottom: 10px">{{ step_text }}</div>
