@@ -823,7 +823,6 @@ def school_list(request):
     if request.session.get('user_type', None) == 'SuperUser':
         context = {
             'item_list': [(school, school.get_display_items()) for school in School.objects.all()],
-            'item_list_title': 'Schools',
             'menu_label': 'Add School',
             'item_list_table_headings': School.get_display_list_headings(),
             'item_list_buttons': [
@@ -975,7 +974,6 @@ def test_category_list(request):
         context = {
             'item_list': [(test_category, test_category.get_display_items())
                           for test_category in TestCategory.objects.all()],
-            'item_list_title': 'Test Categories',
             'menu_label': 'Add Test Category',
             'item_list_table_headings': TestCategory.get_display_list_headings(),
             'item_list_buttons': [
@@ -1109,7 +1107,6 @@ def major_test_category_list(request):
         context = {
             'item_list': [(major_test_category, major_test_category.get_display_items())
                           for major_test_category in MajorTestCategory.objects.all()],
-            'item_list_title': 'Major Test Categories',
             'menu_label': 'Add Major Test Category',
             'item_list_table_headings': MajorTestCategory.get_display_list_headings(),
             'item_list_buttons': [
@@ -1247,7 +1244,6 @@ def test_list(request):
         context = {
             'item_list': [(test, test.get_display_items())
                           for test in Test.objects.all()],
-            'item_list_title': 'Tests',
             'menu_label': 'Add Test',
             'item_list_table_headings': Test.get_display_list_headings(),
             'item_list_buttons': [
@@ -1667,7 +1663,6 @@ def teacher_list(request):
         context = {
             'item_list': [(teacher, teacher.get_display_items())
                           for teacher in Teacher.objects.filter(school_id=school)],
-            'item_list_title': 'Teachers',
             'menu_label': 'Add Teacher',
             'item_list_table_headings': Teacher.get_display_list_headings(),
             'item_list_buttons': [
@@ -1796,7 +1791,6 @@ def class_list(request):
             item_list_add_button_options.append(['item_list_modal_load_link', '/class/adds/', 'Add Classes'])
         context = {
             'item_list': class_items,
-            'item_list_title': 'Classes',
             'menu_label': 'Add Class(es)',
             'item_list_table_headings': class_list_headings,
             'item_list_buttons': [
