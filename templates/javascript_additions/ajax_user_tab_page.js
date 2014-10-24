@@ -25,18 +25,24 @@ $('#main_view_links li a').click(function(event){
 
 $('.short_instructions_links li a').click(function(event){
 
-    $('.short_instructions_links').children('li.active').removeClass('active');
-    $(this).parent('li').addClass('active');
-    $(this).blur();
-
     event.preventDefault();
 
-    var step_number = parseInt($(this).attr('value'));
+    var step_number = parseInt($(this).parent('li').attr('value'));
     show_short_step(step_number);
 
 });
 
 function show_short_step(step_number) {
+
+    $('.short_instructions_links').children('li.active').removeClass('active');
+
+    $('.short_instructions_links').children('li').each(function(){
+        if(parseInt($(this).attr('value')) == step_number) {
+            $(this).addClass('active');
+            $(this).children('a').blur();
+        }
+    })
+
 
     $('.Short_Instructions_Showing').each(function(){
         $(this).removeClass('Short_Instructions_Showing');
@@ -60,9 +66,7 @@ function show_next_short_step(step_number) {
 }
 
 function close_short_instructions() {
-    $('.short_instructions_links').children('li.active').removeClass('active');
     show_short_step(-1);
-
 }
 
 function load_main_view() {
