@@ -344,8 +344,8 @@ def administrator_view(request):
 
         steps = [
             ('Add Teachers', 'administrator_add_teacher',
-             "Follow the diagrams to add all the PE teachers to the system.  When you're done click the arrow button "
-             " above to see the next step.",
+             "Follow the diagrams to add all the PE teachers to the system.  When you're done the "
+             "'<div class='arrow-right' style='display: inline-block'></div>' above to see the next step.",
              [
                  ('add_teachers_AAAA.png', None), ('add_teachers_BBB.png', None),
                  ('add_teachers_CC.png', None), ('add_teachers_D.png', None)
@@ -393,7 +393,7 @@ def administrator_view(request):
             ],
             'step_sets': [(steps_formatted, 'Follow this step to add teachers for year'),
                           (steps_optional_formatted, 'Optional Steps (Can Leave For Teachers)')],
-            'total_steps': step_index + 1
+            'total_steps': len(steps)
         }
 
         return render(request, 'user_tab_page.html', RequestContext(request, context))
