@@ -113,9 +113,31 @@
                                             </div>
                                         </td>
                                         <td height="100%" width="100%" style="vertical-align: top">
-                                            Step {{ step_number }} of {{ total_steps }}
+                                            <div style="float: right; padding-right: 2px">
+                                                <div>
+                                                    <button type="button" style="padding: 0px"
+                                                            {% if forloop.parentloop.first and forloop.first %}
+                                                                disabled
+                                                            {% endif %}
+                                                            onclick="show_previous_short_step({{ step_number }})">
+                                                        <
+                                                    </button>
+                                                    <button type="button" style="padding: 0px"
+                                                            {% if forloop.parentloop.last and forloop.last %}
+                                                                disabled
+                                                            {% endif %}
+                                                            onclick="show_next_short_step({{ step_number }})">
+                                                        >
+                                                    </button>
+                                                </div>
+                                                Step {{ step_number }} of {{ total_steps }}
+                                            </div>
+                                        </td>
+                                        <td height="100%" width="100%" style="vertical-align: top">
                                             <button class="close_button" type="button"
-                                                    onclick="close_short_instructions()">x</button>
+                                                    onclick="close_short_instructions()">
+                                                x
+                                            </button>
                                         </td>
                                     </tr></table>
                                 </div>

@@ -51,6 +51,14 @@ function show_short_step(step_number) {
 
 }
 
+function show_previous_short_step(step_number) {
+    show_short_step(step_number - 1);
+}
+
+function show_next_short_step(step_number) {
+    show_short_step(step_number + 1);
+}
+
 function close_short_instructions() {
     $('.short_instructions_links').children('li.active').removeClass('active');
     show_short_step(-1);
