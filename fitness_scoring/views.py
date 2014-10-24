@@ -310,7 +310,8 @@ def teacher_view(request):
                 ['Home', '/teacher_home/', 'user_home_page'],
                 ['Classes', '/class/list/', 'item_list:1']
             ],
-            'step_sets': step_sets
+            'step_sets': step_sets,
+            'total_steps': step_index
         }
 
         return render(request, 'user_tab_page.html', RequestContext(request, context))
@@ -391,7 +392,8 @@ def administrator_view(request):
                 ['Classes', '/class/list/', 'item_list:1']
             ],
             'step_sets': [(steps_formatted, 'Follow this step to add teachers for year'),
-                          (steps_optional_formatted, 'Optional Steps (Can Leave For Teachers)')]
+                          (steps_optional_formatted, 'Optional Steps (Can Leave For Teachers)')],
+            'total_steps': step_index
         }
 
         return render(request, 'user_tab_page.html', RequestContext(request, context))
