@@ -31,24 +31,19 @@ $('.short_instructions_links li a').click(function(event){
 
     event.preventDefault();
 
-    var loop_counts = $(this).attr('value');
-    var break_pos = loop_counts.indexOf(':');
-
-    var outer_loop_count_show = parseInt(loop_counts.substr(0, break_pos));
-    var inner_loop_count_show = parseInt(loop_counts.substr(break_pos + 1, loop_counts.length - break_pos - 1));
-
-    show_short_step(outer_loop_count_show, inner_loop_count_show);
+    var step_number = parseInt($(this).attr('value'));
+    show_short_step(step_number);
 
 });
 
-function show_short_step(outer_loop_count_show, inner_loop_count_show) {
+function show_short_step(step_number) {
 
     $('.Short_Instructions_Showing').each(function(){
         $(this).removeClass('Short_Instructions_Showing');
         $(this).css('display', 'none');
     })
 
-    var element = $("#short_step_instruction_" + outer_loop_count_show + "_" + inner_loop_count_show);
+    var element = $("#short_step_instruction_" + step_number);
     if(element) {
         element.addClass('Short_Instructions_Showing');
         element.css('display', 'inherit');
@@ -58,7 +53,7 @@ function show_short_step(outer_loop_count_show, inner_loop_count_show) {
 
 function close_short_instructions() {
     $('.short_instructions_links').children('li.active').removeClass('active');
-    show_short_step(-1, -1);
+    show_short_step(-1);
 
 }
 
