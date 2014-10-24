@@ -347,8 +347,8 @@ def administrator_view(request):
              "Follow the diagrams to add all the PE teachers to the system.  When you're done the "
              "'<div class='arrow-right' style='display: inline-block'></div>' above to see the next step.",
              [
-                 ('add_teachers_AAAA.png', None), ('add_teachers_BBB.png', None),
-                 ('add_teachers_CC.png', None), ('add_teachers_D.png', None)
+                 ('add_teachers_A.png', None), ('add_teachers_B.png', None),
+                 ('add_teachers_C.png', None), ('add_teachers_D.png', None)
              ]),
             ('Add Classes For Term', 'administrator_add_classes',
              None,
