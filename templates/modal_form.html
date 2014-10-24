@@ -2,10 +2,16 @@
 <form method="POST" id="modalForm" enctype="multipart/form-data" action="{{ post_to_url }}" class="form-horizontal">
 
     <div class="modal-header">
-        <h4 class="modal-title">{% if modal_title %}{{ modal_title }}{% else %}{{ functionality_name }}{% endif %}</h4>
+        <div class="modal-title">
+            {% if modal_title %}
+                {{ modal_title }}
+            {% else %}
+                {{ functionality_name }}
+            {% endif %}
+        </div>
     </div>
 
-    <div class="modal-body">
+    <div class="modal-body" style="padding-bottom: 0px">
         {% csrf_token %}
         {% if form %}
             {% if form.top_text_messages %}
@@ -23,7 +29,10 @@
                     <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
                         {{ field }}
                         {% if field.help_text %}
-                            <span class="form-field-help">{{ field.help_text }}</span>
+                            {% if form.help_text_nl %}
+                                <br>
+                            {% endif %}
+                            <div style="display: inline" class="form-field-help">{{ field.help_text }}</div>
                         {% endif %}
                         {% if field.errors %}
                             <span class="help-block">{{ field.errors }}</span>
@@ -35,7 +44,10 @@
                         <div class="col-sm-8">
                             {{ field }}
                             {% if field.help_text %}
-                                <span class="form-field-help">{{ field.help_text }}</span>
+                                {% if form.help_text_nl %}
+                                    <br>
+                                {% endif %}
+                                <div style="display: inline" class="form-field-help">{{ field.help_text }}</div>
                             {% endif %}
                             {% if field.errors %}
                                 <span class="help-block">{{ field.errors }}</span>

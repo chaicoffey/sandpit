@@ -65,7 +65,9 @@ class AddTeacherForm(forms.Form):
     school_pk = forms.CharField(widget=forms.HiddenInput())
     first_name = forms.CharField(max_length=100, required=True)
     surname = forms.CharField(max_length=100, required=True)
-    email = forms.EmailField(max_length=100, required=True)
+    email = forms.EmailField(max_length=100, required=True, help_text='After you have added this teacher an email will '
+                                                                      'be sent to them providing their login details '
+                                                                      'for the system')
 
     def __init__(self, school_pk, *args, **kwargs):
         super(AddTeacherForm, self).__init__(*args, **kwargs)
@@ -74,6 +76,8 @@ class AddTeacherForm(forms.Form):
         self.fields['surname'].error_messages = {'required': 'Please Enter Surname'}
 
         self.fields['school_pk'].initial = school_pk
+
+        self.help_text_nl = True
 
     def add_teacher(self):
         if self.is_valid():
