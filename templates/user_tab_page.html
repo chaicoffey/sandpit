@@ -67,7 +67,7 @@
                                                 {{ step_heading }}
                                             </h3>
                                             {% if step_text %}
-                                                <div>{{ step_text }}</div>
+                                                <div class="darker_color" style="padding-bottom: 10px">{{ step_text }}</div>
                                             {% endif %}
                                             {% if images %}
                                                 <div style="padding-bottom: 10px"><table><tr>
@@ -103,10 +103,14 @@
                                                     {% endfor %}
                                                 </tr></table></div>
                                             {% endif %}
-                                            <a class="light_attention_color" href="{{ step_link }}" target="_blank"
-                                               style="font-size: 15px; font-weight: normal">
-                                                Click here for more detailed instructions (will open in a new tab)
-                                            </a>
+                                            <div class="darker_color">
+                                                If the diagrams are not enough
+                                                <a class="light_attention_color" href="{{ step_link }}" target="_blank"
+                                                   style="font-size: 15px">
+                                                     click here for more detailed instructions
+                                                </a>
+                                                (will open in a new tab)
+                                            </div>
                                         </td>
                                         <td height="100%" width="100%" style="vertical-align: top">
                                             <button class="close_button" type="button"
