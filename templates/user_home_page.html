@@ -10,6 +10,13 @@
             {% for text in intro_text %}
                 <li>{{ text }}</li>
             {% endfor %}
+            <li><br></li>
+            <li>
+                To display instructions for step 1 click this button
+                <button type="button" style="padding: 2px" onclick="show_short_step(1)">
+                    <div class="arrow-right"></div>
+                </button>
+            </li>
         </ul>
         {% endautoescape %}
     </div>
