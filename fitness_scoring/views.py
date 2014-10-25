@@ -307,8 +307,8 @@ def teacher_view(request):
             'user_name': request.session.get('username'),
             'user_tab_page_title': heading,
             'user_tabs': [
-                ['Home', '/teacher_home/', 'user_home_page'],
-                ['Classes', '/class/list/', 'item_list:1']
+                ['Home', '/teacher_home/', 'user_home_page', 'Home_Link'],
+                ['Classes', '/class/list/', 'item_list:1', 'Classes_Link']
             ],
             'step_sets': step_sets,
             'total_steps': step_index
@@ -387,9 +387,9 @@ def administrator_view(request):
             'user_name': request.session.get('username'),
             'user_tab_page_title': 'Administrator: ' + administrator.school_id.name,
             'user_tabs': [
-                ['Home', '/administrator_home/', 'user_home_page'],
-                ['Teachers', '/teacher/list/', 'item_list:1'],
-                ['Classes', '/class/list/', 'item_list:1']
+                ['Home', '/administrator_home/', 'user_home_page', 'Home_Link'],
+                ['Teachers', '/teacher/list/', 'item_list:1', 'Teachers_Link'],
+                ['Classes', '/class/list/', 'item_list:1', 'Classes_Link']
             ],
             'step_sets': [(steps_formatted, 'Follow this step to add teachers for year'),
                           (steps_optional_formatted, 'Optional Steps (Can Leave For Teachers)')],
@@ -425,11 +425,11 @@ def superuser_view(request):
             'user_name': request.session.get('username'),
             'user_tab_page_title': 'Super User',
             'user_tabs': [
-                ['Home', '/superuser_home/', 'user_home_page'],
-                ['Add/Update School List', '/school/list/', 'item_list:1'],
-                ['Add/Update Test List', '/test/list/', 'item_list:1'],
-                ['Add/Update Test Category List', '/test_category/list/', 'item_list:1'],
-                ['Add/Update Major Test Category List', '/major_test_category/list/', 'item_list:1']
+                ['Home', '/superuser_home/', 'user_home_page', 'Home_Link'],
+                ['Schools', '/school/list/', 'item_list:1', 'Schools_Link'],
+                ['Tests', '/test/list/', 'item_list:1', 'Tests_Link'],
+                ['Test Categories', '/test_category/list/', 'item_list:1', 'Test_Categories_Link'],
+                ['Major Test Categories', '/major_test_category/list/', 'item_list:1', 'Major_Test_Categories_Link']
             ]
         }
 
