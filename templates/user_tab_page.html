@@ -54,20 +54,17 @@
                         {% for step_number, step_heading, step_text, step_link, images in steps %}
                             <div style="padding-top: 20px; padding-bottom: 20px; display: none"
                                  id="short_step_instruction_{{ step_number }}">
+
                                 <div style="height: 1px; background-color: transparent; text-align: left; padding-left: 10px">
                                     <span class="lighter_color" style="background-color: white; position: relative;
                                      top: -0.6em; font-size: 20px">
                                         &nbsp Instructions &nbsp
                                     </span>
                                 </div>
-                                <div class="lighter_color" style="padding-left: 20px; padding-bottom: 10px; border: 2px solid">
-                                    {% autoescape off %}
-                                    <table><tr>
-                                        <td>
-                                            <h3 class="standard_blue" style="vertical-align: top">
-                                            <table style="width: 100%"><tr>
-                                                <td style="width: 350px">{{ step_heading }}</td>
-                                                <td style="vertical-align: top">
+
+                                <div style="height: 1px; background-color: transparent; text-align: center">
+                                    <span class="darker_color" style="background-color: white; position: relative;
+                                     top: -0.6em; font-size: 12px; padding-left: 10px; padding-right: 10px">
                                                 <button type="button" style="padding: 0px"
                                                         {% if forloop.parentloop.first and forloop.first %}
                                                             disabled
@@ -78,7 +75,7 @@
                                                             disabled
                                                         {% endif %}
                                                     "></div>
-                                                </button><div class="darker_color" style="display: inline; font-size: 12px">
+                                                </button><div style="display: inline">
                                                     (step {{ step_number }} of {{ total_steps }})
                                                 </div><button type="button" style="padding: 0px"
                                                         {% if forloop.parentloop.last and forloop.last %}
@@ -91,8 +88,15 @@
                                                         {% endif %}
                                                     "></div>
                                                 </button>
-                                                </td>
-                                            </tr></table>
+                                    </span>
+                                </div>
+
+                                <div class="lighter_color" style="padding-left: 20px; padding-bottom: 10px; border: 2px solid">
+                                    {% autoescape off %}
+                                    <table><tr>
+                                        <td>
+                                            <h3 class="standard_blue" style="vertical-align: top">
+                                                {{ step_heading }}
                                             </h3>
 
                                             {% if step_text %}
