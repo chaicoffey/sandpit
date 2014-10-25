@@ -36,13 +36,18 @@ function show_short_step(step_number) {
 
     $('.short_instructions_links').children('li.active').removeClass('active');
 
+    var tab_id_link = null;
+
     $('.short_instructions_links').children('li').each(function(){
         if(parseInt($(this).attr('value')) == step_number) {
             $(this).addClass('active');
             $(this).children('a').blur();
+            tab_id_link = $(this).attr('tab_reference');
         }
     })
 
+    if(tab_id_link)
+        $('#' + tab_id_link).click();
 
     $('.Short_Instructions_Showing').each(function(){
         $(this).removeClass('Short_Instructions_Showing');
