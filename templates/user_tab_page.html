@@ -64,21 +64,31 @@
                                     {% autoescape off %}
                                     <table><tr>
                                         <td>
-                                            <h3 class="standard_blue">
-                                                Step<div style="display: inline; padding-left: 2px"></div><button type="button" style="padding: 0px"
+                                            <h3 class="standard_blue" style="vertical-align: top">
+                                                {{ step_heading }}
+                                                <button type="button" style="padding: 0px"
                                                         {% if forloop.parentloop.first and forloop.first %}
                                                             disabled
                                                         {% endif %}
                                                         onclick="show_previous_short_step({{ step_number }})">
-                                                    <div class="arrow-left{% if forloop.parentloop.first and forloop.first %} disabled{% endif %}"></div>
-                                                </button><div style="display: inline; padding-left: 2px"></div><button
-                                                    type="button" style="padding: 0px"
-                                                    {% if forloop.parentloop.last and forloop.last %}
-                                                        disabled
-                                                    {% endif %}
-                                                    onclick="show_next_short_step({{ step_number }})">
-                                                <div class="arrow-right{% if forloop.parentloop.last and forloop.last %} disabled{% endif %}"></div>
-                                                </button>{{ step_number }}: {{ step_heading }}
+                                                    <div class="arrow-left
+                                                        {% if forloop.parentloop.first and forloop.first %}
+                                                            disabled
+                                                        {% endif %}
+                                                    "></div>
+                                                </button><div class="darker_color" style="display: inline; font-size: 12px">
+                                                    (step {{ step_number }} of {{ total_steps }})
+                                                </div><button type="button" style="padding: 0px"
+                                                        {% if forloop.parentloop.last and forloop.last %}
+                                                            disabled
+                                                        {% endif %}
+                                                        onclick="show_next_short_step({{ step_number }})">
+                                                    <div class="arrow-right
+                                                        {% if forloop.parentloop.last and forloop.last %}
+                                                            disabled
+                                                        {% endif %}
+                                                    "></div>
+                                                </button>
                                             </h3>
 
                                             {% if step_text %}
