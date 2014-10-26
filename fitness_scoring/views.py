@@ -408,7 +408,9 @@ def administrator_home(request):
                 'As an administrator you will need to:',
                 '&nbsp&nbsp&nbsp&nbsp&nbsp 1. &nbsp&nbsp Add teachers to the teacher list',
                 '&nbsp&nbsp&nbsp&nbsp&nbsp 2. &nbsp&nbsp Add classes for the teachers for the term (this step is '
-                'optional and can be left to the teachers to do themselves)'
+                'optional and can be left to the teachers to do themselves)',
+                '<br>',
+                'To display instructions for step 1 click "Step 1: Add Teachers" to the bottom left of screen'
             ]
         }
         return render(request, 'user_home_page.html', RequestContext(request, context))
