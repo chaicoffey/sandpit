@@ -21,6 +21,11 @@ $('#main_view_links li a').click(function(event){
 
     load_main_view();
 
+    var short_instructions_tab_id_link = $('.short_instructions_links').children('li.active').attr('tab_reference');
+    var this_id_link = $(this).attr('id');
+    if(!(short_instructions_tab_id_link == this_id_link))
+        close_short_instructions();
+
 });
 
 $('.short_instructions_links li a').click(function(event){
