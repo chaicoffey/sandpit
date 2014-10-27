@@ -466,13 +466,14 @@ def instructions_page(request, instructions_name):
         context = {'heading': 'Add Teacher',
                    'reason': 'You need to add the PE teachers that will be using this program',
                    'instructions': [
-                       [('Click the "Teachers" tab at the left of the screen', 'add_teachers_AA.png')],
+                       [('Click the "Teachers" tab at the left of the screen (it may already be selected)',
+                         'add_teachers_A.png')],
                        [
                            ('Go to the "Add Teacher" menu at the top of the Teachers table and select the '
-                            '"Add Teacher" option', 'add_teachers_BB.png')
+                            '"Add Teacher" option', 'add_teachers_B.png')
                        ],
                        [
-                           ('Enter the details for the teacher', 'add_teachers_CC.png'),
+                           ('Enter the details for the teacher', 'add_teachers_C.png'),
                            ("Then click the button at the bottom of the form.  The teacher will be added and an email "
                             "with the teacher's login details will be sent to the email address you entered.", None)
                        ],
