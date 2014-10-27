@@ -29,7 +29,7 @@
                             {% for steps, steps_text in step_sets %}
                                 <br>
                                 <div style="height: 1px; background-color: transparent; text-align: left; padding-left: 10px">
-                                    <span style="background-color: white; position: relative; top: -0.6em">
+                                    <span style="background-color: #f9f2f4; position: relative; top: -0.6em">
                                         {{ steps_text }}
                                     </span>
                                 </div>
@@ -62,10 +62,10 @@
                                     </span>
                                 </div>
 
-                                <div style="height: 1px; background-color: transparent; text-align: center">
-                                    <span class="darker_color" style="background-color: white; position: relative;
-                                     top: -0.6em; font-size: 12px; padding-left: 10px; padding-right: 10px">
-                                        <button type="button" style="padding: 0px"
+                                <div style="height: 1px; text-align: center">
+                                    <span style="border-color: white; position: relative; top: -16px;
+                                     background-color: white; padding-left: 5px; padding-right: 5px">
+                                        <button type="button" style="padding: 0px; background-color: white"
                                                 {% if forloop.parentloop.first and forloop.first %}
                                                     disabled
                                                 {% endif %}
@@ -75,9 +75,10 @@
                                                     disabled
                                                 {% endif %}
                                             "></div>
-                                        </button><div style="display: inline">
-                                            (step {{ step_number }} of {{ total_steps }})
-                                        </div><button type="button" style="padding: 0px"
+                                        </button><div class="darker_color" style="display: inline;
+                                         position: relative; font-size: 12; top: -0.7em; background-color: white">
+                                            (Step {{ step_number }} of {{ total_steps }})
+                                        </div><button type="button" style="padding: 0px; background-color: white"
                                                 {% if forloop.parentloop.last and forloop.last %}
                                                     disabled
                                                 {% endif %}

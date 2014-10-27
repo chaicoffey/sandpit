@@ -345,9 +345,9 @@ def administrator_view(request):
         steps = [
             ('Add Teachers', 'Teachers_Link', 'administrator_add_teacher',
              "Follow the diagrams to add all the PE teachers to the system.  When you're done click the "
-             "'<div class='arrow-right' style='display: inline-block'></div>' above to see the next step.",
+             "<div class='arrow-right' style='display: inline-block'></div> above to see the next step.",
              [
-                 ('add_teachers_B.png', None), ('add_teachers_C.png', None), ('add_teachers_D.png', None)
+                 ('add_teachers_B.png', None), ('add_teachers_D.png', None)
              ]),
             ('Add Classes For Term', 'Classes_Link', 'administrator_add_classes',
              None,

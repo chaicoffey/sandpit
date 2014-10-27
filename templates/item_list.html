@@ -9,7 +9,7 @@
     <div class="panel panel-default panel-item_list">
 
         <div class="panel-heading">
-            <div class="light_attention_color" style="font-weight: bold; font-size: 15px">
+            <div class="lighter_color" style="font-weight: bold; font-size: 15px">
                 <table style="width: 100%"><tr>
                     <td style="width: 40%">
                         {{ menu_label }}
@@ -22,9 +22,9 @@
                                 </button>
                                 <ul class="dropdown-menu" role="menu">
                                     {% for link_type, link_url, label in button_options %}
-                                        <li class="{{ link_type }}"><a href="{{ link_url }}"><div class="darker_color">
+                                        <li class="{{ link_type }} item_list_menu_link"><a href="{{ link_url }}">
                                             {{ label }}
-                                        </div></a></li>
+                                        </a></li>
                                     {% endfor %}
                                 </ul>
                             </div>
