@@ -442,27 +442,28 @@ class EditClassTeacherForm(forms.Form):
 
 class AssignTestToClassForm(forms.Form):
     class_pk = forms.CharField(widget=forms.HiddenInput())
-    test = forms.ChoiceField(required=True)
 
     def __init__(self, class_pk, *args, **kwargs):
         super(AssignTestToClassForm, self).__init__(*args, **kwargs)
 
-        self.fields['test'].error_messages = {'required': 'Please Select Test'}
+        self.fields['class_pk'].initial = class_pk
 
         class_instance = Class.objects.get(pk=class_pk)
-        self.fields['test'].choices = []
+        already_class_tests = class_instance.get_tests()
         for test in Test.objects.all():
-            if not ClassTest.objects.filter(class_id=class_instance, test_name=test):
-                self.fields['test'].choices.append((test.pk, str(test)))
-
-        self.fields['class_pk'].initial = class_pk
+            field_name = test.test_name.replace(" ", "_")
+            self.fields[field_name] = forms.BooleanField(required=False, initial=(test in already_class_tests))
 
     def assign_test_to_class(self):
         assign_test_to_class = self.is_valid()
         if assign_test_to_class:
             class_instance = Class.objects.get(pk=self.cleaned_data['class_pk'])
-            test = Test.objects.get(pk=self.cleaned_data['test'])
-            assign_test_to_class = class_instance.assign_test_safe(test=test)
+            for test in Test.objects.all():
+                field_name = test.test_name.replace(" ", "_")
+                if self.cleaned_data[field_name]:
+                    class_instance.assign_test_safe(test)
+                else:
+                    class_instance.deallocate_test_safe(test)
         return assign_test_to_class
 
 

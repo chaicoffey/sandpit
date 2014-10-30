@@ -2043,9 +2043,8 @@ def add_test_to_class(request, class_pk):
         if request.POST:
             add_test_to_class_form = AssignTestToClassForm(class_pk=class_pk, data=request.POST)
             if add_test_to_class_form.assign_test_to_class():
-                test_added = Test.objects.get(pk=add_test_to_class_form.cleaned_data['test'])
-                context = {'finish_title': 'Test Added To Class',
-                           'user_message': 'Test Added To Class Successfully: ' + str(test_added)}
+                context = {'finish_title': 'Tests Added To Class',
+                           'user_message': 'Tests Added To Class Successfully'}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/class/test/add/' + str(class_pk) + '/',
