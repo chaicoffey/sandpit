@@ -2050,12 +2050,14 @@ def add_test_to_class(request, class_pk):
             else:
                 context = {'post_to_url': '/class/test/add/' + str(class_pk) + '/',
                            'functionality_name': 'Add Test To Class',
-                           'form': add_test_to_class_form}
+                           'form': add_test_to_class_form,
+                           'form_extra': 'modal_form_extra_add_tests.html'}
                 return render(request, 'modal_form.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/class/test/add/' + str(class_pk) + '/',
                        'functionality_name': 'Add Test To Class',
-                       'form': AssignTestToClassForm(class_pk=class_pk)}
+                       'form': AssignTestToClassForm(class_pk=class_pk),
+                       'form_extra': 'modal_form_extra_add_tests.html'}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to add a test to this class")

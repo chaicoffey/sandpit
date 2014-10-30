@@ -14,6 +14,9 @@
     <div class="modal-body" style="padding-bottom: 0px">
         {% csrf_token %}
         {% if form %}
+            {% if form_extra %}
+                {% include form_extra %}
+            {% endif %}
             {% if form.top_text_messages %}
                 <h5>
                     {% for top_text_message in form.top_text_messages %}
