@@ -444,27 +444,28 @@ class EditClassTeacherForm(forms.Form):
 class AssignTestToClassForm(forms.Form):
     class_pk = forms.CharField(widget=forms.HiddenInput())
 
-    def __init__(self, class_pk, *args, **kwargs):
+    def __init__(self, class_pk, load_from_class_pk=None, *args, **kwargs):
         super(AssignTestToClassForm, self).__init__(*args, **kwargs)
 
         self.fields['class_pk'].initial = class_pk
 
+        class_loading_instance = Class.objects.get(pk=(load_from_class_pk if load_from_class_pk else class_pk))
+        already_class_loading_tests = class_loading_instance.get_tests()
         class_instance = Class.objects.get(pk=class_pk)
         already_class_tests = class_instance.get_tests()
         for test in Test.objects.all():
             field_name = test.test_name.replace(" ", "_")
             self.fields[field_name] = forms.BooleanField(required=False)
-            self.fields[field_name].initial = test in already_class_tests
+            self.fields[field_name].initial = test in already_class_loading_tests
             self.fields[field_name].validators = [validate_class_test_assignment(class_pk, test.pk)]
-            if self.fields[field_name].initial and class_instance.deallocate_test_errors(test):
+            if (test in already_class_tests) and class_instance.deallocate_test_errors(test):
+                self.fields[field_name].initial = True
                 self.fields[field_name].widget = forms.HiddenInput()
                 field_name_visible = field_name + "_visible"
                 self.fields[field_name_visible] = forms.BooleanField(required=False)
                 self.fields[field_name_visible].label = test.test_name[0].upper() + test.test_name[1:].lower()
                 self.fields[field_name_visible].initial = True
                 self.fields[field_name_visible].widget.attrs['disabled'] = 'disabled'
-
-
 
     def assign_test_to_class(self):
         assign_test_to_class = self.is_valid()

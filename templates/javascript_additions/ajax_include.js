@@ -79,6 +79,16 @@ $(document).on('change', '#age_gender_selection', function(event){
     percentile_load_link_clicked_event($('#age_gender_selection').val());
 });
 
+//for loading test selection check boxes when change the use previous class select element
+$(document).on('change', '#previous_class_tests', function(event){
+    event.preventDefault();
+    base_url = window.location.protocol + "//" + window.location.host;
+    var button_value = $('#modal_submit_button').attr('value');
+    $('#remoteModalContent').load(base_url + $('#previous_class_tests').val(), function(){
+        $('#modal_submit_button').val(button_value);
+    });
+});
+
 //for loading class result graphs load links on graph_selection change
 $(document).on('change', '.graph_selection', function(event){
     if($(this).val() != '') {

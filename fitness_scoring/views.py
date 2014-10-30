@@ -2038,8 +2038,13 @@ def class_results_table(request, class_pk):
         return HttpResponseForbidden("You are not authorised to view class results table")
 
 
-def add_test_to_class(request, class_pk):
+def add_test_to_class(request, class_pk, load_from_class_pk=None):
     if user_authorised_for_class(request, class_pk):
+        class_instance = Class.objects.get(pk=class_pk)
+        other_classes = [(class_instance.class_name + '(' + str(class_instance.year) + ')',
+                          '/class/test/add/' + str(class_pk) + '/' + str(class_instance.pk) + '/')
+                         for class_instance in
+                         Class.objects.filter(school_id=class_instance.school_id).exclude(pk=class_pk)]
         if request.POST:
             add_test_to_class_form = AssignTestToClassForm(class_pk=class_pk, data=request.POST)
             if add_test_to_class_form.assign_test_to_class():
@@ -2050,13 +2055,17 @@ def add_test_to_class(request, class_pk):
                 context = {'post_to_url': '/class/test/add/' + str(class_pk) + '/',
                            'functionality_name': 'Add Test To Class',
                            'form': add_test_to_class_form,
-                           'form_extra': 'modal_form_extra_add_tests.html'}
+                           'form_extra': 'modal_form_extra_add_tests.html',
+                           'other_classes': other_classes}
                 return render(request, 'modal_form.html', RequestContext(request, context))
         else:
+            add_test_to_class_form = (AssignTestToClassForm(class_pk=class_pk, load_from_class_pk=load_from_class_pk)
+                                      if load_from_class_pk else AssignTestToClassForm(class_pk=class_pk))
             context = {'post_to_url': '/class/test/add/' + str(class_pk) + '/',
                        'functionality_name': 'Add Test To Class',
-                       'form': AssignTestToClassForm(class_pk=class_pk),
-                       'form_extra': 'modal_form_extra_add_tests.html'}
+                       'form': add_test_to_class_form,
+                       'form_extra': 'modal_form_extra_add_tests.html',
+                       'other_classes': other_classes}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to add a test to this class")
