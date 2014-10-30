@@ -2041,10 +2041,13 @@ def class_results_table(request, class_pk):
 def add_test_to_class(request, class_pk, load_from_class_pk=None):
     if user_authorised_for_class(request, class_pk):
         class_instance = Class.objects.get(pk=class_pk)
-        other_classes = [(class_instance.class_name + '(' + str(class_instance.year) + ')',
-                          '/class/test/add/' + str(class_pk) + '/' + str(class_instance.pk) + '/')
-                         for class_instance in
-                         Class.objects.filter(school_id=class_instance.school_id).exclude(pk=class_pk)]
+        other_classes = [
+            (
+                class_instance.class_name + '(' + str(class_instance.year) + ')',
+                '/class/test/add/' + str(class_pk) + '/' + str(class_instance.pk) + '/'
+            ) for class_instance in
+            Class.objects.filter(school_id=class_instance.school_id).order_by('-year').exclude(pk=class_pk)
+        ]
         if request.POST:
             add_test_to_class_form = AssignTestToClassForm(class_pk=class_pk, data=request.POST)
             if add_test_to_class_form.assign_test_to_class():
