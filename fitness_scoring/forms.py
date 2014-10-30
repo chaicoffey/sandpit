@@ -1,10 +1,11 @@
 from django import forms
 from fitness_scoring.models import School, Administrator, Class, Teacher, Student, MajorTestCategory, TestCategory, Test
-from fitness_scoring.models import User, TeacherClassAllocation, ClassTest, TestSet, StudentClassEnrolment
+from fitness_scoring.models import User, TeacherClassAllocation, TestSet, StudentClassEnrolment
 from fitness_scoring.models import StudentClassTestResult, StudentsSameName
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
 from fitness_scoring.validators import validate_major_test_category_unique, validate_new_major_test_category_name_unique
 from fitness_scoring.validators import validate_new_test_name_unique
+from fitness_scoring.validators import validate_class_test_assignment
 from fitness_scoring.validators import validate_no_space, validate_file_size
 from fitness_scoring.validators import is_valid_email
 from fitness_scoring.fields import MultiFileField
@@ -452,7 +453,9 @@ class AssignTestToClassForm(forms.Form):
         already_class_tests = class_instance.get_tests()
         for test in Test.objects.all():
             field_name = test.test_name.replace(" ", "_")
-            self.fields[field_name] = forms.BooleanField(required=False, initial=(test in already_class_tests))
+            self.fields[field_name] = forms.BooleanField(required=False)
+            self.fields[field_name].initial = test in already_class_tests
+            self.fields[field_name].validators = [validate_class_test_assignment(class_pk, test.pk)]
 
     def assign_test_to_class(self):
         assign_test_to_class = self.is_valid()

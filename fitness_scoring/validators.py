@@ -1,5 +1,6 @@
 
 from fitness_scoring.models import School, TestCategory, MajorTestCategory, Test, Student
+from fitness_scoring.models import ClassTest, StudentClassEnrolment, StudentClassTestResult
 from pe_site.settings import MAX_FILE_UPLOAD_SIZE_MB
 from django.core.exceptions import ValidationError
 import datetime
@@ -78,6 +79,20 @@ def validate_new_student_id_unique(student_pk, school_pk):
             raise ValidationError('Student ID Already Exists: ' + student_id)
 
     return new_student_id_unique
+
+
+def validate_class_test_assignment(class_pk, test_pk):
+
+    def class_test_assignment_valid(assign):
+        if not assign:
+            if ClassTest.objects.filter(class_id=class_pk, test_name=test_pk).exists():
+                enrolments = StudentClassEnrolment.objects.filter(class_id=class_pk)
+                for enrolment in enrolments:
+                    if StudentClassTestResult.objects.filter(student_class_enrolment=enrolment, test=test_pk).exists():
+                        raise ValidationError('Test Has Results Entered For Student: ' + str(enrolment.student_id))
+
+
+    return class_test_assignment_valid
 
 
 def validate_no_space(n_characters):
