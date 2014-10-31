@@ -3,7 +3,7 @@ from django.http import HttpResponseForbidden
 from django.template import RequestContext
 from fitness_scoring.models import User, Student, Teacher, Administrator, SuperUser, School, Class
 from fitness_scoring.models import TestCategory, MajorTestCategory, Test, PercentileBracketList
-from fitness_scoring.models import TeacherClassAllocation, ClassTest, StudentClassEnrolment, TestSet
+from fitness_scoring.models import TeacherClassAllocation, ClassTest, StudentClassEnrolment
 from fitness_scoring.models import StudentClassTestResult
 from fitness_scoring.forms import ChangePasswordFrom
 from fitness_scoring.forms import AddSchoolForm, AddSchoolsForm, EditSchoolForm
@@ -12,7 +12,7 @@ from fitness_scoring.forms import AddMajorTestCategoryForm, AddMajorTestCategori
 from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFileForm
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, AddClassTeacherForm, EditClassTeacherForm
-from fitness_scoring.forms import AssignTestToClassForm, SaveClassTestsAsTestSetForm, LoadClassTestsFromTestSetForm
+from fitness_scoring.forms import AssignTestToClassForm
 from fitness_scoring.forms import ResolveIssuesPersonalForm, ResolveIssuesClassForm
 from fitness_scoring.forms import ResolveIssuesSchoolIDForm, ResolveIssuesSchoolNameForm, ResolveIssuesForm
 from fitness_scoring.forms import StudentEntryForm, StudentEntryEditForm
@@ -1872,12 +1872,13 @@ def class_adds(request):
             result = class_adds_form.add_classes(request)
             if result:
 
-                (n_created, teacher_username_not_exist, test_set_not_exist,
+                (n_created, teacher_username_not_exist, test_template_not_exist,
                  class_already_exists, invalid_lines, not_current_year_warning) = result
 
                 problem_types = [(teacher_username_not_exist,
                                   'Could not recognise the teacher username on the following lines:'),
-                                 (test_set_not_exist, 'Could not recognise the test set on the following lines:'),
+                                 (test_template_not_exist, 'Could not recognise the test template class on the '
+                                                           'following lines:'),
                                  (class_already_exists,
                                   'The class year and name already existed for the following lines:'),
                                  (invalid_lines, 'Error reading data on the following lines:'),
@@ -2021,12 +2022,8 @@ def class_results_table(request, class_pk):
                 ['class_results_modal_load_link', '/class_enrolment/delete/', 'remove', 'delete student result entry']
             ],
             'results_table_buttons': [
-                ['plus', [['class_results_modal_load_link', '/class/test/add/' + str(class_pk), 'Add Test To Class'],
-                          ['class_results_modal_load_link', '/class/test_set/load/' + str(class_pk),
-                           'Load Class Tests From A Test Set']]],
-                ['asterisk', [['class_results_modal_load_link', '/class/test_set/save/' + str(class_pk),
-                               'Save Current Class Tests As A Test Set'],
-                              ['modal_load_link', '/class/get_new_code/' + str(class_pk),
+                ['plus', [['class_results_modal_load_link', '/class/test/add/' + str(class_pk), 'Add Test To Class']]],
+                ['asterisk', [['modal_load_link', '/class/get_new_code/' + str(class_pk),
                                'Get New Class Login Password'],
                               ['class_results_modal_load_link', '/class/approve_all/' + str(class_pk),
                                'Approve All Student Result Entries For Class']]]
@@ -2072,58 +2069,6 @@ def add_test_to_class(request, class_pk, load_from_class_pk=None):
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to add a test to this class")
-
-
-def save_class_tests_as_test_set(request, class_pk):
-    if user_authorised_for_class(request, class_pk):
-        if request.POST:
-            save_class_tests_as_test_set_form = SaveClassTestsAsTestSetForm(class_pk=class_pk, data=request.POST)
-            if save_class_tests_as_test_set_form.save_class_tests_as_test_set():
-                test_set_saved = TestSet.objects.get(
-                    school=Class.objects.get(pk=class_pk).school_id,
-                    test_set_name=save_class_tests_as_test_set_form.cleaned_data['test_set_name']
-                )
-                context = {'finish_title': 'Test Set Saved',
-                           'user_message': 'Test Set Saved Successfully: ' + str(test_set_saved.test_set_name)}
-                return render(request, 'user_message.html', RequestContext(request, context))
-            else:
-                context = {'post_to_url': '/class/test_set/save/' + str(class_pk) + '/',
-                           'functionality_name': 'Save Test Set',
-                           'form': save_class_tests_as_test_set_form}
-                return render(request, 'modal_form.html', RequestContext(request, context))
-        else:
-            context = {'post_to_url': '/class/test_set/save/' + str(class_pk) + '/',
-                       'functionality_name': 'Save Test Set',
-                       'form': SaveClassTestsAsTestSetForm(class_pk=class_pk)}
-            return render(request, 'modal_form.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to save a test set from this class")
-
-
-def load_class_tests_from_test_set(request, class_pk):
-    if user_authorised_for_class(request, class_pk):
-        if request.POST:
-            load_class_tests_from_test_set_form = LoadClassTestsFromTestSetForm(class_pk=class_pk, data=request.POST)
-            if load_class_tests_from_test_set_form.load_class_tests_from_test_set():
-                test_set_loaded = TestSet.objects.get(
-                    school=Class.objects.get(pk=class_pk).school_id,
-                    test_set_name=load_class_tests_from_test_set_form.cleaned_data['test_set_name']
-                )
-                context = {'finish_title': 'Test Set Loaded',
-                           'user_message': 'Test Set Loaded Successfully: ' + str(test_set_loaded.test_set_name)}
-                return render(request, 'user_message.html', RequestContext(request, context))
-            else:
-                context = {'post_to_url': '/class/test_set/load/' + str(class_pk) + '/',
-                           'functionality_name': 'Load Test Set',
-                           'form': load_class_tests_from_test_set_form}
-                return render(request, 'modal_form.html', RequestContext(request, context))
-        else:
-            context = {'post_to_url': '/class/test_set/load/' + str(class_pk) + '/',
-                       'functionality_name': 'Load Test Set',
-                       'form': LoadClassTestsFromTestSetForm(class_pk=class_pk)}
-            return render(request, 'modal_form.html', RequestContext(request, context))
-    else:
-        return HttpResponseForbidden("You are not authorised to load a test set to this class")
 
 
 def get_new_class_code(request, class_pk):

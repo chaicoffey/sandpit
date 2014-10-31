@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.hashers import make_password, check_password
 import datetime
 import time
-import collections
 import string
 from datetime import date
 from time import time as time_seed
@@ -444,44 +443,6 @@ class Class(models.Model):
             ClassTest.objects.create(class_id=self, test_name=test)
         return assigned
 
-    def save_class_tests_as_test_set_errors(self, test_set_name):
-        return TestSet.create_test_set_errors(test_set_name, self.school_id, self.get_tests())
-
-    def save_class_tests_as_test_set_safe(self, test_set_name):
-        return TestSet.create_test_set(test_set_name, self.school_id, self.get_tests())
-
-    def load_class_tests_from_test_set_errors(self, test_set_name):
-
-        if TestSet.objects.filter(school=self.school_id, test_set_name=test_set_name).exists():
-            error_message = None
-        else:
-            error_message = 'No Test Set Exists With Name: ' + test_set_name
-
-        if not error_message:
-            test_set_tests = TestSet.objects.get(school=self.school_id, test_set_name=test_set_name).get_tests()
-            class_tests = self.get_tests()
-            for class_test in class_tests:
-                if (not (class_test in test_set_tests)) and self.does_result_exist_for_test(test=class_test):
-                    error_message = ('Test ' + class_test.test_name + ' has results entered but is not in test set ' +
-                                     test_set_name)
-
-        return error_message
-
-    def load_class_tests_from_test_set_safe(self, test_set_name):
-        load_valid = not self.load_class_tests_from_test_set_errors(test_set_name)
-        if load_valid:
-
-            test_set_tests = TestSet.objects.get(school=self.school_id, test_set_name=test_set_name).get_tests()
-            class_tests = self.get_tests()
-            for class_test in class_tests:
-                if not (class_test in test_set_tests):
-                    ClassTest.objects.get(class_id=self, test_name=class_test).delete()
-            for test_set_test in test_set_tests:
-                if not (test_set_test in class_tests):
-                    ClassTest.objects.create(class_id=self, test_name=test_set_test)
-
-        return load_valid
-
     def deallocate_test_errors(self, test):
         error_message = None
         if ClassTest.objects.filter(class_id=self, test_name=test).exists():
@@ -547,7 +508,7 @@ class Class(models.Model):
         return error_message
 
     @staticmethod
-    def create_class_safe(year, class_name, school_id, teacher_id):
+    def create_class_safe(year, class_name, school_id, teacher_id, test_template_class=None):
 
         error_message = Class.create_class_errors(year, class_name, school_id, teacher_id)
         if not error_message:
@@ -555,6 +516,11 @@ class Class(models.Model):
             user.set_read_agreement()
             class_instance = Class.objects.create(year=year, class_name=class_name, school_id=school_id, user=user)
             TeacherClassAllocation.objects.create(class_id=class_instance, teacher_id=teacher_id)
+
+            if test_template_class:
+                tests = test_template_class.get_tests()
+                for test in tests:
+                    class_instance.assign_test_safe(test)
         else:
             class_instance = None
 
@@ -1096,52 +1062,6 @@ class ClassTest(models.Model):
 
     def __unicode__(self):
         return str(self.class_id) + ' : ' + str(self.test_name)
-
-
-class TestSet(models.Model):
-    school = models.ForeignKey(School)
-    test_set_name = models.CharField(max_length=200)
-
-    def __unicode__(self):
-        return self.test_set_name + ' (' + self.school.name + ')'
-
-    def get_tests(self):
-        return [test_set_test.test for test_set_test in TestSetTest.objects.filter(test_set=self)]
-
-    @staticmethod
-    def create_test_set_errors(test_set_name, school, tests):
-        error_message = None
-
-        if TestSet.objects.filter(school=school, test_set_name=test_set_name).exists():
-            error_message = 'Test Set Name Already Being Used'
-
-        if not error_message:
-            test_sets = TestSet.objects.filter(school=school)
-            for test_set in test_sets:
-                if collections.Counter(test_set.get_tests()) == collections.Counter(tests):
-                    error_message = ("Test Set Comprised Of The Same Tests Already Exists (" + test_set.test_set_name +
-                                     ")")
-
-        return error_message
-
-    @staticmethod
-    def create_test_set(test_set_name, school, tests):
-        if not TestSet.create_test_set_errors(test_set_name, school, tests):
-            test_set = TestSet.objects.create(school=school, test_set_name=test_set_name)
-            for test in tests:
-                TestSetTest.objects.create(test_set=test_set, test=test)
-        else:
-            test_set = None
-
-        return test_set
-
-
-class TestSetTest(models.Model):
-    test_set = models.ForeignKey(TestSet)
-    test = models.ForeignKey(Test)
-
-    def __unicode__(self):
-        return str(self.test_set) + ' : ' + str(self.test)
 
 
 class StudentClassTestResult(models.Model):

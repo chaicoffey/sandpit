@@ -1,6 +1,6 @@
 from django import forms
 from fitness_scoring.models import School, Administrator, Class, Teacher, Student, MajorTestCategory, TestCategory, Test
-from fitness_scoring.models import User, TeacherClassAllocation, TestSet, StudentClassEnrolment
+from fitness_scoring.models import User, TeacherClassAllocation, StudentClassEnrolment
 from fitness_scoring.models import StudentClassTestResult, StudentsSameName
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
 from fitness_scoring.validators import validate_major_test_category_unique, validate_new_major_test_category_name_unique
@@ -210,18 +210,18 @@ class AddClassesForm(forms.Form):
     def add_classes(self, request):
         if self.is_valid():
             result = read_file_upload(uploaded_file=request.FILES['add_classes_file'],
-                                      headings=['year', 'class_name', 'teacher_username', 'test_set'])
+                                      headings=['year', 'class_name', 'teacher_username', 'test_template_class_year'])
             if result:
                 (valid_lines, invalid_lines) = result
                 school = School.objects.get(pk=self.cleaned_data['school_pk'])
                 current_year = datetime.datetime.now().year
                 n_created = 0
                 teacher_username_not_exist = []
-                test_set_not_exist = []
+                test_template_not_exist = []
                 class_already_exists = []
                 not_current_year_warning = []
 
-                for year, class_name, teacher_username, test_set_name in valid_lines:
+                for year, class_name, teacher_username, test_template_class_year in valid_lines:
 
                     if year is None:
                         year = ''
@@ -229,8 +229,17 @@ class AddClassesForm(forms.Form):
                         class_name = ''
                     if teacher_username is None:
                         teacher_username = ''
-                    if test_set_name is None:
-                        test_set_name = ''
+                    if test_template_class_year is None:
+                        test_template_class_year = ''
+                        test_template_class_name = ''
+                        test_template_year = 0
+                    elif (':' not in test_template_class_year) or test_template_class_year.endswith(':'):
+                        test_template_class_name = ''
+                        test_template_year = 0
+                    else:
+                        colon_pos = test_template_class_year.index(':')
+                        test_template_class_name = test_template_class_year[0:colon_pos]
+                        test_template_year = int(test_template_class_year[colon_pos + 1:])
 
                     user = User.objects.filter(username=teacher_username)
                     if user.exists() and Teacher.objects.filter(user=user[0], school_id=school).exists():
@@ -238,32 +247,32 @@ class AddClassesForm(forms.Form):
                     else:
                         teacher = None
                         teacher_username_not_exist.append('(' + year + ', ' + class_name + ', ' + teacher_username +
-                                                          ', ' + test_set_name + ')')
+                                                          ', ' + test_template_class_year + ')')
 
-                    if TestSet.objects.filter(test_set_name=test_set_name, school=school).exists():
-                        test_set = TestSet.objects.get(test_set_name=test_set_name, school=school)
-                    elif test_set_name == '':
-                        test_set = None
+                    if Class.objects.filter(year=test_template_year, class_name=test_template_class_name,
+                                            school_id=school).exists():
+                        test_template_class = Class.objects.get(year=test_template_year,
+                                                                class_name=test_template_class_name, school_id=school)
+                    elif test_template_class_year == '':
+                        test_template_class = None
                     else:
-                        test_set = None
-                        test_set_not_exist.append('(' + year + ', ' + class_name + ', ' + teacher_username + ', ' +
-                                                  test_set_name + ')')
+                        test_template_class = None
+                        test_template_not_exist.append('(' + year + ', ' + class_name + ', ' + teacher_username + ', ' +
+                                                       test_template_class_year + ')')
 
-                    if teacher and ((test_set_name == '') or test_set):
-                        class_instance = Class.create_class_safe(year, class_name, school, teacher)
+                    if teacher and ((test_template_class_year == '') or test_template_class):
+                        class_instance = Class.create_class_safe(year, class_name, school, teacher, test_template_class)
                         if class_instance:
                             if str(year) != str(current_year):
                                 not_current_year_warning.append('(' + year + ', ' + class_name + ', ' + teacher_username
-                                                                + ', ' + test_set_name + ')')
+                                                                + ', ' + test_template_class_year + ')')
                             n_created += 1
-                            if test_set:
-                                class_instance.load_class_tests_from_test_set_safe(test_set.test_set_name)
                         else:
                             class_already_exists.append('(' + year + ', ' + class_name + ', ' + teacher_username +
-                                                        ', ' + test_set_name + ')')
+                                                        ', ' + test_template_class_year + ')')
 
-                return (n_created, teacher_username_not_exist, test_set_not_exist, class_already_exists, invalid_lines,
-                        not_current_year_warning)
+                return (n_created, teacher_username_not_exist, test_template_not_exist, class_already_exists,
+                        invalid_lines, not_current_year_warning)
             else:
                 return None
         else:
@@ -478,78 +487,6 @@ class AssignTestToClassForm(forms.Form):
                 else:
                     class_instance.deallocate_test_safe(test)
         return assign_test_to_class
-
-
-class SaveClassTestsAsTestSetForm(forms.Form):
-    class_pk = forms.CharField(widget=forms.HiddenInput())
-    test_set_name = forms.CharField(max_length=300, required=True)
-
-    def __init__(self, class_pk, *args, **kwargs):
-        super(SaveClassTestsAsTestSetForm, self).__init__(*args, **kwargs)
-
-        self.fields['test_set_name'].error_messages = {'required': 'Please Select Test Set Name'}
-
-        self.fields['class_pk'].initial = class_pk
-
-    def clean(self):
-        cleaned_data = super(SaveClassTestsAsTestSetForm, self).clean()
-        class_pk = cleaned_data.get("class_pk")
-        test_set_name = cleaned_data.get("test_set_name")
-
-        if class_pk and test_set_name:
-            error_message = Class.objects.get(pk=class_pk).save_class_tests_as_test_set_errors(test_set_name)
-            if error_message:
-                self._errors["test_set_name"] = self.error_class([error_message])
-                del cleaned_data["test_set_name"]
-
-        return cleaned_data
-
-    def save_class_tests_as_test_set(self):
-        if self.is_valid():
-            class_pk = self.cleaned_data['class_pk']
-            test_set_name = self.cleaned_data['test_set_name']
-            test_set = Class.objects.get(pk=class_pk).save_class_tests_as_test_set_safe(test_set_name)
-        else:
-            test_set = None
-        return test_set
-
-
-class LoadClassTestsFromTestSetForm(forms.Form):
-    class_pk = forms.CharField(widget=forms.HiddenInput())
-    test_set_name = forms.ChoiceField(required=True)
-
-    def __init__(self, class_pk, *args, **kwargs):
-        super(LoadClassTestsFromTestSetForm, self).__init__(*args, **kwargs)
-
-        self.fields['test_set_name'].error_messages = {'required': 'Please Select Test Set Name'}
-
-        self.fields['class_pk'].initial = class_pk
-
-        self.fields['test_set_name'].choices = [('', '')]
-        for test_set in TestSet.objects.filter(school_id=Class.objects.get(pk=class_pk).school_id):
-            self.fields['test_set_name'].choices.append((test_set.test_set_name, test_set.test_set_name))
-        self.fields['test_set_name'].initial = ''
-
-    def clean(self):
-        cleaned_data = super(LoadClassTestsFromTestSetForm, self).clean()
-        class_pk = cleaned_data.get("class_pk")
-        test_set_name = cleaned_data.get("test_set_name")
-
-        if class_pk and test_set_name:
-            error_message = Class.objects.get(pk=class_pk).load_class_tests_from_test_set_errors(test_set_name)
-            if error_message:
-                self._errors["test_set_name"] = self.error_class([error_message])
-                del cleaned_data["test_set_name"]
-
-        return cleaned_data
-
-    def load_class_tests_from_test_set(self):
-        load_valid = self.is_valid()
-        if load_valid:
-            class_pk = self.cleaned_data['class_pk']
-            test_set_name = self.cleaned_data['test_set_name']
-            load_valid = Class.objects.get(pk=class_pk).load_class_tests_from_test_set_safe(test_set_name)
-        return load_valid
 
 
 class AddSchoolForm(forms.Form):
