@@ -42,7 +42,7 @@
                 <div style="column-count: 2">
                     {% for test_category, tests in test_categories %}
 
-                        {% for field in tests %}
+                        {% for field, instructions_url in tests %}
 
                             {% if field.is_hidden %}
 
@@ -57,7 +57,8 @@
                                     {% endif %}"
                                      style="font-size: 12px">
                                     <div class="col-sm-6 {{ info_load_class }}">
-                                        <a href="" title="click to open test instructions in a new tab">
+                                        <a href="{{ instructions_url }}"
+                                           title="click to open test instructions in a new tab">
                                             <span class="lighter_color glyphicon glyphicon-info-sign"></span>
                                         </a>
                                         {{ field.label_tag }}
