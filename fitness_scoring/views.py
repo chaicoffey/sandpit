@@ -2056,9 +2056,8 @@ def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
                 context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
                            'functionality_name': 'Allocate Tests To Class',
                            'form': allocate_test_to_class_form,
-                           'form_extra': 'modal_form_extra_allocate_tests.html',
                            'other_classes': other_classes}
-                return render(request, 'modal_form.html', RequestContext(request, context))
+                return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
         else:
             allocate_test_to_class_form = (AllocateTestsToClassForm(class_pk=class_pk,
                                                                     load_from_class_pk=load_from_class_pk)
@@ -2066,9 +2065,8 @@ def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
             context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
                        'functionality_name': 'Allocate Tests To Class',
                        'form': allocate_test_to_class_form,
-                       'form_extra': 'modal_form_extra_allocate_tests.html',
                        'other_classes': other_classes}
-            return render(request, 'modal_form.html', RequestContext(request, context))
+            return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to allocate tests to this class")
 
