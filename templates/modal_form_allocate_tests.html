@@ -14,73 +14,40 @@
     <div class="modal-body" style="padding-bottom: 0px">
         {% csrf_token %}
         {% if form %}
+
             {% if other_classes %}
                 <label>Use Previous Class's Tests</label>
                 <select id="previous_class_tests">
                     <option value="" disabled selected></option>
                     {% for class_name, load_url in other_classes %}
-                        <option value="{{ load_url }}">
-                            {{ class_name }}
-                        </option>
+                        <option value="{{ load_url }}">{{ class_name }}</option>
                     {% endfor %}
                 </select>
                 <hr>
             {% endif %}
-            {% if form.top_text_messages %}
-                <h5>
-                    {% for top_text_message in form.top_text_messages %}
-                        {{ top_text_message }}<br>
-                    {% endfor %}
-                </h5>
-            {% endif %}
+
             {{ form.non_field_errors }}
+
             {% for field in form %}
                 {% if field.is_hidden %}
+
                     <div class="form-group" style="display: none">{{ field }}</div>
-                {% elif form.exclude_showing_label %}
-                    <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
-                        {{ field }}
-                        {% if field.help_text %}
-                            {% if form.help_text_nl %}
-                                <br>
-                            {% endif %}
-                            <div style="display: inline" class="form-field-help">{{ field.help_text }}</div>
-                        {% endif %}
-                        {% if field.errors %}
-                            <span class="help-block">{{ field.errors }}</span>
-                        {% endif %}
-                    </div>
+
                 {% else %}
+
                     <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
                         <div class="col-sm-4">{{ field.label_tag }}</div>
                         <div class="col-sm-8">
                             {{ field }}
-                            {% if field.help_text %}
-                                {% if form.help_text_nl %}
-                                    <br>
-                                {% endif %}
-                                <div style="display: inline" class="form-field-help">{{ field.help_text }}</div>
-                            {% endif %}
                             {% if field.errors %}
                                 <span class="help-block">{{ field.errors }}</span>
                             {% endif %}
                         </div>
                     </div>
+
                 {% endif %}
             {% endfor %}
-            {% if form.bottom_text_messages %}
-                <h5>
-                    {% for bottom_text_message in form.bottom_text_messages %}
-                        {{ bottom_text_message }}<br>
-                    {% endfor %}
-                </h5>
-            {% endif %}
-        {% elif prompt_message %}
-            {{ prompt_message }}
-        {% elif prompt_messages %}
-            {% for prompt_message in prompt_messages %}
-                {{ prompt_message }}<br>
-            {% endfor %}
+
         {% endif %}
         <div class="progress progress-striped active hide" id="progress-bar">
             <div class="progress-bar" role="progressbar"
@@ -89,9 +56,6 @@
     </div>
 
     <div class="modal-footer">
-        {% if not hide_cancel_button %}
-            <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-        {% endif %}
         <button type="submit" class="btn btn-primary" id='modal_submit_button'>{{ functionality_name }}</button>
     </div>
 
