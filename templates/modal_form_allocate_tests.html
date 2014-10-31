@@ -51,14 +51,16 @@
                             {% else %}
 
 
-                                <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
+                                <div class="form-group
+                                    {% if field.errors %}
+                                        has-error has-feedback
+                                    {% endif %}"
+                                     style="font-size: 12px">
                                     <div class="col-sm-6">
-                                        <div style="font-size: 12px; display: inline">
-                                            {{ field.label_tag }}
-                                        </div>
                                         <a href="" title="click to open test instructions in a new tab">
                                             <span class="lighter_color glyphicon glyphicon-info-sign"></span>
                                         </a>
+                                        {{ field.label_tag }}
                                     </div>
                                     <div class="col-sm-1">
                                         {{ field }}
@@ -66,7 +68,7 @@
                                             <span class="help-block">{{ field.errors }}</span>
                                         {% endif %}
                                     </div>
-                                    <div class="col-sm-4 lighter_color" style="font-size: 12px">
+                                    <div class="col-sm-4 lighter_color">
                                         {{ test_category }}
                                     </div>
                                 </div>
