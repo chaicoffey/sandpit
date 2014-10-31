@@ -12,7 +12,7 @@ from fitness_scoring.forms import AddMajorTestCategoryForm, AddMajorTestCategori
 from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFileForm
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, AddClassTeacherForm, EditClassTeacherForm
-from fitness_scoring.forms import AssignTestToClassForm
+from fitness_scoring.forms import AllocateTestsToClassForm
 from fitness_scoring.forms import ResolveIssuesPersonalForm, ResolveIssuesClassForm
 from fitness_scoring.forms import ResolveIssuesSchoolIDForm, ResolveIssuesSchoolNameForm, ResolveIssuesForm
 from fitness_scoring.forms import StudentEntryForm, StudentEntryEditForm
@@ -2022,7 +2022,8 @@ def class_results_table(request, class_pk):
                 ['class_results_modal_load_link', '/class_enrolment/delete/', 'remove', 'delete student result entry']
             ],
             'results_table_buttons': [
-                ['plus', [['class_results_modal_load_link', '/class/test/add/' + str(class_pk), 'Add Test To Class']]],
+                ['plus', [['class_results_modal_load_link', '/class/test/allocate/' + str(class_pk),
+                           'Allocate Tests To Class']]],
                 ['asterisk', [['modal_load_link', '/class/get_new_code/' + str(class_pk),
                                'Get New Class Login Password'],
                               ['class_results_modal_load_link', '/class/approve_all/' + str(class_pk),
@@ -2035,40 +2036,41 @@ def class_results_table(request, class_pk):
         return HttpResponseForbidden("You are not authorised to view class results table")
 
 
-def add_test_to_class(request, class_pk, load_from_class_pk=None):
+def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
     if user_authorised_for_class(request, class_pk):
         class_instance = Class.objects.get(pk=class_pk)
         other_classes = [
             (
                 class_instance.class_name + '(' + str(class_instance.year) + ')',
-                '/class/test/add/' + str(class_pk) + '/' + str(class_instance.pk) + '/'
+                '/class/test/allocate/' + str(class_pk) + '/' + str(class_instance.pk) + '/'
             ) for class_instance in
             Class.objects.filter(school_id=class_instance.school_id).order_by('-year').exclude(pk=class_pk)
         ]
         if request.POST:
-            add_test_to_class_form = AssignTestToClassForm(class_pk=class_pk, data=request.POST)
-            if add_test_to_class_form.assign_test_to_class():
-                context = {'finish_title': 'Tests Added To Class',
-                           'user_message': 'Tests Added To Class Successfully'}
+            allocate_test_to_class_form = AllocateTestsToClassForm(class_pk=class_pk, data=request.POST)
+            if allocate_test_to_class_form.allocate_tests_to_class():
+                context = {'finish_title': 'Tests Allocated To Class',
+                           'user_message': 'Tests Allocated To Class Successfully'}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
-                context = {'post_to_url': '/class/test/add/' + str(class_pk) + '/',
-                           'functionality_name': 'Add Test To Class',
-                           'form': add_test_to_class_form,
-                           'form_extra': 'modal_form_extra_add_tests.html',
+                context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
+                           'functionality_name': 'Allocate Tests To Class',
+                           'form': allocate_test_to_class_form,
+                           'form_extra': 'modal_form_extra_allocate_tests.html',
                            'other_classes': other_classes}
                 return render(request, 'modal_form.html', RequestContext(request, context))
         else:
-            add_test_to_class_form = (AssignTestToClassForm(class_pk=class_pk, load_from_class_pk=load_from_class_pk)
-                                      if load_from_class_pk else AssignTestToClassForm(class_pk=class_pk))
-            context = {'post_to_url': '/class/test/add/' + str(class_pk) + '/',
-                       'functionality_name': 'Add Test To Class',
-                       'form': add_test_to_class_form,
-                       'form_extra': 'modal_form_extra_add_tests.html',
+            allocate_test_to_class_form = (AllocateTestsToClassForm(class_pk=class_pk,
+                                                                    load_from_class_pk=load_from_class_pk)
+                                           if load_from_class_pk else AllocateTestsToClassForm(class_pk=class_pk))
+            context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
+                       'functionality_name': 'Allocate Tests To Class',
+                       'form': allocate_test_to_class_form,
+                       'form_extra': 'modal_form_extra_allocate_tests.html',
                        'other_classes': other_classes}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to add a test to this class")
+        return HttpResponseForbidden("You are not authorised to allocate tests to this class")
 
 
 def get_new_class_code(request, class_pk):

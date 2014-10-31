@@ -450,11 +450,11 @@ class EditClassTeacherForm(forms.Form):
         return class_edited
 
 
-class AssignTestToClassForm(forms.Form):
+class AllocateTestsToClassForm(forms.Form):
     class_pk = forms.CharField(widget=forms.HiddenInput())
 
     def __init__(self, class_pk, load_from_class_pk=None, *args, **kwargs):
-        super(AssignTestToClassForm, self).__init__(*args, **kwargs)
+        super(AllocateTestsToClassForm, self).__init__(*args, **kwargs)
 
         self.fields['class_pk'].initial = class_pk
 
@@ -475,7 +475,7 @@ class AssignTestToClassForm(forms.Form):
                 self.fields[field_name_visible].initial = True
                 self.fields[field_name_visible].widget.attrs['disabled'] = 'disabled'
 
-    def assign_test_to_class(self):
+    def allocate_tests_to_class(self):
         assign_test_to_class = self.is_valid()
         if assign_test_to_class:
             class_instance = Class.objects.get(pk=self.cleaned_data['class_pk'])
