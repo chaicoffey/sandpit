@@ -341,6 +341,11 @@ li.item_list_menu_link > a:hover {
 }
 
 label.disabled {
-    color: grey;
+    color: #c0c0c0;
+    font-style: italic;
+}
+
+div.disabled {
+    color: #c0c0c0;
     font-style: italic;
 }

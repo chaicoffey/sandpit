@@ -16,13 +16,15 @@
         {% if form %}
 
             {% if other_classes %}
-                <label>Use Previous Class's Tests</label>
-                <select id="previous_class_tests">
-                    <option value="" disabled selected></option>
-                    {% for class_name, load_url in other_classes %}
-                        <option value="{{ load_url }}">{{ class_name }}</option>
-                    {% endfor %}
-                </select>
+                <div>
+                    <label for="previous_class_tests">Use Previous Class's Tests</label>
+                    <select id="previous_class_tests">
+                        <option value="" disabled selected></option>
+                        {% for class_name, load_url in other_classes %}
+                            <option value="{{ load_url }}">{{ class_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
             {% endif %}
 
             {{ form.non_field_errors }}
@@ -65,7 +67,7 @@
                                                 {% if field.field.widget.attrs.disabled %}
                                                     class="disabled"
                                                 {% endif %}>
-                                            {{ field.label|safe }}
+                                            {{ field.label|safe }}:
                                         </label>
                                     </div>
                                     <div class="col-sm-1">
@@ -74,10 +76,7 @@
                                             <span class="help-block">{{ field.errors }}</span>
                                         {% endif %}
                                     </div>
-                                    <div class="col-sm-4 lighter_color"
-                                            {% if field.field.widget.attrs.disabled %}
-                                                style="font-style: italic"
-                                            {% endif %}>
+                                    <div class="col-sm-4 lighter_color">
                                         {{ test_category }}
                                     </div>
                                 </div>
