@@ -339,3 +339,8 @@ li.item_list_menu_link > a:hover {
     font-weight: bold;
     background-color: orangered;
 }
+
+label.disabled {
+    color: grey;
+    font-style: italic;
+}
