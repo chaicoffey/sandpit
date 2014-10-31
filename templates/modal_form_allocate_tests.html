@@ -23,7 +23,6 @@
                         <option value="{{ load_url }}">{{ class_name }}</option>
                     {% endfor %}
                 </select>
-                <hr>
             {% endif %}
 
             {{ form.non_field_errors }}
@@ -53,8 +52,11 @@
 
 
                                 <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
-                                    <div class="col-sm-5">
+                                    <div class="col-sm-6">
                                         {{ field.label_tag }}
+                                        <a href="" title="click to open test instructions in a new tab">
+                                            <span class="lighter_color glyphicon glyphicon-info-sign"></span>
+                                        </a>
                                     </div>
                                     <div class="col-sm-1">
                                         {{ field }}
@@ -62,7 +64,7 @@
                                             <span class="help-block">{{ field.errors }}</span>
                                         {% endif %}
                                     </div>
-                                    <div class="col-sm-5 lighter_color">
+                                    <div class="col-sm-4 lighter_color">
                                         {{ test_category }}
                                     </div>
                                 </div>
