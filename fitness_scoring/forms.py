@@ -461,13 +461,12 @@ class AssignTestToClassForm(forms.Form):
         class_loading_instance = Class.objects.get(pk=(load_from_class_pk if load_from_class_pk else class_pk))
         already_class_loading_tests = class_loading_instance.get_tests()
         class_instance = Class.objects.get(pk=class_pk)
-        already_class_tests = class_instance.get_tests()
         for test in Test.objects.all():
             field_name = test.test_name.replace(" ", "_")
             self.fields[field_name] = forms.BooleanField(required=False)
             self.fields[field_name].initial = test in already_class_loading_tests
             self.fields[field_name].validators = [validate_class_test_assignment(class_pk, test.pk)]
-            if (test in already_class_tests) and class_instance.deallocate_test_errors(test):
+            if class_instance.does_result_exist_for_test(test):
                 self.fields[field_name].initial = True
                 self.fields[field_name].widget = forms.HiddenInput()
                 field_name_visible = field_name + "_visible"
