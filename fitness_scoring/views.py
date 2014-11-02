@@ -2038,14 +2038,6 @@ def class_results_table(request, class_pk):
 
 def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
     if user_authorised_for_class(request, class_pk):
-        class_instance = Class.objects.get(pk=class_pk)
-        other_classes = [
-            (
-                class_instance.class_name + '(' + str(class_instance.year) + ')',
-                '/class/test/allocate/' + str(class_pk) + '/' + str(class_instance.pk) + '/'
-            ) for class_instance in
-            Class.objects.filter(school_id=class_instance.school_id).order_by('-year').exclude(pk=class_pk)
-        ]
         if request.POST:
             allocate_test_to_class_form = AllocateTestsToClassForm(class_pk=class_pk, data=request.POST)
             if allocate_test_to_class_form.allocate_tests_to_class():
@@ -2056,7 +2048,7 @@ def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
                 context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
                            'functionality_name': 'Allocate Tests To Class',
                            'form': allocate_test_to_class_form,
-                           'other_classes': other_classes,
+                           'other_classes': get_other_classes(class_pk),
                            'info_load_class': 'test_instructions_load_link'}
                 return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
         else:
@@ -2066,12 +2058,35 @@ def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
             context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
                        'functionality_name': 'Allocate Tests To Class',
                        'form': allocate_test_to_class_form,
-                       'other_classes': other_classes,
+                       'other_classes': get_other_classes(class_pk),
                        'info_load_class': 'test_instructions_load_link'}
             return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to allocate tests to this class")
 
+
+def get_other_classes(class_pk):
+        class_instance = Class.objects.get(pk=class_pk)
+        other_classes = Class.objects.filter(school_id=class_instance.school_id).order_by('-year').exclude(pk=class_pk)
+        classes_unique = []
+        for other_class in other_classes:
+            other_tests = set([other_test.test_name for other_test in other_class.get_tests()])
+            unique = True if other_tests else False
+            classes_unique_counter = 0
+            classes_unique_length = len(classes_unique)
+            while unique and (classes_unique_counter < classes_unique_length):
+                (class_unique, class_unique_tests) = classes_unique[classes_unique_counter]
+                unique = not(class_unique_tests == other_tests)
+                classes_unique_counter += 1
+            if unique:
+                classes_unique.append((other_class, other_tests))
+
+        return [
+            (
+                class_unique.class_name + '(' + str(class_unique.year) + ')',
+                '/class/test/allocate/' + str(class_pk) + '/' + str(class_unique.pk) + '/'
+            ) for (class_unique, class_unique_tests) in classes_unique
+        ]
 
 def get_new_class_code(request, class_pk):
     if user_authorised_for_class(request, class_pk):
