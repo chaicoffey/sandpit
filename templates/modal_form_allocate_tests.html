@@ -50,13 +50,13 @@
                             <tr style="width: 100%">
                         {% endif %}
 
-                        <td style="width: 50%">
+                        <td style="width: 50%; height: 50px; vertical-align: top">
                             <div class="form-group
                                 {% if field.errors %}
                                     has-error has-feedback
                                 {% endif %}"
-                                 style="font-size: 10px">
-                                <div class="col-sm-5 {{ info_load_class }}">
+                                 style="font-size: 12px">
+                                <div class="col-sm-6 {{ info_load_class }}" style="padding-left: 21px">
                                     <a href="{{ instructions_url }}"
                                        title="click to open test instructions in a new tab">
                                         <span class="lighter_color glyphicon glyphicon-info-sign"></span>
@@ -74,7 +74,7 @@
                                         <span class="help-block">{{ field.errors }}</span>
                                     {% endif %}
                                 </div>
-                                <div class="col-sm-5 lighter_color">
+                                <div class="col-sm-4 lighter_color">
                                     {{ test_category }}
                                 </div>
                             </div>
