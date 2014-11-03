@@ -497,7 +497,8 @@ class AllocateTestsToClassForm(forms.Form):
                     test_fields.append((self[field_name], '/test/instructions/' + str(test.pk),
                                         test.test_category.test_category_name))
             if test_fields:
-                self.major_test_categories.append((major_test_category.major_test_category_name, test_fields))
+                self.major_test_categories.append((major_test_category.major_test_category_name,
+                                                   AllocateTestsToClassForm.reorder(test_fields)))
 
     def allocate_tests_to_class(self):
         assign_test_to_class = self.is_valid()
@@ -510,6 +511,19 @@ class AllocateTestsToClassForm(forms.Form):
                 else:
                     class_instance.deallocate_test_safe(test)
         return assign_test_to_class
+
+    @staticmethod
+    def reorder(test_fields):
+        n_test_fields = len(test_fields)
+        test_fields_ordered = [None] * n_test_fields
+        even_additive = 1 if n_test_fields % 2 == 0 else 0
+        for test_count in range(0, n_test_fields):
+            ordered_count = 2*test_count
+            if ordered_count >= n_test_fields:
+                ordered_count -= n_test_fields
+                ordered_count += even_additive
+            test_fields_ordered[ordered_count] = test_fields[test_count]
+        return test_fields_ordered
 
 
 class AddSchoolForm(forms.Form):
