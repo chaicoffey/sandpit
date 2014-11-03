@@ -41,7 +41,7 @@
                 </div>
                 <hr class="middle_color" style="border-width: 2px">
 
-                <div style="column-count: 2">
+                <div>
                     {% for test_category, tests in test_categories %}
 
                         {% for field, instructions_url in tests %}
@@ -58,7 +58,7 @@
                                         has-error has-feedback
                                     {% endif %}"
                                      style="font-size: 12px">
-                                    <div class="col-sm-6 {{ info_load_class }}">
+                                    <div class="col-sm-4 {{ info_load_class }}">
                                         <a href="{{ instructions_url }}"
                                            title="click to open test instructions in a new tab">
                                             <span class="lighter_color glyphicon glyphicon-info-sign"></span>
@@ -76,7 +76,7 @@
                                             <span class="help-block">{{ field.errors }}</span>
                                         {% endif %}
                                     </div>
-                                    <div class="col-sm-4 lighter_color">
+                                    <div class="col-sm-6 lighter_color">
                                         {{ test_category }}
                                     </div>
                                 </div>
@@ -86,6 +86,7 @@
                         {% endfor %}
 
                     {% endfor %}
+
                 </div>
 
             {% endfor %}
