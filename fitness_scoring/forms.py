@@ -239,7 +239,12 @@ class AddClassesForm(forms.Form):
                     else:
                         colon_pos = test_template_class_year.index(':')
                         test_template_class_name = test_template_class_year[0:colon_pos]
-                        test_template_year = int(test_template_class_year[colon_pos + 1:])
+                        test_template_year = test_template_class_year[colon_pos + 1:]
+                        if test_template_year.isdigit():
+                            test_template_year = int(test_template_year)
+                        else:
+                            test_template_class_name = ''
+                            test_template_year = 0
 
                     user = User.objects.filter(username=teacher_username)
                     if user.exists() and Teacher.objects.filter(user=user[0], school_id=school).exists():
