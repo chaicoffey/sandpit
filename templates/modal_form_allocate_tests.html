@@ -31,7 +31,7 @@
 
             <div class="form-group" style="display: none">{{ form.class_pk }}</div>
 
-            {% for major_test_category, test_categories in form.major_test_categories %}
+            {% for major_test_category, tests in form.major_test_categories %}
 
                 <div class="middle_color" style="height: 1px; background-color: transparent; text-align: center">
                     <span style="font-size: 16px; position: relative; top: 0.6em; background-color: white;
@@ -42,48 +42,45 @@
                 <hr class="middle_color" style="border-width: 2px">
 
                 <div>
-                    {% for test_category, tests in test_categories %}
 
-                        {% for field, instructions_url in tests %}
+                    {% for field, instructions_url, test_category in tests %}
 
-                            {% if field.is_hidden %}
+                        {% if field.is_hidden %}
 
-                                <div class="form-group" style="display: none">{{ field }}</div>
+                            <div class="form-group" style="display: none">{{ field }}</div>
 
-                            {% else %}
+                        {% else %}
 
 
-                                <div class="form-group
-                                    {% if field.errors %}
-                                        has-error has-feedback
-                                    {% endif %}"
-                                     style="font-size: 12px">
-                                    <div class="col-sm-4 {{ info_load_class }}">
-                                        <a href="{{ instructions_url }}"
-                                           title="click to open test instructions in a new tab">
-                                            <span class="lighter_color glyphicon glyphicon-info-sign"></span>
-                                        </a>
-                                        <label for="{{ field.auto_id }}"
-                                                {% if field.field.widget.attrs.disabled %}
-                                                    class="disabled"
-                                                {% endif %}>
-                                            {{ field.label|safe }}:
-                                        </label>
-                                    </div>
-                                    <div class="col-sm-1">
-                                        {{ field }}
-                                        {% if field.errors %}
-                                            <span class="help-block">{{ field.errors }}</span>
-                                        {% endif %}
-                                    </div>
-                                    <div class="col-sm-6 lighter_color">
-                                        {{ test_category }}
-                                    </div>
+                            <div class="form-group
+                                {% if field.errors %}
+                                    has-error has-feedback
+                                {% endif %}"
+                                 style="font-size: 12px">
+                                <div class="col-sm-4 {{ info_load_class }}">
+                                    <a href="{{ instructions_url }}"
+                                       title="click to open test instructions in a new tab">
+                                        <span class="lighter_color glyphicon glyphicon-info-sign"></span>
+                                    </a>
+                                    <label for="{{ field.auto_id }}"
+                                            {% if field.field.widget.attrs.disabled %}
+                                                class="disabled"
+                                            {% endif %}>
+                                        {{ field.label|safe }}:
+                                    </label>
                                 </div>
+                                <div class="col-sm-1">
+                                    {{ field }}
+                                    {% if field.errors %}
+                                        <span class="help-block">{{ field.errors }}</span>
+                                    {% endif %}
+                                </div>
+                                <div class="col-sm-6 lighter_color">
+                                    {{ test_category }}
+                                </div>
+                            </div>
 
-                            {% endif %}
-
-                        {% endfor %}
+                        {% endif %}
 
                     {% endfor %}
 

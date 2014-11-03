@@ -475,31 +475,29 @@ class AllocateTestsToClassForm(forms.Form):
 
         self.major_test_categories = []
         for major_test_category in MajorTestCategory.objects.all():
-            test_categories = []
-            for test_category in TestCategory.objects.all():
-                tests = Test.objects.filter(major_test_category=major_test_category, test_category=test_category)
-                test_fields = []
-                for test in tests:
-                    field_name = test.test_name.replace(" ", "_")
-                    self.fields[field_name] = forms.BooleanField(required=False)
-                    self.fields[field_name].initial = test in already_class_loading_tests
-                    self.fields[field_name].validators = [validate_class_test_assignment(class_pk, test.pk)]
-                    if class_instance.does_result_exist_for_test(test):
-                        self.fields[field_name].initial = True
-                        self.fields[field_name].widget = forms.HiddenInput()
-                        test_fields.append((self[field_name], '/test/instructions/' + str(test.pk)))
-                        field_name_visible = field_name + "_visible"
-                        self.fields[field_name_visible] = forms.BooleanField(required=False)
-                        self.fields[field_name_visible].label = test.test_name[0].upper() + test.test_name[1:].lower()
-                        self.fields[field_name_visible].initial = True
-                        self.fields[field_name_visible].widget.attrs['disabled'] = 'disabled'
-                        test_fields.append((self[field_name_visible], '/test/instructions/' + str(test.pk)))
-                    else:
-                        test_fields.append((self[field_name], '/test/instructions/' + str(test.pk)))
-                if test_fields:
-                    test_categories.append((test_category.test_category_name, test_fields))
-            if test_categories:
-                self.major_test_categories.append((major_test_category.major_test_category_name, test_categories))
+            tests = Test.objects.filter(major_test_category=major_test_category).order_by('test_category')
+            test_fields = []
+            for test in tests:
+                field_name = test.test_name.replace(" ", "_")
+                self.fields[field_name] = forms.BooleanField(required=False)
+                self.fields[field_name].initial = test in already_class_loading_tests
+                self.fields[field_name].validators = [validate_class_test_assignment(class_pk, test.pk)]
+                if class_instance.does_result_exist_for_test(test):
+                    self.fields[field_name].initial = True
+                    self.fields[field_name].widget = forms.HiddenInput()
+                    test_fields.append((self[field_name], '/test/instructions/' + str(test.pk)))
+                    field_name_visible = field_name + "_visible"
+                    self.fields[field_name_visible] = forms.BooleanField(required=False)
+                    self.fields[field_name_visible].label = test.test_name[0].upper() + test.test_name[1:].lower()
+                    self.fields[field_name_visible].initial = True
+                    self.fields[field_name_visible].widget.attrs['disabled'] = 'disabled'
+                    test_fields.append((self[field_name_visible], '/test/instructions/' + str(test.pk),
+                                        test.test_category.test_category_name))
+                else:
+                    test_fields.append((self[field_name], '/test/instructions/' + str(test.pk),
+                                        test.test_category.test_category_name))
+            if test_fields:
+                self.major_test_categories.append((major_test_category.major_test_category_name, test_fields))
 
     def allocate_tests_to_class(self):
         assign_test_to_class = self.is_valid()
