@@ -485,7 +485,7 @@ class AllocateTestsToClassForm(forms.Form):
                 if class_instance.does_result_exist_for_test(test):
                     self.fields[field_name].initial = True
                     self.fields[field_name].widget = forms.HiddenInput()
-                    test_fields.append((self[field_name], '/test/instructions/' + str(test.pk)))
+
                     field_name_visible = field_name + "_visible"
                     self.fields[field_name_visible] = forms.BooleanField(required=False)
                     self.fields[field_name_visible].label = test.test_name[0].upper() + test.test_name[1:].lower()
