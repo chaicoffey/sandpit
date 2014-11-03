@@ -216,6 +216,7 @@ class AddClassesForm(forms.Form):
                 school = School.objects.get(pk=self.cleaned_data['school_pk'])
                 current_year = datetime.datetime.now().year
                 n_created = 0
+                invalid_year = []
                 teacher_username_not_exist = []
                 test_template_not_exist = []
                 class_already_exists = []
@@ -246,6 +247,11 @@ class AddClassesForm(forms.Form):
                             test_template_class_name = ''
                             test_template_year = 0
 
+                    year_ok = year.isdigit() and (int(year) in range(2000, (current_year+2)))
+                    if not year_ok:
+                        invalid_year.append('(' + year + ', ' + class_name + ', ' + teacher_username +
+                                            ', ' + test_template_class_year + ')')
+
                     user = User.objects.filter(username=teacher_username)
                     if user.exists() and Teacher.objects.filter(user=user[0], school_id=school).exists():
                         teacher = Teacher.objects.get(user=user[0])
@@ -265,7 +271,7 @@ class AddClassesForm(forms.Form):
                         test_template_not_exist.append('(' + year + ', ' + class_name + ', ' + teacher_username + ', ' +
                                                        test_template_class_year + ')')
 
-                    if teacher and ((test_template_class_year == '') or test_template_class):
+                    if year_ok and teacher and ((test_template_class_year == '') or test_template_class):
                         class_instance = Class.create_class_safe(year, class_name, school, teacher, test_template_class)
                         if class_instance:
                             if str(year) != str(current_year):
@@ -276,8 +282,8 @@ class AddClassesForm(forms.Form):
                             class_already_exists.append('(' + year + ', ' + class_name + ', ' + teacher_username +
                                                         ', ' + test_template_class_year + ')')
 
-                return (n_created, teacher_username_not_exist, test_template_not_exist, class_already_exists,
-                        invalid_lines, not_current_year_warning)
+                return (n_created, invalid_year, teacher_username_not_exist, test_template_not_exist,
+                        class_already_exists, invalid_lines, not_current_year_warning)
             else:
                 return None
         else:

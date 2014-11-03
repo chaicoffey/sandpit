@@ -1872,10 +1872,11 @@ def class_adds(request):
             result = class_adds_form.add_classes(request)
             if result:
 
-                (n_created, teacher_username_not_exist, test_template_not_exist,
+                (n_created, invalid_year, teacher_username_not_exist, test_template_not_exist,
                  class_already_exists, invalid_lines, not_current_year_warning) = result
 
-                problem_types = [(teacher_username_not_exist,
+                problem_types = [(invalid_year, 'Invalid year on the following lines:'),
+                                 (teacher_username_not_exist,
                                   'Could not recognise the teacher username on the following lines:'),
                                  (test_template_not_exist, 'Could not recognise the test template class on the '
                                                            'following lines:'),
