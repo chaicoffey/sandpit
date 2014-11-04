@@ -1857,7 +1857,7 @@ def class_list(request):
         return HttpResponseForbidden("You are not authorised to view class list")
 
 
-def class_add(request):
+def class_add(request, load_from_class_pk=None):
     user_type = request.session.get('user_type', None)
     if (user_type == 'Administrator') or (user_type == 'Teacher'):
         user = User.objects.get(username=request.session.get('username', None))
@@ -2081,7 +2081,7 @@ def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
                 return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
         else:
             allocate_test_to_class_form = (AllocateEditTestsToClassForm(class_pk=class_pk,
-                                                                    load_from_class_pk=load_from_class_pk)
+                                                                        load_from_class_pk=load_from_class_pk)
                                            if load_from_class_pk else AllocateEditTestsToClassForm(class_pk=class_pk))
             context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
                        'functionality_name': 'Allocate Tests To Class',

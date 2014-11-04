@@ -462,6 +462,59 @@ class EditClassTeacherForm(forms.Form):
         return class_edited
 
 
+class AllocateTestsToClassForm(forms.Form):
+
+    def __init__(self, load_from_class_pk=None, initialise_default=None, *args, **kwargs):
+        super(AllocateTestsToClassForm, self).__init__(*args, **kwargs)
+
+        if not load_from_class_pk:
+            already_class_loading_tests = []
+        elif load_from_class_pk == 'DEFAULT':
+            already_class_loading_tests = DefaultTest.get_default_tests()
+        else:
+            already_class_loading_tests = Class.objects.get(pk=load_from_class_pk).get_tests()
+
+        if initialise_default and not already_class_loading_tests:
+            already_class_loading_tests = DefaultTest.get_default_tests()
+
+        self.major_test_categories = []
+        for major_test_category in MajorTestCategory.objects.all():
+            tests = Test.objects.filter(major_test_category=major_test_category).order_by('test_category')
+            test_fields = []
+            for test in tests:
+                field_name = test.test_name.replace(" ", "_")
+                self.fields[field_name] = forms.BooleanField(required=False)
+                self.fields[field_name].initial = test in already_class_loading_tests
+                test_fields.append((self[field_name], '/class/add/' + str(test.pk),
+                                    test.test_category.test_category_name))
+            if test_fields:
+                self.major_test_categories.append((major_test_category.major_test_category_name,
+                                                   AllocateEditTestsToClassForm.reorder(test_fields)))
+
+    def allocate_tests_to_class(self, class_pk):
+        assign_tests_to_class = self.is_valid()
+        if assign_tests_to_class:
+            class_instance = Class.objects.get(pk=class_pk)
+            for test in Test.objects.all():
+                field_name = test.test_name.replace(" ", "_")
+                if self.cleaned_data[field_name]:
+                    class_instance.assign_test_safe(test)
+        return assign_tests_to_class
+
+    @staticmethod
+    def reorder(test_fields):
+        n_test_fields = len(test_fields)
+        test_fields_ordered = [None] * n_test_fields
+        even_additive = 1 if n_test_fields % 2 == 0 else 0
+        for test_count in range(0, n_test_fields):
+            ordered_count = 2*test_count
+            if ordered_count >= n_test_fields:
+                ordered_count -= n_test_fields
+                ordered_count += even_additive
+            test_fields_ordered[ordered_count] = test_fields[test_count]
+        return test_fields_ordered
+
+
 class AllocateEditTestsToClassForm(forms.Form):
     class_pk = forms.CharField(widget=forms.HiddenInput())
 
