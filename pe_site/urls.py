@@ -81,7 +81,7 @@ urlpatterns = patterns(
     url(r'^class/results_graphs/previous/(?P<class_pk>\d+)/(?P<student_pk>\d+)/(?P<test_pk>\d+)/$',
         'fitness_scoring.views.class_results_graphs_previous'),
     url(r'^class/test/allocate/(?P<class_pk>\d+)/$', 'fitness_scoring.views.allocate_tests_to_class'),
-    url(r'^class/test/allocate/(?P<class_pk>\d+)/(?P<load_from_class_pk>\d+)/$',
+    url(r'^class/test/allocate/(?P<class_pk>\d+)/(?P<load_from_class_pk>\w+)/$',
         'fitness_scoring.views.allocate_tests_to_class'),
     url(r'^class/get_new_code/(?P<class_pk>\d+)', 'fitness_scoring.views.get_new_class_code',
         name='get_new_class_code'),

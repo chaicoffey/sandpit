@@ -2107,12 +2107,14 @@ def get_other_classes(class_pk):
             if unique:
                 classes_unique.append((other_class, other_tests))
 
-        return [
+        other_classes_unique = [
             (
                 class_unique.class_name + '(' + str(class_unique.year) + ')',
                 '/class/test/allocate/' + str(class_pk) + '/' + str(class_unique.pk) + '/'
             ) for (class_unique, class_unique_tests) in classes_unique
         ]
+        other_classes_unique.insert(0, ('Default', '/class/test/allocate/' + str(class_pk) + '/DEFAULT/'))
+        return other_classes_unique
 
 
 def get_new_class_code(request, class_pk):

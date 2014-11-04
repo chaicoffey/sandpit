@@ -470,8 +470,13 @@ class AllocateTestsToClassForm(forms.Form):
 
         self.fields['class_pk'].initial = class_pk
 
-        class_loading_instance = Class.objects.get(pk=(load_from_class_pk if load_from_class_pk else class_pk))
-        already_class_loading_tests = class_loading_instance.get_tests()
+        if not load_from_class_pk:
+            already_class_loading_tests = Class.objects.get(pk=class_pk).get_tests()
+        elif load_from_class_pk == 'DEFAULT':
+            already_class_loading_tests = DefaultTest.get_default_tests()
+        else:
+            already_class_loading_tests = Class.objects.get(pk=load_from_class_pk).get_tests()
+
         if initialise_default and not already_class_loading_tests:
             already_class_loading_tests = DefaultTest.get_default_tests()
         class_instance = Class.objects.get(pk=class_pk)
