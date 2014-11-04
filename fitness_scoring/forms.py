@@ -1,5 +1,6 @@
 from django import forms
-from fitness_scoring.models import School, Administrator, Class, Teacher, Student, MajorTestCategory, TestCategory, Test
+from fitness_scoring.models import School, Administrator, Class, Teacher, Student
+from fitness_scoring.models import MajorTestCategory, TestCategory, Test, DefaultTest
 from fitness_scoring.models import User, TeacherClassAllocation, StudentClassEnrolment
 from fitness_scoring.models import StudentClassTestResult, StudentsSameName
 from fitness_scoring.validators import validate_test_category_unique, validate_new_test_category_name_unique
@@ -464,13 +465,15 @@ class EditClassTeacherForm(forms.Form):
 class AllocateTestsToClassForm(forms.Form):
     class_pk = forms.CharField(widget=forms.HiddenInput())
 
-    def __init__(self, class_pk, load_from_class_pk=None, *args, **kwargs):
+    def __init__(self, class_pk, load_from_class_pk=None, initialise_default=None, *args, **kwargs):
         super(AllocateTestsToClassForm, self).__init__(*args, **kwargs)
 
         self.fields['class_pk'].initial = class_pk
 
         class_loading_instance = Class.objects.get(pk=(load_from_class_pk if load_from_class_pk else class_pk))
         already_class_loading_tests = class_loading_instance.get_tests()
+        if initialise_default and not already_class_loading_tests:
+            already_class_loading_tests = DefaultTest.get_default_tests()
         class_instance = Class.objects.get(pk=class_pk)
 
         self.major_test_categories = []
@@ -501,8 +504,8 @@ class AllocateTestsToClassForm(forms.Form):
                                                    AllocateTestsToClassForm.reorder(test_fields)))
 
     def allocate_tests_to_class(self):
-        assign_test_to_class = self.is_valid()
-        if assign_test_to_class:
+        assign_tests_to_class = self.is_valid()
+        if assign_tests_to_class:
             class_instance = Class.objects.get(pk=self.cleaned_data['class_pk'])
             for test in Test.objects.all():
                 field_name = test.test_name.replace(" ", "_")
@@ -510,7 +513,7 @@ class AllocateTestsToClassForm(forms.Form):
                     class_instance.assign_test_safe(test)
                 else:
                     class_instance.deallocate_test_safe(test)
-        return assign_test_to_class
+        return assign_tests_to_class
 
     @staticmethod
     def reorder(test_fields):
@@ -524,6 +527,39 @@ class AllocateTestsToClassForm(forms.Form):
                 ordered_count += even_additive
             test_fields_ordered[ordered_count] = test_fields[test_count]
         return test_fields_ordered
+
+
+class AllocateDefaultTestsForm(forms.Form):
+
+    def __init__(self, *args, **kwargs):
+        super(AllocateDefaultTestsForm, self).__init__(*args, **kwargs)
+
+        already_default_tests = DefaultTest.get_default_tests()
+
+        self.major_test_categories = []
+        for major_test_category in MajorTestCategory.objects.all():
+            tests = Test.objects.filter(major_test_category=major_test_category).order_by('test_category')
+            test_fields = []
+            for test in tests:
+                field_name = test.test_name.replace(" ", "_")
+                self.fields[field_name] = forms.BooleanField(required=False)
+                self.fields[field_name].initial = test in already_default_tests
+                test_fields.append((self[field_name], '/test/instructions/' + str(test.pk),
+                                    test.test_category.test_category_name))
+            if test_fields:
+                self.major_test_categories.append((major_test_category.major_test_category_name,
+                                                   AllocateTestsToClassForm.reorder(test_fields)))
+
+    def allocate_default_tests(self):
+        allocate_defaults = self.is_valid()
+        if allocate_defaults:
+            default_tests_new = []
+            for test in Test.objects.all():
+                field_name = test.test_name.replace(" ", "_")
+                if self.cleaned_data[field_name]:
+                    default_tests_new.append(test)
+            DefaultTest.set_default_tests(default_tests_new)
+        return allocate_defaults
 
 
 class AddSchoolForm(forms.Form):

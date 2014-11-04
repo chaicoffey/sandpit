@@ -923,6 +923,24 @@ class Test(models.Model):
         return test
 
 
+class DefaultTest(models.Model):
+    test = models.ForeignKey(Test)
+
+    def __unicode__(self):
+        return self.test
+
+    @staticmethod
+    def set_default_tests(tests_new):
+        for default_test_old in DefaultTest.objects.all():
+            default_test_old.delete()
+        for test_new in tests_new:
+            DefaultTest.objects.create(test=test_new)
+
+    @staticmethod
+    def get_default_tests():
+        return [default_test.test for default_test in DefaultTest.objects.all()]
+
+
 class TeacherClassAllocation(models.Model):
     teacher_id = models.ForeignKey(Teacher)
     class_id = models.ForeignKey(Class)

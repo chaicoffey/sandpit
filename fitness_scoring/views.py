@@ -12,7 +12,7 @@ from fitness_scoring.forms import AddMajorTestCategoryForm, AddMajorTestCategori
 from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFileForm
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, AddClassTeacherForm, EditClassTeacherForm
-from fitness_scoring.forms import AllocateTestsToClassForm
+from fitness_scoring.forms import AllocateTestsToClassForm, AllocateDefaultTestsForm
 from fitness_scoring.forms import ResolveIssuesPersonalForm, ResolveIssuesClassForm
 from fitness_scoring.forms import ResolveIssuesSchoolIDForm, ResolveIssuesSchoolNameForm, ResolveIssuesForm
 from fitness_scoring.forms import StudentEntryForm, StudentEntryEditForm
@@ -1272,7 +1272,8 @@ def test_list(request):
             'menu_label': 'Add Test',
             'item_list_table_headings': Test.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['item_list_modal_load_link', '/test/adds/', 'Add Tests From .CSVs']]]
+                ['+', [('item_list_modal_load_link', '/test/adds/', 'Add Tests From .CSVs'),
+                       ('item_list_modal_load_link', '/allocate_default_tests/', 'Allocate Default Tests')]]
             ],
             'item_list_options': [
                 ['item_list_modal_load_link', '/test/edit/', 'pencil', 'edit test'],
@@ -1679,6 +1680,30 @@ def test_instructions(request, test_pk):
         return render(request, 'test_instructions.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to view instructions for a test")
+
+
+def allocate_default_tests(request):
+    if request.session.get('user_type', None) == 'SuperUser':
+        if request.POST:
+            allocate_default_tests_form = AllocateDefaultTestsForm(data=request.POST)
+            if allocate_default_tests_form.allocate_default_tests():
+                context = {'finish_title': 'Default Tests Allocated',
+                           'user_message': 'Default Tests Allocated Successfully'}
+                return render(request, 'user_message.html', RequestContext(request, context))
+            else:
+                context = {'post_to_url': '/allocate_default_tests/',
+                           'functionality_name': 'Allocate Default Tests',
+                           'form': allocate_default_tests_form,
+                           'info_load_class': 'test_instructions_load_link'}
+                return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
+        else:
+            context = {'post_to_url': '/allocate_default_tests/',
+                       'functionality_name': 'Allocate Default Tests',
+                       'form': AllocateDefaultTestsForm(),
+                       'info_load_class': 'test_instructions_load_link'}
+            return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to allocate default tests")
 
 
 def teacher_list(request):
@@ -2088,6 +2113,7 @@ def get_other_classes(class_pk):
                 '/class/test/allocate/' + str(class_pk) + '/' + str(class_unique.pk) + '/'
             ) for (class_unique, class_unique_tests) in classes_unique
         ]
+
 
 def get_new_class_code(request, class_pk):
     if user_authorised_for_class(request, class_pk):
