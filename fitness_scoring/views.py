@@ -12,7 +12,7 @@ from fitness_scoring.forms import AddMajorTestCategoryForm, AddMajorTestCategori
 from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFileForm
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, AddClassTeacherForm, EditClassTeacherForm
-from fitness_scoring.forms import AllocateTestsToClassForm, AllocateDefaultTestsForm
+from fitness_scoring.forms import AllocateEditTestsToClassForm, AllocateEditDefaultTestsForm
 from fitness_scoring.forms import ResolveIssuesPersonalForm, ResolveIssuesClassForm
 from fitness_scoring.forms import ResolveIssuesSchoolIDForm, ResolveIssuesSchoolNameForm, ResolveIssuesForm
 from fitness_scoring.forms import StudentEntryForm, StudentEntryEditForm
@@ -1685,7 +1685,7 @@ def test_instructions(request, test_pk):
 def allocate_default_tests(request):
     if request.session.get('user_type', None) == 'SuperUser':
         if request.POST:
-            allocate_default_tests_form = AllocateDefaultTestsForm(data=request.POST)
+            allocate_default_tests_form = AllocateEditDefaultTestsForm(data=request.POST)
             if allocate_default_tests_form.allocate_default_tests():
                 context = {'finish_title': 'Default Tests Allocated',
                            'user_message': 'Default Tests Allocated Successfully'}
@@ -1699,7 +1699,7 @@ def allocate_default_tests(request):
         else:
             context = {'post_to_url': '/allocate_default_tests/',
                        'functionality_name': 'Allocate Default Tests',
-                       'form': AllocateDefaultTestsForm(),
+                       'form': AllocateEditDefaultTestsForm(),
                        'info_load_class': 'test_instructions_load_link'}
             return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
     else:
@@ -1875,15 +1875,17 @@ def class_add(request):
             else:
                 context = {'post_to_url': '/class/add/',
                            'functionality_name': 'Add Class',
-                           'form': class_add_form}
-                return render(request, 'modal_form.html', RequestContext(request, context))
+                           'modal_title': 'Add Class',
+                           'class_add_form': class_add_form}
+                return render(request, 'modal_form_add_class.html', RequestContext(request, context))
         else:
             class_add_form = (AddClassTeacherForm(teacher_pk=teacher_or_administrator.pk) if user_type == 'Teacher'
                               else AddClassForm(school_pk=school_pk))
             context = {'post_to_url': '/class/add/',
                        'functionality_name': 'Add Class',
-                       'form': class_add_form}
-            return render(request, 'modal_form.html', RequestContext(request, context))
+                       'modal_title': 'Add Class',
+                       'class_add_form': class_add_form}
+            return render(request, 'modal_form_add_class.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to add a class")
 
@@ -2065,7 +2067,7 @@ def class_results_table(request, class_pk):
 def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
     if user_authorised_for_class(request, class_pk):
         if request.POST:
-            allocate_test_to_class_form = AllocateTestsToClassForm(class_pk=class_pk, data=request.POST)
+            allocate_test_to_class_form = AllocateEditTestsToClassForm(class_pk=class_pk, data=request.POST)
             if allocate_test_to_class_form.allocate_tests_to_class():
                 context = {'finish_title': 'Tests Allocated To Class',
                            'user_message': 'Tests Allocated To Class Successfully'}
@@ -2078,9 +2080,9 @@ def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
                            'info_load_class': 'test_instructions_load_link'}
                 return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
         else:
-            allocate_test_to_class_form = (AllocateTestsToClassForm(class_pk=class_pk,
+            allocate_test_to_class_form = (AllocateEditTestsToClassForm(class_pk=class_pk,
                                                                     load_from_class_pk=load_from_class_pk)
-                                           if load_from_class_pk else AllocateTestsToClassForm(class_pk=class_pk))
+                                           if load_from_class_pk else AllocateEditTestsToClassForm(class_pk=class_pk))
             context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
                        'functionality_name': 'Allocate Tests To Class',
                        'form': allocate_test_to_class_form,

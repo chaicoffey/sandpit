@@ -462,11 +462,11 @@ class EditClassTeacherForm(forms.Form):
         return class_edited
 
 
-class AllocateTestsToClassForm(forms.Form):
+class AllocateEditTestsToClassForm(forms.Form):
     class_pk = forms.CharField(widget=forms.HiddenInput())
 
     def __init__(self, class_pk, load_from_class_pk=None, initialise_default=None, *args, **kwargs):
-        super(AllocateTestsToClassForm, self).__init__(*args, **kwargs)
+        super(AllocateEditTestsToClassForm, self).__init__(*args, **kwargs)
 
         self.fields['class_pk'].initial = class_pk
 
@@ -506,7 +506,7 @@ class AllocateTestsToClassForm(forms.Form):
                                         test.test_category.test_category_name))
             if test_fields:
                 self.major_test_categories.append((major_test_category.major_test_category_name,
-                                                   AllocateTestsToClassForm.reorder(test_fields)))
+                                                   AllocateEditTestsToClassForm.reorder(test_fields)))
 
     def allocate_tests_to_class(self):
         assign_tests_to_class = self.is_valid()
@@ -534,10 +534,10 @@ class AllocateTestsToClassForm(forms.Form):
         return test_fields_ordered
 
 
-class AllocateDefaultTestsForm(forms.Form):
+class AllocateEditDefaultTestsForm(forms.Form):
 
     def __init__(self, *args, **kwargs):
-        super(AllocateDefaultTestsForm, self).__init__(*args, **kwargs)
+        super(AllocateEditDefaultTestsForm, self).__init__(*args, **kwargs)
 
         already_default_tests = DefaultTest.get_default_tests()
 
@@ -553,7 +553,7 @@ class AllocateDefaultTestsForm(forms.Form):
                                     test.test_category.test_category_name))
             if test_fields:
                 self.major_test_categories.append((major_test_category.major_test_category_name,
-                                                   AllocateTestsToClassForm.reorder(test_fields)))
+                                                   AllocateEditTestsToClassForm.reorder(test_fields)))
 
     def allocate_default_tests(self):
         allocate_defaults = self.is_valid()

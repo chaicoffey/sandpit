@@ -1,0 +1,43 @@
+
+<form method="POST" id="modalForm" enctype="multipart/form-data" action="{{ post_to_url }}" class="form-horizontal">
+
+    <div class="modal-header"><div class="modal-title">{{ modal_title }}</div></div>
+
+    <div class="modal-body" style="padding-bottom: 0px">
+        {% csrf_token %}
+
+        {% for field in class_add_form %}
+
+            {% if field.is_hidden %}
+
+                <div class="form-group" style="display: none">{{ field }}</div>
+
+            {% else %}
+
+                <div class="form-group {% if field.errors %}has-error has-feedback{% endif %}">
+                    <div class="col-sm-4">{{ field.label_tag }}</div>
+                    <div class="col-sm-8">
+                        {{ field }}
+                        {% if field.errors %}
+                            <span class="help-block">{{ field.errors }}</span>
+                        {% endif %}
+                    </div>
+                </div>
+
+            {% endif %}
+
+        {% endfor %}
+
+        <div class="progress progress-striped active hide" id="progress-bar">
+            <div class="progress-bar" role="progressbar"
+                 aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
+        </div>
+
+    </div>
+
+    <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+        <button type="submit" class="btn btn-primary" id='modal_submit_button'>{{ functionality_name }}</button>
+    </div>
+
+</form>
