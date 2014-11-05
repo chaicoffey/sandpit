@@ -1869,6 +1869,8 @@ def class_add(request, load_from_class_pk=None):
                               if user_type == 'Teacher' else AddClassForm(school_pk=school_pk, data=request.POST))
             if load_from_class_pk:
                 allocate_tests_form = AllocateTestsToClassForm(load_from_class_pk=load_from_class_pk)
+            elif request.POST['button_pressed'] == 'next':
+                allocate_tests_form = AllocateTestsToClassForm(initialise_default=True)
             else:
                 allocate_tests_form = AllocateTestsToClassForm(data=request.POST)
 
@@ -2124,9 +2126,8 @@ def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
                            'info_load_class': 'test_instructions_load_link'}
                 return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
         else:
-            allocate_test_to_class_form = (AllocateEditTestsToClassForm(class_pk=class_pk,
-                                                                        load_from_class_pk=load_from_class_pk)
-                                           if load_from_class_pk else AllocateEditTestsToClassForm(class_pk=class_pk))
+            allocate_test_to_class_form = AllocateEditTestsToClassForm(class_pk=class_pk,
+                                                                       load_from_class_pk=load_from_class_pk)
             context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
                        'functionality_name': 'Allocate Tests To Class',
                        'form': allocate_test_to_class_form,
