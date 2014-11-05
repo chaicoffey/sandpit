@@ -91,9 +91,25 @@ $(document).on('change', '#previous_class_tests', function(event){
 
 //for loading test selection check boxes when change the use previous class select element
 $(document).on('change', '#previous_class_tests_2', function(event){
+
     event.preventDefault();
+    base_url = window.location.protocol + "//" + window.location.host;
     $('#button_pressed').val('next');
-    $("#modalForm").ajaxSubmit({url: $(this).val(), type: 'post'})
+    var button_value = $('#modal_submit_button').attr('value');
+
+    var options = {
+        url: $(this).val(),
+        error: function(response) {
+            $('#remoteModalContent').html("An error occurred accessing modal form");
+        },
+        success: function(response) {
+
+            $('#remoteModalContent').html(response);
+            $('#modal_submit_button').val(button_value);
+        }
+    };
+    $('#modalForm').ajaxSubmit(options);
+
 });
 
 //for loading class result graphs load links on graph_selection change
