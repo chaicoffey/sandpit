@@ -1746,21 +1746,24 @@ def class_add(request, load_from_class_pk=None):
                                'first_page': False,
                                'class_add_form': class_add_form,
                                'other_classes': get_other_classes(url_prefix='/class/add/', school_pk=school_pk),
-                               'allocate_tests_form': allocate_tests_form}
+                               'allocate_tests_form': allocate_tests_form,
+                               'info_load_class': 'test_instructions_load_link'}
                     return render(request, 'modal_form_add_class.html', RequestContext(request, context))
                 else:
                     context = {'post_to_url': '/class/add/',
                                'modal_title': 'Enter Class Details',
                                'first_page': True,
                                'class_add_form': class_add_form,
-                               'allocate_tests_form': allocate_tests_form}
+                               'allocate_tests_form': allocate_tests_form,
+                               'info_load_class': 'test_instructions_load_link'}
                     return render(request, 'modal_form_add_class.html', RequestContext(request, context))
             elif request.POST['button_pressed'] == 'back':
                 context = {'post_to_url': '/class/add/',
                            'modal_title': 'Enter Class Details',
                            'first_page': True,
                            'class_add_form': class_add_form,
-                           'allocate_tests_form': allocate_tests_form}
+                           'allocate_tests_form': allocate_tests_form,
+                           'info_load_class': 'test_instructions_load_link'}
                 return render(request, 'modal_form_add_class.html', RequestContext(request, context))
             else:
                 if allocate_tests_form.is_valid():
@@ -1781,7 +1784,8 @@ def class_add(request, load_from_class_pk=None):
                                'first_page': False,
                                'class_add_form': class_add_form,
                                'other_classes': get_other_classes(url_prefix='/class/add/', school_pk=school_pk),
-                               'allocate_tests_form': allocate_tests_form}
+                               'allocate_tests_form': allocate_tests_form,
+                               'info_load_class': 'test_instructions_load_link'}
                     return render(request, 'modal_form_add_class.html', RequestContext(request, context))
         else:
             class_add_form = (AddClassTeacherForm(teacher_pk=teacher_or_administrator.pk) if user_type == 'Teacher'
@@ -1790,7 +1794,8 @@ def class_add(request, load_from_class_pk=None):
                        'modal_title': 'Enter Class Details',
                        'first_page': True,
                        'class_add_form': class_add_form,
-                       'allocate_tests_form': AllocateTestsToClassForm()}
+                       'allocate_tests_form': AllocateTestsToClassForm(),
+                       'info_load_class': 'test_instructions_load_link'}
             return render(request, 'modal_form_add_class.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to add a class")
@@ -1872,21 +1877,24 @@ def class_edit(request, class_pk, load_from_class_pk=None):
                                'class_add_form': class_edit_form,
                                'other_classes': get_other_classes(url_prefix='/class/edit/' + str(class_pk) + '/',
                                                                   class_pk=class_pk),
-                               'allocate_tests_form': allocate_tests_form}
+                               'allocate_tests_form': allocate_tests_form,
+                               'info_load_class': 'test_instructions_load_link'}
                     return render(request, 'modal_form_add_class.html', RequestContext(request, context))
                 else:
                     context = {'post_to_url': '/class/edit/' + str(class_pk) + '/',
                                'modal_title': 'Enter Class Details',
                                'first_page': True,
                                'class_add_form': class_edit_form,
-                               'allocate_tests_form': allocate_tests_form}
+                               'allocate_tests_form': allocate_tests_form,
+                               'info_load_class': 'test_instructions_load_link'}
                     return render(request, 'modal_form_add_class.html', RequestContext(request, context))
             elif request.POST['button_pressed'] == 'back':
                 context = {'post_to_url': '/class/edit/' + str(class_pk) + '/',
                            'modal_title': 'Enter Class Details',
                            'first_page': True,
                            'class_add_form': class_edit_form,
-                           'allocate_tests_form': allocate_tests_form}
+                           'allocate_tests_form': allocate_tests_form,
+                           'info_load_class': 'test_instructions_load_link'}
                 return render(request, 'modal_form_add_class.html', RequestContext(request, context))
             else:
                 if allocate_tests_form.is_valid():
@@ -1908,7 +1916,8 @@ def class_edit(request, class_pk, load_from_class_pk=None):
                                'class_add_form': class_edit_form,
                                'other_classes': get_other_classes(url_prefix='/class/edit/' + str(class_pk) + '/',
                                                                   class_pk=class_pk),
-                               'allocate_tests_form': allocate_tests_form}
+                               'allocate_tests_form': allocate_tests_form,
+                               'info_load_class': 'test_instructions_load_link'}
                     return render(request, 'modal_form_add_class.html', RequestContext(request, context))
         else:
             class_edit_form = (EditClassTeacherForm(teacher_pk=teacher_or_administrator.pk, class_pk=class_pk)
@@ -1917,7 +1926,8 @@ def class_edit(request, class_pk, load_from_class_pk=None):
                        'modal_title': 'Enter Class Details',
                        'first_page': True,
                        'class_add_form': class_edit_form,
-                       'allocate_tests_form': AllocateEditTestsToClassForm(class_pk=class_pk)}
+                       'allocate_tests_form': AllocateEditTestsToClassForm(class_pk=class_pk),
+                       'info_load_class': 'test_instructions_load_link'}
             return render(request, 'modal_form_add_class.html', RequestContext(request, context))
 
     else:
