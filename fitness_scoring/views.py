@@ -1869,8 +1869,6 @@ def class_add(request, load_from_class_pk=None):
                               if user_type == 'Teacher' else AddClassForm(school_pk=school_pk, data=request.POST))
             if load_from_class_pk:
                 allocate_tests_form = AllocateTestsToClassForm(load_from_class_pk=load_from_class_pk)
-            elif request.POST['button_pressed'] == 'next':
-                allocate_tests_form = AllocateTestsToClassForm(initialise_default=True)
             else:
                 allocate_tests_form = AllocateTestsToClassForm(data=request.POST)
 
