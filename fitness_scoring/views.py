@@ -1879,7 +1879,7 @@ def class_add(request, load_from_class_pk=None):
                                'modal_title': 'Allocate Tests To Class',
                                'first_page': False,
                                'class_add_form': class_add_form,
-                               'other_classes': get_other_classes(school_pk=school_pk),
+                               'other_classes': get_other_classes(url_prefix='/class/add/', school_pk=school_pk),
                                'allocate_tests_form': allocate_tests_form}
                     return render(request, 'modal_form_add_class.html', RequestContext(request, context))
                 else:
@@ -1917,7 +1917,7 @@ def class_add(request, load_from_class_pk=None):
                                'modal_title': 'Allocate Tests To Class',
                                'first_page': False,
                                'class_add_form': class_add_form,
-                               'other_classes': get_other_classes(school_pk=school_pk),
+                               'other_classes': get_other_classes(url_prefix='/class/add/', school_pk=school_pk),
                                'allocate_tests_form': allocate_tests_form}
                     return render(request, 'modal_form_add_class.html', RequestContext(request, context))
         else:
@@ -1985,7 +1985,7 @@ def class_adds(request):
         return HttpResponseForbidden("You are not authorised to add classes")
 
 
-def class_edit(request, class_pk):
+def class_edit(request, class_pk, load_from_class_pk=None):
     if user_authorised_for_class(request, class_pk):
         user_type = request.session.get('user_type', None)
         user = User.objects.get(username=request.session.get('username', None))
@@ -1995,24 +1995,74 @@ def class_edit(request, class_pk):
             class_edit_form = (EditClassTeacherForm(teacher_pk=teacher_or_administrator.pk, class_pk=class_pk,
                                                     data=request.POST) if user_type == 'Teacher'
                                else EditClassForm(school_pk=school_pk, class_pk=class_pk, data=request.POST))
-            if class_edit_form.edit_class():
-                class_display_text = (class_edit_form.cleaned_data['class_name'] +
-                                      ' (' + class_edit_form.cleaned_data['year'] + ')')
-                context = {'finish_title': 'Class Edited',
-                           'user_message': 'Class Edited Successfully: ' + class_display_text}
-                return render(request, 'user_message.html', RequestContext(request, context))
+
+            if load_from_class_pk:
+                allocate_tests_form = AllocateEditTestsToClassForm(class_pk=class_pk,
+                                                                   load_from_class_pk=load_from_class_pk)
             else:
-                context = {'post_to_url': '/class/edit/' + str(class_pk),
+                allocate_tests_form = AllocateEditTestsToClassForm(class_pk=class_pk, data=request.POST)
+
+            if request.POST['button_pressed'] == 'next':
+                if class_edit_form.is_valid():
+                    context = {'post_to_url': '/class/edit/' + str(class_pk) + '/',
+                               'functionality_name': 'Allocate Tests To Class',
+                               'modal_title': 'Allocate Tests To Class',
+                               'first_page': False,
+                               'class_add_form': class_edit_form,
+                               'other_classes': get_other_classes(url_prefix='/class/edit/' + str(class_pk) + '/',
+                                                                  class_pk=class_pk),
+                               'allocate_tests_form': allocate_tests_form}
+                    return render(request, 'modal_form_add_class.html', RequestContext(request, context))
+                else:
+                    context = {'post_to_url': '/class/edit/' + str(class_pk) + '/',
+                               'functionality_name': 'Edit Class',
+                               'modal_title': 'Edit Class',
+                               'first_page': True,
+                               'class_add_form': class_edit_form,
+                               'allocate_tests_form': allocate_tests_form}
+                    return render(request, 'modal_form_add_class.html', RequestContext(request, context))
+            elif request.POST['button_pressed'] == 'back':
+                context = {'post_to_url': '/class/edit/' + str(class_pk) + '/',
                            'functionality_name': 'Edit Class',
-                           'form': class_edit_form}
-                return render(request, 'modal_form.html', RequestContext(request, context))
+                           'modal_title': 'Edit Class',
+                           'first_page': True,
+                           'class_add_form': class_edit_form,
+                           'allocate_tests_form': allocate_tests_form}
+                return render(request, 'modal_form_add_class.html', RequestContext(request, context))
+            else:
+                if allocate_tests_form.is_valid():
+                    if class_edit_form.edit_class():
+                        class_instance = Class.objects.get(pk=class_pk)
+                        allocate_tests_form.allocate_tests_to_class()
+                        class_display_text = (class_instance.class_name + ' (' + str(class_instance.year) + ')')
+                        context = {'finish_title': 'Class Edited',
+                                   'user_message': 'Class Edited Successfully: ' + class_display_text}
+                        return render(request, 'user_message.html', RequestContext(request, context))
+                    else:
+                        context = {'finish_title': 'Error Editing Class',
+                                   'user_message': 'Error Editing Class'}
+                        return render(request, 'user_message.html', RequestContext(request, context))
+                else:
+                    context = {'post_to_url': '/class/edit/' + str(class_pk) + '/',
+                               'functionality_name': 'Allocate Tests To Class',
+                               'modal_title': 'Allocate Tests To Class',
+                               'first_page': False,
+                               'class_add_form': class_edit_form,
+                               'other_classes': get_other_classes(url_prefix='/class/edit/' + str(class_pk) + '/',
+                                                                  class_pk=class_pk),
+                               'allocate_tests_form': allocate_tests_form}
+                    return render(request, 'modal_form_add_class.html', RequestContext(request, context))
         else:
             class_edit_form = (EditClassTeacherForm(teacher_pk=teacher_or_administrator.pk, class_pk=class_pk)
                                if user_type == 'Teacher' else EditClassForm(school_pk=school_pk, class_pk=class_pk))
-            context = {'post_to_url': '/class/edit/' + str(class_pk),
+            context = {'post_to_url': '/class/edit/' + str(class_pk) + '/',
                        'functionality_name': 'Edit Class',
-                       'form': class_edit_form}
-            return render(request, 'modal_form.html', RequestContext(request, context))
+                       'modal_title': 'Edit Class',
+                       'first_page': True,
+                       'class_add_form': class_edit_form,
+                       'allocate_tests_form': AllocateEditTestsToClassForm(class_pk=class_pk)}
+            return render(request, 'modal_form_add_class.html', RequestContext(request, context))
+
     else:
         return HttpResponseForbidden("You are not authorised to edit a class")
 
@@ -2120,7 +2170,8 @@ def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
                 context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
                            'functionality_name': 'Allocate Tests To Class',
                            'form': allocate_test_to_class_form,
-                           'other_classes': get_other_classes(class_pk=class_pk),
+                           'other_classes': get_other_classes(url_prefix='/class/test/allocate/' + str(class_pk) + '/',
+                                                              class_pk=class_pk),
                            'info_load_class': 'test_instructions_load_link'}
                 return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
         else:
@@ -2129,14 +2180,15 @@ def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
             context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
                        'functionality_name': 'Allocate Tests To Class',
                        'form': allocate_test_to_class_form,
-                       'other_classes': get_other_classes(class_pk=class_pk),
+                       'other_classes': get_other_classes(url_prefix='/class/test/allocate/' + str(class_pk) + '/',
+                                                          class_pk=class_pk),
                        'info_load_class': 'test_instructions_load_link'}
             return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to allocate tests to this class")
 
 
-def get_other_classes(class_pk=None, school_pk=None):
+def get_other_classes(url_prefix, class_pk=None, school_pk=None):
         if class_pk:
             other_classes = (Class.objects.filter(school_id=Class.objects.get(pk=class_pk).school_id).order_by('-year').
                              exclude(pk=class_pk))
@@ -2158,7 +2210,6 @@ def get_other_classes(class_pk=None, school_pk=None):
             if unique:
                 classes_unique.append((other_class, other_tests))
 
-        url_prefix = '/class/test/allocate/' + str(class_pk) + '/' if class_pk else '/class/add/'
         other_classes_unique = [
             (
                 class_unique.class_name + '(' + str(class_unique.year) + ')', url_prefix + str(class_unique.pk) + '/'
