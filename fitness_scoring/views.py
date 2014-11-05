@@ -456,56 +456,62 @@ def instructions_page(request, instructions_name):
     elif instructions_name == 'administrator_add_classes' and user_type == 'Administrator':
         context = {'heading': 'Add Classes',
                    'reason': 'After the teachers have been added you may wish to assign some or all of the classes for '
-                             'the teachers.  Alternatively the teacher may add their own classes themselves when they '
+                             'the term.  Alternatively the teachers may add their own classes themselves when they '
                              'login.  This decision is up to you (it is fairly simple for either of you to do it).',
                    'instructions': [
-                       [('Click the "Add/Update Class List" tab at the left of the screen',
-                         'administrator_add_classes_A.png')],
+                       [('Click the "Classes" tab at the left of the screen (it may already be selected)',
+                         'administrator_add_class_A.png')],
                        [
-                           ('Click the "+" button at the top of the "Class List" table',
-                            'administrator_add_classes_B.png'),
-                           ('Now you have the option to select to add classes individually or to add a number of'
-                            ' classes from a file.  To add classes individually select the "Add Class" option then see'
-                            ' point 3.  To add classes from a file select the "Add Classes" option then see point 4.',
-                            'administrator_add_classes_C.png')
+                           ('Go to the "Add Class(es)" menu at the top of the Class table and select the "Add Class" '
+                            'option', 'administrator_add_class_B.png')
                        ],
                        [
                            ('Enter the details for the class.  You must choose a class name e.g. "Class 7A Term 1").  '
                             'The drop down has a list of the teachers that you have already added.  If the teacher for '
-                            'this class is not available then you must add them from the "Add/Update Teacher List" tab '
-                            '(see instructions)', 'administrator_add_classes_D.png'),
-                           ('Then click the button at the bottom of the form', None),
-                           ('Repeat from point 2. for all the remaining classes you wish to add and you are done!  '
-                            'Note that you will need to add a new "class" for every term you intend to run the tests '
-                            'in.', None)
+                            'this class is not available then you must add them (see instructions).',
+                            'administrator_add_class_C.png'),
+                           ('Then click the button at the bottom of the form', None)
                        ],
-                       [
-                           ('To add multiple classes from a file you must first make a classes CSV file.'
-                            '  See the next point for how to make a classes CSV file.', None),
-                           ('Then browse and select the classes CSV file from the add classes form',
-                            'administrator_add_classes_E.png'),
-                           ('Then click the button at the bottom of the form and you are done!  The classes should now '
-                            'show up in the "Class List" table.  Note that you will need to add a new "class" for '
-                            'every term you intend to run the tests in.', None)
-                       ],
+                       [('Repeat from point 2. for all the remaining classes for the term and you are done!', None)],
+                       [('It is recommended that you add all classes this way the first time you do this, in future '
+                         'you could try to add classes from a file which may be quicker (see instructions).', None)]
+                   ]}
+    elif instructions_name == 'administrator_add_classes_from_file' and user_type == 'Administrator':
+        context = {'heading': 'Add Classes From File',
+                   'reason': 'It can be quicker to add all classes for the term from a file.  However you should not '
+                             'do this the first time you add classes.',
+                   'instructions': [
                        [
                            ('To make a classes CSV file first you must open up a new excel document.', None),
                            ('Next put the following into the first cells of the excel sheet.',
-                            'administrator_add_classes_F.png'),
+                            'administrator_add_classes_A.png'),
                            ('Then put the details for the classes you are adding under the headings  (an example is '
                             ' below).  If there is no test set that you want the class to default with than you can '
                             'leave that column blank (but still include the heading)',
-                            'administrator_add_classes_G.png'),
+                            'administrator_add_classes_B.png'),
                            ('Next you will need to save or export the excel document as a .CSV file.  If you do not '
                             'know how to do this then you will need to look up how on line.  Be sure to make the '
                             '"field delimiter" a comma (,) and the "text delimiter" a double quote (").  Also be sure '
                             'choose the "quote all text cells option".  The options window may look something like '
-                            'this', 'administrator_add_classes_H.png'),
+                            'this', 'administrator_add_classes_C.png'),
                            ('After you have saved the file you can open it in Notepad or WordPad to check it.  It '
-                            'should look something like the example below.', 'administrator_add_classes_I.png'),
+                            'should look something like the example below.', 'administrator_add_classes_D.png'),
                            ('Check that there are double quotes around all of the text (everything except for the '
                             'year)', None),
-                           ('If everything looks good you are now ready to upload the file (see point 4.)', None)
+                           ('If everything looks good you are now ready to upload the file', None)
+                       ],
+                       [
+                           ('Now that the file is ready you can go back to the program to upload it.', None),
+                           ('Click the "Classes" tab at the left of the screen (it may already be selected)',
+                            'administrator_add_class_A.png')
+                       ],
+                       [
+                           ('Go to the "Add Class(es)" menu at the top of the Class table and select the "Add Classes" '
+                            'option', 'administrator_add_classes_F.png')
+                       ],
+                       [
+                           ('Browse and select the .CSV file you just created.', 'administrator_add_class_G.png'),
+                           ('Then click the button at the bottom of the form', None)
                        ]
                    ]}
     elif instructions_name == 'teacher_add_classes' and user_type == 'Teacher':
