@@ -89,6 +89,14 @@ $(document).on('change', '#previous_class_tests', function(event){
     });
 });
 
+//for loading test selection check boxes when change the use previous class select element
+$(document).on('change', '#previous_class_tests_2', function(event){
+    event.preventDefault();
+    $('#button_pressed').val('next');
+    $('#modalForm').attr('action', $('#previous_class_tests_2').val());
+    $('#modalForm').submit();
+});
+
 //for loading class result graphs load links on graph_selection change
 $(document).on('change', '.graph_selection', function(event){
     if($(this).val() != '') {
@@ -148,6 +156,13 @@ $(document).on('submit', '#modalForm', function(formEvent) {
 
     $('#modalForm').ajaxSubmit(options);
 
+});
+
+//crap hack because button value wont show up for add class and tests modal form
+$(document).on('click', '.button-note-pressed', function(event) {
+    event.preventDefault();
+    $('#button_pressed').val($(this).val());
+    $('#modalForm').submit();
 });
 
 function close_modal() {

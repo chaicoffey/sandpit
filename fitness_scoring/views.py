@@ -12,7 +12,7 @@ from fitness_scoring.forms import AddMajorTestCategoryForm, AddMajorTestCategori
 from fitness_scoring.forms import AddTestsForm, EditTestForm, UpdateTestFromFileForm
 from fitness_scoring.forms import AddTeacherForm, EditTeacherForm
 from fitness_scoring.forms import AddClassForm, AddClassesForm, EditClassForm, AddClassTeacherForm, EditClassTeacherForm
-from fitness_scoring.forms import AllocateEditTestsToClassForm, AllocateEditDefaultTestsForm
+from fitness_scoring.forms import AllocateEditTestsToClassForm, AllocateEditDefaultTestsForm, AllocateTestsToClassForm
 from fitness_scoring.forms import ResolveIssuesPersonalForm, ResolveIssuesClassForm
 from fitness_scoring.forms import ResolveIssuesSchoolIDForm, ResolveIssuesSchoolNameForm, ResolveIssuesForm
 from fitness_scoring.forms import StudentEntryForm, StudentEntryEditForm
@@ -1864,27 +1864,68 @@ def class_add(request, load_from_class_pk=None):
         teacher_or_administrator = (Teacher if user_type == 'Teacher' else Administrator).objects.get(user=user)
         school_pk = teacher_or_administrator.school_id.pk
         if request.POST:
+
             class_add_form = (AddClassTeacherForm(teacher_pk=teacher_or_administrator.pk, data=request.POST)
                               if user_type == 'Teacher' else AddClassForm(school_pk=school_pk, data=request.POST))
-            if class_add_form.add_class():
-                class_display_text = (class_add_form.cleaned_data['class_name'] +
-                                      ' (' + class_add_form.cleaned_data['year'] + ')')
-                context = {'finish_title': 'Class Added',
-                           'user_message': 'Class Added Successfully: ' + class_display_text}
-                return render(request, 'user_message.html', RequestContext(request, context))
-            else:
+            allocate_tests_form = AllocateTestsToClassForm(load_from_class_pk=load_from_class_pk,
+                                                           initialise_default=True, data=request.POST)
+            if request.POST['button_pressed'] == 'next':
+                if class_add_form.is_valid():
+                    context = {'post_to_url': '/class/add/',
+                               'functionality_name': 'Allocate Tests To Class',
+                               'modal_title': 'Allocate Tests To Class',
+                               'first_page': False,
+                               'class_add_form': class_add_form,
+                               'other_classes': get_other_classes(school_pk=school_pk),
+                               'allocate_tests_form': allocate_tests_form}
+                    return render(request, 'modal_form_add_class.html', RequestContext(request, context))
+                else:
+                    context = {'post_to_url': '/class/add/',
+                               'functionality_name': 'Add Class',
+                               'modal_title': 'Add Class',
+                               'first_page': True,
+                               'class_add_form': class_add_form,
+                               'allocate_tests_form': allocate_tests_form}
+                    return render(request, 'modal_form_add_class.html', RequestContext(request, context))
+            elif request.POST['button_pressed'] == 'back':
                 context = {'post_to_url': '/class/add/',
                            'functionality_name': 'Add Class',
                            'modal_title': 'Add Class',
-                           'class_add_form': class_add_form}
+                           'first_page': True,
+                           'class_add_form': class_add_form,
+                           'allocate_tests_form': allocate_tests_form}
                 return render(request, 'modal_form_add_class.html', RequestContext(request, context))
+            else:
+                if allocate_tests_form.is_valid():
+                    class_instance = class_add_form.add_class()
+                    if class_instance:
+                        allocate_tests_form.allocate_tests_to_class(class_instance.pk)
+                        class_display_text = (class_instance.class_name + ' (' + str(class_instance.year) + ')')
+                        context = {'finish_title': 'Class Added',
+                                   'user_message': 'Class Added Successfully: ' + class_display_text}
+                        return render(request, 'user_message.html', RequestContext(request, context))
+                    else:
+                        context = {'finish_title': 'Error Adding Class',
+                                   'user_message': 'Error Adding Class'}
+                        return render(request, 'user_message.html', RequestContext(request, context))
+                else:
+                    context = {'post_to_url': '/class/add/',
+                               'functionality_name': 'Allocate Tests To Class',
+                               'modal_title': 'Allocate Tests To Class',
+                               'first_page': False,
+                               'class_add_form': class_add_form,
+                               'other_classes': get_other_classes(school_pk=school_pk),
+                               'allocate_tests_form': allocate_tests_form}
+                    return render(request, 'modal_form_add_class.html', RequestContext(request, context))
         else:
             class_add_form = (AddClassTeacherForm(teacher_pk=teacher_or_administrator.pk) if user_type == 'Teacher'
                               else AddClassForm(school_pk=school_pk))
             context = {'post_to_url': '/class/add/',
                        'functionality_name': 'Add Class',
                        'modal_title': 'Add Class',
-                       'class_add_form': class_add_form}
+                       'first_page': True,
+                       'class_add_form': class_add_form,
+                       'allocate_tests_form': AllocateTestsToClassForm()}
             return render(request, 'modal_form_add_class.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to add a class")
@@ -2076,7 +2117,7 @@ def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
                 context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
                            'functionality_name': 'Allocate Tests To Class',
                            'form': allocate_test_to_class_form,
-                           'other_classes': get_other_classes(class_pk),
+                           'other_classes': get_other_classes(class_pk=class_pk),
                            'info_load_class': 'test_instructions_load_link'}
                 return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
         else:
@@ -2086,16 +2127,22 @@ def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
             context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
                        'functionality_name': 'Allocate Tests To Class',
                        'form': allocate_test_to_class_form,
-                       'other_classes': get_other_classes(class_pk),
+                       'other_classes': get_other_classes(class_pk=class_pk),
                        'info_load_class': 'test_instructions_load_link'}
             return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to allocate tests to this class")
 
 
-def get_other_classes(class_pk):
-        class_instance = Class.objects.get(pk=class_pk)
-        other_classes = Class.objects.filter(school_id=class_instance.school_id).order_by('-year').exclude(pk=class_pk)
+def get_other_classes(class_pk=None, school_pk=None):
+        if class_pk:
+            other_classes = (Class.objects.filter(school_id=Class.objects.get(pk=class_pk).school_id).order_by('-year').
+                             exclude(pk=class_pk))
+        elif school_pk:
+            other_classes = Class.objects.filter(school_id=school_pk).order_by('-year')
+        else:
+            other_classes = []
+
         classes_unique = []
         for other_class in other_classes:
             other_tests = set([other_test.test_name for other_test in other_class.get_tests()])
@@ -2109,13 +2156,13 @@ def get_other_classes(class_pk):
             if unique:
                 classes_unique.append((other_class, other_tests))
 
+        url_prefix = '/class/test/allocate/' + str(class_pk) + '/' if class_pk else '/class/add/'
         other_classes_unique = [
             (
-                class_unique.class_name + '(' + str(class_unique.year) + ')',
-                '/class/test/allocate/' + str(class_pk) + '/' + str(class_unique.pk) + '/'
+                class_unique.class_name + '(' + str(class_unique.year) + ')', url_prefix + str(class_unique.pk) + '/'
             ) for (class_unique, class_unique_tests) in classes_unique
         ]
-        other_classes_unique.insert(0, ('Default', '/class/test/allocate/' + str(class_pk) + '/DEFAULT/'))
+        other_classes_unique.insert(0, ('Default', url_prefix + 'DEFAULT/'))
         return other_classes_unique
 
 
