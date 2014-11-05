@@ -485,7 +485,7 @@ class AllocateTestsToClassForm(forms.Form):
                 field_name = test.test_name.replace(" ", "_")
                 self.fields[field_name] = forms.BooleanField(required=False)
                 self.fields[field_name].initial = test in already_class_loading_tests
-                test_fields.append((self[field_name], '/class/add/' + str(test.pk),
+                test_fields.append((self[field_name], '/test/instructions/' + str(test.pk),
                                     test.test_category.test_category_name))
             if test_fields:
                 self.major_test_categories.append((major_test_category.major_test_category_name,

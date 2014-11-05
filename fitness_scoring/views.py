@@ -1867,8 +1867,11 @@ def class_add(request, load_from_class_pk=None):
 
             class_add_form = (AddClassTeacherForm(teacher_pk=teacher_or_administrator.pk, data=request.POST)
                               if user_type == 'Teacher' else AddClassForm(school_pk=school_pk, data=request.POST))
-            allocate_tests_form = AllocateTestsToClassForm(load_from_class_pk=load_from_class_pk,
-                                                           initialise_default=True, data=request.POST)
+            if load_from_class_pk:
+                allocate_tests_form = AllocateTestsToClassForm(load_from_class_pk=load_from_class_pk)
+            else:
+                allocate_tests_form = AllocateTestsToClassForm(data=request.POST)
+
             if request.POST['button_pressed'] == 'next':
                 if class_add_form.is_valid():
                     context = {'post_to_url': '/class/add/',

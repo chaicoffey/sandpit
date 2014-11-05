@@ -93,8 +93,7 @@ $(document).on('change', '#previous_class_tests', function(event){
 $(document).on('change', '#previous_class_tests_2', function(event){
     event.preventDefault();
     $('#button_pressed').val('next');
-    $('#modalForm').attr('action', $('#previous_class_tests_2').val());
-    $('#modalForm').submit();
+    $("#modalForm").ajaxSubmit({url: $(this).val(), type: 'post'})
 });
 
 //for loading class result graphs load links on graph_selection change
