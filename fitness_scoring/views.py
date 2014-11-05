@@ -2002,7 +2002,7 @@ def class_results_table(request, class_pk):
             ],
             'results_table_buttons': [
                 ['plus', [['class_results_modal_load_link', '/class/test/allocate/' + str(class_pk),
-                           'Allocate Tests To Class']]],
+                           'Change Tests For Class']]],
                 ['asterisk', [['modal_load_link', '/class/get_new_code/' + str(class_pk),
                                'Get New Class Login Password'],
                               ['class_results_modal_load_link', '/class/approve_all/' + str(class_pk),
@@ -2020,12 +2020,13 @@ def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
         if request.POST:
             allocate_test_to_class_form = AllocateEditTestsToClassForm(class_pk=class_pk, data=request.POST)
             if allocate_test_to_class_form.allocate_tests_to_class():
-                context = {'finish_title': 'Tests Allocated To Class',
-                           'user_message': 'Tests Allocated To Class Successfully'}
+                context = {'finish_title': 'Tests Changed For Class',
+                           'user_message': 'Tests Changed For Class Successfully'}
                 return render(request, 'user_message.html', RequestContext(request, context))
             else:
                 context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
-                           'functionality_name': 'Allocate Tests To Class',
+                           'modal_title': 'Choose Tests For Class',
+                           'functionality_name': 'Change Tests',
                            'form': allocate_test_to_class_form,
                            'other_classes': get_other_classes(url_prefix='/class/test/allocate/' + str(class_pk) + '/',
                                                               class_pk=class_pk),
@@ -2035,7 +2036,8 @@ def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
             allocate_test_to_class_form = AllocateEditTestsToClassForm(class_pk=class_pk,
                                                                        load_from_class_pk=load_from_class_pk)
             context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
-                       'functionality_name': 'Allocate Tests To Class',
+                       'modal_title': 'Choose Tests For Class',
+                       'functionality_name': 'Change Tests',
                        'form': allocate_test_to_class_form,
                        'other_classes': get_other_classes(url_prefix='/class/test/allocate/' + str(class_pk) + '/',
                                                           class_pk=class_pk),
