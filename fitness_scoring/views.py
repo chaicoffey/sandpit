@@ -350,23 +350,10 @@ def administrator_view(request):
                  ('add_teachers_B.png', None), ('add_teachers_D.png', None)
              ]),
             ('Add Classes For Term', 'Classes_Link', 'administrator_add_classes',
-             None,
+             "Follow the diagrams to add all teacher's classes for the term. "
+             " **This step is optional and can be left to the teachers to do themselves**",
              [
-                 ('administrator_add_classes_A.png', None), ('administrator_add_classes_BB.png', None),
-                 ('administrator_add_classes_C.png', None), ('administrator_add_classes_D.png', None)
-             ]),
-            ('Add Tests To First Class', 'Classes_Link', 'administrator_add_tests',
-             None,
-             [
-                 ('administrator_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                 ('administrator_add_tests_DD.png', 'REPEAT (For All Tests Adding)'),
-                 ('administrator_add_tests_EEE.png', None)
-             ]),
-            ('Add Tests To Other Classes', 'Classes_Link', 'administrator_add_tests2',
-             None,
-             [
-                 ('administrator_add_classes_A.png', None), ('administrator_add_tests2_B.png', None),
-                 ('administrator_add_tests2_C.png', None), ('administrator_add_classes_D.png', None)
+                 ('administrator_add_classes_B.png', None), ('administrator_add_classes_D.png', None)
              ])
         ]
         non_optional_steps = 1
