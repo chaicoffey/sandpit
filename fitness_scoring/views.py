@@ -1566,13 +1566,13 @@ def allocate_default_tests(request):
             else:
                 context = {'post_to_url': '/allocate_default_tests/',
                            'functionality_name': 'Allocate Default Tests',
-                           'form': allocate_default_tests_form,
+                           'allocate_tests_form': allocate_default_tests_form,
                            'info_load_class': 'test_instructions_load_link'}
                 return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
         else:
             context = {'post_to_url': '/allocate_default_tests/',
                        'functionality_name': 'Allocate Default Tests',
-                       'form': AllocateEditDefaultTestsForm(),
+                       'allocate_tests_form': AllocateEditDefaultTestsForm(),
                        'info_load_class': 'test_instructions_load_link'}
             return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
     else:
@@ -2043,7 +2043,7 @@ def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
                 context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
                            'modal_title': 'Choose Tests For Class',
                            'functionality_name': 'Change Tests',
-                           'form': allocate_test_to_class_form,
+                           'allocate_tests_form': allocate_test_to_class_form,
                            'other_classes': get_other_classes(url_prefix='/class/test/allocate/' + str(class_pk) + '/',
                                                               class_pk=class_pk),
                            'info_load_class': 'test_instructions_load_link'}
@@ -2055,7 +2055,7 @@ def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
             context = {'post_to_url': '/class/test/allocate/' + str(class_pk) + '/',
                        'modal_title': 'Choose Tests For Class',
                        'functionality_name': 'Change Tests',
-                       'form': allocate_test_to_class_form,
+                       'allocate_tests_form': allocate_test_to_class_form,
                        'other_classes': get_other_classes(url_prefix='/class/test/allocate/' + str(class_pk) + '/',
                                                           class_pk=class_pk),
                        'info_load_class': 'test_instructions_load_link'}

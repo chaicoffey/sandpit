@@ -13,83 +13,20 @@
 
     <div class="modal-body" style="padding-bottom: 0px">
         {% csrf_token %}
-        {% if form %}
 
-            {% if other_classes %}
-                <div>
-                    <label for="previous_class_tests">Use Previous Class's Tests</label>
-                    <select id="previous_class_tests">
-                        <option value="" disabled selected></option>
-                        {% for class_name, load_url in other_classes %}
-                            <option value="{{ load_url }}">{{ class_name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-            {% endif %}
-
-            {{ form.non_field_errors }}
-
-            {% for hidden in form.hidden_fields %}
-                <div class="form-group" style="display: none">{{ hidden }}</div>
-            {% endfor %}
-
-            {% for major_test_category, tests in form.major_test_categories %}
-
-                <div class="middle_color" style="height: 1px; background-color: transparent; text-align: center">
-                    <span style="font-size: 16px; position: relative; top: 0.6em; background-color: white;
-                     padding-right: 5px; padding-left: 5px">
-                        {{ major_test_category }}
-                    </span>
-                </div>
-                <hr class="middle_color" style="border-width: 2px">
-
-                <table style="width: 100%">
-                    {% for field, instructions_url, test_category in tests %}
-
-                        {% if forloop.counter0|divisibleby:2 %}
-                            <tr style="width: 100%">
-                        {% endif %}
-
-                        <td style="width: 50%; height: 50px; vertical-align: top">
-                            <div class="form-group
-                                {% if field.errors %}
-                                    has-error has-feedback
-                                {% endif %}"
-                                 style="font-size: 12px">
-                                <div class="col-sm-6 {{ info_load_class }}" style="padding-left: 21px">
-                                    <a href="{{ instructions_url }}"
-                                       title="click to open test instructions in a new tab">
-                                        <span class="link_open_tab glyphicon glyphicon-info-sign"></span>
-                                    </a>
-                                    <label for="{{ field.auto_id }}"
-                                            {% if field.field.widget.attrs.disabled %}
-                                                class="disabled"
-                                            {% endif %}>
-                                        {{ field.label|safe }}:
-                                    </label>
-                                </div>
-                                <div class="col-sm-1">
-                                    {{ field }}
-                                    {% if field.errors %}
-                                        <span class="help-block">{{ field.errors }}</span>
-                                    {% endif %}
-                                </div>
-                                <div class="col-sm-4 lighter_color">
-                                    {{ test_category }}
-                                </div>
-                            </div>
-                        </td>
-
-                        {% if forloop.counter|divisibleby:2 or forloop.last %}
-                            </tr>
-                        {% endif %}
-
+        {% if other_classes %}
+            <div>
+                <label for="previous_class_tests">Use Previous Class's Tests</label>
+                <select id="previous_class_tests">
+                    <option value="" disabled selected></option>
+                    {% for class_name, load_url in other_classes %}
+                        <option value="{{ load_url }}">{{ class_name }}</option>
                     {% endfor %}
-                </table>
-
-            {% endfor %}
-
+                </select>
+            </div>
         {% endif %}
+        {% include "modal_form_allocate_tests_inner.html" %}
+
         <div class="progress progress-striped active hide" id="progress-bar">
             <div class="progress-bar" role="progressbar"
                  aria-valuenow="100" aria-valuemin="0" aria-valuemax="100" style="width: 100%"></div>
