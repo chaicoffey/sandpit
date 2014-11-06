@@ -16,23 +16,16 @@ from django.core.validators import MinLengthValidator
 import datetime
 from datetime import date
 import time
+import re
 
 
-class _BaseForm(object):
+class BaseForm(forms.Form):
     def clean(self):
-        cleaned_data = super(_BaseForm, self).clean()
+        cleaned_data = super(BaseForm, self).clean()
         for field in cleaned_data:
             if isinstance(cleaned_data[field], basestring):
-                cleaned_data[field] = cleaned_data[field].strip()
+                cleaned_data[field] = re.sub(' +', ' ', cleaned_data[field].strip())
         return cleaned_data
-
-
-class BaseModelForm(_BaseForm, forms.ModelForm):
-    pass
-
-
-class BaseForm(_BaseForm, forms.Form):
-    pass
 
 
 class ChangePasswordFrom(BaseForm):
