@@ -356,7 +356,7 @@ def administrator_view(request):
                                              '/instructions_page/' + instructions_name, images))
 
         context = {
-            'logged_in_heading': 'Administrator: ' + administrator.school_id.name,
+            'logged_in_heading': 'Administrator (' + administrator.school_id.name + ')',
             'user_name': request.session.get('username'),
             'user_tab_page_title': 'Administrator: ' + administrator.school_id.name,
             'user_tabs': [
