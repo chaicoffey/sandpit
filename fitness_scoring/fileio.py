@@ -1,6 +1,7 @@
 import csv
 import tempfile
 import os
+import re
 from pe_site.settings import BASE_DIR
 from fitness_scoring.models import MajorTestCategory, TestCategory
 from fitness_scoring.models import PercentileBracketSet
@@ -50,7 +51,10 @@ def read_file(file_path_on_server, headings):
             try:
                 data_line = []
                 for heading in headings:
-                    data_line.append(line[heading])
+                    if line[heading]:
+                        data_line.append(re.sub(' +', ' ', line[heading].strip()))
+                    else:
+                        data_line.append(line[heading])
                 valid_lines.append(data_line)
             except:
                 invalid_lines.append(line)
