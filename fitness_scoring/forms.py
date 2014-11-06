@@ -18,7 +18,24 @@ from datetime import date
 import time
 
 
-class ChangePasswordFrom(forms.Form):
+class _BaseForm(object):
+    def clean(self):
+        cleaned_data = super(_BaseForm, self).clean()
+        for field in cleaned_data:
+            if isinstance(cleaned_data[field], basestring):
+                cleaned_data[field] = cleaned_data[field].strip()
+        return cleaned_data
+
+
+class BaseModelForm(_BaseForm, forms.ModelForm):
+    pass
+
+
+class BaseForm(_BaseForm, forms.Form):
+    pass
+
+
+class ChangePasswordFrom(BaseForm):
     user_pk = forms.CharField(widget=forms.HiddenInput())
     old_password = forms.CharField(widget=forms.PasswordInput())
     new_password = forms.CharField(widget=forms.PasswordInput())
@@ -63,7 +80,7 @@ class ChangePasswordFrom(forms.Form):
         return password_changed
 
 
-class AddTeacherForm(forms.Form):
+class AddTeacherForm(BaseForm):
     school_pk = forms.CharField(widget=forms.HiddenInput())
     first_name = forms.CharField(max_length=100, required=True)
     surname = forms.CharField(max_length=100, required=True)
@@ -101,7 +118,7 @@ class AddTeacherForm(forms.Form):
         return teacher
 
 
-class EditTeacherForm(forms.Form):
+class EditTeacherForm(BaseForm):
     teacher_pk = forms.CharField(widget=forms.HiddenInput())
     school_pk = forms.CharField(widget=forms.HiddenInput())
     first_name = forms.CharField(max_length=100, required=True)
@@ -136,7 +153,7 @@ class EditTeacherForm(forms.Form):
         return teacher
 
 
-class AddClassForm(forms.Form):
+class AddClassForm(BaseForm):
     school_pk = forms.CharField(widget=forms.HiddenInput())
     year = forms.ChoiceField()
     class_name = forms.CharField(max_length=200)
@@ -198,7 +215,7 @@ class AddClassForm(forms.Form):
         return class_saved
 
 
-class AddClassesForm(forms.Form):
+class AddClassesForm(BaseForm):
     school_pk = forms.CharField(widget=forms.HiddenInput())
     add_classes_file = forms.FileField(required=True, validators=[validate_file_size])
 
@@ -291,7 +308,7 @@ class AddClassesForm(forms.Form):
             return False
 
 
-class EditClassForm(forms.Form):
+class EditClassForm(BaseForm):
     class_pk = forms.CharField(widget=forms.HiddenInput())
     school_pk = forms.CharField(widget=forms.HiddenInput())
     year = forms.ChoiceField()
@@ -359,7 +376,7 @@ class EditClassForm(forms.Form):
         return class_edited
 
 
-class AddClassTeacherForm(forms.Form):
+class AddClassTeacherForm(BaseForm):
     teacher_pk = forms.CharField(widget=forms.HiddenInput())
     year = forms.ChoiceField()
     class_name = forms.CharField(max_length=200)
@@ -409,7 +426,7 @@ class AddClassTeacherForm(forms.Form):
         return class_saved
 
 
-class EditClassTeacherForm(forms.Form):
+class EditClassTeacherForm(BaseForm):
     class_pk = forms.CharField(widget=forms.HiddenInput())
     teacher_pk = forms.CharField(widget=forms.HiddenInput())
     year = forms.ChoiceField()
@@ -462,7 +479,7 @@ class EditClassTeacherForm(forms.Form):
         return class_edited
 
 
-class AllocateTestsToClassForm(forms.Form):
+class AllocateTestsToClassForm(BaseForm):
 
     def __init__(self, load_from_class_pk=None, initialise_default=None, *args, **kwargs):
         super(AllocateTestsToClassForm, self).__init__(*args, **kwargs)
@@ -515,7 +532,7 @@ class AllocateTestsToClassForm(forms.Form):
         return test_fields_ordered
 
 
-class AllocateEditTestsToClassForm(forms.Form):
+class AllocateEditTestsToClassForm(BaseForm):
     class_pk = forms.CharField(widget=forms.HiddenInput())
 
     def __init__(self, class_pk, load_from_class_pk=None, initialise_default=None, *args, **kwargs):
@@ -587,7 +604,7 @@ class AllocateEditTestsToClassForm(forms.Form):
         return test_fields_ordered
 
 
-class AllocateEditDefaultTestsForm(forms.Form):
+class AllocateEditDefaultTestsForm(BaseForm):
 
     def __init__(self, *args, **kwargs):
         super(AllocateEditDefaultTestsForm, self).__init__(*args, **kwargs)
@@ -620,7 +637,7 @@ class AllocateEditDefaultTestsForm(forms.Form):
         return allocate_defaults
 
 
-class AddSchoolForm(forms.Form):
+class AddSchoolForm(BaseForm):
     name = forms.CharField(max_length=300, required=True, validators=[MinLengthValidator(3), validate_no_space(3)])
     state = forms.ChoiceField(choices=School.STATE_CHOICES, required=True)
     subscription_paid = forms.BooleanField(initial=False, required=False)
@@ -655,7 +672,7 @@ class AddSchoolForm(forms.Form):
         return school
 
 
-class AddSchoolsForm(forms.Form):
+class AddSchoolsForm(BaseForm):
     add_schools_file = forms.FileField(required=True, validators=[validate_file_size])
 
     def __init__(self, *args, **kwargs):
@@ -727,7 +744,7 @@ class AddSchoolsForm(forms.Form):
             return False
 
 
-class EditSchoolForm(forms.Form):
+class EditSchoolForm(BaseForm):
     school_pk = forms.CharField(widget=forms.HiddenInput())
     name = forms.CharField(max_length=300, required=True, validators=[MinLengthValidator(3), validate_no_space(3)])
     state = forms.ChoiceField(choices=School.STATE_CHOICES, required=True)
@@ -763,7 +780,7 @@ class EditSchoolForm(forms.Form):
         return school_edited
 
 
-class AddMajorTestCategoryForm(forms.Form):
+class AddMajorTestCategoryForm(BaseForm):
     major_test_category_name = forms.CharField(max_length=200, required=True,
                                                validators=[validate_major_test_category_unique])
 
@@ -779,7 +796,7 @@ class AddMajorTestCategoryForm(forms.Form):
         return major_test_category_saved
 
 
-class AddMajorTestCategoriesForm(forms.Form):
+class AddMajorTestCategoriesForm(BaseForm):
     add_major_test_categories_file = forms.FileField(required=True, validators=[validate_file_size])
 
     def __init__(self, *args, **kwargs):
@@ -817,7 +834,7 @@ class AddMajorTestCategoriesForm(forms.Form):
             return False
 
 
-class EditMajorTestCategoryForm(forms.Form):
+class EditMajorTestCategoryForm(BaseForm):
     major_test_category_pk = forms.CharField(widget=forms.HiddenInput())
     major_test_category_name = forms.CharField(max_length=200, required=True)
 
@@ -844,7 +861,7 @@ class EditMajorTestCategoryForm(forms.Form):
         return major_test_category_edited
 
 
-class AddTestCategoryForm(forms.Form):
+class AddTestCategoryForm(BaseForm):
     test_category_name = forms.CharField(max_length=200, required=True, validators=[validate_test_category_unique])
 
     def __init__(self, *args, **kwargs):
@@ -859,7 +876,7 @@ class AddTestCategoryForm(forms.Form):
         return test_category_saved
 
 
-class AddTestCategoriesForm(forms.Form):
+class AddTestCategoriesForm(BaseForm):
     add_test_categories_file = forms.FileField(required=True, validators=[validate_file_size])
 
     def __init__(self, *args, **kwargs):
@@ -895,7 +912,7 @@ class AddTestCategoriesForm(forms.Form):
             return False
 
 
-class EditTestCategoryForm(forms.Form):
+class EditTestCategoryForm(BaseForm):
     test_category_pk = forms.CharField(widget=forms.HiddenInput())
     test_category_name = forms.CharField(max_length=200, required=True)
 
@@ -921,7 +938,7 @@ class EditTestCategoryForm(forms.Form):
         return test_category_edited
 
 
-class AddTestsForm(forms.Form):
+class AddTestsForm(BaseForm):
     add_tests_files = MultiFileField(required=True)
 
     def __init__(self, *args, **kwargs):
@@ -956,7 +973,7 @@ class AddTestsForm(forms.Form):
             return False
 
 
-class UpdateTestFromFileForm(forms.Form):
+class UpdateTestFromFileForm(BaseForm):
     test_pk = forms.CharField(widget=forms.HiddenInput())
     update_test_file = forms.FileField(required=True, validators=[validate_file_size],
                                        help_text='can only add to percentile lists cannot overwrite what is already'
@@ -989,7 +1006,7 @@ class UpdateTestFromFileForm(forms.Form):
             return False
 
 
-class EditTestForm(forms.Form):
+class EditTestForm(BaseForm):
     test_pk = forms.CharField(widget=forms.HiddenInput())
     test_name = forms.CharField(max_length=200, required=True)
 
@@ -1013,7 +1030,7 @@ class EditTestForm(forms.Form):
         return test_edited
 
 
-class ResolveIssuesPersonalForm(forms.Form):
+class ResolveIssuesPersonalForm(BaseForm):
     resolver_type = forms.CharField(widget=forms.HiddenInput())
     enrolment_pk = forms.CharField(widget=forms.HiddenInput())
     date_tests_performed = forms.DateField(required=True, input_formats=['%d/%m/%Y'])
@@ -1075,7 +1092,7 @@ class ResolveIssuesPersonalForm(forms.Form):
         return resolved
 
 
-class ResolveIssuesClassForm(forms.Form):
+class ResolveIssuesClassForm(BaseForm):
     resolver_type = forms.CharField(widget=forms.HiddenInput())
     enrolment_results = forms.ChoiceField(required=True, widget=forms.RadioSelect)
 
@@ -1128,7 +1145,7 @@ class ResolveIssuesClassForm(forms.Form):
         return resolved
 
 
-class ResolveIssuesSchoolIDForm(forms.Form):
+class ResolveIssuesSchoolIDForm(BaseForm):
     resolver_type = forms.CharField(widget=forms.HiddenInput())
     resolution_options = forms.ChoiceField(required=True, widget=forms.RadioSelect)
 
@@ -1205,7 +1222,7 @@ class ResolveIssuesSchoolIDForm(forms.Form):
                 's details are correct and ' + incorrect_student + 's details are incorrect')
 
 
-class ResolveIssuesSchoolNameForm(forms.Form):
+class ResolveIssuesSchoolNameForm(BaseForm):
     resolver_type = forms.CharField(widget=forms.HiddenInput())
     resolution_options = forms.ChoiceField(required=True, widget=forms.RadioSelect)
 
@@ -1279,7 +1296,7 @@ class ResolveIssuesSchoolNameForm(forms.Form):
         return this_student + ' and ' + other_student + ' are different people and both their names are correct'
 
 
-class ResolveIssuesForm(forms.Form):
+class ResolveIssuesForm(BaseForm):
     resolver_type = forms.CharField(widget=forms.HiddenInput())
     resolve_method = forms.CharField(widget=forms.HiddenInput())
 
