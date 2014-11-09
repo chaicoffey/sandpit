@@ -3,7 +3,7 @@
 
     <div class="modal-header"><div class="modal-title">{{ modal_title }}</div></div>
 
-    <div class="modal-body" {% if not first_page %}style="padding-bottom: 0px"{% endif %}>
+    <div class="modal-body" {% if not first_page %}style="padding-bottom: 0"{% endif %}>
         {% csrf_token %}
 
         <div {% if not first_page %}style="display: none"{% endif %}>
@@ -31,6 +31,14 @@
         </div>
 
         <div {% if first_page %}style="display: none"{% endif %}>
+
+            <div class="lighter_color" style="font-size: 12px">
+                Please select the tests you wish to conduct with your class over the term.  These can be edited later.
+                You may click on the <span class="link_open_tab glyphicon glyphicon-info-sign"></span> symbols for
+                details of the tests.  You may also use a set of tests already chosen for a previous class.  The set
+                of tests you choose may be edited later.
+            </div>
+            <hr>
 
             {% if other_classes %}
                 <div>
