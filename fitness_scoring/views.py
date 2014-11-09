@@ -298,7 +298,7 @@ def teacher_view(request):
                 ['Classes', '/class/list/', 'item_list:1', 'Classes_Link']
             ],
             'step_sets': step_sets,
-            'total_steps': step_index
+            'total_steps': len(steps)
         }
 
         return render(request, 'user_tab_page.html', RequestContext(request, context))
@@ -343,17 +343,21 @@ def administrator_view(request):
                  ('administrator_add_classes_B.png', None), ('administrator_add_classes_D.png', None)
              ])
         ]
-        non_optional_steps = 1
-        steps_formatted = []
-        for step_index in range(non_optional_steps):
-            (step_heading, tab_id_link, instructions_name, step_text, images) = steps[step_index]
-            steps_formatted.append((step_index + 1, step_heading, tab_id_link, step_text,
-                                    '/instructions_page/' + instructions_name, images))
-        steps_optional_formatted = []
-        for step_index in range(non_optional_steps, len(steps)):
-            (step_heading, tab_id_link, instructions_name, step_text, images) = steps[step_index]
-            steps_optional_formatted.append((step_index + 1, step_heading, tab_id_link, step_text,
-                                             '/instructions_page/' + instructions_name, images))
+        step_divisions = [
+            (1, 'Follow this step to add teachers for year'),
+            (2, 'Optional Steps (Can Leave For Teachers)')
+        ]
+
+        step_sets = []
+        step_index = 0
+        for step_index_to, steps_text in step_divisions:
+            steps_formatted = []
+            while step_index < step_index_to:
+                (step_heading, tab_id_link, instructions_name, step_text, images) = steps[step_index]
+                steps_formatted.append((step_index + 1, step_heading, tab_id_link, step_text,
+                                        '/instructions_page/' + instructions_name, images))
+                step_index += 1
+            step_sets.append((steps_formatted, steps_text))
 
         context = {
             'logged_in_heading': 'Administrator (' + administrator.school_id.name + ')',
@@ -364,8 +368,7 @@ def administrator_view(request):
                 ['Teachers', '/teacher/list/', 'item_list:1', 'Teachers_Link'],
                 ['Classes', '/class/list/', 'item_list:1', 'Classes_Link']
             ],
-            'step_sets': [(steps_formatted, 'Follow this step to add teachers for year'),
-                          (steps_optional_formatted, 'Optional Steps (Can Leave For Teachers)')],
+            'step_sets': step_sets,
             'total_steps': len(steps)
         }
 
