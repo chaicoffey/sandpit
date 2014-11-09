@@ -285,7 +285,8 @@ def teacher_view(request):
             while step_index < step_index_to:
                 (step_heading, tab_id_link, instructions_name, step_text, images) = steps[step_index]
                 steps_formatted.append((step_index + 1, step_heading, tab_id_link, step_text,
-                                        '/instructions_page/' + instructions_name, images))
+                                        ('/instructions_page/' + instructions_name) if instructions_name else None,
+                                        images))
                 step_index += 1
             step_sets.append((steps_formatted, steps_text))
 
@@ -341,11 +342,18 @@ def administrator_view(request):
              " **This step is optional and can be left to the teachers to do themselves**",
              [
                  ('administrator_add_classes_B.png', None), ('administrator_add_classes_D.png', None)
-             ])
+             ]),
+            ('Completed', 'Classes_Link', None,
+             "Once you have added all the PE teachers (and optionally the classes for the term) you are done!  "
+             "The teachers will have received emails with their login details and can now login to the site.  You will "
+             "need to come back to the site when/if you wish to add classes for next term or if more teachers need to "
+             "be added to the system.  You can now logout.",
+             None)
         ]
         step_divisions = [
             (1, 'Follow this step to add teachers for year'),
-            (2, 'Optional Steps (Can Leave For Teachers)')
+            (2, 'Optional Steps (Can Leave For Teachers)'),
+            (3, 'Completed')
         ]
 
         step_sets = []
@@ -355,7 +363,8 @@ def administrator_view(request):
             while step_index < step_index_to:
                 (step_heading, tab_id_link, instructions_name, step_text, images) = steps[step_index]
                 steps_formatted.append((step_index + 1, step_heading, tab_id_link, step_text,
-                                        '/instructions_page/' + instructions_name, images))
+                                        ('/instructions_page/' + instructions_name) if instructions_name else None,
+                                        images))
                 step_index += 1
             step_sets.append((steps_formatted, steps_text))
 

@@ -20,7 +20,7 @@
                 </div>
 
                 {% if step_sets %}
-                    <div class="lighter_color" style="padding-top: 60px; padding-bottom: 20px">
+                    <div class="lighter_color" style="padding-top: 55px; padding-bottom: 20px">
                         <hr class="darker_color">
                         <div class="lighter_color" style="font-weight: bold; font-size: 15px" align="center">
                             Steps Instructions (click one to view)
@@ -138,14 +138,16 @@
                                                     {% endfor %}
                                                 </tr></table></div>
                                             {% endif %}
-                                            <div class="darker_color">
-                                                If the diagrams are not enough
-                                                <a class="link_open_tab" href="{{ step_link }}" target="_blank"
-                                                   style="font-size: 15px">
-                                                     click here for more detailed instructions
-                                                </a>
-                                                (will open in a new tab)
-                                            </div>
+                                            {% if step_link %}
+                                                <div class="darker_color">
+                                                    If the diagrams are not enough
+                                                    <a class="link_open_tab" href="{{ step_link }}" target="_blank"
+                                                       style="font-size: 15px">
+                                                         click here for more detailed instructions
+                                                    </a>
+                                                    (will open in a new tab)
+                                                </div>
+                                            {% endif %}
                                         </td>
                                         <td height="100%" style="vertical-align: top">
                                             <button class="close_button" type="button"
