@@ -1,14 +1,24 @@
 <!DOCTYPE html>
+{% load staticfiles %}
 <html>
 <head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/site_styles.css' %}">
     <title>{{ heading }}</title>
 </head>
-<body>
+<body style="padding-top: 0">
 
-    <div class="text-info">
-        <h1>{{ test.test_category.test_category_name }} ({{ test.major_test_category.major_test_category_name }}):
-            {{ heading }}</h1>
+    <div class="text-info" style="color: black">
+        <h1>
+            {{ test.test_category.test_category_name }} ({{ test.major_test_category.major_test_category_name }}):
+            {{ heading }}
+            <button type="button" class="btn btn-primary" onclick="window.close();">
+                Close Instructions
+            </button>
+        </h1>
 
+        When you clicked on the instructions link this page opened in a new tab or window.  You can click on the close
+        instructions button above to close this tab and return to the program.
         <hr>
         <h3>Objective</h3>
             {% if objective %}
