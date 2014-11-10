@@ -241,10 +241,12 @@ def teacher_view(request):
 
         steps = [
             ('Add Classes For Term', 'Classes_Link', 'teacher_add_classes',
-             None,
+             "Follow the diagrams to add all of your classes for the term.  "
+             " **This step may have already been done by the administrator for you**.  "
+             "When you're done click the <div class='arrow-right' style='display: inline-block'></div> above to see "
+             "the next step.",
              [
-                 ('teacher_add_classes_A.png', None), ('administrator_add_classes_BB.png', None),
-                 ('teacher_add_classes_CC.png', None), ('teacher_add_classes_DDD.png', None)
+                 ('teacher_add_classes_B.png', None), ('teacher_add_classes_D.png', None)
              ]),
             ('Run Tests', 'Classes_Link', 'teacher_run_tests',
              None,
@@ -273,7 +275,7 @@ def teacher_view(request):
              ])
         ]
         step_divisions = [
-            (1, 'Do these (unless already done by admin)'),
+            (1, 'Do this (unless already done by admin)'),
             (2, 'Running the tests'),
             (5, 'Do these steps after running tests')
         ]
@@ -352,7 +354,7 @@ def administrator_view(request):
         ]
         step_divisions = [
             (1, 'Follow this step to add teachers for year'),
-            (2, 'Optional Steps (Can Leave For Teachers)'),
+            (2, 'Optional Step (Can Leave For Teachers)'),
             (3, 'Completed')
         ]
 
