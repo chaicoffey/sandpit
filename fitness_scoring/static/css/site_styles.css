@@ -197,6 +197,15 @@ ul {list-style:none}
     color: #303030;
 }
 
+.results_table > thead > tr > th
+{
+    border-top: 1px solid #303030;
+    border-right: 1px solid #303030;
+
+    background-color: #a0a0a0;
+    color: #303030;
+}
+
 .darker_color
 {
     color: #303030;
@@ -278,6 +287,12 @@ ul {list-style:none}
 
 .link_open_tab {
     color: #23b14d;
+    background-color: white;
+}
+
+td.test_instructions_load_link > a > span {
+    color: #23b14d;
+    background-color: white;
 }
 
 .arrow-right {
