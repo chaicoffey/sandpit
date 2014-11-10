@@ -2004,15 +2004,18 @@ def class_results_table(request, class_pk):
         student_test_results = []
         for enrolment in StudentClassEnrolment.objects.filter(class_id=class_instance):
             if enrolment.has_pending_issues():
-                approval_option = ['class_results_modal_load_link', '/class_enrolment/resolve_pending_issues/',
+                approval_option = ('class_results_modal_load_link', '/class_enrolment/resolve_pending_issues/',
                                    'exclamation-sign', 'student result entry has pending issues' + '\n' +
-                                                       'click to resolve issues']
+                                                       'click to resolve issues',
+                                   'attention_color')
             elif enrolment.is_approved():
-                approval_option = ['class_results_modal_load_link', '/class_enrolment/un_approve/',
-                                   'check', 'student result entry approved' + '\n' + 'click to remove approval']
+                approval_option = ('class_results_modal_load_link', '/class_enrolment/un_approve/',
+                                   'check', 'student result entry approved' + '\n' + 'click to remove approval',
+                                   'standard_blue')
             else:
-                approval_option = ['class_results_modal_load_link', '/class_enrolment/approve/',
-                                   'unchecked', 'student result entry not yet approved' + '\n' + 'click to approve']
+                approval_option = ('class_results_modal_load_link', '/class_enrolment/approve/',
+                                   'unchecked', 'student result entry not yet approved' + '\n' + 'click to approve',
+                                   'standard_blue')
             student_test_results.append(([approval_option], enrolment.pk, enrolment.student_id,
                                          enrolment.student_gender_at_time_of_enrolment,
                                          enrolment.get_student_age_at_time_of_enrolment(),

@@ -55,10 +55,11 @@
             {% for approval_options, enrolment_pk, student, gender, age, test_results in student_test_results %}
                 <tr>
                     <td><table><tr>
-                        {% for link_type, option_link, option_glyph_icon, hover_message in approval_options %}
+                        {% for link_type, option_link, option_glyph_icon, hover_message, style_class in approval_options %}
                             <td class="{{ link_type }}">
-                                <a href="{{ option_link }}{{ enrolment_pk }}" title="{{ hover_message }}">
-                                    <span class="glyphicon glyphicon-{{ option_glyph_icon }}"></span>
+                                <a href="{{ option_link }}{{ enrolment_pk }}"
+                                   title="{{ hover_message }}">
+                                    <span class="glyphicon glyphicon-{{ option_glyph_icon }} {{ style_class }}"></span>
                                 </a>
                             </td>
                         {% endfor %}
