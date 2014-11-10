@@ -341,7 +341,7 @@ def administrator_view(request):
              "Follow the diagrams to add all teacher's classes for the term. "
              " **This step is optional and can be left to the teachers to do themselves**",
              [
-                 ('administrator_add_classes_B.png', None), ('administrator_add_classes_D.png', None)
+                 ('administrator_add_class_B.png', None), ('administrator_add_class_D.png', None)
              ]),
             ('Completed', 'Classes_Link', None,
              "Once you have added all the PE teachers (and optionally the classes for the term) you are done!  "
