@@ -14,14 +14,16 @@
 
         <div class="container-fluid">
             <div class="row">
-                <div class="col-sm-3 col-md-2 sidebar">
-                    <ul class="nav nav-sidebar" id="class_links">
-                        {% for link_label, link_url, load_type in class_tabs %}
-                            <li class="{{ load_type }}">
-                                <a href="{{ link_url }}">{{ link_label }}</a>
-                            </li>
-                        {% endfor %}
-                    </ul>
+                <div class="col-sm-3 col-md-2 sidebar" style="padding-top: 15px">
+                    <div class="middle_color" style="border: 2px solid; border-radius: 4px">
+                        <ul class="nav nav-sidebar" id="class_links">
+                            {% for link_label, link_url, load_type in class_tabs %}
+                                <li class="{{ load_type }}">
+                                    <a href="{{ link_url }}">{{ link_label }}</a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
                 </div>
                 <div class="panel-body">
                     <div>
