@@ -106,6 +106,16 @@ ul {list-style:none}
     border: 2px solid #303030;
 }
 
+.panel-class
+{
+    border: 2px solid #303030;
+}
+
+.panel-class-results-table
+{
+    border: 2px solid #808080;
+}
+
 .table_page_select
 {
     float: left;
