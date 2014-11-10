@@ -232,6 +232,12 @@ td.class_results_modal_load_link  > a > span.standard_blue {
     color: #428bca;
 }
 
+.panel-heading.lighter_color {
+    color: #a0a0a0;
+    font-weight: bold;
+    border-color: #a0a0a0;
+}
+
 .darker_color
 {
     color: #303030;
