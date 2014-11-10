@@ -32,11 +32,11 @@
         <table class="table table-hover results_table" id="results_table">
             <thead>
                 <tr>
-                    <th></th>
-                    <th>Students</th>
-                    <th>Gender/Age</th>
+                    <th style="vertical-align: middle"></th>
+                    <th style="vertical-align: middle">Students</th>
+                    <th style="vertical-align: middle">Gender/Age</th>
                     {% for test in class_tests %}
-                        <th>
+                        <th style="vertical-align: middle">
                             <table><tr>
                                 {% for link_type, option_link, option_glyph_icon, hover_message in class_test_options %}
                                     <td class="{{ link_type }}">
@@ -49,7 +49,7 @@
                             {{ test.test_name }}
                         </th>
                     {% endfor %}
-                    <th></th>
+                    <th style="vertical-align: middle"></th>
                 </tr>
             </thead>
             {% for approval_options, enrolment_pk, student, gender, age, test_results in student_test_results %}
