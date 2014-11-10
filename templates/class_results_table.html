@@ -7,19 +7,25 @@
 <div class="panel panel-default">
 
     <div class="panel-heading">
-        Menus
-        {% for button_glyph_icon, button_options in results_table_buttons %}
-            <div class="btn-group">
-                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                    <span class="glyphicon glyphicon-{{ button_glyph_icon }}"></span>
-                </button>
-                <ul class="dropdown-menu" role="menu">
-                    {% for link_type, link_url, label in button_options %}
-                        <li class="{{ link_type }}"><a href="{{ link_url }}">{{ label }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endfor %}
+        <div class="lighter_color" style="font-weight: bold; font-size: 15px">
+            Menus
+            {% for button_label, button_options in results_table_buttons %}
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle darker_color"
+                            style="border-width: 2px; padding: 1px; height: 35px; width: 35px"
+                            data-toggle="dropdown">
+                        <div class="light_attention_color" style="font-size: 20px">{{ button_label }}</div>
+                    </button>
+                    <ul class="dropdown-menu" role="menu">
+                        {% for link_type, link_url, label in button_options %}
+                            <li class="{{ link_type }} item_list_menu_link"><a href="{{ link_url }}">
+                                {{ label }}
+                            </a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endfor %}
+        </div>
     </div>
 
     <div class="table-responsive" id="results_div">
