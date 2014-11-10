@@ -2,7 +2,7 @@
 
 body { padding-top:80px; }
 @media screen and (max-width: 768px) {
-    body { padding-top: 0px; }
+    body { padding-top: 0; }
 }
 
 select {
@@ -95,7 +95,7 @@ ul {list-style:none}
 
 .user-home-page-intro
 {
-    font-size: 20;
+    font-size: 14px;
     font-weight: bold;
     color: #303030;
     background-color: #a0a0a0;
