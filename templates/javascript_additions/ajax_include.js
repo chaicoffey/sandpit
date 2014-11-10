@@ -58,6 +58,9 @@ $(document).on('click', '.class_load_link a', function(event){
 
 //for loading class load links on item_list page
 $(document).on('click', '.class_result_edit_page_load_link a', function(event){
+    $('#class_links').children('li.active').removeClass('active');
+    $(this).parent('li').addClass('active');
+    $(this).blur();
     event.preventDefault();
     $('#class_results').load(base_url + $(this).attr('href'));
 });
