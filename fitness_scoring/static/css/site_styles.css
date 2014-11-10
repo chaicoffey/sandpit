@@ -295,6 +295,14 @@ td.test_instructions_load_link > a > span {
     background-color: white;
 }
 
+td.class_results_modal_load_link  > a > span {
+    color: orangered;
+}
+
+td.class_result_edit_page_load_link  > a > span {
+    color: orangered;
+}
+
 .arrow-right {
 	width: 0;
 	height: 0;
