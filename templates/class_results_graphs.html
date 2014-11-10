@@ -1,106 +1,114 @@
 
-<div id="class_results_graph_header">
+<div class="panel panel-default class-results-graphs">
 
-    <h2>{{ title }}</h2>
+    <div id="class_results_graph_header">
 
-    {% for selection_option in selection_options %}
-        <select class="graph_selection">
-            <option value=""></option>
-            {% for value, item, selected in selection_option %}
-                <option value="{{ value }}" {% if selected %}selected{% endif %}>{{ item }}</option>
-            {% endfor %}
-        </select>
-    {% endfor %}
+        <div class="panel-heading">
+            <div class="middle_color" style="font-weight: bold; font-size: 25px; text-align: center">
+                {{ title }}
+            </div>
+        <div>
 
-</div>
+        {% for selection_option in selection_options %}
+            <select class="graph_selection">
+                <option value=""></option>
+                {% for value, item, selected in selection_option %}
+                    <option value="{{ value }}" {% if selected %}selected{% endif %}>{{ item }}</option>
+                {% endfor %}
+            </select>
+        {% endfor %}
 
-{% if graphs %}
+    </div>
 
-    {% for title, title_text in graphs %}
-        <hr>
-        <h3>{{ title_text }}</h3>
-        <div class="class_result_view" id="graph_{{ title }}" style="width:600px;height:300px"></div>
-    {% endfor %}
+    {% if graphs %}
 
-    <script>
-        $(document).ready(function() {
+        {% for title, title_text in graphs %}
+            <hr>
+            <h3>{{ title_text }}</h3>
+            <div class="class_result_view" id="graph_{{ title }}" style="width:600px;height:300px"></div>
+        {% endfor %}
 
-            {% for title, title_text, graph_data in graphs %}
-                {% for category, category_text, category_data in graph_data %}
-                    var graph_{{ title }}_{{ category }}_data = [
-                        {% for count, label, value in category_data %}
-                            [{{ count }}, {{ value }}],
+        <script>
+            $(document).ready(function() {
+
+                {% for title, title_text, graph_data in graphs %}
+                    {% for category, category_text, category_data in graph_data %}
+                        var graph_{{ title }}_{{ category }}_data = [
+                            {% for count, label, value in category_data %}
+                                [{{ count }}, {{ value }}],
+                            {% endfor %}
+                        ];
+                    {% endfor %}
+                {% endfor %}
+
+                {% for title, title_text, graph_data, y_label, y_min, y_max, y_inc, n_items, show_legend in graphs %}
+
+                    var graph_{{ title }}_ticks = [
+                        {% for category, category_text, category_data in graph_data %}
+                            {% for count, label, value in category_data %}
+                                [{{ count }}, "{{ label }}"],
+                            {% endfor %}
                         {% endfor %}
                     ];
-                {% endfor %}
-            {% endfor %}
 
-            {% for title, title_text, graph_data, y_label, y_min, y_max, y_inc, n_items, show_legend in graphs %}
-
-                var graph_{{ title }}_ticks = [
-                    {% for category, category_text, category_data in graph_data %}
-                        {% for count, label, value in category_data %}
-                            [{{ count }}, "{{ label }}"],
-                        {% endfor %}
-                    {% endfor %}
-                ];
-
-                var graph_{{ title }}_chart_options = {
-                    axisLabels: {
-                        show: true
-                    },
-                    xaxis: {
-                        axisLabel: '',
-                        ticks: graph_{{ title }}_ticks,
-                        min: -0.7,
-                        max: {{ n_items }}.7,
-                        tickLength: 0
-                    },
-                    yaxis: {
-                        position: 'left',
-                        axisLabel: '{{ y_label }}',
-                        axisLabelFontSizePixels: 18,
-                        min: {{ y_min }},
-                        max: {{ y_max }},
-                        tickSize: {{ y_inc }},
-                        font: {
-                            size: 14,
-                            weight: "bold",
-                            variant: "small-caps",
-                            color: "#000000"
-                        }
-                    },
-                    series: {
-                        bars: {
+                    var graph_{{ title }}_chart_options = {
+                        axisLabels: {
                             show: true
+                        },
+                        xaxis: {
+                            axisLabel: '',
+                            ticks: graph_{{ title }}_ticks,
+                            min: -0.7,
+                            max: {{ n_items }}.7,
+                            tickLength: 0
+                        },
+                        yaxis: {
+                            position: 'left',
+                            axisLabel: '{{ y_label }}',
+                            axisLabelFontSizePixels: 18,
+                            min: {{ y_min }},
+                            max: {{ y_max }},
+                            tickSize: {{ y_inc }},
+                            font: {
+                                size: 14,
+                                weight: "bold",
+                                variant: "small-caps",
+                                color: "#000000"
+                            }
+                        },
+                        series: {
+                            bars: {
+                                show: true
+                            }
+                        },
+                        bars: {
+                            align: "center",
+                            barWidth: 0.6
+                        },
+                        legend: {
+                            backgroundOpacity: 0.5,
+                            show: {% if show_legend %} true {% else %} false {% endif %}
                         }
-                    },
-                    bars: {
-                        align: "center",
-                        barWidth: 0.6
-                    },
-                    legend: {
-                        backgroundOpacity: 0.5,
-                        show: {% if show_legend %} true {% else %} false {% endif %}
-                    }
-                 };
+                     };
 
-                var graph_{{ title }}_dataset = [
-                    {% for category, category_text, category_data in graph_data %}
-                        { label: "{{ category_text }}", data: graph_{{ title }}_{{ category }}_data },
-                    {% endfor %}
-                ];
+                    var graph_{{ title }}_dataset = [
+                        {% for category, category_text, category_data in graph_data %}
+                            { label: "{{ category_text }}", data: graph_{{ title }}_{{ category }}_data },
+                        {% endfor %}
+                    ];
 
-                $.plot("#graph_{{ title }}",
-                        graph_{{ title }}_dataset,
-                        graph_{{ title }}_chart_options);
+                    $.plot("#graph_{{ title }}",
+                            graph_{{ title }}_dataset,
+                            graph_{{ title }}_chart_options);
 
-            {% endfor %}
+                {% endfor %}
 
-        });
-    </script>
+            });
+        </script>
 
-{% else %}
-    <hr>
-    <h4>{{ not_selected_text }}</h4>
-{% endif %}
+    {% else %}
+        <hr>
+        <h4>{{ not_selected_text }}</h4>
+    {% endif %}
+
+</div>

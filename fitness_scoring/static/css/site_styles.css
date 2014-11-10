@@ -131,6 +131,11 @@ ul {list-style:none}
     border: 2px solid #808080;
 }
 
+.class-results-graphs
+{
+    border: 2px solid #808080;
+}
+
 .table_page_select
 {
     float: left;
