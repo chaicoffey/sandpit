@@ -270,12 +270,14 @@ def teacher_view(request):
              None,
              [
                  ('run_tests_B.png', None), ('view_results_C.png', 'VIEW RESULTS YOU WISH')
-             ])
+             ]),
+            ('Completed', 'Classes_Link', None, None, None)
         ]
         step_divisions = [
             (1, 'Do this (unless already done by admin)'),
             (2, 'Running the tests'),
-            (5, 'Do these steps after running tests')
+            (5, 'Do these steps after running tests'),
+            (6, 'Completed')
         ]
 
         step_sets = []
