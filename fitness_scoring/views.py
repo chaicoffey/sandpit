@@ -251,27 +251,25 @@ def teacher_view(request):
             ('Run Tests', 'Classes_Link', 'teacher_run_tests',
              None,
              [
-                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                 ('run_tests_C.png', 'INSTRUCTIONS FOR TESTS'), ('run_tests_E.png', None)
+                 ('run_tests_B.png', None), ('run_tests_C.png', 'INSTRUCTIONS FOR TESTS'),
+                 ('run_tests_E.png', None)
              ]),
             ('Get Students To Enter Results', 'Classes_Link', 'get_class_login',
              None,
              [
-                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                 ('enter_results_C.png', None), ('enter_results_DD.png', None)
+                 ('run_tests_B.png', None), ('enter_results_C.png', None),
+                 ('enter_results_D.png', None)
              ]),
             ('Approve Entries For Class', 'Classes_Link', 'teacher_approve_entries',
              None,
              [
-                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                 ('approve_results_C.png', 'RESOLVE PENDING ISSUES'),
+                 ('run_tests_B.png', None), ('approve_results_C.png', 'RESOLVE PENDING ISSUES'),
                  ('approve_results_D.png', 'TICK FOR APPROVED RESULTS')
              ]),
             ('View Results', 'Classes_Link', 'teacher_view_results',
              None,
              [
-                 ('teacher_add_classes_A.png', None), ('administrator_add_tests_C.png', None),
-                 ('view_results_C.png', 'VIEW RESULTS YOU WISH')
+                 ('run_tests_B.png', None), ('view_results_C.png', 'VIEW RESULTS YOU WISH')
              ])
         ]
         step_divisions = [
