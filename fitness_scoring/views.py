@@ -249,29 +249,35 @@ def teacher_view(request):
                  ('teacher_add_classes_B.png', None), ('teacher_add_classes_D.png', None)
              ]),
             ('Run Tests', 'Classes_Link', 'teacher_run_tests',
-             None,
+             "Follow the diagrams to see the test instructions for each class.  Then you are ready to run the tests "
+             "with your classes.  After running the tests come back to this program and see the next step.",
              [
                  ('run_tests_B.png', None), ('run_tests_C.png', 'INSTRUCTIONS FOR TESTS'),
                  ('run_tests_E.png', None)
              ]),
             ('Get Students To Enter Results', 'Classes_Link', 'get_class_login',
-             None,
+             "Obtain a login for each class.  Get all students to sign into this site with their class login and enter "
+             "their results.",
              [
                  ('run_tests_B.png', None), ('enter_results_C.png', None),
                  ('enter_results_D.png', None)
              ]),
             ('Approve Entries For Class', 'Classes_Link', 'teacher_approve_entries',
-             None,
+             "For each class resolve any pending issues (if there are any).  Then check over the results before "
+             "approving.",
              [
                  ('run_tests_B.png', None), ('approve_results_C.png', 'RESOLVE PENDING ISSUES'),
                  ('approve_results_D.png', 'TICK FOR APPROVED RESULTS')
              ]),
             ('View Results', 'Classes_Link', 'teacher_view_results',
-             None,
+             "There are different ways you can view the student results.  These should be helpful for writing reports.",
              [
                  ('run_tests_B.png', None), ('view_results_C.png', 'VIEW RESULTS YOU WISH')
              ]),
-            ('Completed', 'Classes_Link', None, None, None)
+            ('Completed', 'Classes_Link', None,
+             "If you have finished all the steps you are done!  Use the program again when you are running tests for "
+             "the term",
+             None)
         ]
         step_divisions = [
             (1, 'Do this (unless already done by admin)'),
