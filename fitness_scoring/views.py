@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponseForbidden
 from django.template import RequestContext
-from fitness_scoring.models import User, Student, Teacher, Administrator, SuperUser, School, Class
+from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, Class
 from fitness_scoring.models import TestCategory, MajorTestCategory, Test, PercentileBracketList
 from fitness_scoring.models import TeacherClassAllocation, ClassTest, StudentClassEnrolment
 from fitness_scoring.models import StudentClassTestResult
@@ -2400,67 +2400,55 @@ def class_results_graphs_students(request, class_pk, student_pk=None):
         return HttpResponseForbidden("You are not authorised to view results for this class")
 
 
-def class_results_graphs_previous(request, class_pk, student_pk=None, test_pk=None):
+def class_results_graphs_previous(request, class_pk, student_pk=None):
     if user_authorised_for_class(request, class_pk):
-        if ((student_pk is None) or (student_pk == "None") or
-                StudentClassEnrolment.objects.filter(class_id=class_pk, student_id=student_pk).exists()):
-            if student_pk and (student_pk != "None"):
-                tests = {}
-                for enrolment in StudentClassEnrolment.objects.filter(student_id=student_pk):
-                    results = StudentClassTestResult.objects.filter(student_class_enrolment=enrolment)
-                    for result in results:
-                        tests[result.test.test_name] = str(result.test.pk)
-                test_select_options = [("/class/results_graphs/previous/" + str(class_pk) + "/" + str(student_pk) +
-                                        "/" + tests[test], test, tests[test] == str(test_pk)) for test in tests.keys()]
-            else:
-                test_select_options = []
-
+        if (student_pk is None) or StudentClassEnrolment.objects.filter(class_id=class_pk,
+                                                                        student_id=student_pk).exists():
             context = {
-                'title': 'Previous Results',
-                'not_selected_text': 'Please Select A Student And A Test',
+                'title': 'Student History',
+                'not_selected_text': 'Please Select A Student To View Graph',
                 'selection_options': [
                     [("/class/results_graphs/previous/" + str(class_pk) + "/" + str(enrolment.student_id.pk),
                       enrolment.student_id, str(enrolment.student_id.pk) == str(student_pk))
-                     for enrolment in StudentClassEnrolment.objects.filter(class_id=class_pk)],
-                    test_select_options
+                     for enrolment in StudentClassEnrolment.objects.filter(class_id=class_pk)]
                 ]
             }
-            if student_pk and test_pk:
-                results_for_test = []
-                for enrolment in StudentClassEnrolment.objects.filter(student_id=student_pk):
-                    result = StudentClassTestResult.objects.filter(test=test_pk, student_class_enrolment=enrolment)
-                    if result.exists():
-                        results_for_test.append(result[0])
+            if student_pk:
+                enrolments = StudentClassEnrolment.objects.filter(student_id=student_pk)
+                results_for_student = StudentClassTestResult.objects.none()
+                for enrolment in enrolments:
+                    results_for_student = (results_for_student |
+                                           StudentClassTestResult.objects.filter(student_class_enrolment=enrolment))
+                results_for_student = results_for_student.order_by('test')
                 graph_info = {}
-                for result in results_for_test:
-                    year = str(result.student_class_enrolment.class_id.year)
-                    if year not in graph_info.keys():
-                        graph_info[year] = []
+                major_category_counter = {}
+                for result in results_for_student:
+                    major_category = result.test.major_test_category.major_test_category_name
+                    category = result.test.test_category.test_category_name
+                    if major_category not in graph_info.keys():
+                        graph_info[major_category] = {}
+                        major_category_counter[major_category] = 0
+                    if category not in graph_info[major_category].keys():
+                        graph_info[major_category][category] = []
                     unit = result.test.percentiles.get_result_unit_text()
                     unit = "" if unit == "" else " " + unit
                     percentile = result.percentile if result.percentile else 0
-                    graph_info[year].append((
-                        result.student_class_enrolment.class_id.class_name + " (" + result.result + unit + ")",
+                    class_instance = result.student_class_enrolment.class_id
+                    class_text_info = class_instance.class_name + " " + str(class_instance.year)
+                    graph_info[major_category][category].append((
+                        major_category_counter[major_category],
+                        str(result.test.test_name) + ", " + class_text_info + " (" + result.result + unit + ")",
                         percentile
                     ))
-
-                graph_info_keys_sorted = graph_info.keys()
-                graph_info_keys_sorted.sort()
-                graph_info_sorted = {}
-                counter = 0
-                for year in graph_info_keys_sorted:
-                    graph_info[year].sort()
-                    graph_info_sorted[year] = []
-                    for label, percentile in graph_info[year]:
-                        graph_info_sorted[year].append((counter, label, percentile))
-                        counter += 1
-
-                graph_data = []
-                for year in graph_info_keys_sorted:
-                    graph_data.append((year.replace(" ", "_"), year, graph_info_sorted[year]))
-                test_name = Test.objects.get(pk=test_pk).test_name
-                context['graphs'] = [("Class_Results", str(Student.objects.get(pk=student_pk)) + ' - ' + test_name,
-                                      graph_data, 'Percentile', 0, 100, 10, counter - 1, True)]
+                    major_category_counter[major_category] += 1
+                context['graphs'] = []
+                for major_category in graph_info.keys():
+                    graph_data = []
+                    for category in graph_info[major_category].keys():
+                        graph_data.append((category.replace(" ", "_"), category, graph_info[major_category][category]))
+                    context['graphs'].append((major_category.replace(" ", "_"), major_category, graph_data,
+                                              'Percentile', 0, 100, 10, major_category_counter[major_category] - 1,
+                                              True))
             return render(request, 'class_results_graphs.html', RequestContext(request, context))
         else:
             return HttpResponseForbidden("Student and class does not match")

@@ -80,8 +80,6 @@ urlpatterns = patterns(
     url(r'^class/results_graphs/previous/(?P<class_pk>\d+)/$', 'fitness_scoring.views.class_results_graphs_previous'),
     url(r'^class/results_graphs/previous/(?P<class_pk>\d+)/(?P<student_pk>\d+)/$',
         'fitness_scoring.views.class_results_graphs_previous'),
-    url(r'^class/results_graphs/previous/(?P<class_pk>\d+)/(?P<student_pk>\d+)/(?P<test_pk>\d+)/$',
-        'fitness_scoring.views.class_results_graphs_previous'),
     url(r'^class/test/allocate/(?P<class_pk>\d+)/$', 'fitness_scoring.views.allocate_tests_to_class'),
     url(r'^class/test/allocate/(?P<class_pk>\d+)/(?P<load_from_class_pk>\w+)/$',
         'fitness_scoring.views.allocate_tests_to_class'),
