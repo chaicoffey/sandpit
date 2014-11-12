@@ -2448,7 +2448,7 @@ def class_results_graphs_previous(request, class_pk, student_pk=None):
                         graph_data.append((category.replace(" ", "_"), category, graph_info[major_category][category]))
                     context['graphs'].append((major_category.replace(" ", "_"), major_category, graph_data,
                                               'Percentile', 0, 100, 10, major_category_counter[major_category] - 1,
-                                              True))
+                                              True, True))
             return render(request, 'class_results_graphs.html', RequestContext(request, context))
         else:
             return HttpResponseForbidden("Student and class does not match")

@@ -42,7 +42,7 @@
                     {% endfor %}
                 {% endfor %}
 
-                {% for title, title_text, graph_data, y_label, y_min, y_max, y_inc, n_items, show_legend in graphs %}
+                {% for title, title_text, graph_data, y_label, y_min, y_max, y_inc, n_items, show_legend, show_bars_together in graphs %}
 
                     var graph_{{ title }}_ticks = [
                         {% for category, category_text, category_data in graph_data %}
@@ -84,7 +84,7 @@
                         },
                         bars: {
                             align: "center",
-                            barWidth: 0.6
+                            barWidth: {% if show_bars_together %} 1.0 {% else %} 0.6 {% endif %}
                         },
                         legend: {
                             backgroundOpacity: 0.5,
