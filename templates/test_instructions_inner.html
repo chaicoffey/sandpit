@@ -3,15 +3,17 @@
     <h1>
         {{ test.test_category.test_category_name }} ({{ test.major_test_category.major_test_category_name }}):
         {{ heading }}
-        {% if close_button %}
+        {% if showing_individual_test %}
             <button type="button" class="btn btn-primary" onclick="window.close();">
                 Close Instructions
             </button>
         {% endif %}
     </h1>
 
-    When you clicked on the instructions link this page opened in a new tab or window.  You can click on the close
-    instructions button above to close this tab and return to the program.
+    {% if showing_individual_test %}
+        When you clicked on the instructions link this page opened in a new tab or window.  You can click on the close
+        instructions button above to close this tab and return to the program.
+    {% endif %}
     <hr>
     <h3>Objective</h3>
         {% if objective %}

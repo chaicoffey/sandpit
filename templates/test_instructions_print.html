@@ -18,11 +18,15 @@
                 Close Instructions
             </button>
         </h1>
+
+        When you clicked on the instructions link this page opened in a new tab or window.  You can click on the close
+        instructions button above to close this tab and return to the program.
     </div>
 
     <div id="print_section">
         {% for test, heading, objective, resources, instructions, diagram, multiple_diagrams in tests %}
             <div style="page-break-after: always">
+                <hr class="darker_color" style="border-width: 3px">
                 {% include "test_instructions_inner.html" %}
             </div>
         {% endfor %}

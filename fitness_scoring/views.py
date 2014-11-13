@@ -1332,7 +1332,7 @@ def test_instructions(request, test_pk):
     user_type = request.session.get('user_type', None)
     if (user_type == 'Administrator') or (user_type == 'Teacher'):
         context = get_test_instructions_context(test_pk)
-        context['close_button'] = True
+        context['showing_individual_test'] = True
         return render(request, 'test_instructions.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to view instructions for a test")
