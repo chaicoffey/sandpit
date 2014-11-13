@@ -1332,6 +1332,7 @@ def test_instructions(request, test_pk):
     user_type = request.session.get('user_type', None)
     if (user_type == 'Administrator') or (user_type == 'Teacher'):
         context = get_test_instructions_context(test_pk)
+        context['close_button'] = True
         return render(request, 'test_instructions.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to view instructions for a test")
@@ -2133,8 +2134,8 @@ def print_test_instructions(request, class_pk):
         for test in test_classes:
             test_context = get_test_instructions_context(test.pk)
             if 'objective' in test_context.keys():
-                test_tuple = (test_context['heading'], test_context['objective'], test_context['resources'],
-                              test_context['instructions'])
+                test_tuple = (test_context['test'], test_context['heading'], test_context['objective'],
+                              test_context['resources'], test_context['instructions'])
                 if 'diagram' in test_context.keys():
                     test_tuple += (test_context['diagram'],)
                 if 'multiple_diagrams' in test_context.keys():
@@ -2142,7 +2143,7 @@ def print_test_instructions(request, class_pk):
             else:
                 test_tuple = (test_context['heading'])
             tests.append(test_tuple)
-        context = {'heading': 'Print Test Instructions', 'tests': tests}
+        context = {'title': 'Print Test Instructions', 'tests': tests}
         return render(request, 'test_instructions_print.html', RequestContext(request, context))
     else:
         return HttpResponseForbidden("You are not authorised to print test instructions for this class")
