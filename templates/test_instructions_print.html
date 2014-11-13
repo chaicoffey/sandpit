@@ -22,7 +22,7 @@
 
     <div id="print_section">
         {% for test, heading, objective, resources, instructions, diagram, multiple_diagrams in tests %}
-            <div>
+            <div style="page-break-after: always">
                 {% include "test_instructions_inner.html" %}
             </div>
         {% endfor %}
