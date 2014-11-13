@@ -249,11 +249,12 @@ def teacher_view(request):
                  ('teacher_add_classes_B.png', None), ('teacher_add_classes_D.png', None)
              ]),
             ('Run Tests', 'Classes_Link', 'teacher_run_tests',
-             "Follow the diagrams to see the test instructions for each class.  Then you are ready to run the tests "
-             "with your classes.  After running the tests come back to this program and see the next step.",
+             "Follow the diagrams to print off the test instructions.  Do this for each class however if two classes "
+             "have the same set of tests you only need to do it for one of them.  After you have printed off the "
+             "instructions you are ready to run the tests with your classes.  After running the tests come back to "
+             "this program and see the next step.",
              [
-                 ('run_tests_B.png', None), ('run_tests_C.png', 'INSTRUCTIONS FOR TESTS'),
-                 ('run_tests_E.png', None)
+                 ('run_tests_B.png', None), ('run_tests_C.png', None), ('run_tests_E.png', None)
              ]),
             ('Get Students To Enter Results', 'Classes_Link', 'get_class_login',
              "Obtain a login for each class.  Get all students to sign into this site with their class login and enter "
