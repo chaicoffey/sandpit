@@ -10,7 +10,6 @@
 
     <div class="text-info" style="color: black">
         <h1>
-            {{ title }}
             <button type="button" class="btn btn-primary" onclick="window.printDiv('print_section');">
                 Print Instructions
             </button>
@@ -41,6 +40,7 @@
         window.frames["print_frame"].document.body.innerHTML = document.getElementById(divId).innerHTML;
         window.frames["print_frame"].window.focus();
         window.frames["print_frame"].window.print();
+        window.close();
     }
 </script>
 
