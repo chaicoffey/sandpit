@@ -1409,7 +1409,8 @@ def get_test_instructions_context(test_pk):
                        'The athlete continuous this press-up action, with no rest for 30 seconds',
                        'The assistant counts and records the number of correctly completed press-ups'
                    ]],
-                   'diagrams': ['push_ups1.png', 'push_ups2.png']}
+                   'diagram': ['push_ups1.png', 'push_ups2.png'],
+                   'multiple_diagrams': True}
     elif test_name == 'Beep Test':
         context = {'heading': 'Beep Test',
                    'objective': "The objective of the Multi-Stage Fitness Test (MSFT) (as described in a paper by "
@@ -2123,6 +2124,25 @@ def get_other_classes(url_prefix, class_pk=None, school_pk=None):
         return other_classes_unique
 
 
+def print_test_instructions(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        test_classes = Class.objects.get(pk=class_pk).get_tests()
+        tests = []
+        for test in test_classes:
+            test_context = get_test_instructions_context(test.pk)
+            test_tuple = (test_context['heading'], test_context['objective'], test_context['resources'],
+                          test_context['instructions'])
+            if 'diagram' in test_context.keys():
+                test_tuple.append(test_context['diagram'])
+            if 'multiple_diagrams' in test_context.keys():
+                test_tuple.append(test_context['multiple_diagrams'])
+            tests.append(test_tuple)
+        context = {'heading': 'Print Test Instructions', 'tests': tests}
+        return render(request, 'test_instructions_print.html', RequestContext(request, context))
+    else:
+        return HttpResponseForbidden("You are not authorised to print test instructions for this class")
+
+
 def get_new_class_code(request, class_pk):
     if user_authorised_for_class(request, class_pk):
         if request.POST:
@@ -2138,7 +2158,7 @@ def get_new_class_code(request, class_pk):
                        'hide_cancel_button': True}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to delete a teacher from this school")
+        return HttpResponseForbidden("You are not authorised to get a new class code for this class")
 
 
 def approve_all_class_results(request, class_pk):

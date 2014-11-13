@@ -62,16 +62,17 @@
 
         {% if diagram %}
             <hr>
-            <h3>Diagram</h3>
-                <img src="/static/images/test_instructions/{{ diagram }}"/>
-        {% elif diagrams %}
-            <hr>
-            <h3>Diagrams</h3>
+            {% if multiple_diagrams %}
+                <h3>Diagrams</h3>
                 <ol>
-                    {% for diagram in diagrams %}
-                        <li><img src="/static/images/test_instructions/{{ diagram }}"/></li>
+                    {% for diagram1 in diagram %}
+                        <li><img src="/static/images/test_instructions/{{ diagram1 }}"/></li>
                     {% endfor %}
                 </ol>
+            {% else %}
+                <h3>Diagram</h3>
+                <img src="/static/images/test_instructions/{{ diagram }}"/>
+            {% endif %}
         {% endif %}
     </div>
 
