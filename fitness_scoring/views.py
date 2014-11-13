@@ -2048,7 +2048,9 @@ def class_results_table(request, class_pk):
             'results_table_buttons': [
                 ['+', [['class_results_modal_load_link', '/class/test/allocate/' + str(class_pk),
                         'Change Tests For Class']]],
-                [u'\u2713', [['modal_load_link', '/class/get_new_code/' + str(class_pk),
+                [u'\u2713', [['test_instructions_load_link', '/class/print_test_instructions/' + str(class_pk),
+                              'Print Off Test Instructions'],
+                             ['modal_load_link', '/class/get_new_code/' + str(class_pk),
                               'Get New Class Login Password'],
                              ['class_results_modal_load_link', '/class/approve_all/' + str(class_pk),
                               'Approve All Student Result Entries For Class']]]
@@ -2130,12 +2132,15 @@ def print_test_instructions(request, class_pk):
         tests = []
         for test in test_classes:
             test_context = get_test_instructions_context(test.pk)
-            test_tuple = (test_context['heading'], test_context['objective'], test_context['resources'],
-                          test_context['instructions'])
-            if 'diagram' in test_context.keys():
-                test_tuple.append(test_context['diagram'])
-            if 'multiple_diagrams' in test_context.keys():
-                test_tuple.append(test_context['multiple_diagrams'])
+            if 'objective' in test_context.keys():
+                test_tuple = (test_context['heading'], test_context['objective'], test_context['resources'],
+                              test_context['instructions'])
+                if 'diagram' in test_context.keys():
+                    test_tuple += (test_context['diagram'],)
+                if 'multiple_diagrams' in test_context.keys():
+                    test_tuple += (test_context['multiple_diagrams'],)
+            else:
+                test_tuple = (test_context['heading'])
             tests.append(test_tuple)
         context = {'heading': 'Print Test Instructions', 'tests': tests}
         return render(request, 'test_instructions_print.html', RequestContext(request, context))
