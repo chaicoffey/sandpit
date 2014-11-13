@@ -11,7 +11,7 @@
     <div class="text-info" style="color: black">
         <h1>
             {{ title }}
-            <button type="button" class="btn btn-primary" onclick="window.print();">
+            <button type="button" class="btn btn-primary" onclick="window.printDiv('print_section');">
                 Print Instructions
             </button>
             <button type="button" class="btn btn-primary" onclick="window.close();">
@@ -28,5 +28,16 @@
         {% endfor %}
     </div>
 
+    <iframe name="print_frame" width="0" height="0" frameborder="0" src="about:blank"></iframe>
+
 </body>
+
+<script>
+    function printDiv(divId) {
+        window.frames["print_frame"].document.body.innerHTML = document.getElementById(divId).innerHTML;
+        window.frames["print_frame"].window.focus();
+        window.frames["print_frame"].window.print();
+    }
+</script>
+
 </html>
