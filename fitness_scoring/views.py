@@ -745,8 +745,8 @@ def school_list(request):
             'menu_label': 'Add School',
             'item_list_table_headings': School.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['item_list_modal_load_link', '/school/add/', 'Add School'],
-                       ['item_list_modal_load_link', '/school/adds/', 'Add/Edit Schools From .CSV']]]
+                ('+', 'item_list_modal_load_link', '/school/add/', 'Add School'),
+                ('++', 'item_list_modal_load_link', '/school/adds/', 'Add/Edit Schools From .CSV')
             ],
             'item_list_options': [
                 ['item_list_modal_load_link', '/school/edit/', 'pencil', 'edit school'],
@@ -896,8 +896,8 @@ def test_category_list(request):
             'menu_label': 'Add Test Category',
             'item_list_table_headings': TestCategory.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['item_list_modal_load_link', '/test_category/add/', 'Add Test Category'],
-                       ['item_list_modal_load_link', '/test_category/adds/', 'Add/Edit Test Categories From .CSV']]]
+                ('+', 'item_list_modal_load_link', '/test_category/add/', 'Add Test Category'),
+                ('++', 'item_list_modal_load_link', '/test_category/adds/', 'Add/Edit Test Categories From .CSV')
             ],
             'item_list_options': [
                 ['item_list_modal_load_link', '/test_category/edit/', 'pencil', 'edit test category'],
@@ -1029,9 +1029,9 @@ def major_test_category_list(request):
             'menu_label': 'Add Major Test Category',
             'item_list_table_headings': MajorTestCategory.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['item_list_modal_load_link', '/major_test_category/add/', 'Add Major Test Category'],
-                       ['item_list_modal_load_link', '/major_test_category/adds/', 'Add/Edit Major Test Categories From'
-                                                                                   ' .CSV']]]
+                ('+', 'item_list_modal_load_link', '/major_test_category/add/', 'Add Major Test Category'),
+                ('++', 'item_list_modal_load_link', '/major_test_category/adds/', 'Add/Edit Major Test Categories From '
+                                                                                  '.CSV')
             ],
             'item_list_options': [
                 ['item_list_modal_load_link', '/major_test_category/edit/', 'pencil', 'edit major test category'],
@@ -1166,8 +1166,8 @@ def test_list(request):
             'menu_label': 'Add Test',
             'item_list_table_headings': Test.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [('item_list_modal_load_link', '/test/adds/', 'Add Tests From .CSVs'),
-                       ('item_list_modal_load_link', '/allocate_default_tests/', 'Allocate Default Tests')]]
+                ('+', 'item_list_modal_load_link', '/test/adds/', 'Add Tests From .CSVs'),
+                ('T', 'item_list_modal_load_link', '/allocate_default_tests/', 'Allocate Default Tests')
             ],
             'item_list_options': [
                 ['item_list_modal_load_link', '/test/edit/', 'pencil', 'edit test'],
@@ -1617,7 +1617,7 @@ def teacher_list(request):
             'menu_label': 'Add Teacher',
             'item_list_table_headings': Teacher.get_display_list_headings(),
             'item_list_buttons': [
-                ['+', [['item_list_modal_load_link', '/teacher/add/', 'Add Teacher']]]
+                ('+', 'item_list_modal_load_link', '/teacher/add/', 'Add Teacher')
             ],
             'item_list_options': [
                 ['item_list_modal_load_link', '/teacher/edit/', 'pencil', 'edit teacher'],
@@ -1728,7 +1728,7 @@ def class_list(request):
     user_type = request.session.get('user_type', None)
     if (user_type == 'Administrator') or (user_type == 'Teacher'):
         user = User.objects.get(username=request.session.get('username', None))
-        item_list_add_button_options = [['item_list_modal_load_link', '/class/add/', 'Add Class']]
+        item_list_add_buttons = [('+', 'item_list_modal_load_link', '/class/add/', 'Add Class')]
         if user_type == 'Teacher':
             teacher = Teacher.objects.get(user=user)
             class_items = [(allocation.class_id, allocation.class_id.get_display_items_teacher())
@@ -1739,14 +1739,12 @@ def class_list(request):
             class_items = [(class_instance, class_instance.get_display_items()) for class_instance
                            in Class.objects.filter(school_id=school)]
             class_list_headings = Class.get_display_list_headings()
-            item_list_add_button_options.append(['item_list_modal_load_link', '/class/adds/', 'Add Classes'])
+            item_list_add_buttons.append(('++', 'item_list_modal_load_link', '/class/adds/', 'Add Classes'))
         context = {
             'item_list': class_items,
             'menu_label': 'Add Class(es)',
             'item_list_table_headings': class_list_headings,
-            'item_list_buttons': [
-                ['+', item_list_add_button_options]
-            ],
+            'item_list_buttons': item_list_add_buttons,
             'item_list_options': [
                 ['item_list_modal_load_link', '/class/edit/', 'pencil', 'edit class'],
                 ['class_load_link', '/class/class/', 'home', 'go to class page'],
@@ -2048,16 +2046,13 @@ def class_results_table(request, class_pk):
                 ['class_results_modal_load_link', '/class_enrolment/delete/', 'remove', 'delete student result entry']
             ],
             'results_table_buttons': [
-                ['T', [('class_results_modal_load_link', '/class/test/allocate/' + str(class_pk),
-                        'Change Tests For Class')]],
-                ['<span class="glyphicon glyphicon-print"></span>',
-                 [('test_instructions_load_link', '/class/print_test_instructions/' + str(class_pk),
-                   'Print Off Test Instructions')]
-                ],
-                [u'\u25c9', [('modal_load_link', '/class/get_new_code/' + str(class_pk),
-                              'Get New Class Login Password')]],
-                [u'\u2713', [('class_results_modal_load_link', '/class/approve_all/' + str(class_pk),
-                              'Approve All Student Result Entries For Class')]]
+                ('T', 'class_results_modal_load_link', '/class/test/allocate/' + str(class_pk),
+                 'Change Tests For Class'),
+                ('<span class="glyphicon glyphicon-print"></span>', 'test_instructions_load_link',
+                 '/class/print_test_instructions/' + str(class_pk), 'Print Off Test Instructions', True),
+                (u'\u25c9', 'modal_load_link', '/class/get_new_code/' + str(class_pk), 'Get New Class Login Password'),
+                (u'\u2713', 'class_results_modal_load_link', '/class/approve_all/' + str(class_pk),
+                 'Approve All Student Result Entries For Class')
             ],
             'student_test_results': student_test_results
         }

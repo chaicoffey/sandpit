@@ -225,6 +225,16 @@ td.test_instructions_load_link > a > span {
     background-color: white;
 }
 
+div.test_instructions_load_link > a {
+    color: #303030;
+    border-color: #303030;
+}
+
+div.test_instructions_load_link > a:hover {
+    color: #303030;
+    border-color: #303030;
+}
+
 td.class_results_modal_load_link  > a > span {
     color: orangered;
 }
@@ -373,3 +383,18 @@ div.disabled {
     color: #c0c0c0;
     font-style: italic;
 }
+
+.btn:hover,
+.btn:focus {
+  text-decoration: none;
+}
+
+.btn-default:hover,
+.btn-default:focus,
+.btn-default:active,
+.btn-default.active,
+.open .dropdown-toggle.btn-default {
+  background-color: white;
+  border-color: #303030;
+}
+

@@ -28,6 +28,14 @@ $(document).on('click', '.modal_load_link a', function(event){
     });
 });
 
+$(document).on('click', '.modal_load_link button', function(event){
+    event.preventDefault();
+    $('#remoteModalContent').load(base_url + $(this).attr('href'), function(){
+        $('#modal_submit_button').val('null_submit');
+        $('#remoteModal').modal('show');
+    });
+});
+
 //for loading modal links on item_list page into remote modal
 $(document).on('click', '.item_list_modal_load_link a', function(event){
     event.preventDefault();
@@ -38,8 +46,26 @@ $(document).on('click', '.item_list_modal_load_link a', function(event){
     $('#item_list_message_alert').addClass('hidden');
 });
 
+$(document).on('click', '.item_list_modal_load_link button', function(event){
+    event.preventDefault();
+    $('#remoteModalContent').load(base_url + $(this).attr('href'), function(){
+        $('#modal_submit_button').val('item_list_submit');
+        $('#remoteModal').modal('show');
+    });
+    $('#item_list_message_alert').addClass('hidden');
+});
+
 //for loading modal links on class results table into remote modal
 $(document).on('click', '.class_results_modal_load_link a', function(event){
+    event.preventDefault();
+    $('#remoteModalContent').load(base_url + $(this).attr('href'), function(){
+        $('#modal_submit_button').val('class_results_table_submit');
+        $('#remoteModal').modal('show');
+    });
+    $('#class_user_message_alert').addClass('hidden');
+});
+
+$(document).on('click', '.class_results_modal_load_link button', function(event){
     event.preventDefault();
     $('#remoteModalContent').load(base_url + $(this).attr('href'), function(){
         $('#modal_submit_button').val('class_results_table_submit');

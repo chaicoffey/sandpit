@@ -13,20 +13,13 @@
                 <table style="width: 100%"><tr>
                     <td style="width: 40%">
                         {{ menu_label }}
-                        {% for button_label, button_options in item_list_buttons %}
-                            <div class="btn-group">
+                        {% for button_label, link_type, link_url, link_label  in item_list_buttons %}
+                            <div class="btn-group {{ link_type }}">
                                 <button type="button" class="btn btn-default dropdown-toggle darker_color"
                                         style="border-width: 2px; padding: 1px; height: 35px; width: 35px"
-                                        data-toggle="dropdown">
+                                        data-toggle="dropdown" title="{{ link_label }}" href="{{ link_url }}">
                                     <div class="light_attention_color" style="font-size: 20px">{{ button_label }}</div>
                                 </button>
-                                <ul class="dropdown-menu" role="menu">
-                                    {% for link_type, link_url, label in button_options %}
-                                        <li class="{{ link_type }} item_list_menu_link"><a href="{{ link_url }}">
-                                            {{ label }}
-                                        </a></li>
-                                    {% endfor %}
-                                </ul>
                             </div>
                         {% endfor %}
                     </td>
