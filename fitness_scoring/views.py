@@ -2048,14 +2048,16 @@ def class_results_table(request, class_pk):
                 ['class_results_modal_load_link', '/class_enrolment/delete/', 'remove', 'delete student result entry']
             ],
             'results_table_buttons': [
-                ['+', [['class_results_modal_load_link', '/class/test/allocate/' + str(class_pk),
-                        'Change Tests For Class']]],
-                [u'\u2713', [['test_instructions_load_link', '/class/print_test_instructions/' + str(class_pk),
-                              'Print Off Test Instructions'],
-                             ['modal_load_link', '/class/get_new_code/' + str(class_pk),
-                              'Get New Class Login Password'],
-                             ['class_results_modal_load_link', '/class/approve_all/' + str(class_pk),
-                              'Approve All Student Result Entries For Class']]]
+                ['T', [('class_results_modal_load_link', '/class/test/allocate/' + str(class_pk),
+                        'Change Tests For Class')]],
+                ['<span class="glyphicon glyphicon-print"></span>',
+                 [('test_instructions_load_link', '/class/print_test_instructions/' + str(class_pk),
+                   'Print Off Test Instructions')]
+                ],
+                [u'\u25c9', [('modal_load_link', '/class/get_new_code/' + str(class_pk),
+                              'Get New Class Login Password')]],
+                [u'\u2713', [('class_results_modal_load_link', '/class/approve_all/' + str(class_pk),
+                              'Approve All Student Result Entries For Class')]]
             ],
             'student_test_results': student_test_results
         }
