@@ -509,8 +509,10 @@ def instructions_page(request, instructions_name):
                             "(see the 'D')", 'administrator_add_class_D.png')
                        ],
                        [('Repeat from point 2. for all the remaining classes for the term and you are done!', None)],
-                       [('It is recommended that you add all classes this way the first time you do this, in future '
-                         'you could try to add classes from a file which may be quicker (see instructions).', None)]
+                       [("It is recommended that you add all classes this way the first time you do this, in future "
+                         "you could try to add classes from a file which may be quicker "
+                         "<div class='test_instructions_load_link link_open_tab' style='display: inline'>"
+                         "<a href='administrator_add_classes_from_file'>(see instructions)</a></div>.", None)]
                    ]}
     elif instructions_name == 'administrator_add_classes_from_file' and user_type == 'Administrator':
         context = {'heading': 'Add Classes From File',

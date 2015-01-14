@@ -30,7 +30,9 @@
                     {% for instruction in instructions %}
                         <li>
                             {% for instruction_line, image in instruction %}
-                                {{ instruction_line }}<br><br>
+                                {% autoescape off %}
+                                    {{ instruction_line }}<br><br>
+                                {% endautoescape %}
                                 {% if image %}
                                     <img src="/static/images/instructions/{{ image }}" style="border:1px solid black"/>
                                     <br><br>
