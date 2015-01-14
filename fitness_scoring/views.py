@@ -472,7 +472,8 @@ def instructions_page(request, instructions_name):
                            ("Then click the button at the bottom of the form.  The teacher will be added and an email "
                             "with the teacher's login details will be sent to the email address you entered.", None)
                        ],
-                       [('Repeat from point 2. for all the remaining teachers you wish to add and you are done!', None)]
+                       [("Repeat from point 2. for all the remaining PE teachers you wish to add and you are done! "
+                         "(don't forget to add yourself if you are a PE teacher).", None)]
                    ]}
     elif instructions_name == 'administrator_add_classes' and user_type == 'Administrator':
         context = {'heading': 'Add Classes',
@@ -492,6 +493,20 @@ def instructions_page(request, instructions_name):
                             'this class is not available then you must add them (see instructions).',
                             'administrator_add_class_C.png'),
                            ('Then click the button at the bottom of the form', None)
+                       ],
+                       [
+                           ('The next step is to select the tests that you want the class to perform over the term.  '
+                            'A default set of tests is originally selected.', None),
+                           ("Click the check boxes of tests you wish to change. (see the 'A')", None),
+                           ("You can see instructions for the tests by clicking on the green icon. (see the 'B')",
+                            None),
+                           ("You can reselect the default set of tests or select a set of tests someone has previously "
+                            "used in another class.  Note that not all of the previous classes will be displayed.  If "
+                            "more than one class has used the same set of tests then only one of these classes will be "
+                            "listed. (see the 'C')", None),
+                           ("Once you are finished selecting the classes click the button at the bottom of the form "
+                            "and the class will be added.  Note that you can change these selected tests later. "
+                            "(see the 'D')", 'administrator_add_class_D.png')
                        ],
                        [('Repeat from point 2. for all the remaining classes for the term and you are done!', None)],
                        [('It is recommended that you add all classes this way the first time you do this, in future '
