@@ -464,8 +464,7 @@ def instructions_page(request, instructions_name):
                        [('Click the "Teachers" tab at the left of the screen (it may already be selected)',
                          'add_teachers_A.png')],
                        [
-                           ('Go to the "Add Teacher" menu at the top of the Teachers table and select the '
-                            '"Add Teacher" option', 'add_teachers_B.png')
+                           ('Click the "+" button at the top of the teachers table.', 'add_teachers_B.png')
                        ],
                        [
                            ('Enter the details for the teacher', 'add_teachers_C.png'),
@@ -483,10 +482,7 @@ def instructions_page(request, instructions_name):
                    'instructions': [
                        [('Click the "Classes" tab at the left of the screen (it may already be selected)',
                          'administrator_add_class_A.png')],
-                       [
-                           ('Go to the "Add Class(es)" menu at the top of the Class table and select the "Add Class" '
-                            'option', 'administrator_add_class_B.png')
-                       ],
+                       [('Click the "+" button at the top of the classes table.', 'administrator_add_class_B.png')],
                        [
                            ('Enter the details for the class.  You must choose a class name e.g. "Class 7A Term 1").  '
                             'The drop down has a list of the teachers that you have already added.  If the teacher for '
@@ -523,9 +519,10 @@ def instructions_page(request, instructions_name):
                            ('To make a classes CSV file first you must open up a new excel document.', None),
                            ('Next put the following into the first cells of the excel sheet.',
                             'administrator_add_classes_A.png'),
-                           ('Then put the details for the classes you are adding under the headings  (an example is '
-                            ' below).  If there is no test set that you want the class to default with than you can '
-                            'leave that column blank (but still include the heading)',
+                           ("Then put the details for the classes you are adding under the headings  (an example is "
+                            " below).  If you leave the last cell blank for any classes than the default set of "
+                            "tests will be allocated instead of a previous class' tests.  Note though you must still "
+                            "include the heading even if you leave the cells blank for all classes).",
                             'administrator_add_classes_B.png'),
                            ('Next you will need to save or export the excel document as a .CSV file.  If you do not '
                             'know how to do this then you will need to look up how on line.  Be sure to make the '
@@ -545,11 +542,12 @@ def instructions_page(request, instructions_name):
                        ],
                        [
                            ('Go to the "Add Class(es)" menu at the top of the Class table and select the "Add Classes" '
-                            'option', 'administrator_add_classes_F.png')
+                            'option', 'administrator_add_classes_E.png')
                        ],
                        [
-                           ('Browse and select the .CSV file you just created.', 'administrator_add_class_G.png'),
-                           ('Then click the button at the bottom of the form', None)
+                           ('Browse and select the .CSV file you just created.', 'administrator_add_classes_F.png'),
+                           ('Then click the button at the bottom of the form (it may take a little time to add the '
+                            'classes so be patient)', None)
                        ]
                    ]}
     elif instructions_name == 'teacher_add_classes' and user_type == 'Teacher':
