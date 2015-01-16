@@ -641,8 +641,8 @@ def instructions_page(request, instructions_name):
                        [
                            ('Then Click the "Classes" tab at the left of the screen (it may already be selected)',
                              'teacher_add_class_A.png'),
-                           ('Then in the "Class List" table click on the "class home page" symbol for the class that '
-                            'the class that you wish to approve results for', 'administrator_add_tests_C.png')
+                           ('Then in the classes table click on the home page symbol for the class that you wish to '
+                            'approve results for', 'run_tests_B.png')
                        ],
                        [
                            ('You should see the "Class Results" table with some results in it.  If you notice an "!" '
