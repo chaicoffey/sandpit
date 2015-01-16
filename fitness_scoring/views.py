@@ -256,12 +256,11 @@ def teacher_view(request):
              [
                  ('run_tests_B.png', None), ('run_tests_C.png', None), ('run_tests_E.png', None)
              ]),
-            ('Get Students To Enter Results', 'Classes_Link', 'get_class_login',
+            ('Get Students To Enter Results', 'Classes_Link', 'teacher_student_enter_results',
              "Obtain a login for each class.  Get all students to sign into this site with their class login and enter "
              "their results.",
              [
-                 ('run_tests_B.png', None), ('enter_results_C.png', None),
-                 ('enter_results_D.png', None)
+                 ('run_tests_B.png', None), ('enter_results_C.png', None), ('enter_results_D.png', None)
              ]),
             ('Approve Entries For Class', 'Classes_Link', 'teacher_approve_entries',
              "For each class resolve any pending issues (if there are any).  Then check over the results before "
@@ -598,37 +597,37 @@ def instructions_page(request, instructions_name):
                    'instructions': [
                        [
                            ('First you will need to get the class log in details for the students.', None),
-                           ('To do this Click the "Add/Update Class List" tab at the left of the screen',
-                            'teacher_add_classes_A.png'),
-                           ('Then in the "Class List" table click on the "class home page" symbol for the class that '
-                            'is entering the results', 'administrator_add_tests_C.png'),
-                           ('Then click the "*" button at the top of the "Class List" table', 'teacher_add_test_F.png'),
-                           ('Then select the "Get New Class Login Password" option', 'enter_results_A.png'),
-                           ('Then note down the login and password that is displayed', 'enter_results_B.png'),
+                           ('To do this click the "Classes" tab at the left of the screen (it may already be selected)',
+                            'teacher_add_class_A.png'),
+                           ('Then in the classes table click on the home page symbol for the class that is entering '
+                            'the results', 'run_tests_B.png'),
+                           ('Then click the circle button', 'enter_results_C.png'),
+                           ('Then note down the login and password that is displayed and then click done',
+                            'enter_results_D.png'),
                            ('If at a later time you forget the login/password or you want to reset the password then '
                             'you can repeat point 1.  Each time you repeat it you will reset the password to a new '
                             'one.', None)
                        ],
                        [
                            ('Now the students can login.  To do this get each of the students to go to the login '
-                            'screen and enter the login and password obtained in point 1', 'enter_results_C.png'),
+                            'screen and enter the login and password obtained in point 1', 'enter_results_E.png'),
                            ('If you are using the one computer than you will first need to logout', None)
                        ],
                        [
                            ('Now each student can enter their results.  First they should fill in the student '
-                            'details.', 'enter_results_DD.png'),
-                           ('Then the results', 'enter_results_E.png'),
+                            'details.', 'enter_results_F.png'),
+                           ('Then the results', 'enter_results_G.png'),
                            ('Make sure the results are entered with the units given next to each result entry box',
-                            'enter_results_F.png')
+                            'enter_results_H.png')
                        ],
                        [
                            ('After the results have been entered click the "Save Results" button at the bottom of the '
-                            'screen', 'enter_results_G.png'),
+                            'screen', 'enter_results_I.png'),
                            ('If all the results have been entered correctly than the student should now see graphs of '
                             'their results.  If they wish they can take a screen shot of the results.  Once they '
-                            'click "Done" at the bottom of the screen they will be logged out.', 'enter_results_H.png'),
+                            'click "Done" at the bottom of the screen they will be logged out.', 'enter_results_J.png'),
                            ('If the results were not all entered correctly than there will be some red text next to '
-                            'the boxes that need to be amended', 'enter_results_I.png'),
+                            'the boxes that need to be amended', 'enter_results_K.png'),
                            ('If the graphs show up as all 0 than it may be that the student has entered in the '
                             'wrong age (and so there is no percentile information for that age)', None)
                        ]
