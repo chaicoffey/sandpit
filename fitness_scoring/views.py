@@ -484,19 +484,21 @@ def instructions_page(request, instructions_name):
                          'administrator_add_class_A.png')],
                        [('Click the "+" button at the top of the classes table.', 'administrator_add_class_B.png')],
                        [
-                           ('Enter the details for the class.  You must choose a class name e.g. "Class 7A Term 1").  '
-                            'The drop down has a list of the teachers that you have already added.  If the teacher for '
-                            'this class is not available then you must add them (see instructions).',
-                            'administrator_add_class_C.png'),
+                           ('Enter the details for the class.  When entering the class name you should give the term '
+                            'as well e.g. "Class 7A Term 1".  The drop down has a list of the teachers that you have '
+                            'already added.  If the teacher for this class is not available then you must add them '
+                            "<div class='link_open_tab' style='display: inline'><a href='administrator_add_teacher'>"
+                            "(see instructions)</a></div>.", 'administrator_add_class_C.png'),
                            ('Then click the button at the bottom of the form', None)
                        ],
                        [
                            ('The next step is to select the tests that you want the class to perform over the term.  '
                             'A default set of tests is originally selected.', None),
-                           ("Click the check boxes of tests you wish to change. (see the 'A')", None),
-                           ("You can see instructions for the tests by clicking on the green icon. (see the 'B')",
+                           ("Click the check boxes of tests you wish to change. (see the 'A' in the diagram below)",
                             None),
-                           ("You can reselect the default set of tests or select a set of tests someone has previously "
+                           ("You can see instructions for the tests by clicking on the green icons. (see the 'B')",
+                            None),
+                           ("You can reselect the default set of tests or select the tests someone has previously "
                             "used in another class.  Note that not all of the previous classes will be displayed.  If "
                             "more than one class has used the same set of tests then only one of these classes will be "
                             "listed. (see the 'C')", None),
