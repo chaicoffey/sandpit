@@ -485,7 +485,7 @@ def instructions_page(request, instructions_name):
                        [('Click the "+" button at the top of the classes table.', 'administrator_add_class_B.png')],
                        [
                            ('Enter the details for the class.  When entering the class name you should give the term '
-                            'as well e.g. "Class 7A Term 1".  The drop down has a list of the teachers that you have '
+                            'as well e.g. "Class 9C Term 1".  The drop down has a list of the teachers that you have '
                             'already added.  If the teacher for this class is not available then you must add them '
                             "<div class='link_open_tab' style='display: inline'><a href='administrator_add_teacher'>"
                             "(see instructions)</a></div>.", 'administrator_add_class_C.png'),
@@ -554,31 +554,27 @@ def instructions_page(request, instructions_name):
                    ]}
     elif instructions_name == 'teacher_add_classes' and user_type == 'Teacher':
         context = {'heading': 'Add Classes',
-                   'reason': 'If the administrator has not already assigned your classes for the year than you will '
+                   'reason': 'If the administrator has not already assigned your classes for the term than you will '
                              'need to do so yourself',
                    'instructions': [
-                       [('Click the "Add/Update Class List" tab at the left of the screen',
-                         'teacher_add_classes_A.png')],
+                       [('Click the "Classes" tab at the left of the screen (it may already be selected)',
+                         'teacher_add_class_A.png')],
+                       [('Click the "+" button at the top of the classes table.', 'teacher_add_class_B.png')],
                        [
-                           ('Click the "+" button at the top of the "Class List" table',
-                            'teacher_add_classes_B.png'),
-                           ('Then Select the "Add Class" option', 'teacher_add_classes_CC.png')
-                       ],
-                       [
-                           ('Enter the details for the class.  You must choose a class name e.g. "Class 7A Term 1"',
-                            'teacher_add_classes_D.png'),
+                           ('Enter the details for the class.  When entering the class name you should give the term '
+                            'as well e.g. "Class 9C Term 1".', 'teacher_add_class_C.png'),
                            ('Then click the button at the bottom of the form', None)
                        ],
                        [('Repeat from point 2. for all your remaining classes and you are done!.  Note that you will '
-                         'need to add a new "class" for every term you intend to run the tests in.', None)]
+                         'need to add a new set of classes for every term you intend to run the tests in.', None)]
                    ]}
     elif instructions_name == 'teacher_run_tests' and user_type == 'Teacher':
         context = {'heading': 'Run Tests',
                    'reason': 'Once you have classes assigned this program will provide aides for running the tests',
                    'instructions': [
                        [
-                           ('Click the "Add/Update Class List" tab at the left of the screen',
-                            'teacher_add_classes_A.png'),
+                           ('Click the "Classes" tab at the left of the screen (it may already be selected)',
+                            'teacher_add_class_A.png'),
                            ('Then in the "Class List" table click on the "class home page" symbol for the class that '
                             'you want to run tests for', 'administrator_add_tests_C.png')
                        ],
@@ -649,9 +645,8 @@ def instructions_page(request, instructions_name):
                              'you have a separate computer.',
                    'instructions': [
                        [
-                           ('First make sure you are logged in as a teacher', None),
-                           ('Then click the "Add/Update Class List" tab at the left of the screen',
-                            'teacher_add_classes_A.png'),
+                           ('Then Click the "Classes" tab at the left of the screen (it may already be selected)',
+                             'teacher_add_class_A.png'),
                            ('Then in the "Class List" table click on the "class home page" symbol for the class that '
                             'the class that you wish to approve results for', 'administrator_add_tests_C.png')
                        ],
@@ -710,8 +705,8 @@ def instructions_page(request, instructions_name):
                              'in different forms',
                    'instructions': [
                        [
-                           ('Click the "Add/Update Class List" tab at the left of the screen',
-                            'teacher_add_classes_A.png'),
+                           ('Click the "Classes" tab at the left of the screen (it may already be selected)',
+                            'teacher_add_class_A.png'),
                            ('Then in the "Class List" table click on the "class home page" symbol for the class that '
                             'the class that you wish to view results for', 'administrator_add_tests_C.png'),
                            ('There are 4 different formats that you can view the data listed in the following 3 '
