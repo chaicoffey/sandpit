@@ -705,7 +705,7 @@ def instructions_page(request, instructions_name):
                             'points', None)
                        ],
                        [
-                           ('Initially you will see the "Class results table', 'view_results_C.png'),
+                           ('Initially you will see the class results table', 'view_results_C.png'),
                            ('This can also be accessed by clicking the "Results Table" class panel option',
                             'view_results_D.png'),
                            ('If there are a lot of tests in the table you may need to scroll right on the table to see '
@@ -728,12 +728,12 @@ def instructions_page(request, instructions_name):
                             'graph represents a minor test category', 'view_results_K.png')
                        ],
                        [
-                           ('Previous results for a student for given tests can be viewed by clicking the "Previous '
-                            'Graphs" class panel option.  This is only useful if a student has results entered into '
-                            'the system from previous classes', 'view_results_L.png'),
-                           ('Next select the student and the test you want to view results for', 'view_results_M.png'),
-                           ('The resulting graph(s) will show the percentiles rankings from previous classes for the '
-                            'chosen student and test.  The color of the bars represents a year.', 'view_results_N.png')
+                           ('Previous results for a student can be viewed by clicking the "Previous Graphs" class '
+                            'panel option.  This is only useful if a student has results entered into the system from '
+                            'previous classes', 'view_results_L.png'),
+                           ('Next select the student you want to view results for', 'view_results_M.png'),
+                           ('The resulting graphs will show the percentiles rankings for tests from previous classes '
+                            'for the chosen student', 'view_results_N.png')
                        ]
                    ]}
     else:
