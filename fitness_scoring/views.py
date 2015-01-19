@@ -699,41 +699,41 @@ def instructions_page(request, instructions_name):
                        [
                            ('Click the "Classes" tab at the left of the screen (it may already be selected)',
                             'teacher_add_class_A.png'),
-                           ('Then in the "Class List" table click on the "class home page" symbol for the class that '
-                            'the class that you wish to view results for', 'administrator_add_tests_C.png'),
-                           ('There are 4 different formats that you can view the data listed in the following 3 '
+                           ('Then in the classes table click on the home page symbol for the class that you wish to '
+                            'view results for', 'run_tests_B.png'),
+                           ('There are 4 different formats that you can view the data listed in the following 4 '
                             'points', None)
                        ],
                        [
-                           ('Initially you will see the "Class results table', 'view_results_B.png'),
+                           ('Initially you will see the "Class results table', 'view_results_C.png'),
                            ('This can also be accessed by clicking the "Results Table" class panel option',
-                            'view_results_A.png'),
+                            'view_results_D.png'),
                            ('If there are a lot of tests in the table you may need to scroll right on the table to see '
-                            'all of the results', 'view_results_C.png')
+                            'all of the results', 'view_results_E.png')
                        ],
                        [
                            ('A graph of the results of the class for a given test can be viewed by first clicking the '
-                            '"Tests Graphs" class panel option', 'view_results_D.png'),
-                           ('Next select the test you want to view results for', 'view_results_E.png'),
+                            '"Tests Graphs" class panel option', 'view_results_F.png'),
+                           ('Next select the test you want to view results for', 'view_results_G.png'),
                            ('The resulting graph will show percentiles rankings for each of the students for that '
                             'test.  Note that 2 students with the same result on a test may have a different '
-                            'percentile ranking if they are different ages', 'view_results_F.png')
+                            'percentile ranking if they are different ages', 'view_results_H.png')
                        ],
                        [
                            ('A graph of the results for a student can be viewed by first clicking the "Students '
-                            'Graphs" class panel option', 'view_results_G.png'),
-                           ('Next select the student you want to view results for', 'view_results_H.png'),
+                            'Graphs" class panel option', 'view_results_I.png'),
+                           ('Next select the student you want to view results for', 'view_results_J.png'),
                            ('The resulting graph(s) will show percentiles rankings for the student for the different '
                             'tests.  There will be one graph per major test category.  The color of the bars in each '
-                            'graph represents a minor test category', 'view_results_I.png')
+                            'graph represents a minor test category', 'view_results_K.png')
                        ],
                        [
                            ('Previous results for a student for given tests can be viewed by clicking the "Previous '
                             'Graphs" class panel option.  This is only useful if a student has results entered into '
-                            'the system from previous classes', 'view_results_J.png'),
-                           ('Next select the student and the test you want to view results for', 'view_results_K.png'),
+                            'the system from previous classes', 'view_results_L.png'),
+                           ('Next select the student and the test you want to view results for', 'view_results_M.png'),
                            ('The resulting graph(s) will show the percentiles rankings from previous classes for the '
-                            'chosen student and test.  The color of the bars represents a year.', 'view_results_L.png')
+                            'chosen student and test.  The color of the bars represents a year.', 'view_results_N.png')
                        ]
                    ]}
     else:
