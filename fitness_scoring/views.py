@@ -266,8 +266,8 @@ def teacher_view(request):
              "For each class resolve any pending issues (if there are any).  Then check over the results before "
              "approving.",
              [
-                 ('run_tests_B.png', None), ('approve_results_E.png', 'RESOLVE PENDING ISSUES'),
-                 ('approve_results_G.png', 'TICK FOR APPROVED RESULTS')
+                 ('run_tests_B.png', None), ('approve_results_C.png', 'RESOLVE PENDING ISSUES'),
+                 ('approve_results_D.png', 'TICK FOR APPROVED RESULTS')
              ]),
             ('View Results', 'Classes_Link', 'teacher_view_results',
              "There are different ways you can view the student results.  These should be helpful for writing reports.",
@@ -645,14 +645,14 @@ def instructions_page(request, instructions_name):
                             'approve results for', 'run_tests_B.png')
                        ],
                        [
-                           ('You should see the "Class Results" table with some results in it.  If you notice an "!" '
-                            'next to any of the names then there are some pending issues to resolve.  Pending issues '
-                            'can arise from different causes (mainly due to a student entering in the wrong details).  '
+                           ('You should see a table with some results in it.  If you notice an "!" next to any of the '
+                            'names then there are some pending issues to resolve.  Pending issues can arise from '
+                            'different causes (mainly due to a student entering in the wrong details).  '
                             'The system will detect for instance if the same student has entered results twice, if two '
                             'students enter the same student number, if a student already in the database has very '
                             'similar details but one is different or if the student age is outside the normal age for '
-                            'a high school student.  To resolve the issue click on the "!" symbol next to the student.',
-                            'approve_results_C.png'),
+                            'a high school student.  If there are any issues showing click on the "!" symbol next '
+                            'to the student to resolve it.', 'approve_results_C.png'),
                            ('You will then see a pop up dialog.  Make sure to read it carefully before going onto the '
                             'next step', 'approve_results_D.png'),
                            ("Hopefully the dialog can help you to resolve the issue but if not you can edit the "
