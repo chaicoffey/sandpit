@@ -266,8 +266,8 @@ def teacher_view(request):
              "For each class resolve any pending issues (if there are any).  Then check over the results before "
              "approving.",
              [
-                 ('run_tests_B.png', None), ('approve_results_C.png', 'RESOLVE PENDING ISSUES'),
-                 ('approve_results_D.png', 'TICK FOR APPROVED RESULTS')
+                 ('run_tests_B.png', None), ('approve_results_E.png', 'RESOLVE PENDING ISSUES'),
+                 ('approve_results_G.png', 'TICK FOR APPROVED RESULTS')
              ]),
             ('View Results', 'Classes_Link', 'teacher_view_results',
              "There are different ways you can view the student results.  These should be helpful for writing reports.",
@@ -652,14 +652,14 @@ def instructions_page(request, instructions_name):
                             'students enter the same student number, if a student already in the database has very '
                             'similar details but one is different or if the student age is outside the normal age for '
                             'a high school student.  To resolve the issue click on the "!" symbol next to the student.',
-                            'approve_results_A.png'),
+                            'approve_results_C.png'),
                            ('You will then see a pop up dialog.  Make sure to read it carefully before going onto the '
-                            'next step', 'approve_results_B.png'),
+                            'next step', 'approve_results_D.png'),
                            ("Hopefully the dialog can help you to resolve the issue but if not you can edit the "
                             "results directly by clicking the pencil symbol to the right of the student's results.  "
                             "If there are a lot of tests you may need to scroll the table to the right to see the "
                             "pencil symbol.  You can also delete a student entry (and perhaps get them to re-enter it) "
-                            "by clicking the cross symbol next to the pencil", 'approve_results_C.png')
+                            "by clicking the cross symbol next to the pencil", 'approve_results_E.png')
                        ],
                        [
                            ('Once the pending issues for a student have been resolved (or there were none to start '
@@ -669,28 +669,26 @@ def instructions_page(request, instructions_name):
                             'all.  If you need to amend anything you can do so by clicking the pencil symbol to the '
                             'right of the results (again you may need to scroll).  You can also delete the whole '
                             'entry (and perhaps get the student to re-enter the results) by clicking the cross symbol '
-                            'next to the pencil.', 'approve_results_C.png'),
+                            'next to the pencil.', 'approve_results_E.png'),
                            ('If you do edit the results than make sure to save the results at the end by clicking the '
                             '"Save Results" button at the bottom of the form.', None)
                        ],
                        [
                            ("Once you are satisfied that a student's results are entered correctly you can approve the "
                             "student.  To do this click the empty check box next to the student's name",
-                            'approve_results_D.png'),
+                            'approve_results_G.png'),
                            ('Then click the "Approve Student Result Entry" button of the form that pops up',
-                            'approve_results_E.png'),
+                            'approve_results_H.png'),
                            ('You should now see a tick in the check box.  If you have made a mistake and you want to '
-                            'un-approve the student you can click on this symbol.', 'approve_results_F.png')
+                            'un-approve the student you can click on this symbol.', 'approve_results_I.png')
                        ],
                        [
                            ('You can also approve all the students at once instead of clicking on each of the check '
                             'boxes individually.  However before you do this make sure that you are satisfied that all '
-                            'the results are correct.  To approve all at once first click the "*" button at the top of '
-                            'the "Class List" table', 'teacher_add_test_F.png'),
-                           ('Then select the "Approve All Student Result Entries For Class" option',
-                            'teacher_add_test_G.png'),
+                            'the results are correct.  To approve all click the tick in the menus',
+                            'approve_results_J.png'),
                            ('Then click the "Approve All Student Entry Results" in the dialog that pops up',
-                            'teacher_add_test_H.png')
+                            'approve_results_K.png')
                        ]
                    ]}
     elif instructions_name == 'teacher_view_results' and user_type == 'Teacher':
