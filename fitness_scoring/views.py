@@ -17,6 +17,7 @@ from fitness_scoring.forms import ResolveIssuesPersonalForm, ResolveIssuesClassF
 from fitness_scoring.forms import ResolveIssuesSchoolIDForm, ResolveIssuesSchoolNameForm, ResolveIssuesForm
 from fitness_scoring.forms import StudentEntryForm, StudentEntryEditForm
 from fitness_scoring.user_emails import send_email_user_reset
+from operator import itemgetter
 
 
 def login_user(request):
@@ -2456,12 +2457,16 @@ def class_results_graphs_previous(request, class_pk, student_pk=None):
                 ]
             }
             if student_pk:
-                enrolments = StudentClassEnrolment.objects.filter(student_id=student_pk)
-                results_for_student = StudentClassTestResult.objects.none()
-                for enrolment in enrolments:
-                    results_for_student = (results_for_student |
-                                           StudentClassTestResult.objects.filter(student_class_enrolment=enrolment))
-                results_for_student = results_for_student.order_by('test')
+                results_for_student = []
+                for enrolment in StudentClassEnrolment.objects.filter(student_id=student_pk):
+                    for result in StudentClassTestResult.objects.filter(student_class_enrolment=enrolment):
+                        results_for_student.append((enrolment.class_id.class_name, enrolment.class_id.year,
+                                                    result.test.test_name,
+                                                    result.test.test_category.test_category_name, result))
+                for sort_index in range(4):
+                    results_for_student.sort(key=itemgetter(sort_index))
+                results_for_student = [result for class_name, year, test_name, test_category_name, result in
+                                       results_for_student]
                 graph_info = {}
                 major_category_counter = {}
                 for result in results_for_student:
