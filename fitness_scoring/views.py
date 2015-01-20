@@ -2364,8 +2364,11 @@ def class_results_graphs_tests(request, class_pk, test_pk=None):
             }
             if test_pk:
                 enrolments = StudentClassEnrolment.objects.filter(class_id=class_pk)
-                results_for_test = [StudentClassTestResult.objects.get(test=test_pk, student_class_enrolment=enrolment)
-                                    for enrolment in enrolments]
+                results_for_test = []
+                for enrolment in enrolments:
+                    result = StudentClassTestResult.objects.filter(test=test_pk, student_class_enrolment=enrolment)
+                    if result.exists():
+                        results_for_test.append(result[0])
                 graph_info = []
                 counter = 0
                 for result in results_for_test:
