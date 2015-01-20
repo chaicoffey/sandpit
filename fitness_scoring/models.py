@@ -111,6 +111,10 @@ class User(models.Model):
         self.read_agreement = True
         self.save()
 
+    def change_username(self, base_username):
+        self.username = User.get_valid_username(base_username)
+        self.save()
+
     @staticmethod
     def get_authenticated_user(username, password):
         user = User.objects.filter(username=username)
@@ -431,6 +435,8 @@ class Class(models.Model):
             allocation = TeacherClassAllocation.objects.get(class_id=self)
             allocation.teacher_id = teacher_id
             allocation.save()
+            if (str(year) != str(self.year)) or (class_name != self.class_name):
+                self.user.change_username((str(year) + "_" + class_name))
             self.year = year
             self.class_name = class_name
             self.school_id = school_id
