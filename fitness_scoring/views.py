@@ -2364,7 +2364,7 @@ def class_results_graphs_tests(request, class_pk, test_pk=None):
                 ]
             }
             if test_pk:
-                enrolments = StudentClassEnrolment.objects.filter(class_id=class_pk)
+                enrolments = StudentClassEnrolment.objects.filter(class_id=class_pk, approval_status="APPROVED")
                 results_for_test = []
                 for enrolment in enrolments:
                     result = StudentClassTestResult.objects.filter(test=test_pk, student_class_enrolment=enrolment)
@@ -2403,11 +2403,13 @@ def class_results_graphs_students(request, class_pk, student_pk=None):
                 'selection_options': [
                     [("/class/results_graphs/students/" + str(class_pk) + "/" + str(enrolment.student_id.pk),
                       enrolment.student_id, str(enrolment.student_id.pk) == str(student_pk))
-                     for enrolment in StudentClassEnrolment.objects.filter(class_id=class_pk)]
+                     for enrolment in StudentClassEnrolment.objects.filter(class_id=class_pk,
+                                                                           approval_status='APPROVED')]
                 ]
             }
             if student_pk:
-                enrolment = StudentClassEnrolment.objects.get(class_id=class_pk, student_id=student_pk)
+                enrolment = StudentClassEnrolment.objects.get(class_id=class_pk, student_id=student_pk,
+                                                              approval_status='APPROVED')
                 results_for_student = StudentClassTestResult.objects.filter(student_class_enrolment=enrolment)
                 graph_info = {}
                 major_category_counter = {}
@@ -2453,12 +2455,14 @@ def class_results_graphs_previous(request, class_pk, student_pk=None):
                 'selection_options': [
                     [("/class/results_graphs/previous/" + str(class_pk) + "/" + str(enrolment.student_id.pk),
                       enrolment.student_id, str(enrolment.student_id.pk) == str(student_pk))
-                     for enrolment in StudentClassEnrolment.objects.filter(class_id=class_pk)]
+                     for enrolment in StudentClassEnrolment.objects.filter(class_id=class_pk,
+                                                                           approval_status='APPROVED')]
                 ]
             }
             if student_pk:
                 results_for_student = []
-                for enrolment in StudentClassEnrolment.objects.filter(student_id=student_pk):
+                for enrolment in StudentClassEnrolment.objects.filter(student_id=student_pk,
+                                                                      approval_status='APPROVED'):
                     for result in StudentClassTestResult.objects.filter(student_class_enrolment=enrolment):
                         results_for_student.append((enrolment.class_id.class_name, enrolment.class_id.year,
                                                     result.test.test_name,
