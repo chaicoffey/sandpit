@@ -579,8 +579,15 @@ def instructions_page(request, instructions_name):
                             'run tests for', 'run_tests_B.png')
                        ],
                        [
-                           ('Now you can print off the tests.  Click the printer symbol.', 'run_tests_C.png'),
-                           ('In the tab that opens click the print instructions button', 'run_tests_D.png'),
+                           ('Check that the set of tests you want to run are allocated to the class.  You may need to '
+                            'scroll to the right to see all of them', 'run_tests_C.png'),
+                           ("If there are any tests that you wish to add or remove click the 'T' symbol and then make "
+                            "the changes", 'run_tests_D.png')
+                       ],
+                       [
+                           ('Once all the tests are correct you can print them off.  Click the printer symbol.',
+                            'run_tests_E.png'),
+                           ('In the tab that opens click the print instructions button', 'run_tests_F.png'),
                            ('After you have printed the tab that opened will close automatically', None),
                            ('You should print off the instructions for every class you are teaching (unless one class '
                             'has the same set of tests as another then you only need to print once)', None)
