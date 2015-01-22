@@ -463,14 +463,15 @@ def instructions_page(request, instructions_name):
                    'instructions': [
                        [('Click the "Teachers" tab at the left of the screen (it may already be selected)',
                          'add_teachers_A.png')],
-                       [
-                           ('Click the "+" button at the top of the teachers table.', 'add_teachers_B.png')
-                       ],
+                       [('Click the "+" button at the top of the teachers table.', 'add_teachers_B.png')],
                        [
                            ('Enter the details for the teacher', 'add_teachers_C.png'),
                            ("Then click the button at the bottom of the form.  The teacher will be added and an email "
                             "with the teacher's login details will be sent to the email address you entered.", None)
                        ],
+                       [('After you have added the teacher you will see them in teacher table.  If you have made a '
+                         'mistake and you wish to edit the teacher then click the pencil to the right of the teacher.  '
+                         'If you wish to delete the teacher then click the cross.', 'add_teachers_D.png')],
                        [("Repeat from point 2. for all the remaining PE teachers you wish to add and you are done! "
                          "(don't forget to add yourself if you are a PE teacher).", None)]
                    ]}
@@ -506,6 +507,9 @@ def instructions_page(request, instructions_name):
                             "and the class will be added.  Note that you can change these selected tests later. "
                             "(see the 'D')", 'administrator_add_class_D.png')
                        ],
+                       [('After you have added the class you will see it in class table.  If you have made a '
+                         'mistake and you wish to edit the class then click the pencil to the right of the class.  '
+                         'If you wish to delete the class then click the cross.', 'administrator_add_class_E.png')],
                        [('Repeat from point 2. for all the remaining classes for the term and you are done!', None)],
                        [("It is recommended that you add all classes this way the first time you do this, in future "
                          "you could try to add classes from a file which may be quicker "
@@ -565,6 +569,9 @@ def instructions_page(request, instructions_name):
                             'as well e.g. "Class 9C Term 1".', 'teacher_add_class_C.png'),
                            ('Then click the button at the bottom of the form', None)
                        ],
+                       [('After you have added the class you will see it in class table.  If you have made a '
+                         'mistake and you wish to edit the class then click the pencil to the right of the class.  '
+                         'If you wish to delete the class then click the cross.', 'teacher_add_class_D.png')],
                        [('Repeat from point 2. for all your remaining classes and you are done!.  Note that you will '
                          'need to add a new set of classes for every term you intend to run the tests in.', None)]
                    ]}
