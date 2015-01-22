@@ -38,7 +38,7 @@ def send_email_user_login(email, username, password, teacher_or_admin):
                ('Teacher' if teacher_or_admin else 'Administrator') + ' Login Details',
                ('Hi,\n\n'
                'You are now signed up for the fitness testing application.\n\n'
-               'To start using go to ' + web_address + ' and enter the login details below:\n\n'
+               'To start using FitTest go to ' + web_address + ' and enter the login details below:\n\n'
                'username: ' + username + '\n'
                'password: ' + password + '\n\n'
                "After you login just " + ("follow " if teacher_or_admin else "start following ") +
