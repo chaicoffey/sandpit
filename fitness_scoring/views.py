@@ -585,10 +585,10 @@ def instructions_page(request, instructions_name):
                            ('You should print off the instructions for every class you are teaching (unless one class '
                             'has the same set of tests as another then you only need to print once)', None)
                        ],
-                       [
-                           ("When running the tests be sure that the student's or an assistant notes down their "
-                            "results", None)
-                       ]
+                       [("When running the tests be sure that the student's or an assistant notes down their results",
+                         None)],
+                       [('After the tests are run return to the program and go to the next instruction step to see how '
+                         'to get the students to enter their results', None)]
                    ]}
     elif instructions_name == 'teacher_student_enter_results' and user_type == 'Teacher':
         context = {'heading': 'Entering Results',
