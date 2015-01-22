@@ -3,7 +3,7 @@ from django.core.mail import send_mail
 from pe_site.settings import DEFAULT_FROM_EMAIL
 
 
-subject_start = 'Fitness Testing App - '
+subject_start = 'FitTest - '
 
 sign_off = ('\n\n'
             'Regards,\n'
