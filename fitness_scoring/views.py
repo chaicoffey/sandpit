@@ -1758,7 +1758,8 @@ def class_list(request):
             class_items = [(class_instance, class_instance.get_display_items()) for class_instance
                            in Class.objects.filter(school_id=school)]
             class_list_headings = Class.get_display_list_headings()
-            item_list_add_buttons.append(('++', 'item_list_modal_load_link', '/class/adds/', 'Add Classes'))
+            item_list_add_buttons.append(('++', 'item_list_modal_load_link', '/class/adds/', 'Add Classes From File'
+                                                                                             ' (Advanced)'))
         context = {
             'item_list': class_items,
             'menu_label': 'Add Class(es)',
