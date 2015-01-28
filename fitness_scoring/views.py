@@ -249,31 +249,33 @@ def teacher_view(request):
              [
                  ('teacher_add_classes_B.png', None), ('teacher_add_classes_D.png', None)
              ]),
-            ('Run Tests', 'Classes_Link', 'teacher_run_tests',
-             "Follow the diagrams to print off the test instructions.  Do this for each class however if two classes "
-             "have the same set of tests you only need to do it for one of them.  After you have printed off the "
-             "instructions you are ready to run the tests with your classes.  After running the tests come back to "
-             "this program and see the next step.",
+            ('Print Test Instructions', 'Classes_Link', 'teacher_print_instructions',
+             "Follow the diagrams to print the test instructions.  Do this for each class however if two classes "
+             "have the same set of tests you only need to do it for one of them.",
              [
-                 ('run_tests_B.png', None), ('run_tests_C.png', None), ('run_tests_E.png', None)
+                 ('print_instructions_B.png', None), ('print_instructions_C.png', None)
              ]),
+            ('Run Tests', 'Classes_Link', None,
+             "Use the printed instructions to run the tests with the students in each class.  Make sure they record "
+             "the results.  After you have done this return to the program and see the next step for getting the "
+             "students to enter the results.", None),
             ('Get Students To Enter Results', 'Classes_Link', 'teacher_student_enter_results',
              "Obtain a login for each class.  Get all students to sign into this site with their class login and enter "
              "their results.",
              [
-                 ('run_tests_B.png', None), ('enter_results_C.png', None), ('enter_results_D.png', None)
+                 ('print_instructions_B.png', None), ('enter_results_C.png', None), ('enter_results_D.png', None)
              ]),
             ('Approve Entries For Class', 'Classes_Link', 'teacher_approve_entries',
              "For each class resolve any pending issues (if there are any).  Then check over the results before "
              "approving.",
              [
-                 ('run_tests_B.png', None), ('approve_results_C.png', 'RESOLVE PENDING ISSUES'),
+                 ('print_instructions_B.png', None), ('approve_results_C.png', 'RESOLVE PENDING ISSUES'),
                  ('approve_results_D.png', 'TICK FOR APPROVED RESULTS')
              ]),
             ('View Results', 'Classes_Link', 'teacher_view_results',
              "There are different ways you can view the student results.  These should be helpful for writing reports.",
              [
-                 ('run_tests_B.png', None), ('view_results_C.png', 'VIEW RESULTS YOU WISH')
+                 ('print_instructions_B.png', None), ('view_results_C.png', 'VIEW RESULTS YOU WISH')
              ]),
             ('Completed', 'Classes_Link', None,
              "If you have finished all the steps you are done!  Use the program again when you are running tests for "
@@ -282,9 +284,9 @@ def teacher_view(request):
         ]
         step_divisions = [
             (1, 'Do this (unless already done by admin)'),
-            (2, 'Running the tests'),
-            (5, 'Do these steps after running tests'),
-            (6, 'Completed')
+            (3, 'Running the tests'),
+            (6, 'Do these steps after running tests'),
+            (7, 'Completed')
         ]
 
         step_sets = []
@@ -575,34 +577,32 @@ def instructions_page(request, instructions_name):
                        [('Repeat from point 2. for all your remaining classes and you are done!.  Note that you will '
                          'need to add a new set of classes for every term you intend to run the tests in.', None)]
                    ]}
-    elif instructions_name == 'teacher_run_tests' and user_type == 'Teacher':
-        context = {'heading': 'Run Tests',
+    elif instructions_name == 'teacher_print_instructions' and user_type == 'Teacher':
+        context = {'heading': 'Print Instructions',
                    'reason': 'Once you have classes assigned this program will provide aides for running the tests',
                    'instructions': [
                        [
                            ('Click the "Classes" tab at the left of the screen (it may already be selected)',
                             'teacher_add_class_A.png'),
                            ('Then in the classes table click on the home page symbol for the class that you want to '
-                            'run tests for', 'run_tests_B.png')
+                            'run tests for', 'print_instructions_B.png')
                        ],
                        [
                            ('Check that the set of tests you want to run are allocated to the class.  You may need to '
-                            'scroll to the right to see all of them', 'run_tests_C.png'),
+                            'scroll to the right to see all of them', 'print_instructions_C.png'),
                            ("If there are any tests that you wish to add or remove click the 'T' symbol and then make "
-                            "the changes", 'run_tests_D.png')
+                            "the changes", 'print_instructions_D.png')
                        ],
                        [
                            ('Once all the tests are correct you can print them off.  Click the printer symbol.',
-                            'run_tests_E.png'),
-                           ('In the tab that opens click the print instructions button', 'run_tests_F.png'),
-                           ('After you have printed the tab that opened will close automatically', None),
+                            'print_instructions_E.png'),
+                           ('In the tab that opens click the print instructions button', 'print_instructions_F.png'),
+                           ('After you have printed the tab that opened will close automatically', None)
+                       ],
+                       [
                            ('You should print off the instructions for every class you are teaching (unless one class '
                             'has the same set of tests as another then you only need to print once)', None)
-                       ],
-                       [("When running the tests be sure that the student's or an assistant notes down their results",
-                         None)],
-                       [('After the tests are run return to the program and go to the next instruction step to see how '
-                         'to get the students to enter their results', None)]
+                       ]
                    ]}
     elif instructions_name == 'teacher_student_enter_results' and user_type == 'Teacher':
         context = {'heading': 'Entering Results',
@@ -615,7 +615,7 @@ def instructions_page(request, instructions_name):
                            ('To do this click the "Classes" tab at the left of the screen (it may already be selected)',
                             'teacher_add_class_A.png'),
                            ('Then in the classes table click on the home page symbol for the class that is entering '
-                            'the results', 'run_tests_B.png'),
+                            'the results', 'print_instructions_B.png'),
                            ('Then click the circle button', 'enter_results_C.png'),
                            ('Then note down the login and password that is displayed and then click done',
                             'enter_results_D.png'),
@@ -657,7 +657,7 @@ def instructions_page(request, instructions_name):
                            ('Then Click the "Classes" tab at the left of the screen (it may already be selected)',
                              'teacher_add_class_A.png'),
                            ('Then in the classes table click on the home page symbol for the class that you wish to '
-                            'approve results for', 'run_tests_B.png')
+                            'approve results for', 'print_instructions_B.png')
                        ],
                        [
                            ('You should see a table with some results in it.  If you notice an "!" next to any of the '
@@ -715,7 +715,7 @@ def instructions_page(request, instructions_name):
                            ('Click the "Classes" tab at the left of the screen (it may already be selected)',
                             'teacher_add_class_A.png'),
                            ('Then in the classes table click on the home page symbol for the class that you wish to '
-                            'view results for', 'run_tests_B.png'),
+                            'view results for', 'print_instructions_B.png'),
                            ('There are 4 different formats that you can view the data listed in the following 4 '
                             'points', None)
                        ],
