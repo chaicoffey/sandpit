@@ -2026,7 +2026,9 @@ def class_class(request, class_pk):
                  'class_result_edit_page_load_link'),
                 ('Previous Graphs', '/class/results_graphs/previous/' + str(class_pk),
                  'class_result_edit_page_load_link')
-            ]
+            ],
+            'back_button_label': 'Back To Classes',
+            'back_button_onclick_command': 'load_main_view()'
         }
         return render(request, 'class.html', RequestContext(request, context))
     else:
