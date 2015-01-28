@@ -258,9 +258,11 @@ def teacher_view(request):
             ('Run Tests', 'Classes_Link', None,
              "Use the printed instructions to run the tests with the students in each class.  Make sure they record "
              "the results.  After you have done this return to the program and see the next step for getting the "
-             "students to enter the results.", None),
+             "students to enter the results.",
+             None),
             ('Get Students To Enter Results', 'Classes_Link', 'teacher_student_enter_results',
-             "Obtain a login for each class.  Get all students to sign into this site with their class login and enter "
+             "To obtain a username and password for each class go to each class's home page and press the circle.  "
+             "Write down the details.  After you have done this get all students to sign into this site and enter "
              "their results.",
              [
                  ('print_instructions_B.png', None), ('enter_results_C.png', None), ('enter_results_D.png', None)
