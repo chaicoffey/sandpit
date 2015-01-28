@@ -49,6 +49,13 @@ select {
     color: #f9f2f4;
 }
 
+select.graph_selection {
+    font-weight: bold;
+    color: purple;
+    font-size: 20px;
+    border-color: #999;
+}
+
 #class_links > li > a {
     background-color: #f9f2f4;
     color: purple;

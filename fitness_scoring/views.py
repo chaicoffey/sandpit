@@ -2375,7 +2375,7 @@ def class_results_graphs_tests(request, class_pk, test_pk=None):
         if (test_pk is None) or ClassTest.objects.filter(class_id=class_pk, test_name=test_pk).exists():
             context = {
                 'title': 'Tests',
-                'not_selected_text': 'Please Select A Test To View Graph',
+                'not_selected_text': 'Please Select A Test',
                 'selection_options': [
                     [("/class/results_graphs/tests/" + str(class_pk) + "/" + str(class_test.test_name.pk),
                       class_test.test_name, str(class_test.test_name.pk) == str(test_pk))
@@ -2418,7 +2418,7 @@ def class_results_graphs_students(request, class_pk, student_pk=None):
                                                                         student_id=student_pk).exists():
             context = {
                 'title': 'Students',
-                'not_selected_text': 'Please Select A Student To View Graph',
+                'not_selected_text': 'Please Select A Student',
                 'selection_options': [
                     [("/class/results_graphs/students/" + str(class_pk) + "/" + str(enrolment.student_id.pk),
                       enrolment.student_id, str(enrolment.student_id.pk) == str(student_pk))
@@ -2470,7 +2470,7 @@ def class_results_graphs_previous(request, class_pk, student_pk=None):
                                                                         student_id=student_pk).exists():
             context = {
                 'title': 'Student History',
-                'not_selected_text': 'Please Select A Student To View Graph',
+                'not_selected_text': 'Please Select A Student',
                 'selection_options': [
                     [("/class/results_graphs/previous/" + str(class_pk) + "/" + str(enrolment.student_id.pk),
                       enrolment.student_id, str(enrolment.student_id.pk) == str(student_pk))

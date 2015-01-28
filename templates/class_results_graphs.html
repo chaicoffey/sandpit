@@ -12,7 +12,7 @@
         <hr style="margin-top: 0">
         {% for selection_option in selection_options %}
             <select class="graph_selection">
-                <option value=""></option>
+                <option value="">{{ not_selected_text }}</option>
                 {% for value, item, selected in selection_option %}
                     <option value="{{ value }}" {% if selected %}selected{% endif %}>{{ item }}</option>
                 {% endfor %}
@@ -107,9 +107,6 @@
             });
         </script>
 
-    {% else %}
-        <hr>
-        <h4>{{ not_selected_text }}</h4>
     {% endif %}
 
 </div>
