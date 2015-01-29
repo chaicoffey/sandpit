@@ -278,7 +278,11 @@ def teacher_view(request):
                  ('approve_results_D.png', 'TICK FOR APPROVED RESULTS')
              ]),
             ('View Results', 'Classes_Link', 'teacher_view_results',
-             "There are different ways you can view the student results.  These should be helpful for writing reports.",
+             "You can view a class's results by going to class home page.  Once on the class home page to see a "
+             "comparison graph of the class' results for a given test go to the "
+             '"Tests Graphs" tab.  To see a graph of the results for one student go to the "Students Graphs" tab.  To '
+             'see a graph of the results history of a student go to the "Previous Results" tab.  Note that results '
+             'will only show for entries that have been approved.',
              [
                  ('print_instructions_B.png', None), ('view_results_C.png', 'VIEW RESULTS YOU WISH')
              ]),
