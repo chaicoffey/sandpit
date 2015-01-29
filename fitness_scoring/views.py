@@ -268,8 +268,11 @@ def teacher_view(request):
                  ('print_instructions_B.png', None), ('enter_results_C.png', None), ('enter_results_D.png', None)
              ]),
             ('Approve Entries For Class', 'Classes_Link', 'teacher_approve_entries',
-             "For each class resolve any pending issues (if there are any).  Then check over the results before "
-             "approving.",
+             "For each class go to the class home page.  If a student has entered information the system believes is "
+             "incorrect you will see a <span class='glyphicon glyphicon-exclamation-sign attention_color'></span> "
+             "next to the student name.  If you see this symbol click it to resolve the problem.  Once all pending "
+             "issues are resolved check over each student's results and if you think they are correct tick the box to "
+             "approve them.",
              [
                  ('print_instructions_B.png', None), ('approve_results_C.png', 'RESOLVE PENDING ISSUES'),
                  ('approve_results_D.png', 'TICK FOR APPROVED RESULTS')
