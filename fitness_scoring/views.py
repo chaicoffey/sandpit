@@ -292,7 +292,8 @@ def teacher_view(request):
              'see a graph of the results history of a student go to the "Previous Results" tab.  Note that results '
              'will only show for entries that have been approved.',
              [
-                 ('print_instructions_B.png', None), ('view_results_C.png', 'VIEW RESULTS YOU WISH')
+                 ('print_instructions_B.png', None), ('view_results_C.png', 'VIEW RESULTS YOU WISH'),
+                 ('print_instructions_D.png', None), ('teacher_add_classes_D.png', None)
              ]),
             ('Completed', 'Classes_Link', None,
              "If you have finished all the steps you are done!  Use the program again when you are running tests for "
@@ -781,6 +782,10 @@ def instructions_page(request, instructions_name):
                            ('Next select the student you want to view results for', 'view_results_M.png'),
                            ('The resulting graphs will show the percentiles rankings for tests from previous classes '
                             'for the chosen student', 'view_results_N.png')
+                       ],
+                       [
+                           ('Repeat from point 1 to view results for other classes  (be sure to click the "Classes" '
+                            'tab)', None)
                        ]
                    ]}
     else:
