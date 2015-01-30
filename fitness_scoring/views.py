@@ -645,8 +645,8 @@ def instructions_page(request, instructions_name):
                             'one.', None)
                        ],
                        [
-                           ('You will need to repeat from point 1 for each class so that you have login details for '
-                            'each class (be sure to click the "Classes" tab)', None)
+                           ('Now you will need to get login details for your other classes.  To do this repeat from '
+                            'point 1 (be sure to click the "Classes" tab)', None)
                        ]
                    ]}
     elif instructions_name == 'student_enter_results' and user_type == 'Teacher':
@@ -737,6 +737,10 @@ def instructions_page(request, instructions_name):
                             'approve_results_J.png'),
                            ('Then click the "Approve All Student Entry Results" in the dialog that pops up',
                             'approve_results_K.png')
+                       ],
+                       [
+                           ('To approve results for other classes repeat from point 1  (be sure to click the "Classes" '
+                            'tab)', None)
                        ]
                    ]}
     elif instructions_name == 'teacher_view_results' and user_type == 'Teacher':
