@@ -16,7 +16,7 @@ from fitness_scoring.forms import AllocateEditTestsToClassForm, AllocateEditDefa
 from fitness_scoring.forms import ResolveIssuesPersonalForm, ResolveIssuesClassForm
 from fitness_scoring.forms import ResolveIssuesSchoolIDForm, ResolveIssuesSchoolNameForm, ResolveIssuesForm
 from fitness_scoring.forms import StudentEntryForm, StudentEntryEditForm
-from fitness_scoring.user_emails import send_email_user_reset
+from fitness_scoring.user_emails import send_email_user_reset, web_address
 from operator import itemgetter
 
 
@@ -260,12 +260,18 @@ def teacher_view(request):
              "the results.  After you have done this return to the program and see the next step for getting the "
              "students to enter the results.",
              None),
-            ('Get Students To Enter Results', 'Classes_Link', 'teacher_student_enter_results',
-             "To obtain a username and password for each class go to each class's home page and press the circle.  "
-             "Write down the details.  After you have done this get all students to sign into this site and enter "
-             "their results.",
+            ('Get Class Login Details', 'Classes_Link', 'teacher_get_login_details',
+             "You must now obtain a username and password for each class for the students to login and enter their "
+             "results with.  To do this go to each class's home page and press the circle.  Write down the login that "
+             "are displayed details.",
              [
-                 ('print_instructions_B.png', None), ('enter_results_C.png', None), ('enter_results_D.png', None)
+                 ('print_instructions_B.png', None), ('get_login_C.png', None)
+             ]),
+            ('Get Students To Enter Results', 'Classes_Link', 'student_enter_results',
+             "Get all students to sign into this site with the class login details obtained in the previous step.  "
+             "Then they can enter their results.  The site address is " + web_address,
+             [
+                 ('enter_results_A.png', None), ('enter_results_B.png', None)
              ]),
             ('Approve Entries For Class', 'Classes_Link', 'teacher_approve_entries',
              "For each class go to the class home page.  If a student has entered information the system believes is "
@@ -294,8 +300,8 @@ def teacher_view(request):
         step_divisions = [
             (1, 'Do this (unless already done by admin)'),
             (3, 'Running the tests'),
-            (6, 'Do these steps after running tests'),
-            (7, 'Completed')
+            (7, 'Do these steps after running tests'),
+            (8, 'Completed')
         ]
 
         step_sets = []
@@ -613,45 +619,58 @@ def instructions_page(request, instructions_name):
                             'has the same set of tests as another then you only need to print once)', None)
                        ]
                    ]}
-    elif instructions_name == 'teacher_student_enter_results' and user_type == 'Teacher':
-        context = {'heading': 'Entering Results',
+    elif instructions_name == 'teacher_get_login_details' and user_type == 'Teacher':
+        context = {'heading': 'Get Class Login Details',
                    'reason': 'Once the students have completed the tests and noted their results they will need to '
-                             'enter them into the system.  Each of the students will need access to a computer for '
-                             'doing this.',
+                             'enter them into the system.  For each class you will need to get a username and password '
+                             'for the students to login with.',
                    'instructions': [
                        [
-                           ('First you will need to get the class log in details for the students.', None),
-                           ('To do this click the "Classes" tab at the left of the screen (it may already be selected)',
+                           ('Click the "Classes" tab at the left of the screen (it may already be selected)',
                             'teacher_add_class_A.png'),
                            ('Then in the classes table click on the home page symbol for the class that is entering '
                             'the results', 'print_instructions_B.png'),
-                           ('Then click the circle button', 'enter_results_C.png'),
+                       ],
+                       [
+                           ('Next click the circle button', 'get_login_C.png'),
                            ('Then note down the login and password that is displayed and then click done',
-                            'enter_results_D.png'),
+                            'get_login_D.png'),
                            ('If at a later time you forget the login/password or you want to reset the password then '
-                            'you can repeat point 1.  Each time you repeat it you will reset the password to a new '
+                            'you can repeat point 2.  Each time you repeat it you will reset the password to a new '
                             'one.', None)
                        ],
                        [
-                           ('Now the students can login.  To do this get each of the students to go to the login '
-                            'screen and enter the login and password obtained in point 1', 'enter_results_E.png'),
+                           ('You will need to repeat from point 1 for each class so that you have login details for '
+                            'each class', None)
+                       ]
+                   ]}
+    elif instructions_name == 'student_enter_results' and user_type == 'Teacher':
+        context = {'heading': 'Get Students To Enter Results',
+                   'reason': 'Once each class has a login the student can enter their results.  Each of the students '
+                             'will need access to a computer for doing this.',
+                   'instructions': [
+                       [
+                           ('Now the students can login.  To do this get each of the students to go to the site home '
+                            'page and enter the login and password obtained in the previous step',
+                            'enter_results_A.png'),
+                           ('The site address is ' + web_address, None),
                            ('If you are using the one computer than you will first need to logout', None)
                        ],
                        [
                            ('Now each student can enter their results.  First they should fill in the student '
-                            'details.', 'enter_results_F.png'),
-                           ('Then the results', 'enter_results_G.png'),
+                            'details.', 'enter_results_B.png'),
+                           ('Then the results', 'enter_results_C.png'),
                            ('Make sure the results are entered with the units given next to each result entry box',
-                            'enter_results_H.png')
+                            'enter_results_D.png')
                        ],
                        [
                            ('After the results have been entered click the "Save Results" button at the bottom of the '
-                            'screen', 'enter_results_I.png'),
+                            'screen', 'enter_results_E.png'),
                            ('If all the results have been entered correctly than the student should now see graphs of '
                             'their results.  If they wish they can take a screen shot of the results.  Once they '
-                            'click "Done" at the bottom of the screen they will be logged out.', 'enter_results_J.png'),
+                            'click "Done" at the bottom of the screen they will be logged out.', 'enter_results_F.png'),
                            ('If the results were not all entered correctly than there will be some red text next to '
-                            'the boxes that need to be amended', 'enter_results_K.png'),
+                            'the boxes that need to be amended', 'enter_results_G.png'),
                            ('If the graphs show up as all 0 than it may be that the student has entered in the '
                             'wrong age (and so there is no percentile information for that age)', None)
                        ]
@@ -663,8 +682,8 @@ def instructions_page(request, instructions_name):
                              'you have a separate computer.',
                    'instructions': [
                        [
-                           ('Then Click the "Classes" tab at the left of the screen (it may already be selected)',
-                             'teacher_add_class_A.png'),
+                           ('Click the "Classes" tab at the left of the screen (it may already be selected)',
+                            'teacher_add_class_A.png'),
                            ('Then in the classes table click on the home page symbol for the class that you wish to '
                             'approve results for', 'print_instructions_B.png')
                        ],
