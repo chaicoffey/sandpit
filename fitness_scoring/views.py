@@ -283,7 +283,7 @@ def teacher_view(request):
              "approve them.",
              [
                  ('print_instructions_B.png', None), ('approve_results_C.png', 'RESOLVE PENDING ISSUES'),
-                 ('approve_results_D.png', 'TICK FOR APPROVED RESULTS')
+                 ('approve_results_D.png', 'TICK FOR APPROVED RESULTS'), ('teacher_add_classes_D.png', None)
              ]),
             ('View Results', 'Classes_Link', 'teacher_view_results',
              "You can view a class's results by going to class home page.  Once on the class home page to see a "
