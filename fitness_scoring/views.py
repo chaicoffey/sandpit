@@ -266,7 +266,8 @@ def teacher_view(request):
              "results with.  To do this go to each class's home page and press the circle.  Write down the login that "
              "are displayed details.",
              [
-                 ('print_instructions_B.png', None), ('get_login_C.png', None)
+                 ('print_instructions_B.png', None), ('get_login_C.png', None), ('print_instructions_D.png', None),
+                 ('teacher_add_classes_D.png', None)
              ]),
             ('Get Students To Enter Results', 'Classes_Link', 'student_enter_results',
              "Get all students to sign into this site with the class login details obtained in the previous step.  "
@@ -618,8 +619,8 @@ def instructions_page(request, instructions_name):
                        [
                            ('You should print off the instructions for every class you are teaching (unless one class '
                             'has the same set of tests as another then you only need to print once)', None),
-                           ('To print for other classes repeat from point 1 (You will need to click the "Classes" tab '
-                            'again ).', None)
+                           ('To print for other classes repeat from point 1 (be sure to click the "Classes" tab).',
+                            None)
                        ]
                    ]}
     elif instructions_name == 'teacher_get_login_details' and user_type == 'Teacher':
@@ -644,7 +645,7 @@ def instructions_page(request, instructions_name):
                        ],
                        [
                            ('You will need to repeat from point 1 for each class so that you have login details for '
-                            'each class', None)
+                            'each class (be sure to click the "Classes" tab)', None)
                        ]
                    ]}
     elif instructions_name == 'student_enter_results' and user_type == 'Teacher':
