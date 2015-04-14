@@ -29,25 +29,30 @@
             {% endif %}
         <hr>
         <h3>How To</h3>
-            {% if instructions %}
-                <ol>
-                    {% for instruction in instructions %}
-                        <li>
-                            {% for instruction_line, image in instruction %}
-                                {% autoescape off %}
-                                    {{ instruction_line }}<br><br>
-                                {% endautoescape %}
-                                {% if image %}
-                                    <img src="/static/images/instructions/{{ image }}" style="border:1px solid black"/>
-                                    <br><br>
-                                {% endif %}
-                            {% endfor %}
-                        </li>
-                    {% endfor %}
-                </ol>
-            {% else %}
-                No Instructions Listed.
-            {% endif %}
+        {% if instructions %}
+            <ol>
+                {% for instruction in instructions %}
+                    <li>
+                        {% for instruction_line, image in instruction %}
+                            {% autoescape off %}
+                                {{ instruction_line }}<br><br>
+                            {% endautoescape %}
+                            {% if image %}
+                                <img src="/static/images/instructions/{{ image }}" style="border:1px solid black"/>
+                                <br><br>
+                            {% endif %}
+                        {% endfor %}
+                    </li>
+                {% endfor %}
+            </ol>
+        {% else %}
+            No Instructions Listed.
+        {% endif %}
+
+        <button type="button" class="btn btn-primary" onclick="window.close();">
+            Close Instructions
+        </button>
+
     </div>
 </body>
 </html>
