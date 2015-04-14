@@ -69,4 +69,16 @@
             <img src="/static/images/test_instructions/{{ diagram }}"/>
         {% endif %}
     {% endif %}
+
+    {% if showing_individual_test %}
+        <hr>
+        <h1>
+            <button type="button" class="btn btn-primary" onclick="window.close();">
+                Close Instructions
+            </button>
+        </h1>
+        When you clicked on the instructions link this page opened in a new tab or window.  You can click on the close
+        instructions button above to close this tab and return to the program.
+    {% endif %}
+
 </div>
