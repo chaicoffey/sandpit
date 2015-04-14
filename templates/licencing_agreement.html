@@ -1,40 +1,9 @@
+{% load staticfiles %}
 <html>
 
 <head>
     <title>Terms and Conditions</title>
-
-    <style type="text/css">
-
-        h1	{font:bold 1.2em/1.6em arial;margin:4px 0;padding:4px 0;}
-        h2	{font:normal 1.1em/1.5em arial;margin:14px 0 0 0;padding:4px 0;}
-        div, p {font: normal 1em/1.3em arial;}
-
-        textarea.terms {
-            width:600px;
-            height:200px;
-            border:1px solid #ccc;
-            background:#f2f2f2;
-            font:normal 11px/15px arial;
-            padding:6px;
-            color:#333;
-        }
-
-        div.terms {
-            width:600px;
-            height:200px;
-            border:1px solid #ccc;
-            background:#f2f2f2;
-            padding:6px;
-            overflow:auto;
-        }
-        div.terms p,
-        div.terms li {font:normal 11px/15px arial;color:#333;}
-        div.terms h3 {font:bold 14px/19px arial;color:#000;}
-        div.terms h4 {font:bold 12px/17px arial;color:#000;}
-        div.terms strong {color:#000;}
-
-    </style>
-
+    <link rel="stylesheet" type="text/css" href="{% static 'css/site_styles.css' %}">
 </head>
 <body>
 
