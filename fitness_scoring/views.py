@@ -1,5 +1,4 @@
 from django.shortcuts import render, redirect
-from django.http import HttpResponseForbidden
 from django.template import RequestContext
 from fitness_scoring.models import User, Teacher, Administrator, SuperUser, School, Class
 from fitness_scoring.models import TestCategory, MajorTestCategory, Test, PercentileBracketList
@@ -92,12 +91,12 @@ def licencing_check(request):
                     request.session['user_type'] = 'Class'
                     return redirect('fitness_scoring.views.class_student_view')
                 else:
-                    return HttpResponseForbidden("Unrecognised User")
+                    return reload_window_to_login(request)
             else:
                 return render(request, 'licencing_agreement.html', RequestContext(request,
                                                                                   {'post_to_url': '/licencing_check/'}))
     else:
-        return HttpResponseForbidden("You are not authorised to read the agreement")
+        return reload_window_to_login(request)
 
 
 def logout_user(request):
@@ -133,7 +132,7 @@ def change_user_password(request, is_finished):
                            'form': ChangePasswordFrom(user_pk=user_pk)}
                 return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to change password")
+        return reload_window_to_login(request)
 
 
 def class_student_view(request):
@@ -161,7 +160,7 @@ def class_student_view(request):
             context['form'] = StudentEntryForm(class_pk=class_instance.pk)
             return render(request, 'student_entry_form.html', RequestContext(request, context))
     else:
-        return redirect('fitness_scoring.views.login_user')
+        return reload_window_to_login(request)
 
 
 def class_student_results_view(request, enrolment_pk):
@@ -229,9 +228,9 @@ def class_student_results_view(request, enrolment_pk):
             return render(request, 'class_student_results.html', RequestContext(request, context))
 
         else:
-            return HttpResponseForbidden("You are not authorised to view these results")
+            return reload_window_to_login(request)
     else:
-        return HttpResponseForbidden("You are not authorised to view these results")
+        return reload_window_to_login(request)
 
 
 def teacher_view(request):
@@ -333,7 +332,7 @@ def teacher_view(request):
 
         return render(request, 'user_tab_page.html', RequestContext(request, context))
     else:
-        return reload_window(request)
+        return reload_window_to_login(request)
 
 
 def teacher_home(request):
@@ -351,7 +350,7 @@ def teacher_home(request):
         }
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
-        return reload_window(request)
+        return reload_window_to_login(request)
 
 
 def administrator_view(request):
@@ -412,7 +411,7 @@ def administrator_view(request):
 
         return render(request, 'user_tab_page.html', RequestContext(request, context))
     else:
-        return reload_window(request)
+        return reload_window_to_login(request)
 
 
 def administrator_home(request):
@@ -430,7 +429,7 @@ def administrator_home(request):
         }
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
-        return reload_window(request)
+        return reload_window_to_login(request)
 
 
 def superuser_view(request):
@@ -451,7 +450,7 @@ def superuser_view(request):
 
         return render(request, 'user_tab_page.html', RequestContext(request, context))
     else:
-        return reload_window(request)
+        return reload_window_to_login(request)
 
 
 def superuser_home(request):
@@ -459,7 +458,7 @@ def superuser_home(request):
         context = {'instructions_url': '/superuser_short_instructions/', 'intro_text': ['Super User']}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
-        return reload_window(request)
+        return reload_window_to_login(request)
 
 
 def instructions_page(request, instructions_name):
@@ -816,7 +815,7 @@ def school_list(request):
         }
         return render(request, 'item_list.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to view school list")
+        return reload_window_to_login(request)
 
 
 def school_add(request):
@@ -834,7 +833,7 @@ def school_add(request):
             context = {'post_to_url': '/school/add/', 'functionality_name': 'Add School', 'form': AddSchoolForm()}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to add a school")
+        return reload_window_to_login(request)
 
 
 def school_adds(request):
@@ -880,7 +879,7 @@ def school_adds(request):
                        'form': AddSchoolsForm()}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to add schools")
+        return reload_window_to_login(request)
 
 
 def school_edit(request, school_pk):
@@ -902,7 +901,7 @@ def school_edit(request, school_pk):
                        'form': EditSchoolForm(school_pk=school_pk)}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to edit a school")
+        return reload_window_to_login(request)
 
 
 def school_delete(request, school_pk):
@@ -927,7 +926,7 @@ def school_delete(request, school_pk):
                        'prompt_message': 'Are You Sure You Wish To Delete ' + school_name + "?"}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to delete a school")
+        return reload_window_to_login(request)
 
 
 def school_reset_password(request, school_pk):
@@ -945,7 +944,7 @@ def school_reset_password(request, school_pk):
                        'prompt_message': 'Are You Sure You Wish To Reset The Password For ' + str(administrator) + "?"}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to reset the administrator password for a school")
+        return reload_window_to_login(request)
 
 
 def test_category_list(request):
@@ -966,7 +965,7 @@ def test_category_list(request):
         }
         return render(request, 'item_list.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to view test category list")
+        return reload_window_to_login(request)
 
 
 def test_category_add(request):
@@ -989,7 +988,7 @@ def test_category_add(request):
                        'form': AddTestCategoryForm()}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to add a test category")
+        return reload_window_to_login(request)
 
 
 def test_category_adds(request):
@@ -1030,7 +1029,7 @@ def test_category_adds(request):
                        'form': AddTestCategoriesForm()}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to add test categories")
+        return reload_window_to_login(request)
 
 
 def test_category_edit(request, test_category_pk):
@@ -1053,7 +1052,7 @@ def test_category_edit(request, test_category_pk):
                        'form': EditTestCategoryForm(test_category_pk=test_category_pk)}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to edit a test category")
+        return reload_window_to_login(request)
 
 
 def test_category_delete(request, test_category_pk):
@@ -1078,7 +1077,7 @@ def test_category_delete(request, test_category_pk):
                        'prompt_message': 'Are You Sure You Wish To Delete ' + test_category_name + "?"}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to delete a test category")
+        return reload_window_to_login(request)
 
 
 def major_test_category_list(request):
@@ -1100,7 +1099,7 @@ def major_test_category_list(request):
         }
         return render(request, 'item_list.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to view major test category list")
+        return reload_window_to_login(request)
 
 
 def major_test_category_add(request):
@@ -1123,7 +1122,7 @@ def major_test_category_add(request):
                        'form': AddMajorTestCategoryForm()}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to add a major test category")
+        return reload_window_to_login(request)
 
 
 def major_test_category_adds(request):
@@ -1165,7 +1164,7 @@ def major_test_category_adds(request):
                        'form': AddMajorTestCategoriesForm()}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to add major test categories")
+        return reload_window_to_login(request)
 
 
 def major_test_category_edit(request, major_test_category_pk):
@@ -1189,7 +1188,7 @@ def major_test_category_edit(request, major_test_category_pk):
                        'form': EditMajorTestCategoryForm(major_test_category_pk=major_test_category_pk)}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to edit a major test category")
+        return reload_window_to_login(request)
 
 
 def major_test_category_delete(request, major_test_category_pk):
@@ -1215,7 +1214,7 @@ def major_test_category_delete(request, major_test_category_pk):
                        'prompt_message': 'Are You Sure You Wish To Delete ' + major_test_category_name + "?"}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to delete a major test category")
+        return reload_window_to_login(request)
 
 
 def test_list(request):
@@ -1238,7 +1237,7 @@ def test_list(request):
         }
         return render(request, 'item_list.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to view test list")
+        return reload_window_to_login(request)
 
 
 def test_adds(request):
@@ -1278,7 +1277,7 @@ def test_adds(request):
                        'form': AddTestsForm()}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to add tests")
+        return reload_window_to_login(request)
 
 
 def test_edit(request, test_pk):
@@ -1301,7 +1300,7 @@ def test_edit(request, test_pk):
                        'form': EditTestForm(test_pk=test_pk)}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to edit a test")
+        return reload_window_to_login(request)
 
 
 def test_update(request, test_pk):
@@ -1342,7 +1341,7 @@ def test_update(request, test_pk):
                        'form': UpdateTestFromFileForm(test_pk=test_pk)}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to edit a test")
+        return reload_window_to_login(request)
 
 
 def test_delete(request, test_pk):
@@ -1367,7 +1366,7 @@ def test_delete(request, test_pk):
                        'prompt_message': 'Are You Sure You Wish To Delete ' + test_name + "?"}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to delete a test")
+        return reload_window_to_login(request)
 
 
 def test_percentile_brackets_graphs(request, percentile_bracket_list_pk, test_pk):
@@ -1386,7 +1385,7 @@ def test_percentile_brackets_graphs(request, percentile_bracket_list_pk, test_pk
                    'percentile_bracket_scores': percentile_bracket_list.get_scores(True)}
         return render(request, 'percentile_brackets_graph.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to view the percentile brackets for a test")
+        return reload_window_to_login(request)
 
 
 def test_instructions(request, test_pk):
@@ -1396,7 +1395,7 @@ def test_instructions(request, test_pk):
         context['showing_individual_test'] = True
         return render(request, 'test_instructions.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to view instructions for a test")
+        return reload_window_to_login(request)
 
 
 def get_test_instructions_context(test_pk):
@@ -1664,7 +1663,7 @@ def allocate_default_tests(request):
                        'info_load_class': 'test_instructions_load_link'}
             return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to allocate default tests")
+        return reload_window_to_login(request)
 
 
 def teacher_list(request):
@@ -1687,7 +1686,7 @@ def teacher_list(request):
         }
         return render(request, 'item_list.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to view teacher list")
+        return reload_window_to_login(request)
 
 
 def teacher_add(request):
@@ -1712,7 +1711,7 @@ def teacher_add(request):
                        'form': AddTeacherForm(school_pk=school_pk)}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to add a teacher")
+        return reload_window_to_login(request)
 
 
 def teacher_edit(request, teacher_pk):
@@ -1737,7 +1736,7 @@ def teacher_edit(request, teacher_pk):
                        'form': EditTeacherForm(school_pk=school_pk, teacher_pk=teacher_pk)}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to edit a teacher")
+        return reload_window_to_login(request)
 
 
 def teacher_delete(request, teacher_pk):
@@ -1763,7 +1762,7 @@ def teacher_delete(request, teacher_pk):
                        'prompt_message': 'Are You Sure You Wish To Delete ' + teacher_display_text + "?"}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to delete a teacher from this school")
+        return reload_window_to_login(request)
 
 
 def teacher_reset_password(request, teacher_pk):
@@ -1781,7 +1780,7 @@ def teacher_reset_password(request, teacher_pk):
                        'prompt_message': 'Are You Sure You Wish To Reset The Password For ' + str(teacher) + "?"}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to reset the password for a teacher")
+        return reload_window_to_login(request)
 
 
 def class_list(request):
@@ -1814,7 +1813,7 @@ def class_list(request):
         }
         return render(request, 'item_list.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to view class list")
+        return reload_window_to_login(request)
 
 
 def class_add(request, load_from_class_pk=None):
@@ -1891,7 +1890,7 @@ def class_add(request, load_from_class_pk=None):
                        'info_load_class': 'test_instructions_load_link'}
             return render(request, 'modal_form_add_class.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to add a class")
+        return reload_window_to_login(request)
 
 
 def class_adds(request):
@@ -1942,7 +1941,7 @@ def class_adds(request):
                        'form': AddClassesForm(school_pk=school_pk)}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to add classes")
+        return reload_window_to_login(request)
 
 
 def class_edit(request, class_pk, load_from_class_pk=None):
@@ -2024,7 +2023,7 @@ def class_edit(request, class_pk, load_from_class_pk=None):
             return render(request, 'modal_form_add_class.html', RequestContext(request, context))
 
     else:
-        return HttpResponseForbidden("You are not authorised to edit a class")
+        return reload_window_to_login(request)
 
 
 def class_delete(request, class_pk):
@@ -2049,7 +2048,7 @@ def class_delete(request, class_pk):
                        'prompt_message': 'Are You Sure You Wish To Delete ' + class_display_text + "?"}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to delete a class")
+        return reload_window_to_login(request)
 
 
 def class_class(request, class_pk):
@@ -2071,7 +2070,7 @@ def class_class(request, class_pk):
         }
         return render(request, 'class.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to view class")
+        return reload_window_to_login(request)
 
 
 def class_results_table(request, class_pk):
@@ -2121,7 +2120,7 @@ def class_results_table(request, class_pk):
         }
         return render(request, 'class_results_table.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to view class results table")
+        return reload_window_to_login(request)
 
 
 def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
@@ -2154,7 +2153,7 @@ def allocate_tests_to_class(request, class_pk, load_from_class_pk=None):
                        'info_load_class': 'test_instructions_load_link'}
             return render(request, 'modal_form_allocate_tests.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to allocate tests to this class")
+        return reload_window_to_login(request)
 
 
 def get_other_classes(url_prefix, class_pk=None, school_pk=None):
@@ -2207,7 +2206,7 @@ def print_test_instructions(request, class_pk):
         context = {'title': 'Print Test Instructions', 'tests': tests}
         return render(request, 'test_instructions_print.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to print test instructions for this class")
+        return reload_window_to_login(request)
 
 
 def get_new_class_code(request, class_pk):
@@ -2225,7 +2224,7 @@ def get_new_class_code(request, class_pk):
                        'hide_cancel_button': True}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to get a new class code for this class")
+        return reload_window_to_login(request)
 
 
 def approve_all_class_results(request, class_pk):
@@ -2246,7 +2245,7 @@ def approve_all_class_results(request, class_pk):
                        'prompt_message': 'Are You Sure You Wish To Approve All Student Entry Results For The Class?'}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to approve all student entry results for this class")
+        return reload_window_to_login(request)
 
 
 def remove_test_from_class(request, class_pk, test_pk):
@@ -2272,7 +2271,7 @@ def remove_test_from_class(request, class_pk, test_pk):
                                          "' From This Class?"}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to remove a test from this class")
+        return reload_window_to_login(request)
 
 
 def class_enrolment_approve(request, enrolment_pk):
@@ -2293,7 +2292,7 @@ def class_enrolment_approve(request, enrolment_pk):
                                          str(enrolment.student_id) + '?'}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to approve a student result entry from this class")
+        return reload_window_to_login(request)
 
 
 def class_enrolment_un_approve(request, enrolment_pk):
@@ -2314,7 +2313,7 @@ def class_enrolment_un_approve(request, enrolment_pk):
                                          str(enrolment.student_id) + '?'}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to remove a student result entry approval from this class")
+        return reload_window_to_login(request)
 
 
 def class_enrolment_resolve_pending_issues(request, enrolment_pk):
@@ -2361,8 +2360,7 @@ def class_enrolment_resolve_pending_issues(request, enrolment_pk):
                    'form': resolve_pending_issues_form}
         return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("Either there is no issue to resolve or you are not authorised to resolve"
-                                     " a pending issue for this class")
+        return reload_window_to_login(request)
 
 
 def class_enrolment_edit(request, enrolment_pk):
@@ -2388,7 +2386,7 @@ def class_enrolment_edit(request, enrolment_pk):
             context['form'] = StudentEntryEditForm(enrolment_pk=enrolment_pk)
             return render(request, 'student_entry_form_inner.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to edit a student result entry from this class")
+        return reload_window_to_login(request)
 
 
 def class_enrolment_delete(request, enrolment_pk):
@@ -2406,7 +2404,7 @@ def class_enrolment_delete(request, enrolment_pk):
                                          str(enrolment.student_id) + '?'}
             return render(request, 'modal_form.html', RequestContext(request, context))
     else:
-        return HttpResponseForbidden("You are not authorised to delete a student result entry from this class")
+        return reload_window_to_login(request)
 
 
 def class_results_graphs_tests(request, class_pk, test_pk=None):
@@ -2446,9 +2444,9 @@ def class_results_graphs_tests(request, class_pk, test_pk=None):
                                       0, 100, 10, counter - 1, False)]
             return render(request, 'class_results_graphs.html', RequestContext(request, context))
         else:
-            return HttpResponseForbidden("Test and class does not match")
+            return reload_window_to_login(request)
     else:
-        return HttpResponseForbidden("You are not authorised to view results for this class")
+        return reload_window_to_login(request)
 
 
 def class_results_graphs_students(request, class_pk, student_pk=None):
@@ -2498,9 +2496,9 @@ def class_results_graphs_students(request, class_pk, student_pk=None):
                                               True))
             return render(request, 'class_results_graphs.html', RequestContext(request, context))
         else:
-            return HttpResponseForbidden("Student and class does not match")
+            return reload_window_to_login(request)
     else:
-        return HttpResponseForbidden("You are not authorised to view results for this class")
+        return reload_window_to_login(request)
 
 
 def class_results_graphs_previous(request, class_pk, student_pk=None):
@@ -2560,9 +2558,9 @@ def class_results_graphs_previous(request, class_pk, student_pk=None):
                                               True, True))
             return render(request, 'class_results_graphs.html', RequestContext(request, context))
         else:
-            return HttpResponseForbidden("Student and class does not match")
+            return reload_window_to_login(request)
     else:
-        return HttpResponseForbidden("You are not authorised to view results for this class")
+        return reload_window_to_login(request)
 
 
 def user_authorised_for_teacher(request, teacher_pk):
@@ -2594,10 +2592,10 @@ def user_authorised_for_class(request, class_pk):
     return authorised
 
 
-def reload_window(request):
+def reload_window_to_login(request):
     context = {
         'reload_to_url': '/login',
-        'alert_message': 'You are no longer authorised to do this action (you may have logged in or logged out in '
-                         'another tab or window).'
+        'alert_message': 'Your FitTest session has expired or you are not authorised to take this action.  Note you '
+                         'may have logged in or logged out in another tab or window causing this session to expire.'
     }
     return render(request, 'reload_window.html', RequestContext(request, context))
