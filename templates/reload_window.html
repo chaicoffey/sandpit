@@ -9,6 +9,11 @@
 
 <script type="text/javascript">
 
+    $(document).ready(function() {
+        reload_window();
+    });
+
+
     function reload_window() {
         {% if alert_message %}
             alert('{{ alert_message }}');
