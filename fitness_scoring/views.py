@@ -333,7 +333,7 @@ def teacher_view(request):
 
         return render(request, 'user_tab_page.html', RequestContext(request, context))
     else:
-        return redirect('fitness_scoring.views.login_user')
+        return reload_window(request)
 
 
 def teacher_home(request):
@@ -351,7 +351,7 @@ def teacher_home(request):
         }
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
-        return redirect('fitness_scoring.views.login_user')
+        return reload_window(request)
 
 
 def administrator_view(request):
@@ -412,7 +412,7 @@ def administrator_view(request):
 
         return render(request, 'user_tab_page.html', RequestContext(request, context))
     else:
-        return redirect('fitness_scoring.views.login_user')
+        return reload_window(request)
 
 
 def administrator_home(request):
@@ -430,7 +430,7 @@ def administrator_home(request):
         }
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
-        return redirect('fitness_scoring.views.login_user')
+        return reload_window(request)
 
 
 def superuser_view(request):
@@ -451,7 +451,7 @@ def superuser_view(request):
 
         return render(request, 'user_tab_page.html', RequestContext(request, context))
     else:
-        return redirect('fitness_scoring.views.login_user')
+        return reload_window(request)
 
 
 def superuser_home(request):
@@ -459,7 +459,7 @@ def superuser_home(request):
         context = {'instructions_url': '/superuser_short_instructions/', 'intro_text': ['Super User']}
         return render(request, 'user_home_page.html', RequestContext(request, context))
     else:
-        return redirect('fitness_scoring.views.login_user')
+        return reload_window(request)
 
 
 def instructions_page(request, instructions_name):
@@ -2592,3 +2592,12 @@ def user_authorised_for_class(request, class_pk):
         authorised = False
 
     return authorised
+
+
+def reload_window(request):
+    context = {
+        'reload_to_url': '/login',
+        'alert_message': 'You are no longer authorised to do this action (you may have logged in or logged out in '
+                         'another tab or window).'
+    }
+    return render(request, 'reload_window.html', RequestContext(request, context))

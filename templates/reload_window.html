@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body onload="reload_window()">
+
+</body>
+
+<script type="text/javascript">
+
+    function reload_window() {
+        {% if alert_message %}
+            alert('{{ alert_message }}');
+        {% endif %}
+        window.location.href = '{{ reload_to_url }}';
+    }
+
+</script>
+
+</html>
