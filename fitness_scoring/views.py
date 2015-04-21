@@ -630,21 +630,20 @@ def instructions_page(request, instructions_name):
                    'instructions': [
                        [
                            ('Click the "Classes" tab at the left of the screen (it may already be selected)',
-                            'teacher_add_class_A.png'),
-                           ('Then in the classes table click on the home page symbol for the class that is entering '
-                            'the results', 'print_instructions_B.png'),
+                            'teacher_add_class_A.png')
                        ],
                        [
-                           ('Next click the reset/get new class login button', 'get_login_C.png'),
+                           ('Next in the classes table click on the "reset/get new login" symbol for the class that '
+                            'you want to run tests for', 'get_login_C.png'),
                            ('Then note down the login and password that is displayed and then click done',
                             'get_login_D.png'),
                            ('If at a later time you forget the login/password or you want to reset the password then '
-                            'you can repeat point 2.  Each time you repeat it you will reset the password to a new '
-                            'one.', None)
+                            'you can click this link again.  Each time you click it you will reset the password to a '
+                            'new one.', None)
                        ],
                        [
                            ('Now you will need to get login details for your other classes.  To do this repeat from '
-                            'point 1 (be sure to click the "Classes" tab)', None)
+                            'point 2.', None)
                        ]
                    ]}
     elif instructions_name == 'student_enter_results' and user_type == 'Teacher':
