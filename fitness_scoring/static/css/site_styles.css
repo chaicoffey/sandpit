@@ -248,6 +248,16 @@ div.test_instructions_load_link > a:hover {
     border-color: #303030;
 }
 
+div.modal_load_link > a {
+    color: #303030;
+    border-color: #303030;
+}
+
+div.modal_load_link > a:hover {
+    color: #303030;
+    border-color: #303030;
+}
+
 td.class_results_modal_load_link  > a > span {
     color: orangered;
 }

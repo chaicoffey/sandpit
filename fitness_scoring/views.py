@@ -2113,7 +2113,8 @@ def class_results_table(request, class_pk):
                  'Change Tests For Class'),
                 ('<span class="glyphicon glyphicon-print"></span>', 'test_instructions_load_link',
                  '/class/print_test_instructions/' + str(class_pk), 'Print Off Test Instructions', True),
-                (u'\u25c9', 'modal_load_link', '/class/get_new_code/' + str(class_pk), 'Get New Class Login Password'),
+                ('<span class="glyphicon glyphicon-repeat"></span>', 'modal_load_link',
+                 '/class/get_new_code/' + str(class_pk), 'Reset/Get New Class Login Password', True),
                 (u'\u2713', 'class_results_modal_load_link', '/class/approve_all/' + str(class_pk),
                  'Approve All Student Result Entries For Class')
             ],
