@@ -263,7 +263,7 @@ def teacher_view(request):
              "You must now obtain a username and password for each class for the students to login and enter their "
              "results with.  Write down the login details that are displayed for each class.",
              [
-                 ('get_login_C.png', None), ('teacher_add_classes_D.png', None)
+                 ('get_login_C.png', None), ('get_login_D.png', 'NOTE DETAILS'), ('teacher_add_classes_D.png', None)
              ]),
             ('Get Students To Enter Results', 'Classes_Link', 'student_enter_results',
              "Get all students to sign into this site with the class login details obtained in the previous step.  "
