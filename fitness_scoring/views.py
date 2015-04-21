@@ -635,7 +635,7 @@ def instructions_page(request, instructions_name):
                             'the results', 'print_instructions_B.png'),
                        ],
                        [
-                           ('Next click the circle button', 'get_login_C.png'),
+                           ('Next click the reset/get new class login button', 'get_login_C.png'),
                            ('Then note down the login and password that is displayed and then click done',
                             'get_login_D.png'),
                            ('If at a later time you forget the login/password or you want to reset the password then '
