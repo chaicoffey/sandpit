@@ -252,8 +252,7 @@ def teacher_view(request):
              "Follow the diagrams to print the test instructions.  Do this for each class however if two classes "
              "have the same set of tests you only need to do it for one of them.",
              [
-                 ('print_instructions_C.png', None), ('print_instructions_F.png', None),
-                 ('print_instructions_D.png', None)
+                 ('print_instructions_C.png', None), ('print_instructions_D.png', None)
              ]),
             ('Run Tests', 'Classes_Link', None,
              "Use the printed instructions to run the tests with the students in each class.  Make sure they record "
