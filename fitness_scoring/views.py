@@ -1807,6 +1807,8 @@ def class_list(request):
             'item_list_buttons': item_list_add_buttons,
             'item_list_options': [
                 ['item_list_modal_load_link', '/class/edit/', 'pencil', 'edit class'],
+                ['test_instructions_load_link', '/class/print_test_instructions/', 'print',
+                 'print class test instructions'],
                 ['class_load_link', '/class/class/', 'home', 'go to class page'],
                 ['item_list_modal_load_link', '/class/delete/', 'remove', 'delete class']
             ]
