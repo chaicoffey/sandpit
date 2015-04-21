@@ -252,7 +252,7 @@ def teacher_view(request):
              "Follow the diagrams to print the test instructions.  Do this for each class however if two classes "
              "have the same set of tests you only need to do it for one of them.",
              [
-                 ('print_instructions_B.png', None), ('print_instructions_C.png', None)
+                 ('print_instructions_C.png', None), ('print_instructions_D.png', None)
              ]),
             ('Run Tests', 'Classes_Link', None,
              "Use the printed instructions to run the tests with the students in each class.  Make sure they record "
@@ -264,7 +264,7 @@ def teacher_view(request):
              "results with.  To do this go to each class's home page and press the circle.  Write down the login "
              "details that are displayed.",
              [
-                 ('approve_results_B.png', None), ('get_login_C.png', None), ('approve_results_E.png', None),
+                 ('print_instructions_B.png', None), ('get_login_C.png', None), ('approve_results_E.png', None),
                  ('teacher_add_classes_D.png', None)
              ]),
             ('Get Students To Enter Results', 'Classes_Link', 'student_enter_results',
@@ -280,7 +280,7 @@ def teacher_view(request):
              "issues are resolved check over each student's results and if you think they are correct tick the box to "
              "approve them.  Make sure to do this for all of your classes for the term.",
              [
-                 ('approve_results_B.png', None), ('approve_results_C.png', 'RESOLVE PENDING ISSUES'),
+                 ('print_instructions_B.png', None), ('approve_results_C.png', 'RESOLVE PENDING ISSUES'),
                  ('approve_results_D.png', 'TICK FOR APPROVED RESULTS'), ('approve_results_E.png', None)
              ]),
             ('View Results', 'Classes_Link', 'teacher_view_results',
@@ -290,7 +290,7 @@ def teacher_view(request):
              'see a graph of the results history of a student go to the "Previous Results" tab.  Note that results '
              'will only show for entries that have been approved.',
              [
-                 ('approve_results_B.png', None), ('view_results_C.png', 'VIEW RESULTS YOU WISH'),
+                 ('print_instructions_B.png', None), ('view_results_C.png', 'VIEW RESULTS YOU WISH'),
                  ('approve_results_E.png', None), ('teacher_add_classes_D.png', None)
              ]),
             ('Completed', 'Classes_Link', None,
