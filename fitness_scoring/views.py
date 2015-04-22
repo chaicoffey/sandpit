@@ -2110,7 +2110,9 @@ def class_results_table(request, class_pk):
                 ('T', 'class_results_modal_load_link', '/class/test/allocate/' + str(class_pk),
                  'Change Tests For Class'),
                 ('<span class="glyphicon glyphicon-print"></span>', 'test_instructions_load_link',
-                 '/class/print_test_instructions/' + str(class_pk), 'Print Off Test Instructions', True),
+                 '/class/print_test_instructions/' + str(class_pk), 'Print Test Instructions', True),
+                ('<span class="glyphicon glyphicon-list-alt"></span>', 'test_instructions_load_link',
+                 '/class/print_student_results_sheet/' + str(class_pk), 'Print Student Results Sheet', True),
                 ('<span class="glyphicon glyphicon-repeat"></span>', 'modal_load_link',
                  '/class/get_new_code/' + str(class_pk), 'Reset/Get New Class Login Password', True),
                 (u'\u2713', 'class_results_modal_load_link', '/class/approve_all/' + str(class_pk),
@@ -2205,6 +2207,14 @@ def print_test_instructions(request, class_pk):
             tests.append(test_tuple)
         context = {'title': 'Print Test Instructions', 'tests': tests}
         return render(request, 'test_instructions_print.html', RequestContext(request, context))
+    else:
+        return reload_window_to_login(request)
+
+
+def print_student_results_sheet(request, class_pk):
+    if user_authorised_for_class(request, class_pk):
+        context = {}
+        return render(request, 'student_results_sheet_print.html', RequestContext(request, context))
     else:
         return reload_window_to_login(request)
 

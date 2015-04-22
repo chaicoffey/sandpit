@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+{% load staticfiles %}
+<html>
+<head>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bootstrap.min.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/site_styles.css' %}">
+    <title>{{ title }}</title>
+</head>
+<body style="padding-top: 0">
+
+    <div class="text-info" style="color: black">
+        <h1>
+            <button type="button" class="btn btn-primary" onclick="window.printDiv('print_section');">
+                Print Student Results Entry Sheet
+            </button>
+            <button type="button" class="btn btn-primary" onclick="window.close();">
+                Close Student Results Entry Sheet
+            </button>
+        </h1>
+
+        When you clicked on the print student results sheet link this page opened in a new tab or window.  You can
+        click on the close instructions button above to close this tab and return to the program.
+    </div>
+
+    <div id="print_section">
+
+    </div>
+
+    <iframe name="print_frame" width="0" height="0" frameborder="0" src="about:blank"></iframe>
+
+    <div class="text-info" style="color: black">
+        <hr class="darker_color" style="border-width: 3px">
+        <h1>
+            <button type="button" class="btn btn-primary" onclick="window.printDiv('print_section');">
+                Print Student Results Entry Sheet
+            </button>
+            <button type="button" class="btn btn-primary" onclick="window.close();">
+                Close Student Results Entry Sheet
+            </button>
+        </h1>
+
+        When you clicked on the print student results sheet link this page opened in a new tab or window.  You can
+        click on the close instructions button above to close this tab and return to the program.
+    </div>
+
+</body>
+
+<script>
+    function printDiv(divId) {
+        window.frames["print_frame"].document.body.innerHTML = document.getElementById(divId).innerHTML;
+        window.frames["print_frame"].window.focus();
+        window.frames["print_frame"].window.print();
+        window.close();
+    }
+</script>
+
+</html>

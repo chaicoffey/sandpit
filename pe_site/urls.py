@@ -85,6 +85,8 @@ urlpatterns = patterns(
         'fitness_scoring.views.allocate_tests_to_class'),
     url(r'^class/print_test_instructions/(?P<class_pk>\d+)', 'fitness_scoring.views.print_test_instructions',
         name='print_test_instructions'),
+    url(r'^class/print_student_results_sheet/(?P<class_pk>\d+)', 'fitness_scoring.views.print_student_results_sheet',
+        name='print_student_results_sheet'),
     url(r'^class/get_new_code/(?P<class_pk>\d+)', 'fitness_scoring.views.get_new_class_code',
         name='get_new_class_code'),
     url(r'^class/approve_all/(?P<class_pk>\d+)', 'fitness_scoring.views.approve_all_class_results',
