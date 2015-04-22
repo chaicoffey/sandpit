@@ -22,19 +22,20 @@
         click on the close instructions button above to close this tab and return to the program.
     </div>
 
+    <hr class="darker_color" style="border-width: 3px">
     <div id="print_section">
 
-    <table>
-        {% autoescape off %}
-            {% for test_name, test_unit in tests %}
-                <tr>
-                    <td style="padding: 3px">{{ test_name }}</td>
-                    <td style="padding: 3px"><input type="text" disabled="disabled"></td>
-                    <td style="padding: 3px">{{ test_unit }}</td>
-                </tr>
-            {% endfor %}
-        {% endautoescape %}
-    </table>
+        <table>
+            {% autoescape off %}
+                {% for test_name, test_unit in tests %}
+                    <tr>
+                        <td style="padding: 3px">{{ test_name }}</td>
+                        <td style="padding: 3px"><input type="text" disabled="disabled"></td>
+                        <td style="padding: 3px">{{ test_unit }}</td>
+                    </tr>
+                {% endfor %}
+            {% endautoescape %}
+        </table>
 
     </div>
 

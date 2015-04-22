@@ -1802,12 +1802,14 @@ def class_list(request):
             'item_list_table_headings': class_list_headings,
             'item_list_buttons': item_list_add_buttons,
             'item_list_options': [
-                ['item_list_modal_load_link', '/class/edit/', 'pencil', 'edit class'],
-                ['test_instructions_load_link', '/class/print_test_instructions/', 'print',
-                 'print class test instructions'],
-                ['modal_load_link', '/class/get_new_code/', 'repeat', 'reset/get new class login password'],
-                ['class_load_link', '/class/class/', 'home', 'go to class page'],
-                ['item_list_modal_load_link', '/class/delete/', 'remove', 'delete class']
+                ('item_list_modal_load_link', '/class/edit/', 'pencil', 'edit class'),
+                ('test_instructions_load_link', '/class/print_test_instructions/', 'print',
+                 'print class test instructions'),
+                ('test_instructions_load_link', '/class/print_student_results_sheet/', 'list-alt',
+                 'print student results entry sheet'),
+                ('modal_load_link', '/class/get_new_code/', 'repeat', 'reset/get new class login password'),
+                ('class_load_link', '/class/class/', 'home', 'go to class page'),
+                ('item_list_modal_load_link', '/class/delete/', 'remove', 'delete class')
             ]
         }
         return render(request, 'item_list.html', RequestContext(request, context))
@@ -2112,7 +2114,7 @@ def class_results_table(request, class_pk):
                 ('<span class="glyphicon glyphicon-print"></span>', 'test_instructions_load_link',
                  '/class/print_test_instructions/' + str(class_pk), 'Print Test Instructions', True),
                 ('<span class="glyphicon glyphicon-list-alt"></span>', 'test_instructions_load_link',
-                 '/class/print_student_results_sheet/' + str(class_pk), 'Print Student Results Sheet', True),
+                 '/class/print_student_results_sheet/' + str(class_pk), 'Print Student Results Entry Sheet', True),
                 ('<span class="glyphicon glyphicon-repeat"></span>', 'modal_load_link',
                  '/class/get_new_code/' + str(class_pk), 'Reset/Get New Class Login Password', True),
                 (u'\u2713', 'class_results_modal_load_link', '/class/approve_all/' + str(class_pk),
