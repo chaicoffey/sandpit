@@ -254,6 +254,13 @@ def teacher_view(request):
              [
                  ('print_instructions_C.png', None), ('print_instructions_D.png', None)
              ]),
+            ('Print Results Entry Sheet', 'Classes_Link', 'teacher_print_results_entry',
+             "Follow the diagrams to print the student results entry sheets.  The students will use these to write "
+             "down their results. Make sure you print off enough copies for all the students in the class.  Do this "
+             "for each class.",
+             [
+                 ('print_results_entry_C.png', None), ('print_instructions_D.png', None)
+             ]),
             ('Run Tests', 'Classes_Link', None,
              "Use the printed instructions to run the tests with the students in each class.  Make sure they record "
              "the results.  After you have done this return to the program and see the next step for getting the "
@@ -298,9 +305,9 @@ def teacher_view(request):
         ]
         step_divisions = [
             (1, 'Do this (unless already done by admin)'),
-            (3, 'Running the tests'),
-            (7, 'Do these steps after running tests'),
-            (8, 'Completed')
+            (4, 'Running the tests'),
+            (8, 'Do these steps after running tests'),
+            (9, 'Completed')
         ]
 
         step_sets = []
@@ -618,6 +625,28 @@ def instructions_page(request, instructions_name):
                             'has the same set of tests as another then you only need to print once)', None),
                            ('To print for other classes repeat from point 1 (be sure to click the "Classes" tab).',
                             None)
+                       ]
+                   ]}
+    elif instructions_name == 'teacher_print_results_entry' and user_type == 'Teacher':
+        context = {'heading': 'Print Student Entry Results Sheet',
+                   'reason': 'This step will give you a print out that the students can write their results in when '
+                             'they are performing the tests.  Later they will enter these results into the system.',
+                   'instructions': [
+                       [
+                           ('Click the "Classes" tab at the left of the screen (it may already be selected)',
+                            'teacher_add_class_A.png')
+                       ],
+                       [
+                           ('Next in the classes table click on the "print entry sheet" symbol for the class that '
+                            'you want to run tests for', 'print_results_entry_C.png'),
+                           ('In the tab that opens click the print student results entry sheet button',
+                            'print_results_entry_D.png'),
+                           ('Make sure to make enough copies for all the students in the class.', None),
+                           ('After you have printed the tab that opened will close automatically', None)
+                       ],
+                       [
+                           ('Now you will need to get the result entry sheets for your other classes.  '
+                            'To do this repeat from point 2.', None)
                        ]
                    ]}
     elif instructions_name == 'teacher_get_login_details' and user_type == 'Teacher':
