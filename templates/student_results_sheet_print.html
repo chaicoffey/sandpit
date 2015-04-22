@@ -23,15 +23,34 @@
     </div>
 
     <hr class="darker_color" style="border-width: 3px">
+
     <div id="print_section">
+
+        <h2>{{ class_name }}</h2>
+        <h3>Teacher: {{ teacher_name }}</h3>
+
+        <hr class="middle_color" style="border-width: 1px">
+
+        <div style="font-weight: bold; font-size: 16px; padding-bottom: 10px">Student ID:</div>
+        <div style="font-weight: bold; font-size: 16px">Student Name:</div>
+
+        <hr class="middle_color" style="border-width: 1px">
 
         <table>
             {% autoescape off %}
                 {% for test_name, test_unit in tests %}
                     <tr>
-                        <td style="padding: 3px">{{ test_name }}</td>
-                        <td style="padding: 3px"><input type="text" disabled="disabled"></td>
-                        <td style="padding: 3px">{{ test_unit }}</td>
+                        <td style="padding-left: 10px; padding-right: 10px; padding-bottom: 15px">
+                            <div style="font-weight: bold; font-size: 16px">{{ test_name }}:</div>
+                        </td>
+                        <td style="padding-bottom: 15px">
+                            <div style="border: 1px black solid;
+                             padding-left: 160px; padding-top: 15px; padding-bottom: 15px">
+                            </div>
+                        </td>
+                        <td style="padding-left: 10px; padding-bottom: 15px">
+                            <div style="font-weight: bold; font-size: 16px">{{ test_unit }}</div>
+                        </td>
                     </tr>
                 {% endfor %}
             {% endautoescape %}

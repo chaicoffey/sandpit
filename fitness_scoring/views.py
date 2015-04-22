@@ -2244,9 +2244,15 @@ def print_test_instructions(request, class_pk):
 
 def print_student_results_sheet(request, class_pk):
     if user_authorised_for_class(request, class_pk):
+        class_instance = Class.objects.get(pk=class_pk)
+        teacher = TeacherClassAllocation.objects.get(class_id=class_instance).teacher_id
         tests = [(class_test.test_name.test_name, class_test.test_name.percentiles.get_result_unit_text())
                  for class_test in ClassTest.objects.filter(class_id=class_pk)]
-        context = {'tests': tests}
+        context = {
+            'class_name': class_instance.class_name + ' (' + str(class_instance.year) + ')',
+            'teacher_name': teacher.first_name + " " + teacher.surname,
+            'tests': tests
+        }
         return render(request, 'student_results_sheet_print.html', RequestContext(request, context))
     else:
         return reload_window_to_login(request)
