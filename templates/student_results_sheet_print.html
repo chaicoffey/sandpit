@@ -24,6 +24,18 @@
 
     <div id="print_section">
 
+    <table>
+        {% autoescape off %}
+            {% for test_name, test_unit in tests %}
+                <tr>
+                    <td style="padding: 3px">{{ test_name }}</td>
+                    <td style="padding: 3px"><input type="text" disabled="disabled"></td>
+                    <td style="padding: 3px">{{ test_unit }}</td>
+                </tr>
+            {% endfor %}
+        {% endautoescape %}
+    </table>
+
     </div>
 
     <iframe name="print_frame" width="0" height="0" frameborder="0" src="about:blank"></iframe>

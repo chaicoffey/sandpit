@@ -2213,7 +2213,9 @@ def print_test_instructions(request, class_pk):
 
 def print_student_results_sheet(request, class_pk):
     if user_authorised_for_class(request, class_pk):
-        context = {}
+        tests = [(class_test.test_name.test_name, class_test.test_name.percentiles.get_result_unit_text())
+                 for class_test in ClassTest.objects.filter(class_id=class_pk)]
+        context = {'tests': tests}
         return render(request, 'student_results_sheet_print.html', RequestContext(request, context))
     else:
         return reload_window_to_login(request)
