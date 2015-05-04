@@ -9,7 +9,7 @@ sign_off = ('\n\n'
             'Regards,\n'
             'Fitness testing app team\n')
 
-web_address = 'http://123.3.112.108/'
+web_address = 'http://www.pefittest.com/'
 
 
 def send_email(email, subject, text):
