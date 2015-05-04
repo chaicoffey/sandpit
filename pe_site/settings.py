@@ -87,9 +87,9 @@ STATIC_URL = '/static/'
 EMAIL_USE_TLS = True
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'pe.fitness.testing.superuser@gmail.com'
-EMAIL_HOST_PASSWORD = 'super11!'
-DEFAULT_FROM_EMAIL = 'pe.fitness.testing.superuser@gmail.com'
-DEFAULT_TO_EMAIL = 'pe.fitness.testing.superuser@gmail.com'
+EMAIL_HOST_USER = 'noreply.fittest@gmail.com'
+EMAIL_HOST_PASSWORD = 'chaichaichai'
+DEFAULT_FROM_EMAIL = 'noreply.fittest@gmail.com'
+DEFAULT_TO_EMAIL = 'noreply.fittest@gmail.com'
 
 MAX_FILE_UPLOAD_SIZE_MB = 2
